@@ -93,9 +93,9 @@ class Build {
     BuildItem(target: Target.android, arch: Arch.amd64, archName: 'x86_64'),
   ];
 
-  static String get appName => 'FlClash';
+  static String get appName => 'MeowClash';
 
-  static String get coreName => 'FlClashCore';
+  static String get coreName => 'MeowClashCore';
 
   static String get libName => 'libclash';
 

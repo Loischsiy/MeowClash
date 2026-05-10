@@ -1,5 +1,5 @@
-name: fl_clash
-description: A multi-platform proxy client based on ClashMeta, simple and easy to use, open-source and ad-free.
+name: meow_clash
+description: MeowClash - a multi-platform proxy client based on ClashMeta, fork of FlClash
 publish_to: 'none'
 version: 0.8.92+2026020201
 environment:

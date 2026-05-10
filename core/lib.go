@@ -233,15 +233,15 @@ func setEventListener(listener unsafe.Pointer) {
 }
 
 //export getTotalTraffic
-func getTotalTraffic(onlyStatisticsProxy bool) *C.char {
-	data := C.CString(handleGetTotalTraffic(onlyStatisticsProxy))
+func getTotalTraffic() *C.char {
+	data := C.CString(handleGetTotalTraffic())
 	defer C.free(unsafe.Pointer(data))
 	return data
 }
 
 //export getTraffic
-func getTraffic(onlyStatisticsProxy bool) *C.char {
-	data := C.CString(handleGetTraffic(onlyStatisticsProxy))
+func getTraffic() *C.char {
+	data := C.CString(handleGetTraffic())
 	defer C.free(unsafe.Pointer(data))
 	return data
 }

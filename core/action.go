@@ -53,8 +53,8 @@ func handleAction(action *Action, result ActionResult) {
 		result.success(handleShutdown())
 		return
 	case validateConfigMethod:
-		path := action.Data.(string)
-		result.success(handleValidateConfig(path))
+		data := []byte(action.Data.(string))
+		result.success(handleValidateConfig(data))
 		return
 	case updateConfigMethod:
 		data := []byte(action.Data.(string))
@@ -74,12 +74,10 @@ func handleAction(action *Action, result ActionResult) {
 		})
 		return
 	case getTrafficMethod:
-		data := action.Data.(bool)
-		result.success(handleGetTraffic(data))
+		result.success(handleGetTraffic())
 		return
 	case getTotalTrafficMethod:
-		data := action.Data.(bool)
-		result.success(handleGetTotalTraffic(data))
+		result.success(handleGetTotalTraffic())
 		return
 	case resetTrafficMethod:
 		handleResetTraffic()
@@ -184,6 +182,17 @@ func handleAction(action *Action, result ActionResult) {
 	case deleteFile:
 		path := action.Data.(string)
 		handleDelFile(path, result)
+		return
+	case suspendMethod:
+		data := action.Data.(bool)
+		result.success(handleSuspend(data))
+		return
+	case flushFakeIPMethod:
+		result.success(handleFlushFakeIP())
+		return
+	case flushDnsCacheMethod:
+		handleFlushDnsCache()
+		result.success(true)
 		return
 	default:
 		nextHandle(action, result)

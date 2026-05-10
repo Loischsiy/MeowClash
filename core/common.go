@@ -14,18 +14,14 @@ import (
 	"github.com/metacubex/mihomo/component/resolver"
 	"github.com/metacubex/mihomo/config"
 	"github.com/metacubex/mihomo/constant"
-	"github.com/metacubex/mihomo/constant/features"
 	cp "github.com/metacubex/mihomo/constant/provider"
 	"github.com/metacubex/mihomo/hub"
-	"github.com/metacubex/mihomo/hub/executor"
 	"github.com/metacubex/mihomo/hub/route"
 	"github.com/metacubex/mihomo/listener"
 	"github.com/metacubex/mihomo/log"
 	rp "github.com/metacubex/mihomo/rules/provider"
 	"github.com/metacubex/mihomo/tunnel"
 	"os"
-	"path/filepath"
-	"runtime"
 	"sync"
 )
 
@@ -128,9 +124,7 @@ func updateListeners() {
 	listener.ReCreateShadowSocks(general.ShadowSocksConfig, tunnel.Tunnel)
 	listener.ReCreateVmess(general.VmessConfig, tunnel.Tunnel)
 	listener.ReCreateTuic(general.TuicServer, tunnel.Tunnel)
-	if !features.Android {
-		listener.ReCreateTun(general.Tun, tunnel.Tunnel)
-	}
+	listener.ReCreateTun(general.Tun, tunnel.Tunnel)
 }
 
 func stopListeners() {
@@ -160,6 +154,7 @@ func patchSelectGroup(mapping map[string]string) {
 
 func defaultSetupParams() *SetupParams {
 	return &SetupParams{
+		Config:      config.DefaultRawConfig(),
 		TestURL:     "https://www.gstatic.com/generate_204",
 		SelectedMap: map[string]string{},
 	}
@@ -228,6 +223,12 @@ func updateConfig(params *UpdateParams) {
 		general.Tun.AutoRoute = *params.Tun.AutoRoute
 		general.Tun.Device = *params.Tun.Device
 		general.Tun.RouteAddress = *params.Tun.RouteAddress
+		if params.Tun.RouteExcludeAddress != nil {
+			general.Tun.RouteExcludeAddress = *params.Tun.RouteExcludeAddress
+		}
+		if params.Tun.StrictRoute != nil {
+			general.Tun.StrictRoute = *params.Tun.StrictRoute
+		}
 		general.Tun.DNSHijack = *params.Tun.DNSHijack
 		general.Tun.Stack = *params.Tun.Stack
 	}
@@ -235,13 +236,38 @@ func updateConfig(params *UpdateParams) {
 	updateListeners()
 }
 
-func applyConfig(params *SetupParams) error {
-	runtime.GC()
+func setupConfig(params *SetupParams) error {
 	runLock.Lock()
 	defer runLock.Unlock()
-	var err error
+
+	if params.Config != nil && params.Config.ProxyGroup != nil {
+		for _, group := range params.Config.ProxyGroup {
+			if elm, ok := group["tolerance"]; ok {
+				switch v := elm.(type) {
+				case json.Number:
+					if i, err := v.Int64(); err == nil {
+						group["tolerance"] = int(i)
+					}
+				case float64:
+					group["tolerance"] = int(v)
+				case float32:
+					group["tolerance"] = int(v)
+				}
+			}
+		}
+	}
+
 	constant.DefaultTestURL = params.TestURL
-	currentConfig, err = executor.ParseWithPath(filepath.Join(constant.Path.HomeDir(), "config.yaml"))
+	if params.OverrideTestUrl && params.Config != nil {
+		if params.Config.ProxyGroup != nil {
+			for _, group := range params.Config.ProxyGroup {
+				group["url"] = params.TestURL
+			}
+		}
+	}
+
+	var err error
+	currentConfig, err = config.ParseRawConfig(params.Config)
 	if err != nil {
 		currentConfig, _ = config.ParseRawConfig(config.DefaultRawConfig())
 	}

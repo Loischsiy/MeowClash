@@ -1,9 +1,19 @@
 package main
 
 import (
-	"cmp"
 	"context"
 	"encoding/json"
+	"fmt"
+	"net"
+	"os"
+	"runtime"
+	"runtime/debug"
+	"sort"
+	"strconv"
+	"time"
+
+	"core/state"
+
 	"github.com/metacubex/mihomo/adapter"
 	"github.com/metacubex/mihomo/adapter/outboundgroup"
 	"github.com/metacubex/mihomo/common/observable"
@@ -13,20 +23,12 @@ import (
 	"github.com/metacubex/mihomo/component/updater"
 	"github.com/metacubex/mihomo/config"
 	"github.com/metacubex/mihomo/constant"
-	"github.com/metacubex/mihomo/constant/features"
 	cp "github.com/metacubex/mihomo/constant/provider"
 	"github.com/metacubex/mihomo/hub/executor"
 	"github.com/metacubex/mihomo/listener"
 	"github.com/metacubex/mihomo/log"
 	"github.com/metacubex/mihomo/tunnel"
 	"github.com/metacubex/mihomo/tunnel/statistic"
-	"golang.org/x/exp/slices"
-	"net"
-	"os"
-	"runtime"
-	"runtime/debug"
-	"strconv"
-	"time"
 )
 
 var (
@@ -74,9 +76,7 @@ func handleGetIsInit() bool {
 func handleForceGC() {
 	log.Infoln("[APP] request force GC")
 	runtime.GC()
-	if features.Android {
-		debug.FreeOSMemory()
-	}
+	debug.FreeOSMemory()
 }
 
 func handleShutdown() bool {
@@ -87,61 +87,33 @@ func handleShutdown() bool {
 	return true
 }
 
-func handleValidateConfig(path string) string {
-	buf, err := readFile(path)
-	_, err = config.UnmarshalRawConfig(buf)
+func handleFlushFakeIP() bool {
+	err := resolver.FlushFakeIP()
+	if err != nil {
+		log.Errorln("[APP] Flush FakeIP error: %v", err)
+		return false
+	}
+	log.Infoln("[APP] FakeIP pool flushed")
+	return true
+}
+
+func handleFlushDnsCache() {
+	resolver.ClearCache()
+	log.Infoln("[APP] DNS cache flushed")
+}
+
+func handleValidateConfig(bytes []byte) string {
+	_, err := config.UnmarshalRawConfig(bytes)
 	if err != nil {
 		return err.Error()
 	}
 	return ""
 }
 
-func handleGetProxies() ProxiesData {
+func handleGetProxies() map[string]constant.Proxy {
 	runLock.Lock()
 	defer runLock.Unlock()
-
-	nameList := config.GetProxyNameList()
-
-	proxies := make(map[string]constant.Proxy)
-
-	for name, proxy := range tunnel.Proxies() {
-		proxies[name] = proxy
-	}
-	for _, p := range tunnel.Providers() {
-		for _, proxy := range p.Proxies() {
-			proxies[proxy.Name()] = proxy
-		}
-	}
-
-	hasGlobal := false
-	allNames := make([]string, 0, len(nameList)+1)
-
-	for _, name := range nameList {
-		if name == "GLOBAL" {
-			hasGlobal = true
-		}
-
-		p, ok := proxies[name]
-		if !ok || p == nil {
-			continue
-		}
-		switch p.Type() {
-		case constant.Selector, constant.URLTest, constant.Fallback, constant.Relay, constant.LoadBalance:
-			allNames = append(allNames, name)
-		default:
-		}
-	}
-
-	if !hasGlobal {
-		if p, ok := proxies["GLOBAL"]; ok && p != nil {
-			allNames = append([]string{"GLOBAL"}, allNames...)
-		}
-	}
-
-	return ProxiesData{
-		All:     allNames,
-		Proxies: proxies,
-	}
+	return tunnel.ProxiesWithProviders()
 }
 
 func handleChangeProxy(data string, fn func(string string)) {
@@ -183,8 +155,8 @@ func handleChangeProxy(data string, fn func(string string)) {
 	}()
 }
 
-func handleGetTraffic(onlyStatisticsProxy bool) string {
-	up, down := statistic.DefaultManager.NowTraffic(onlyStatisticsProxy)
+func handleGetTraffic() string {
+	up, down := statistic.DefaultManager.NowTraffic(state.CurrentState.OnlyStatisticsProxy)
 	traffic := map[string]int64{
 		"up":   up,
 		"down": down,
@@ -197,8 +169,8 @@ func handleGetTraffic(onlyStatisticsProxy bool) string {
 	return string(data)
 }
 
-func handleGetTotalTraffic(onlyStatisticsProxy bool) string {
-	up, down := statistic.DefaultManager.TotalTraffic(onlyStatisticsProxy)
+func handleGetTotalTraffic() string {
+	up, down := statistic.DefaultManager.TotalTraffic(state.CurrentState.OnlyStatisticsProxy)
 	traffic := map[string]int64{
 		"up":   up,
 		"down": down,
@@ -328,9 +300,7 @@ func handleGetExternalProviders() string {
 		}
 		eps = append(eps, *externalProvider)
 	}
-	slices.SortFunc(eps, func(a, b ExternalProvider) int {
-		return cmp.Compare(a.Name, b.Name)
-	})
+	sort.Sort(ExternalProviders(eps))
 	data, err := json.Marshal(eps)
 	if err != nil {
 		return ""
@@ -539,10 +509,10 @@ func handleSetupConfig(bytes []byte) string {
 	err := UnmarshalJson(bytes, params)
 	if err != nil {
 		log.Errorln("unmarshalRawConfig error %v", err)
-		_ = applyConfig(defaultSetupParams())
+		_ = setupConfig(defaultSetupParams())
 		return err.Error()
 	}
-	err = applyConfig(params)
+	err = setupConfig(params)
 	if err != nil {
 		return err.Error()
 	}
@@ -568,7 +538,7 @@ func init() {
 	statistic.DefaultRequestNotify = func(c statistic.Tracker) {
 		sendMessage(Message{
 			Type: RequestMessage,
-			Data: c,
+			Data: c.Info(),
 		})
 	}
 	executor.DefaultProviderLoadedHook = func(providerName string) {

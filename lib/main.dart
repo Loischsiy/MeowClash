@@ -24,11 +24,17 @@ Future<void> main() async {
   globalState.isService = false;
   WidgetsFlutterBinding.ensureInitialized();
 
+  debugPrint('=== MAIN START ===');
   PaintingBinding.instance.imageCache.maximumSizeBytes = 50 * 1024 * 1024;
 
   final version = await system.version;
+  debugPrint('=== Version: $version ===');
+  debugPrint('=== Calling preload... ===');
   await clashCore.preload();
+  debugPrint('=== preload done ===');
+  debugPrint('=== Calling initApp... ===');
   await globalState.initApp(version);
+  debugPrint('=== initApp done ===');
 
   try {
     await uiManager.initializeUI();
@@ -36,10 +42,13 @@ Future<void> main() async {
     commonPrint.log('Failed to initialize UI: $e');
   }
 
+  debugPrint('=== Calling _runApp... ===');
   await _runApp(version);
+  debugPrint('=== _runApp done ===');
 }
 
 Future<void> _runApp(int version) async {
+  debugPrint('=== _runApp: start ===');
   if (system.isAndroid && globalState.config.appSetting.enableHighRefreshRate) {
     try {
       await FlutterDisplayMode.setHighRefreshRate();
@@ -47,11 +56,14 @@ Future<void> _runApp(int version) async {
       commonPrint.log('Failed to set high refresh rate: $e');
     }
   }
+  debugPrint('=== _runApp: android?.init ===');
   await android?.init();
-  
+  debugPrint('=== _runApp: window?.init ===');
   await window?.init(version);
+  debugPrint('=== _runApp: runApp ===');
   HttpOverrides.global = MeowClashHttpOverrides();
   runApp(ProviderScope(child: const Application()));
+  debugPrint('=== _runApp: done ===');
 }
 
 @pragma('vm:entry-point')

@@ -1,8 +1,10 @@
 import 'package:meow_clash/common/common.dart';
 import 'package:meow_clash/common/network_matcher.dart';
+import 'package:meow_clash/l10n/l10n_ext.dart';
 import 'package:meow_clash/plugins/app.dart';
 import 'package:meow_clash/plugins/service.dart';
 import 'package:meow_clash/providers/config.dart';
+import 'package:meow_clash/providers/override_local_settings.dart';
 import 'package:meow_clash/providers/providers.dart';
 import 'package:meow_clash/state.dart';
 import 'package:meow_clash/widgets/widgets.dart';
@@ -435,6 +437,29 @@ class ExcludeChinaItem extends ConsumerWidget {
   }
 }
 
+class OverrideLocalSettingsItem extends ConsumerWidget {
+  const OverrideLocalSettingsItem({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final overrideLocalSettings = ref.watch(overrideLocalSettingsProvider);
+
+    return ListItem.switchItem(
+      title: Text(appLocalizations.overrideLocalSettings),
+      subtitle: Text(appLocalizations.overrideLocalSettingsDesc),
+      delegate: SwitchDelegate(
+        value: overrideLocalSettings,
+        onChanged: (bool value) async {
+          await ref
+              .read(overrideLocalSettingsProvider.notifier)
+              .setValue(value);
+          globalState.appController.setupClashConfigDebounce();
+        },
+      ),
+    );
+  }
+}
+
 class OtherSettingView extends ConsumerWidget {
   const OtherSettingView({super.key});
 
@@ -450,6 +475,7 @@ class OtherSettingView extends ConsumerWidget {
     final isRussian = locale?.toLowerCase().startsWith('ru') ?? false;
 
     List<Widget> items = [
+      const OverrideLocalSettingsItem(),
       const SmartAutoStopItem(),
       if (smartAutoStop) const NetworkMatchItem(),
       if (system.isAndroid) const DozeSuspendItem(),

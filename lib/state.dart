@@ -25,6 +25,8 @@ import 'package:url_launcher/url_launcher.dart';
 import 'common/common.dart';
 import 'controller.dart';
 import 'models/models.dart';
+import 'services/config_merge_service.dart';
+import 'services/config_priority_service.dart';
 
 typedef UpdateTasks = List<FutureOr Function()>;
 
@@ -477,6 +479,9 @@ class GlobalState {
     final rawConfig = await handleEvaluate(configMap);
     final originalProxyGroups = rawConfig['proxy-groups'];
 
+    final externalPriority = await configPriorityService.getOverrideLocalSettings();
+    final mergeService = ConfigMergeService(externalPriority: externalPriority);
+
     final realPatchConfig = patchConfig.copyWith(
       tun: patchConfig.tun.getRealTun(
         config.networkProps.bypassPrivateRoute,
@@ -493,40 +498,41 @@ class GlobalState {
     }
     rawConfig['external-ui'] = await appPath.uiPath;
     rawConfig['interface-name'] = '';
-    rawConfig['tcp-concurrent'] = realPatchConfig.tcpConcurrent;
-    rawConfig['unified-delay'] = realPatchConfig.unifiedDelay;
-    rawConfig['ipv6'] = realPatchConfig.ipv6;
-    rawConfig['log-level'] = realPatchConfig.logLevel.name;
+    mergeService.apply(rawConfig, 'tcp-concurrent', realPatchConfig.tcpConcurrent);
+    mergeService.apply(rawConfig, 'unified-delay', realPatchConfig.unifiedDelay);
+    mergeService.apply(rawConfig, 'ipv6', realPatchConfig.ipv6);
+    mergeService.apply(rawConfig, 'log-level', realPatchConfig.logLevel.name);
     rawConfig['port'] = 0;
     rawConfig['socks-port'] = 0;
-    rawConfig['keep-alive-interval'] = realPatchConfig.keepAliveInterval;
-    rawConfig['mixed-port'] = realPatchConfig.mixedPort;
-    rawConfig['port'] = realPatchConfig.port;
-    rawConfig['socks-port'] = realPatchConfig.socksPort;
-    rawConfig['redir-port'] = realPatchConfig.redirPort;
-    rawConfig['tproxy-port'] = realPatchConfig.tproxyPort;
-    rawConfig['find-process-mode'] = realPatchConfig.findProcessMode.name;
-    rawConfig['allow-lan'] = realPatchConfig.allowLan;
-    rawConfig['mode'] = realPatchConfig.mode.name;
+    mergeService.apply(rawConfig, 'keep-alive-interval', realPatchConfig.keepAliveInterval);
+    mergeService.apply(rawConfig, 'mixed-port', realPatchConfig.mixedPort);
+    mergeService.apply(rawConfig, 'port', realPatchConfig.port);
+    mergeService.apply(rawConfig, 'socks-port', realPatchConfig.socksPort);
+    mergeService.apply(rawConfig, 'redir-port', realPatchConfig.redirPort);
+    mergeService.apply(rawConfig, 'tproxy-port', realPatchConfig.tproxyPort);
+    mergeService.apply(rawConfig, 'find-process-mode', realPatchConfig.findProcessMode.name);
+    mergeService.apply(rawConfig, 'allow-lan', realPatchConfig.allowLan);
+    mergeService.apply(rawConfig, 'mode', realPatchConfig.mode.name);
     if (rawConfig['tun'] == null) {
       rawConfig['tun'] = {};
     }
-    rawConfig['tun']['enable'] = realPatchConfig.tun.enable;
-    rawConfig['tun']['device'] = realPatchConfig.tun.device;
-    rawConfig['tun']['dns-hijack'] = realPatchConfig.tun.dnsHijack;
-    rawConfig['tun']['stack'] = realPatchConfig.tun.stack.name;
-    rawConfig['tun']['route-address'] = realPatchConfig.tun.routeAddress;
-    rawConfig['tun']['route-exclude-address'] = realPatchConfig.tun.routeExcludeAddress;
-    rawConfig['tun']['auto-route'] = true;
-    rawConfig['tun']['auto-detect-interface'] = true;
-    rawConfig['tun']['strict-route'] = realPatchConfig.tun.strictRoute;
-    rawConfig['tun']['endpoint-independent-nat'] =
-        realPatchConfig.tun.endpointIndependentNat;
-    rawConfig['tun']['disable-icmp-forwarding'] =
-        realPatchConfig.tun.disableIcmpForwarding;
-    rawConfig['tun']['mtu'] = realPatchConfig.tun.mtu;
-    rawConfig['geodata-loader'] = realPatchConfig.geodataLoader.name;
-    rawConfig['geodata-mode'] = false;
+    final tunMap = rawConfig['tun'] as Map<String, dynamic>;
+    mergeService.apply(tunMap, 'enable', realPatchConfig.tun.enable);
+    mergeService.apply(tunMap, 'device', realPatchConfig.tun.device);
+    mergeService.apply(tunMap, 'dns-hijack', realPatchConfig.tun.dnsHijack);
+    mergeService.apply(tunMap, 'stack', realPatchConfig.tun.stack.name);
+    mergeService.apply(tunMap, 'route-address', realPatchConfig.tun.routeAddress);
+    mergeService.apply(tunMap, 'route-exclude-address', realPatchConfig.tun.routeExcludeAddress);
+    tunMap['auto-route'] = true;
+    tunMap['auto-detect-interface'] = true;
+    mergeService.apply(tunMap, 'strict-route', realPatchConfig.tun.strictRoute);
+    mergeService.apply(tunMap, 'endpoint-independent-nat',
+        realPatchConfig.tun.endpointIndependentNat);
+    mergeService.apply(tunMap, 'disable-icmp-forwarding',
+        realPatchConfig.tun.disableIcmpForwarding);
+    mergeService.apply(tunMap, 'mtu', realPatchConfig.tun.mtu);
+    mergeService.apply(rawConfig, 'geodata-loader', realPatchConfig.geodataLoader.name);
+    mergeService.apply(rawConfig, 'geodata-mode', false);
     if (rawConfig['sniffer']?['sniff'] != null) {
       for (final value in (rawConfig['sniffer']?['sniff'] as Map).values) {
         if (value['ports'] != null && value['ports'] is List) {
@@ -573,16 +579,17 @@ class GlobalState {
     }
 
     rawConfig['profile']['store-selected'] = true;
-    rawConfig['geox-url'] = realPatchConfig.geoXUrl.toJson();
-    rawConfig['global-ua'] = realPatchConfig.globalUa;
+    mergeService.apply(rawConfig, 'geox-url', realPatchConfig.geoXUrl.toJson());
+    mergeService.apply(rawConfig, 'global-ua', realPatchConfig.globalUa);
     if (rawConfig['hosts'] == null) {
-      rawConfig['hosts'] = {};
+      rawConfig['hosts'] = <String, dynamic>{};
     }
+    final hostsMap = rawConfig['hosts'] as Map<String, dynamic>;
     for (final host in realPatchConfig.hosts.entries) {
-      rawConfig['hosts'][host.key] = host.value.splitByMultipleSeparators;
+      mergeService.apply(hostsMap, host.key, host.value.splitByMultipleSeparators);
     }
 
-    rawConfig['hosts']['dns.msftncsi.com'] = [
+    hostsMap['dns.msftncsi.com'] = [
       '131.107.255.255',
       'fd3e:4f5a:5b81::1',
     ];
@@ -592,7 +599,7 @@ class GlobalState {
     }
     final isEnableDns = rawConfig['dns']['enable'] == true;
     final overrideDns = globalState.config.overrideDns;
-    if (overrideDns || !isEnableDns) {
+    if (!isEnableDns || (overrideDns && mergeService.shouldOverrideSection(rawConfig, 'dns'))) {
       final dns = switch (!isEnableDns) {
         true => realPatchConfig.dns.copyWith(
           nameserver: [...realPatchConfig.dns.nameserver, 'system://'],
@@ -618,7 +625,7 @@ class GlobalState {
       rawConfig['ntp'] = {};
     }
     final overrideNtp = globalState.config.overrideNtp;
-    if (overrideNtp) {
+    if (overrideNtp && mergeService.shouldOverrideSection(rawConfig, 'ntp')) {
       final ntp = realPatchConfig.ntp;
       rawConfig['ntp'] = ntp.toJson();
     }
@@ -626,12 +633,12 @@ class GlobalState {
       rawConfig['sniffer'] = {};
     }
     final overrideSniffer = globalState.config.overrideSniffer;
-    if (overrideSniffer) {
+    if (overrideSniffer && mergeService.shouldOverrideSection(rawConfig, 'sniffer')) {
       final sniffer = realPatchConfig.sniffer;
       rawConfig['sniffer'] = sniffer.toJson();
     }
     final guiTunnels = realPatchConfig.tunnels;
-    if (guiTunnels.isNotEmpty) {
+    if (guiTunnels.isNotEmpty && mergeService.shouldOverrideSection(rawConfig, 'tunnels')) {
       final existingTunnels = rawConfig['tunnels'] as List? ?? [];
       final allTunnels = [
         ...existingTunnels,
@@ -643,7 +650,7 @@ class GlobalState {
       rawConfig['experimental'] = {};
     }
     final overrideExperimental = globalState.config.overrideExperimental;
-    if (overrideExperimental) {
+    if (overrideExperimental && mergeService.shouldOverrideSection(rawConfig, 'experimental')) {
       final experimental = realPatchConfig.experimental;
       rawConfig['experimental'] = experimental.toJson();
     }

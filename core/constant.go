@@ -2,13 +2,15 @@ package main
 
 import (
 	"encoding/json"
+	"net/netip"
+	"time"
+
 	"github.com/metacubex/mihomo/adapter/provider"
 	P "github.com/metacubex/mihomo/component/process"
+	"github.com/metacubex/mihomo/config"
 	"github.com/metacubex/mihomo/constant"
 	"github.com/metacubex/mihomo/log"
 	"github.com/metacubex/mihomo/tunnel"
-	"net/netip"
-	"time"
 )
 
 type InitParams struct {
@@ -39,14 +41,15 @@ type UpdateParams struct {
 }
 
 type tunSchema struct {
-	Enable              bool               `yaml:"enable" json:"enable"`
-	Device              *string            `yaml:"device" json:"device"`
-	Stack               *constant.TUNStack `yaml:"stack" json:"stack"`
-	DNSHijack           *[]string          `yaml:"dns-hijack" json:"dns-hijack"`
-	AutoRoute           *bool              `yaml:"auto-route" json:"auto-route"`
-	RouteAddress        *[]netip.Prefix    `yaml:"route-address" json:"route-address,omitempty"`
-	RouteExcludeAddress *[]netip.Prefix    `yaml:"route-exclude-address" json:"route-exclude-address,omitempty"`
-	StrictRoute         *bool              `yaml:"strict-route" json:"strict-route,omitempty"`
+	Enable                bool               `yaml:"enable" json:"enable"`
+	Device                *string            `yaml:"device" json:"device"`
+	Stack                 *constant.TUNStack `yaml:"stack" json:"stack"`
+	DNSHijack             *[]string          `yaml:"dns-hijack" json:"dns-hijack"`
+	AutoRoute             *bool              `yaml:"auto-route" json:"auto-route"`
+	RouteAddress          *[]netip.Prefix    `yaml:"route-address" json:"route-address,omitempty"`
+	RouteExcludeAddress   *[]netip.Prefix    `yaml:"route-exclude-address" json:"route-exclude-address,omitempty"`
+	StrictRoute           *bool              `yaml:"strict-route" json:"strict-route,omitempty"`
+	DisableICMPForwarding *bool              `yaml:"disable-icmp-forwarding" json:"disable-icmp-forwarding,omitempty"`
 }
 
 type ChangeProxyParams struct {
@@ -68,11 +71,6 @@ type ExternalProvider struct {
 	Path             string                     `json:"path"`
 	UpdateAt         time.Time                  `json:"update-at"`
 	SubscriptionInfo *provider.SubscriptionInfo `json:"subscription-info"`
-}
-
-type ProxiesData struct {
-	Proxies map[string]constant.Proxy `json:"proxies"`
-	All     []string                  `json:"all"`
 }
 
 const (
@@ -105,11 +103,13 @@ const (
 	startListenerMethod            Method = "startListener"
 	stopListenerMethod             Method = "stopListener"
 	updateDnsMethod                Method = "updateDns"
+	setStateMethod                 Method = "setState"
+	getAndroidVpnOptionsMethod     Method = "getAndroidVpnOptions"
+	getRunTimeMethod               Method = "getRunTime"
+	getCurrentProfileNameMethod    Method = "getCurrentProfileName"
 	crashMethod                    Method = "crash"
 	setupConfigMethod              Method = "setupConfig"
 	getConfigMethod                Method = "getConfig"
-	deleteFile                     Method = "deleteFile"
-	suspendMethod                  Method = "suspend"
 	flushFakeIPMethod              Method = "flushFakeIP"
 	flushDnsCacheMethod            Method = "flushDnsCache"
 )

@@ -14,6 +14,7 @@ import (
 	"github.com/metacubex/mihomo/component/resolver"
 	"github.com/metacubex/mihomo/config"
 	"github.com/metacubex/mihomo/constant"
+	"github.com/metacubex/mihomo/constant/features"
 	cp "github.com/metacubex/mihomo/constant/provider"
 	"github.com/metacubex/mihomo/hub"
 	"github.com/metacubex/mihomo/hub/route"
@@ -32,6 +33,12 @@ var (
 	runLock       sync.Mutex
 	mBatch, _     = batch.New[bool](context.Background(), batch.WithConcurrencyNum[bool](50))
 )
+
+type ExternalProviders []ExternalProvider
+
+func (a ExternalProviders) Len() int           { return len(a) }
+func (a ExternalProviders) Less(i, j int) bool { return a[i].Name < a[j].Name }
+func (a ExternalProviders) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 
 func getExternalProvidersRaw() map[string]cp.Provider {
 	eps := make(map[string]cp.Provider)
@@ -107,15 +114,11 @@ func updateListeners() {
 	listeners := currentConfig.Listeners
 	general := currentConfig.General
 	listener.PatchInboundListeners(listeners, tunnel.Tunnel, true)
-
-	allowLan := general.AllowLan
-	listener.SetAllowLan(allowLan)
+	listener.SetAllowLan(general.AllowLan)
 	inbound.SetSkipAuthPrefixes(general.SkipAuthPrefixes)
 	inbound.SetAllowedIPs(general.LanAllowedIPs)
 	inbound.SetDisAllowedIPs(general.LanDisAllowedIPs)
-
-	bindAddress := general.BindAddress
-	listener.SetBindAddress(bindAddress)
+	listener.SetBindAddress(general.BindAddress)
 	listener.ReCreateHTTP(general.Port, tunnel.Tunnel)
 	listener.ReCreateSocks(general.SocksPort, tunnel.Tunnel)
 	listener.ReCreateRedir(general.RedirPort, tunnel.Tunnel)
@@ -124,7 +127,9 @@ func updateListeners() {
 	listener.ReCreateShadowSocks(general.ShadowSocksConfig, tunnel.Tunnel)
 	listener.ReCreateVmess(general.VmessConfig, tunnel.Tunnel)
 	listener.ReCreateTuic(general.TuicServer, tunnel.Tunnel)
-	listener.ReCreateTun(general.Tun, tunnel.Tunnel)
+	if !features.Android {
+		listener.ReCreateTun(general.Tun, tunnel.Tunnel)
+	}
 }
 
 func stopListeners() {
@@ -155,7 +160,7 @@ func patchSelectGroup(mapping map[string]string) {
 func defaultSetupParams() *SetupParams {
 	return &SetupParams{
 		Config:      config.DefaultRawConfig(),
-		TestURL:     "https://www.gstatic.com/generate_204",
+		TestURL:     "https://g.cn/generate_204",
 		SelectedMap: map[string]string{},
 	}
 }
@@ -231,6 +236,7 @@ func updateConfig(params *UpdateParams) {
 		}
 		general.Tun.DNSHijack = *params.Tun.DNSHijack
 		general.Tun.Stack = *params.Tun.Stack
+		general.Tun.DisableICMPForwarding = *params.Tun.DisableICMPForwarding
 	}
 
 	updateListeners()

@@ -2,17 +2,14 @@ package main
 
 import (
 	"context"
+	"core/state"
 	"encoding/json"
 	"fmt"
 	"net"
-	"os"
 	"runtime"
-	"runtime/debug"
 	"sort"
 	"strconv"
 	"time"
-
-	"core/state"
 
 	"github.com/metacubex/mihomo/adapter"
 	"github.com/metacubex/mihomo/adapter/outboundgroup"
@@ -38,16 +35,16 @@ var (
 )
 
 func handleInitClash(paramsString string) bool {
-	runLock.Lock()
-	defer runLock.Unlock()
 	var params = InitParams{}
 	err := json.Unmarshal([]byte(paramsString), &params)
 	if err != nil {
 		return false
 	}
 	version = params.Version
-	constant.SetHomeDir(params.HomeDir)
-	isInit = true
+	if !isInit {
+		constant.SetHomeDir(params.HomeDir)
+		isInit = true
+	}
 	return isInit
 }
 
@@ -65,7 +62,6 @@ func handleStopListener() bool {
 	defer runLock.Unlock()
 	isRunning = false
 	listener.StopListener()
-	resolver.ResetConnection()
 	return true
 }
 
@@ -73,33 +69,19 @@ func handleGetIsInit() bool {
 	return isInit
 }
 
-func handleForceGC() {
-	log.Infoln("[APP] request force GC")
-	runtime.GC()
-	debug.FreeOSMemory()
+func handleForceGc() {
+	go func() {
+		log.Infoln("[APP] request force GC")
+		runtime.GC()
+	}()
 }
 
 func handleShutdown() bool {
 	stopListeners()
 	executor.Shutdown()
-	handleForceGC()
+	runtime.GC()
 	isInit = false
 	return true
-}
-
-func handleFlushFakeIP() bool {
-	err := resolver.FlushFakeIP()
-	if err != nil {
-		log.Errorln("[APP] Flush FakeIP error: %v", err)
-		return false
-	}
-	log.Infoln("[APP] FakeIP pool flushed")
-	return true
-}
-
-func handleFlushDnsCache() {
-	resolver.ClearCache()
-	log.Infoln("[APP] DNS cache flushed")
 }
 
 func handleValidateConfig(bytes []byte) string {
@@ -163,7 +145,7 @@ func handleGetTraffic() string {
 	}
 	data, err := json.Marshal(traffic)
 	if err != nil {
-		log.Errorln("Error: %s", err)
+		fmt.Println("Error:", err)
 		return ""
 	}
 	return string(data)
@@ -177,7 +159,7 @@ func handleGetTotalTraffic() string {
 	}
 	data, err := json.Marshal(traffic)
 	if err != nil {
-		log.Errorln("Error: %s", err)
+		fmt.Println("Error:", err)
 		return ""
 	}
 	return string(data)
@@ -247,7 +229,7 @@ func handleGetConnections() string {
 	snapshot := statistic.DefaultManager.Snapshot()
 	data, err := json.Marshal(snapshot)
 	if err != nil {
-		log.Errorln("Error: %s", err)
+		fmt.Println("Error:", err)
 		return ""
 	}
 	return string(data)
@@ -342,13 +324,13 @@ func handleUpdateGeoData(geoType string, geoName string, fn func(value string)) 
 				fn(err.Error())
 				return
 			}
-		case "GEOIP":
+		case "GeoIp":
 			err := updater.UpdateGeoIpWithPath(path)
 			if err != nil {
 				fn(err.Error())
 				return
 			}
-		case "GEOSITE":
+		case "GeoSite":
 			err := updater.UpdateGeoSiteWithPath(path)
 			if err != nil {
 				fn(err.Error())
@@ -391,15 +373,6 @@ func handleSideLoadExternalProvider(providerName string, data []byte, fn func(va
 		}
 		fn("")
 	}()
-}
-
-func handleSuspend(suspended bool) bool {
-	if suspended {
-		tunnel.OnSuspend()
-	} else {
-		tunnel.OnRunning()
-	}
-	return true
 }
 
 func handleStartLog() {
@@ -448,6 +421,10 @@ func handleGetMemory(fn func(value string)) {
 	}()
 }
 
+func handleSetState(params string) {
+	_ = json.Unmarshal([]byte(params), state.CurrentState)
+}
+
 func handleGetConfig(path string) (*config.RawConfig, error) {
 	bytes, err := readFile(path)
 	if err != nil {
@@ -458,6 +435,21 @@ func handleGetConfig(path string) (*config.RawConfig, error) {
 		return nil, err
 	}
 	return prof, nil
+}
+
+func handleFlushFakeIP() bool {
+	err := resolver.FlushFakeIP()
+	if err != nil {
+		log.Errorln("[APP] Flush FakeIP error: %v", err)
+		return false
+	}
+	log.Infoln("[APP] FakeIP pool flushed")
+	return true
+}
+
+func handleFlushDnsCache() {
+	resolver.ClearCache()
+	log.Infoln("[APP] DNS cache flushed")
 }
 
 func handleCrash() {
@@ -474,37 +466,7 @@ func handleUpdateConfig(bytes []byte) string {
 	return ""
 }
 
-func handleDelFile(path string, result ActionResult) {
-	go func() {
-		fileInfo, err := os.Stat(path)
-		if err != nil {
-			if !os.IsNotExist(err) {
-				result.success(err.Error())
-			}
-			result.success("")
-			return
-		}
-		if fileInfo.IsDir() {
-			err = os.RemoveAll(path)
-			if err != nil {
-				result.success(err.Error())
-				return
-			}
-		} else {
-			err = os.Remove(path)
-			if err != nil {
-				result.success(err.Error())
-				return
-			}
-		}
-		result.success("")
-	}()
-}
-
 func handleSetupConfig(bytes []byte) string {
-	if !isInit {
-		return "not initialized"
-	}
 	var params = defaultSetupParams()
 	err := UnmarshalJson(bytes, params)
 	if err != nil {
@@ -517,6 +479,17 @@ func handleSetupConfig(bytes []byte) string {
 		return err.Error()
 	}
 	return ""
+}
+
+func handleSuspend(suspended bool) bool {
+	if suspended {
+		log.Infoln("[APP] Suspend mode enabled")
+		tunnel.OnSuspend()
+	} else {
+		log.Infoln("[APP] Resume from suspend")
+		tunnel.OnRunning()
+	}
+	return true
 }
 
 func init() {

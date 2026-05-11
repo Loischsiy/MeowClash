@@ -4,6 +4,7 @@ package tun
 
 import "C"
 import (
+	"core/state"
 	"github.com/metacubex/mihomo/constant"
 	LC "github.com/metacubex/mihomo/listener/config"
 	"github.com/metacubex/mihomo/listener/sing_tun"
@@ -11,61 +12,64 @@ import (
 	"github.com/metacubex/mihomo/tunnel"
 	"net"
 	"net/netip"
-	"strings"
 )
 
-func Start(fd int, stack string, address, dns string) *sing_tun.Listener {
+type Props struct {
+	Fd       int    `json:"fd"`
+	Gateway  string `json:"gateway"`
+	Gateway6 string `json:"gateway6"`
+	Portal   string `json:"portal"`
+	Portal6  string `json:"portal6"`
+	Dns      string `json:"dns"`
+	Dns6     string `json:"dns6"`
+}
+
+func Start(fd int, device string, stack constant.TUNStack, disableIcmpForwarding bool, mtu uint32, ipv6Enabled bool) (*sing_tun.Listener, error) {
 	var prefix4 []netip.Prefix
-	var prefix6 []netip.Prefix
-	tunStack, ok := constant.StackTypeMapping[strings.ToLower(stack)]
-	if !ok {
-		tunStack = constant.TunSystem
+	tempPrefix4, err := netip.ParsePrefix(state.DefaultIpv4Address)
+	if err != nil {
+		log.Errorln("startTUN error:", err)
+		return nil, err
 	}
-	for _, a := range strings.Split(address, ",") {
-		a = strings.TrimSpace(a)
-		if len(a) == 0 {
-			continue
-		}
-		prefix, err := netip.ParsePrefix(a)
+	prefix4 = append(prefix4, tempPrefix4)
+	var prefix6 []netip.Prefix
+	if ipv6Enabled {
+		tempPrefix6, err := netip.ParsePrefix(state.DefaultIpv6Address)
 		if err != nil {
-			log.Errorln("TUN:", err)
-			return nil
+			log.Errorln("startTUN error:", err)
+			return nil, err
 		}
-		if prefix.Addr().Is4() {
-			prefix4 = append(prefix4, prefix)
-		} else {
-			prefix6 = append(prefix6, prefix)
-		}
+		prefix6 = append(prefix6, tempPrefix6)
 	}
 
 	var dnsHijack []string
-	for _, d := range strings.Split(dns, ",") {
-		d = strings.TrimSpace(d)
-		if len(d) == 0 {
-			continue
-		}
-		dnsHijack = append(dnsHijack, net.JoinHostPort(d, "53"))
+	dnsHijack = append(dnsHijack, net.JoinHostPort(state.GetDnsServerAddress(), "53"))
+
+	validMtu := mtu
+	if validMtu < 1280 || validMtu > 65535 {
+		validMtu = 1480
 	}
 
 	options := LC.Tun{
-		Enable:              true,
-		Device:              "MeowClash",
-		Stack:               tunStack,
-		DNSHijack:           dnsHijack,
-		AutoRoute:           false,
-		AutoDetectInterface: false,
-		Inet4Address:        prefix4,
-		Inet6Address:        prefix6,
-		MTU:                 9000,
-		FileDescriptor:      fd,
+		Enable:                true,
+		Device:                device,
+		Stack:                 stack,
+		DNSHijack:             dnsHijack,
+		AutoRoute:             false,
+		AutoDetectInterface:   false,
+		Inet4Address:          prefix4,
+		Inet6Address:          prefix6,
+		MTU:                   validMtu,
+		FileDescriptor:        fd,
+		DisableICMPForwarding: disableIcmpForwarding,
 	}
 
 	listener, err := sing_tun.New(options, tunnel.Tunnel)
 
 	if err != nil {
-		log.Errorln("TUN:", err)
-		return nil
+		log.Errorln("startTUN error:", err)
+		return nil, err
 	}
 
-	return listener
+	return listener, nil
 }

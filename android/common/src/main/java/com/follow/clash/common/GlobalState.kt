@@ -3,8 +3,6 @@ package com.follow.clash.common
 
 import android.app.Application
 import android.util.Log
-import com.google.firebase.FirebaseApp
-import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 
@@ -26,10 +24,14 @@ object GlobalState : CoroutineScope by CoroutineScope(Dispatchers.Default) {
     val application: Application
         get() = _application!!
 
-
     fun log(text: String) {
         Log.d("[MeowClash]", text)
     }
+
+    fun init(application: Application) {
+        _application = application
+    }
+}
 
     fun init(application: Application) {
         _application = application

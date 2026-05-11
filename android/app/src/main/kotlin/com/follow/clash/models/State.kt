@@ -1,6 +1,5 @@
 package com.follow.clash.models
 
-import com.follow.clash.service.models.VpnOptions
 import com.google.gson.annotations.SerializedName
 
 data class SharedState(

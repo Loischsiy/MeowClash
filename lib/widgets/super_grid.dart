@@ -56,10 +56,7 @@ class SuperGridState extends State<SuperGrid> with TickerProviderStateMixin {
 
   late AnimationController _transformController;
 
-  Future<bool> get isTransformCompleter =>
-      _transformCompleter?.future ?? Future(() => true);
-
-  Completer<bool>? _transformCompleter;
+  Completer? _transformCompleter;
 
   Map<int, Animation<Offset>> _transformAnimationMap = {};
 
@@ -122,7 +119,10 @@ class SuperGridState extends State<SuperGrid> with TickerProviderStateMixin {
 
     _childrenNotifier.value = widget.children;
 
-    _fakeDragWidgetController = AnimationController.unbounded(vsync: this);
+    _fakeDragWidgetController = AnimationController.unbounded(
+      vsync: this,
+      duration: commonDuration,
+    );
 
     _shakeController = AnimationController(
       vsync: this,
@@ -137,6 +137,7 @@ class SuperGridState extends State<SuperGrid> with TickerProviderStateMixin {
       vsync: this,
       duration: commonDuration,
     );
+
     _initState();
   }
 
@@ -225,14 +226,10 @@ class SuperGridState extends State<SuperGrid> with TickerProviderStateMixin {
       final preAnimationValue = _transformAnimationMap[key]?.value;
       return MapEntry(
         key,
-        Tween(begin: preAnimationValue ?? Offset.zero, end: value.end).animate(
-          _transformController.drive(
-            Tween<double>(
-              begin: 0.0,
-              end: 1,
-            ).chain(CurveTween(curve: Easing.emphasizedAccelerate)),
-          ),
-        ),
+        Tween(
+          begin: preAnimationValue ?? Offset.zero,
+          end: value.end,
+        ).animate(_transformController),
       );
     });
 
@@ -265,18 +262,18 @@ class SuperGridState extends State<SuperGrid> with TickerProviderStateMixin {
     if (_targetIndex == -1) {
       return;
     }
-    const tolerance = Tolerance(distance: 0.5, velocity: 0.01);
     const spring = SpringDescription(mass: 1, stiffness: 100, damping: 10);
-    final simulation = SpringSimulation(spring, 0, 1, 0, tolerance: tolerance);
+    final simulation = SpringSimulation(spring, 0, 1, 0);
     _fakeDragWidgetAnimation = Tween(
       begin: details.offset - _parentOffset,
       end: _targetOffset,
     ).animate(_fakeDragWidgetController);
     _animating.value = true;
 
-    _transformCompleter = Completer<bool>();
-    await _fakeDragWidgetController.animateWith(simulation);
-    _transformCompleter?.complete(true);
+    _transformCompleter = Completer();
+    final animateWith = _fakeDragWidgetController.animateWith(simulation);
+    _transformCompleter?.complete(animateWith);
+    await animateWith;
     _animating.value = false;
     _fakeDragWidgetAnimation = null;
     _transformTweenMap.clear();
@@ -426,18 +423,14 @@ class SuperGridState extends State<SuperGrid> with TickerProviderStateMixin {
     required Widget feedback,
     required Widget item,
     required int index,
+    bool isDeletable = true,
   }) {
     final target = DragTarget<int>(
       builder: (_, _, _) {
         return AbsorbPointer(child: item);
       },
       onWillAcceptWithDetails: (_) {
-        debouncer.call(
-          FunctionTag.handleWill,
-          _handleWill,
-          args: [index],
-          duration: commonDuration,
-        );
+        debouncer.call(FunctionTag.handleWill, _handleWill, args: [index]);
         return false;
       },
     );
@@ -456,14 +449,15 @@ class SuperGridState extends State<SuperGrid> with TickerProviderStateMixin {
           if (dragIndex == index) {
             return child!;
           }
-          return _buildShake(
-            _DeletableContainer(
-              onDelete: () {
-                _handleDelete(index);
-              },
-              child: child!,
-            ),
-          );
+          final content = isDeletable
+              ? _DeletableContainer(
+                  onDelete: () {
+                    _handleDelete(index);
+                  },
+                  child: child!,
+                )
+              : child!;
+          return _buildShake(content);
         },
         child: target,
       ),
@@ -504,10 +498,11 @@ class SuperGridState extends State<SuperGrid> with TickerProviderStateMixin {
 
   Widget _builderItem(int index) {
     final girdItem = _childrenNotifier.value[index];
-    final child = RepaintBoundary(child: girdItem.child);
+    final child = girdItem.child;
     return GridItem(
       mainAxisCellCount: girdItem.mainAxisCellCount,
       crossAxisCellCount: girdItem.crossAxisCellCount,
+      isDeletable: girdItem.isDeletable,
       child: Builder(
         builder: (context) {
           _itemContexts[index] = context;
@@ -529,6 +524,7 @@ class SuperGridState extends State<SuperGrid> with TickerProviderStateMixin {
               feedback: feedback,
               item: child,
               index: index,
+              isDeletable: girdItem.isDeletable,
             ),
             index,
           );

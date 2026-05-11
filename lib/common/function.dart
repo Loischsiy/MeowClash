@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:meow_clash/common/common.dart';
 import 'package:meow_clash/enum/enum.dart';
 
 class Debouncer {
@@ -10,13 +9,13 @@ class Debouncer {
     FunctionTag tag,
     Function func, {
     List<dynamic>? args,
-    Duration? duration,
+    Duration duration = const Duration(milliseconds: 600),
   }) {
     final timer = _operations[tag];
     if (timer != null) {
       timer.cancel();
     }
-    _operations[tag] = Timer(duration ?? const Duration(milliseconds: 600), () {
+    _operations[tag] = Timer(duration, () {
       _operations[tag]?.cancel();
       _operations.remove(tag);
       Function.apply(func, args);
@@ -37,25 +36,16 @@ class Throttler {
     Function func, {
     List<dynamic>? args,
     Duration duration = const Duration(milliseconds: 600),
-    bool fire = false,
   }) {
     final timer = _operations[tag];
     if (timer != null) {
       return true;
     }
-    if (fire) {
+    _operations[tag] = Timer(duration, () {
+      _operations[tag]?.cancel();
+      _operations.remove(tag);
       Function.apply(func, args);
-      _operations[tag] = Timer(duration, () {
-        _operations[tag]?.cancel();
-        _operations.remove(tag);
-      });
-    } else {
-      _operations[tag] = Timer(duration, () {
-        Function.apply(func, args);
-        _operations[tag]?.cancel();
-        _operations.remove(tag);
-      });
-    }
+    });
     return false;
   }
 
@@ -69,7 +59,7 @@ Future<T> retry<T>({
   required Future<T> Function() task,
   int maxAttempts = 3,
   required bool Function(T res) retryIf,
-  Duration delay = midDuration,
+  Duration delay = Duration.zero,
 }) async {
   int attempts = 0;
   while (attempts < maxAttempts) {
@@ -79,7 +69,7 @@ Future<T> retry<T>({
     }
     attempts++;
   }
-  throw 'retry error';
+  throw 'unknown error';
 }
 
 final debouncer = Debouncer();

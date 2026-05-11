@@ -3,7 +3,6 @@ import 'package:meow_clash/providers/config.dart';
 import 'package:meow_clash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
 class CloseConnectionsItem extends ConsumerWidget {
   const CloseConnectionsItem({super.key});
@@ -21,7 +20,7 @@ class CloseConnectionsItem extends ConsumerWidget {
         onChanged: (value) async {
           ref
               .read(appSettingProvider.notifier)
-              .update((state) => state.copyWith(closeConnections: value));
+              .updateState((state) => state.copyWith(closeConnections: value));
         },
       ),
     );
@@ -44,30 +43,9 @@ class UsageItem extends ConsumerWidget {
         onChanged: (bool value) async {
           ref
               .read(appSettingProvider.notifier)
-              .update((state) => state.copyWith(onlyStatisticsProxy: value));
-        },
-      ),
-    );
-  }
-}
-
-class MinimizeItem extends ConsumerWidget {
-  const MinimizeItem({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final minimizeOnExit = ref.watch(
-      appSettingProvider.select((state) => state.minimizeOnExit),
-    );
-    return ListItem.switchItem(
-      title: Text(appLocalizations.minimizeOnExit),
-      subtitle: Text(appLocalizations.minimizeOnExitDesc),
-      delegate: SwitchDelegate(
-        value: minimizeOnExit,
-        onChanged: (bool value) {
-          ref
-              .read(appSettingProvider.notifier)
-              .update((state) => state.copyWith(minimizeOnExit: value));
+              .updateState(
+                (state) => state.copyWith(onlyStatisticsProxy: value),
+              );
         },
       ),
     );
@@ -90,7 +68,30 @@ class AutoLaunchItem extends ConsumerWidget {
         onChanged: (bool value) {
           ref
               .read(appSettingProvider.notifier)
-              .update((state) => state.copyWith(autoLaunch: value));
+              .updateState((state) => state.copyWith(autoLaunch: value));
+        },
+      ),
+    );
+  }
+}
+
+class SmartDelayLaunchItem extends ConsumerWidget {
+  const SmartDelayLaunchItem({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final smartDelayLaunch = ref.watch(
+      appSettingProvider.select((state) => state.smartDelayLaunch),
+    );
+    return ListItem.switchItem(
+      title: Text(appLocalizations.smartDelayLaunch),
+      subtitle: Text(appLocalizations.smartDelayLaunchDesc),
+      delegate: SwitchDelegate(
+        value: smartDelayLaunch,
+        onChanged: (bool value) {
+          ref
+              .read(appSettingProvider.notifier)
+              .updateState((state) => state.copyWith(smartDelayLaunch: value));
         },
       ),
     );
@@ -113,7 +114,7 @@ class SilentLaunchItem extends ConsumerWidget {
         onChanged: (bool value) {
           ref
               .read(appSettingProvider.notifier)
-              .update((state) => state.copyWith(silentLaunch: value));
+              .updateState((state) => state.copyWith(silentLaunch: value));
         },
       ),
     );
@@ -136,7 +137,7 @@ class AutoRunItem extends ConsumerWidget {
         onChanged: (bool value) {
           ref
               .read(appSettingProvider.notifier)
-              .update((state) => state.copyWith(autoRun: value));
+              .updateState((state) => state.copyWith(autoRun: value));
         },
       ),
     );
@@ -159,7 +160,7 @@ class HiddenItem extends ConsumerWidget {
         onChanged: (value) {
           ref
               .read(appSettingProvider.notifier)
-              .update((state) => state.copyWith(hidden: value));
+              .updateState((state) => state.copyWith(hidden: value));
         },
       ),
     );
@@ -182,53 +183,57 @@ class AnimateTabItem extends ConsumerWidget {
         onChanged: (value) {
           ref
               .read(appSettingProvider.notifier)
-              .update((state) => state.copyWith(isAnimateToPage: value));
+              .updateState((state) => state.copyWith(isAnimateToPage: value));
         },
       ),
     );
   }
 }
 
-class OpenLogsItem extends ConsumerWidget {
-  const OpenLogsItem({super.key});
+class NavBarHapticFeedbackItem extends ConsumerWidget {
+  const NavBarHapticFeedbackItem({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final openLogs = ref.watch(
-      appSettingProvider.select((state) => state.openLogs),
+    final enableNavBarHapticFeedback = ref.watch(
+      appSettingProvider.select((state) => state.enableNavBarHapticFeedback),
     );
     return ListItem.switchItem(
-      title: Text(appLocalizations.logcat),
-      subtitle: Text(appLocalizations.logcatDesc),
+      title: Text(appLocalizations.navBarHapticFeedback),
+      subtitle: Text(appLocalizations.navBarHapticFeedbackDesc),
       delegate: SwitchDelegate(
-        value: openLogs,
-        onChanged: (bool value) {
-          ref
-              .read(appSettingProvider.notifier)
-              .update((state) => state.copyWith(openLogs: value));
+        value: enableNavBarHapticFeedback,
+        onChanged: (value) {
+          ref.read(appSettingProvider.notifier).updateState(
+            (state) => state.copyWith(enableNavBarHapticFeedback: value),
+          );
         },
       ),
     );
   }
 }
 
-class CrashlyticsItem extends ConsumerWidget {
-  const CrashlyticsItem({super.key});
+class HighRefreshRateItem extends ConsumerWidget {
+  const HighRefreshRateItem({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final crashlytics = ref.watch(
-      appSettingProvider.select((state) => state.crashlytics),
+    final enableHighRefreshRate = ref.watch(
+      appSettingProvider.select((state) => state.enableHighRefreshRate),
     );
     return ListItem.switchItem(
-      title: Text(appLocalizations.crashlytics),
-      subtitle: Text(appLocalizations.crashlyticsTip),
+      title: Text(appLocalizations.highRefreshRate),
+      subtitle: Text(appLocalizations.highRefreshRateDesc),
       delegate: SwitchDelegate(
-        value: crashlytics,
-        onChanged: (bool value) {
-          ref
-              .read(appSettingProvider.notifier)
-              .update((state) => state.copyWith(crashlytics: value));
+        value: enableHighRefreshRate,
+        onChanged: (value) {
+          ref.read(appSettingProvider.notifier).updateState(
+            (state) => state.copyWith(enableHighRefreshRate: value),
+          );
+
+          if (context.mounted) {
+            context.showSnackBar(appLocalizations.restartTip);
+          }
         },
       ),
     );
@@ -251,7 +256,7 @@ class AutoCheckUpdateItem extends ConsumerWidget {
         onChanged: (bool value) {
           ref
               .read(appSettingProvider.notifier)
-              .update((state) => state.copyWith(autoCheckUpdate: value));
+              .updateState((state) => state.copyWith(autoCheckUpdate: value));
         },
       ),
     );
@@ -261,37 +266,43 @@ class AutoCheckUpdateItem extends ConsumerWidget {
 class ApplicationSettingView extends StatelessWidget {
   const ApplicationSettingView({super.key});
 
-  String getLocaleString(Locale? locale) {
-    if (locale == null) return appLocalizations.defaultText;
-    return Intl.message(locale.toString());
-  }
+
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> items = [
-      MinimizeItem(),
-      if (system.isDesktop) ...[AutoLaunchItem(), SilentLaunchItem()],
-      AutoRunItem(),
-      if (system.isAndroid) ...[HiddenItem()],
-      AnimateTabItem(),
-      OpenLogsItem(),
-      CloseConnectionsItem(),
-      UsageItem(),
-      if (system.isAndroid) CrashlyticsItem(),
-      AutoCheckUpdateItem(),
-    ];
-    return BaseScaffold(
-      title: appLocalizations.application,
-      body: ListView.separated(
-        itemBuilder: (_, index) {
-          final item = items[index];
-          return item;
-        },
-        separatorBuilder: (_, _) {
-          return const Divider(height: 0);
-        },
-        itemCount: items.length,
-      ),
+    return Consumer(
+      builder: (context, ref, _) {
+        final autoLaunch = ref.watch(
+          appSettingProvider.select((state) => state.autoLaunch),
+        );
+        List<Widget> items = [
+          AutoLaunchItem(),
+          if (system.isDesktop) ...[
+            if (system.isWindows && autoLaunch) SmartDelayLaunchItem(),
+            SilentLaunchItem(),
+          ],
+          AutoRunItem(),
+          if (system.isAndroid) ...[HiddenItem()],
+          AnimateTabItem(),
+          if (system.isAndroid) ...[
+            NavBarHapticFeedbackItem(),
+            HighRefreshRateItem(),
+          ],
+          CloseConnectionsItem(),
+          UsageItem(),
+          AutoCheckUpdateItem(),
+        ];
+        return ListView.separated(
+          itemBuilder: (_, index) {
+            final item = items[index];
+            return item;
+          },
+          separatorBuilder: (_, _) {
+            return const Divider(height: 0);
+          },
+          itemCount: items.length,
+        );
+      },
     );
   }
 }

@@ -1,13 +1,11 @@
 import 'dart:async';
-import 'dart:io';
 
+import 'package:meow_clash/clash/clash.dart';
 import 'package:meow_clash/common/common.dart';
-import 'package:meow_clash/core/controller.dart';
+import 'package:meow_clash/models/common.dart';
 import 'package:meow_clash/state.dart';
 import 'package:meow_clash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
-
-final _memoryStateNotifier = ValueNotifier<num>(0);
 
 class MemoryInfo extends StatefulWidget {
   const MemoryInfo({super.key});
@@ -17,32 +15,68 @@ class MemoryInfo extends StatefulWidget {
 }
 
 class _MemoryInfoState extends State<MemoryInfo> {
-  Timer? timer;
+  late final VoidCallback _tickListener;
+  // Cache last memory value to avoid showing 0 on rebuild
+  static TrafficValue _lastMemoryValue = TrafficValue(value: 0);
+  TrafficValue _memoryValue = _lastMemoryValue;
+  Timer? _initTimer;
+  bool _isUpdating = false;
 
   @override
   void initState() {
     super.initState();
-    _updateMemory();
+    _tickListener = _updateMemory;
+    dashboardRefreshManager.tick2s.addListener(_tickListener);
+
+    // Get immediately on first open, otherwise delay 1000ms
+    if (_lastMemoryValue.value == 0) {
+      _retryUpdateMemory();
+    } else {
+      // Has cached value, delay
+      _initTimer = Timer(const Duration(milliseconds: 1000), _updateMemory);
+    }
+  }
+
+  Future<void> _retryUpdateMemory() async {
+    for (int i = 0; i < 5; i++) {
+      if (!mounted) return;
+      await _updateMemory();
+      if (_memoryValue.value > 0) break;
+      await Future.delayed(const Duration(milliseconds: 500));
+    }
   }
 
   @override
   void dispose() {
-    timer?.cancel();
+    _initTimer?.cancel();
+    dashboardRefreshManager.tick2s.removeListener(_tickListener);
     super.dispose();
   }
 
   Future<void> _updateMemory() async {
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final rss = ProcessInfo.currentRss;
-      if (coreController.isCompleted) {
-        _memoryStateNotifier.value = await coreController.getMemory() + rss;
-      } else {
-        _memoryStateNotifier.value = rss;
+    if (!mounted) return;
+    if (_isUpdating) return;
+    _isUpdating = true;
+
+    try {
+      final memoryValue = await clashCore.getMemory();
+      // Update only if valid (non-zero)
+      if (memoryValue > 0) {
+        final adjustedValue = memoryValue;
+
+        if (mounted) {
+          setState(() {
+            _memoryValue = TrafficValue(value: adjustedValue);
+            _lastMemoryValue = _memoryValue; // Cache latest valid value
+          });
+        }
       }
-      timer = Timer(Duration(seconds: 2), () async {
-        _updateMemory();
-      });
-    });
+      // If 0, keep last valid value
+    } catch (e) {
+      // Ignore error, keep current value
+    } finally {
+      _isUpdating = false;
+    }
   }
 
   @override
@@ -51,8 +85,34 @@ class _MemoryInfoState extends State<MemoryInfo> {
       height: getWidgetHeight(1),
       child: CommonCard(
         info: Info(iconData: Icons.memory, label: appLocalizations.memoryInfo),
-        onPressed: () {
-          coreController.requestGc();
+        onLongPress: () async {
+          // Show confirmation dialog
+          final result = await globalState.showCommonDialog<bool>(
+            child: CommonDialog(
+              title: appLocalizations.forceGCTitle,
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context, rootNavigator: true).pop(false);
+                  },
+                  child: Text(appLocalizations.cancel),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context, rootNavigator: true).pop(true);
+                  },
+                  child: Text(appLocalizations.confirm),
+                ),
+              ],
+              child: Text(appLocalizations.forceGCDesc),
+            ),
+          );
+
+          // Execute force GC after user confirms
+          if (result == true) {
+            await clashCore.requestGc();
+            globalState.showNotifier(appLocalizations.success);
+          }
         },
         child: Container(
           padding: baseInfoEdgeInsets.copyWith(top: 0),
@@ -63,27 +123,23 @@ class _MemoryInfoState extends State<MemoryInfo> {
             children: [
               SizedBox(
                 height: globalState.measure.bodyMediumHeight + 2,
-                child: ValueListenableBuilder(
-                  valueListenable: _memoryStateNotifier,
-                  builder: (_, memory, _) {
-                    final traffic = memory.traffic;
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Text(
-                          traffic.value,
-                          style: context.textTheme.bodyMedium?.toLight
-                              .adjustSize(1),
-                        ),
-                        SizedBox(width: 8),
-                        Text(
-                          traffic.unit,
-                          style: context.textTheme.bodyMedium?.toLight
-                              .adjustSize(1),
-                        ),
-                      ],
-                    );
-                  },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Text(
+                      _memoryValue.showValue,
+                      style: context.textTheme.bodyMedium?.toLight.adjustSize(
+                        1,
+                      ),
+                    ),
+                    SizedBox(width: 8),
+                    Text(
+                      _memoryValue.showUnit,
+                      style: context.textTheme.bodyMedium?.toLight.adjustSize(
+                        1,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],

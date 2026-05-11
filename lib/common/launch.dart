@@ -23,26 +23,55 @@ class AutoLaunch {
   }
 
   Future<bool> get isEnable async {
+    if (system.isWindows) {
+      // Windows 上改为通过任务计划实现开机自启动
+      try {
+        final result = await Process.run('schtasks', [
+          '/Query',
+          '/TN',
+          appName,
+        ]);
+        return result.exitCode == 0;
+      } catch (_) {
+        return false;
+      }
+    }
     return await launchAtStartup.isEnabled();
   }
 
-  Future<bool> enable() async {
+  Future<bool> enable({bool requireNetwork = true}) async {
+    if (system.isWindows) {
+      // 使用任务计划实现 Windows 开机自启动（管理员模式）
+      return await windows?.registerTask(
+            appName,
+            requireNetwork: requireNetwork,
+          ) ??
+          false;
+    }
     return await launchAtStartup.enable();
   }
 
   Future<bool> disable() async {
+    if (system.isWindows) {
+      return await windows?.unregisterTask(appName) ?? false;
+    }
     return await launchAtStartup.disable();
   }
 
-  Future<void> updateStatus(bool isAutoLaunch) async {
+  Future<void> updateStatus(
+    bool isAutoLaunch, {
+    bool requireNetwork = true,
+  }) async {
     if (kDebugMode) {
       return;
     }
     if (await isEnable == isAutoLaunch) return;
+
+    // 异步执行，避免阻塞 UI
     if (isAutoLaunch == true) {
-      enable();
+      unawaited(enable(requireNetwork: requireNetwork));
     } else {
-      disable();
+      unawaited(disable());
     }
   }
 }

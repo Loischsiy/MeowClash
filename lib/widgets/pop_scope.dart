@@ -1,19 +1,13 @@
 import 'dart:async';
 
-import 'package:meow_clash/controller.dart';
+import 'package:meow_clash/state.dart';
 import 'package:flutter/widgets.dart';
 
 class CommonPopScope extends StatelessWidget {
   final Widget child;
-  final FutureOr<bool> Function(BuildContext context)? onPop;
-  final FutureOr<void> Function()? onPopSuccess;
+  final FutureOr<bool> Function()? onPop;
 
-  const CommonPopScope({
-    super.key,
-    required this.child,
-    this.onPop,
-    this.onPopSuccess,
-  });
+  const CommonPopScope({super.key, required this.child, this.onPop});
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +19,7 @@ class CommonPopScope extends StatelessWidget {
               if (didPop) {
                 return;
               }
-              final res = await onPop!(context);
+              final res = await onPop!();
               if (!context.mounted) {
                 return;
               }
@@ -33,9 +27,6 @@ class CommonPopScope extends StatelessWidget {
                 return;
               }
               Navigator.of(context).pop();
-              if (onPopSuccess != null) {
-                await onPopSuccess!();
-              }
             },
       child: child,
     );
@@ -56,7 +47,7 @@ class _SystemBackBlockState extends State<SystemBackBlock> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      appController.backBlock();
+      globalState.appController.backBlock();
     });
   }
 
@@ -64,7 +55,7 @@ class _SystemBackBlockState extends State<SystemBackBlock> {
   void dispose() {
     super.dispose();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      appController.unBackBlock();
+      globalState.appController.unBackBlock();
     });
   }
 

@@ -1,5 +1,5 @@
-extension IterableExt<E> on Iterable<E> {
-  Iterable<E> separated(E separator) sync* {
+extension IterableExt<T> on Iterable<T> {
+  Iterable<T> separated(T separator) sync* {
     final iterator = this.iterator;
     if (!iterator.moveNext()) return;
 
@@ -11,7 +11,7 @@ extension IterableExt<E> on Iterable<E> {
     }
   }
 
-  Iterable<List<E>> chunks(int size) sync* {
+  Iterable<List<T>> chunks(int size) sync* {
     if (length == 0) return;
     var iterator = this.iterator;
     while (iterator.moveNext()) {
@@ -23,7 +23,7 @@ extension IterableExt<E> on Iterable<E> {
     }
   }
 
-  Iterable<E> fill(int length, {required E Function(int count) filler}) sync* {
+  Iterable<T> fill(int length, {required T Function(int count) filler}) sync* {
     int count = 0;
     for (var item in this) {
       yield item;
@@ -36,7 +36,7 @@ extension IterableExt<E> on Iterable<E> {
     }
   }
 
-  Iterable<E> takeLast({int count = 50}) {
+  Iterable<T> takeLast({int count = 50}) {
     if (count <= 0) return Iterable.empty();
     return count >= length ? this : toList().skip(length - count);
   }
@@ -78,36 +78,9 @@ extension ListExt<T> on List<T> {
     return sublist(start);
   }
 
-  T? safeGet(int index, {T? defaultValue}) {
-    if (index < 0 || index >= length) {
-      return defaultValue;
-    }
-    return this[index];
-  }
-
-  T safeLast(T defaultValue) {
-    if (isNotEmpty) {
-      return last;
-    }
-    return defaultValue;
-  }
-
-  void addOrRemove(T value) {
-    if (contains(value)) {
-      remove(value);
-    } else {
-      add(value);
-    }
-  }
-}
-
-extension SetExt<T> on Set<T> {
-  void addOrRemove(T value) {
-    if (contains(value)) {
-      remove(value);
-    } else {
-      add(value);
-    }
+  T safeGet(int index) {
+    if (length > index) return this[index];
+    return last;
   }
 }
 
@@ -143,15 +116,5 @@ extension MapExt<K, V> on Map<K, V> {
       this[key] = callback();
     }
     return this[key]!;
-  }
-
-  Map<K, V> copyWitUpdate(K key, V? value) {
-    final newMap = Map<K, V>.from(this);
-    if (value == null) {
-      newMap.remove(key);
-    } else {
-      newMap[key] = value;
-    }
-    return newMap;
   }
 }

@@ -1,55 +1,41 @@
+import 'dart:async';
 import 'dart:io';
-
-import 'package:meow_clash/controller.dart';
 import 'package:meow_clash/enum/enum.dart';
 import 'package:meow_clash/models/models.dart';
+import 'package:meow_clash/state.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:tray_manager/tray_manager.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
-import 'app_localizations.dart';
-import 'constant.dart';
-import 'system.dart';
-import 'window.dart';
+import 'common.dart';
 
 class Tray {
-  static Tray? _instance;
+  Timer? _debounceTimer;
+  TrayState? _pendingState;
+  bool _isUpdating = false;
 
-  Tray._internal();
-
-  factory Tray() {
-    _instance ??= Tray._internal();
-    return _instance!;
-  }
-
-  String get trayIconSuffix {
-    return system.isWindows ? 'ico' : 'png';
-  }
-
-  Future<void> destroy() async {
-    await trayManager.destroy();
-  }
-
-  String getTryIcon({required bool isStart, required bool tunEnable}) {
-    if (system.isMacOS || !isStart) {
-      return 'assets/images/icon/status_1.$trayIconSuffix';
-    }
-    if (!tunEnable) {
-      return 'assets/images/icon/status_2.$trayIconSuffix';
-    }
-    return 'assets/images/icon/status_3.$trayIconSuffix';
-  }
-
+  static const _debounceDelay = Duration(milliseconds: 300);
   Future _updateSystemTray({
+    required Brightness? brightness,
     required bool isStart,
-    required bool tunEnable,
+    bool force = false,
   }) async {
-    if (Platform.isLinux) {
+    if (system.isAndroid) {
+      return;
+    }
+    if (force) {
       await trayManager.destroy();
     }
     await trayManager.setIcon(
-      getTryIcon(isStart: isStart, tunEnable: tunEnable),
-      isTemplate: true,
+      utils.getTrayIconPath(
+        brightness:
+            brightness ??
+            WidgetsBinding.instance.platformDispatcher.platformBrightness,
+        isStart: isStart,
+      ),
+      isTemplate: system.isMacOS,
     );
     if (!Platform.isLinux) {
       await trayManager.setToolTip(appName);
@@ -58,17 +44,43 @@ class Tray {
 
   Future<void> update({
     required TrayState trayState,
-    required Traffic traffic,
+    bool focus = false,
   }) async {
     if (system.isAndroid) {
       return;
     }
-    if (!system.isLinux) {
-      await _updateSystemTray(
-        isStart: trayState.isStart,
-        tunEnable: trayState.tunEnable,
-      );
+
+    _debounceTimer?.cancel();
+
+    if (_isUpdating) {
+      _pendingState = trayState;
+      return;
     }
+
+    if (focus) {
+      await _doUpdate(trayState: trayState, focus: focus);
+    } else {
+      _debounceTimer = Timer(_debounceDelay, () async {
+        await _doUpdate(trayState: trayState, focus: focus);
+      });
+    }
+  }
+
+  Future<void> _doUpdate({
+    required TrayState trayState,
+    bool focus = false,
+  }) async {
+    if (_isUpdating) return;
+    _isUpdating = true;
+
+    try {
+      if (!Platform.isLinux) {
+        await _updateSystemTray(
+          brightness: trayState.brightness,
+          isStart: trayState.isStart,
+          force: focus,
+        );
+      }
     List<MenuItem> menuItems = [];
     final showMenuItem = MenuItem(
       label: appLocalizations.show,
@@ -80,70 +92,58 @@ class Tray {
     final startMenuItem = MenuItem.checkbox(
       label: trayState.isStart ? appLocalizations.stop : appLocalizations.start,
       onClick: (_) async {
-        appController.updateStart();
+        globalState.appController.updateStart();
       },
       checked: false,
     );
     menuItems.add(startMenuItem);
-    if (system.isMacOS) {
-      final speedStatistics = MenuItem.checkbox(
-        label: appLocalizations.speedStatistics,
-        onClick: (_) async {
-          appController.updateSpeedStatistics();
-        },
-        checked: trayState.showTrayTitle,
-      );
-      menuItems.add(speedStatistics);
-    }
     menuItems.add(MenuItem.separator());
     for (final mode in Mode.values) {
       menuItems.add(
         MenuItem.checkbox(
           label: Intl.message(mode.name),
           onClick: (_) {
-            appController.changeMode(mode);
+            globalState.appController.changeMode(mode);
           },
           checked: mode == trayState.mode,
         ),
       );
     }
     menuItems.add(MenuItem.separator());
-    if (system.isMacOS) {
-      for (final group in trayState.groups) {
-        List<MenuItem> subMenuItems = [];
-        for (final proxy in group.all) {
-          subMenuItems.add(
-            MenuItem.checkbox(
-              label: proxy.name,
-              checked:
-                  appController.getSelectedProxyName(group.name) == proxy.name,
-              onClick: (_) {
-                appController.updateCurrentSelectedMap(group.name, proxy.name);
-                appController.changeProxy(
-                  groupName: group.name,
-                  proxyName: proxy.name,
-                );
-              },
-            ),
-          );
-        }
-        menuItems.add(
-          MenuItem.submenu(
-            label: group.name,
-            submenu: Menu(items: subMenuItems),
+    for (final group in trayState.groups) {
+      List<MenuItem> subMenuItems = [];
+      for (final proxy in group.all) {
+        subMenuItems.add(
+          MenuItem.checkbox(
+            label: proxy.name,
+            checked: trayState.selectedMap[group.name] == proxy.name,
+            onClick: (_) {
+              final appController = globalState.appController;
+              appController.updateCurrentSelectedMap(group.name, proxy.name);
+              appController.changeProxy(
+                groupName: group.name,
+                proxyName: proxy.name,
+              );
+            },
           ),
         );
       }
-      if (trayState.groups.isNotEmpty) {
-        menuItems.add(MenuItem.separator());
-      }
+      menuItems.add(
+        MenuItem.submenu(
+          label: group.name,
+          submenu: Menu(items: subMenuItems),
+        ),
+      );
+    }
+    if (trayState.groups.isNotEmpty) {
+      menuItems.add(MenuItem.separator());
     }
     if (trayState.isStart) {
       menuItems.add(
         MenuItem.checkbox(
           label: appLocalizations.tun,
           onClick: (_) {
-            appController.updateTun();
+            globalState.appController.updateTun();
           },
           checked: trayState.tunEnable,
         ),
@@ -152,7 +152,7 @@ class Tray {
         MenuItem.checkbox(
           label: appLocalizations.systemProxy,
           onClick: (_) {
-            appController.updateSystemProxy();
+            globalState.appController.updateSystemProxy();
           },
           checked: trayState.systemProxy,
         ),
@@ -162,7 +162,7 @@ class Tray {
     final autoStartMenuItem = MenuItem.checkbox(
       label: appLocalizations.autoLaunch,
       onClick: (_) async {
-        appController.updateAutoLaunch();
+        globalState.appController.updateAutoLaunch();
       },
       checked: trayState.autoLaunch,
     );
@@ -174,36 +174,43 @@ class Tray {
     );
     menuItems.add(autoStartMenuItem);
     menuItems.add(copyEnvVarMenuItem);
+
+    if (!system.isAndroid) {
+      final wakelockMenuItem = MenuItem.checkbox(
+        label: appLocalizations.wakelock,
+        onClick: (_) async {
+          await _toggleWakelock();
+        },
+        checked: trayState.wakelockEnabled,
+      );
+      menuItems.add(wakelockMenuItem);
+    }
+
     menuItems.add(MenuItem.separator());
     final exitMenuItem = MenuItem(
       label: appLocalizations.exit,
       onClick: (_) async {
-        await appController.handleExit();
+        await globalState.appController.handleExit();
       },
     );
     menuItems.add(exitMenuItem);
     final menu = Menu(items: menuItems);
     await trayManager.setContextMenu(menu);
-    if (system.isLinux) {
+    if (Platform.isLinux) {
       await _updateSystemTray(
+        brightness: trayState.brightness,
         isStart: trayState.isStart,
-        tunEnable: trayState.tunEnable,
+        force: focus,
       );
     }
-    updateTrayTitle(showTrayTitle: trayState.showTrayTitle, traffic: traffic);
-  }
+    } finally {
+      _isUpdating = false;
 
-  Future<void> updateTrayTitle({
-    required bool showTrayTitle,
-    required Traffic traffic,
-  }) async {
-    if (!system.isMacOS) {
-      return;
-    }
-    if (!showTrayTitle) {
-      await trayManager.setTitle('');
-    } else {
-      await trayManager.setTitle(traffic.trayTitle);
+      if (_pendingState != null) {
+        final pending = _pendingState;
+        _pendingState = null;
+        await _doUpdate(trayState: pending!, focus: false);
+      }
     }
   }
 
@@ -216,6 +223,23 @@ class Tray {
 
     await Clipboard.setData(ClipboardData(text: cmdline));
   }
+
+  Future<void> _toggleWakelock() async {
+    try {
+      final enabled = await WakelockPlus.enabled;
+      if (enabled) {
+        await WakelockPlus.disable();
+        globalState.appController.stopWakelockAutoRecovery();
+      } else {
+        await WakelockPlus.enable();
+        globalState.appController.startWakelockAutoRecovery();
+      }
+      globalState.updateWakelockState(!enabled);
+      await globalState.appController.updateTray();
+    } catch (e) {
+      commonPrint.log('WakeLock toggle error: $e');
+    }
+  }
 }
 
-final tray = system.isDesktop ? Tray() : null;
+final tray = Tray();

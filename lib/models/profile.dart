@@ -1,16 +1,19 @@
+// ignore_for_file: invalid_annotation_target
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:meow_clash/clash/core.dart';
 import 'package:meow_clash/common/common.dart';
-import 'package:meow_clash/core/controller.dart';
 import 'package:meow_clash/enum/enum.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'clash_config.dart';
-import 'state.dart';
 
 part 'generated/profile.freezed.dart';
 part 'generated/profile.g.dart';
+
+typedef SelectedMap = Map<String, String>;
 
 @freezed
 abstract class SubscriptionInfo with _$SubscriptionInfo {
@@ -44,121 +47,85 @@ abstract class SubscriptionInfo with _$SubscriptionInfo {
 @freezed
 abstract class Profile with _$Profile {
   const factory Profile({
-    required int id,
-    @Default('') String label,
+    required String id,
+    String? label,
     String? currentGroupName,
     @Default('') String url,
     DateTime? lastUpdateDate,
     required Duration autoUpdateDuration,
     SubscriptionInfo? subscriptionInfo,
     @Default(true) bool autoUpdate,
-    @Default({}) Map<String, String> selectedMap,
+    @Default({}) SelectedMap selectedMap,
     @Default({}) Set<String> unfoldSet,
-    @Default(OverwriteType.standard) OverwriteType overwriteType,
-    int? scriptId,
-    int? order,
+    @Default(OverrideData()) OverrideData overrideData,
+    @JsonKey(includeToJson: false, includeFromJson: false)
+    @Default(false)
+    bool isUpdating,
   }) = _Profile;
 
   factory Profile.fromJson(Map<String, Object?> json) =>
       _$ProfileFromJson(json);
 
   factory Profile.normal({String? label, String url = ''}) {
-    final id = snowflake.id;
     return Profile(
-      label: label ?? '',
+      label: label,
       url: url,
-      id: id,
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
       autoUpdateDuration: defaultUpdateDuration,
     );
   }
 }
 
 @freezed
-abstract class ProfileRuleLink with _$ProfileRuleLink {
-  const factory ProfileRuleLink({
-    int? profileId,
-    required int ruleId,
-    RuleScene? scene,
-    String? order,
-  }) = _ProfileRuleLink;
+abstract class OverrideData with _$OverrideData {
+  const factory OverrideData({
+    @Default(false) bool enable,
+    @Default(OverrideRule()) OverrideRule rule,
+  }) = _OverrideData;
+
+  factory OverrideData.fromJson(Map<String, Object?> json) =>
+      _$OverrideDataFromJson(json);
 }
 
-extension ProfileRuleLinkExt on ProfileRuleLink {
-  String get key {
-    final splits = <String?>[
-      profileId?.toString(),
-      ruleId.toString(),
-      scene?.name,
-    ];
-    return splits.where((item) => item != null).join('_');
+extension OverrideDataExt on OverrideData {
+  List<String> get runningRule {
+    if (!enable) {
+      return [];
+    }
+    return rule.rules.map((item) => item.value).toList();
   }
 }
 
-// @freezed
-// abstract class Overwrite with _$Overwrite {
-//   const factory Overwrite({
-//     @Default(OverwriteType.standard) OverwriteType type,
-//     @Default(StandardOverwrite()) StandardOverwrite standardOverwrite,
-//     @Default(ScriptOverwrite()) ScriptOverwrite scriptOverwrite,
-//   }) = _Overwrite;
-//
-//   factory Overwrite.fromJson(Map<String, Object?> json) =>
-//       _$OverwriteFromJson(json);
-// }
-
 @freezed
-abstract class StandardOverwrite with _$StandardOverwrite {
-  const factory StandardOverwrite({
+abstract class OverrideRule with _$OverrideRule {
+  const factory OverrideRule({
+    @Default(OverrideRuleType.override) OverrideRuleType type,
+    @Default([]) List<Rule> overrideRules,
     @Default([]) List<Rule> addedRules,
-    @Default([]) List<int> disabledRuleIds,
-  }) = _StandardOverwrite;
+  }) = _OverrideRule;
 
-  factory StandardOverwrite.fromJson(Map<String, Object?> json) =>
-      _$StandardOverwriteFromJson(json);
+  factory OverrideRule.fromJson(Map<String, Object?> json) =>
+      _$OverrideRuleFromJson(json);
 }
 
-@freezed
-abstract class ScriptOverwrite with _$ScriptOverwrite {
-  const factory ScriptOverwrite({int? scriptId}) = _ScriptOverwrite;
+extension OverrideRuleExt on OverrideRule {
+  List<Rule> get rules => switch (type == OverrideRuleType.override) {
+    true => overrideRules,
+    false => addedRules,
+  };
 
-  factory ScriptOverwrite.fromJson(Map<String, Object?> json) =>
-      _$ScriptOverwriteFromJson(json);
+  OverrideRule updateRules(List<Rule> Function(List<Rule> rules) builder) {
+    if (type == OverrideRuleType.added) {
+      return copyWith(addedRules: builder(addedRules));
+    }
+    return copyWith(overrideRules: builder(overrideRules));
+  }
 }
 
 extension ProfilesExt on List<Profile> {
-  Profile? getProfile(int? profileId) {
+  Profile? getProfile(String? profileId) {
     final index = indexWhere((profile) => profile.id == profileId);
     return index == -1 ? null : this[index];
-  }
-
-  String _getLabel(String label, int id) {
-    final realLabel = label.takeFirstValid([id.toString()]);
-    final hasDup =
-        indexWhere(
-          (element) => element.label == realLabel && element.id != id,
-        ) !=
-        -1;
-    if (hasDup) {
-      return _getLabel(utils.getOverwriteLabel(realLabel), id);
-    } else {
-      return label;
-    }
-  }
-
-  VM2<List<Profile>, Profile> copyAndAddProfile(Profile profile) {
-    final List<Profile> profilesTemp = List.from(this);
-    final index = profilesTemp.indexWhere(
-      (element) => element.id == profile.id,
-    );
-    final updateProfile = profile.copyWith(
-      label: _getLabel(profile.label, profile.id),
-    );
-    if (index == -1) {
-      profilesTemp.add(updateProfile);
-    } else {
-      profilesTemp[index] = updateProfile;
-    }
-    return VM2(profilesTemp, updateProfile);
   }
 }
 
@@ -168,46 +135,33 @@ extension ProfileExtension on Profile {
 
   bool get realAutoUpdate => url.isEmpty == true ? false : autoUpdate;
 
-  String get realLabel => label.takeFirstValid([id.toString()]);
-
-  String get fileName => '$id.yaml';
-
-  String get updatingKey => 'profile_$id';
-
-  Future<Profile?> checkAndUpdateAndCopy() async {
-    final mFile = await _getFile(false);
-    final isExists = await mFile.exists();
-    if (isExists || url.isEmpty) {
-      return null;
+  Future<void> checkAndUpdate() async {
+    final isExists = await check();
+    if (!isExists) {
+      if (url.isNotEmpty) {
+        await update();
+      }
     }
-    return update();
   }
 
-  Future<File> _getFile([bool autoCreate = true]) async {
-    final path = await appPath.getProfilePath(id.toString());
+  Future<bool> check() async {
+    final profilePath = await appPath.getProfilePath(id);
+    return await File(profilePath).exists();
+  }
+
+  Future<File> getFile() async {
+    final path = await appPath.getProfilePath(id);
     final file = File(path);
     final isExists = await file.exists();
-    if (!isExists && autoCreate) {
-      return await file.create(recursive: true);
+    if (!isExists) {
+      await file.create(recursive: true);
     }
     return file;
-    // final oldPath = await appPath.getProfilePath(id);
-    // final newPath = await appPath.getProfilePath(fileName);
-    // final oldFile = oldPath == newPath ? null : File(oldPath);
-    // final oldIsExists = await oldFile?.exists() ?? false;
-    // if (oldIsExists) {
-    //   return await oldFile!.rename(newPath);
-    // }
-    // final file = File(newPath);
-    // final isExists = await file.exists();
-    // if (!isExists && autoCreate) {
-    //   return await file.create(recursive: true);
-    // }
-    // return file;
   }
 
-  Future<File> get file async {
-    return _getFile();
+  Future<int> get profileLastModified async {
+    final file = await getFile();
+    return (await file.lastModified()).microsecondsSinceEpoch;
   }
 
   Future<Profile> update() async {
@@ -215,35 +169,28 @@ extension ProfileExtension on Profile {
     final disposition = response.headers.value('content-disposition');
     final userinfo = response.headers.value('subscription-userinfo');
     return await copyWith(
-      label: label.takeFirstValid([
-        utils.getFileNameForDisposition(disposition),
-        id.toString(),
-      ]),
+      label: label ?? utils.getFileNameForDisposition(disposition) ?? id,
       subscriptionInfo: SubscriptionInfo.formHString(userinfo),
-    ).saveFile(response.data ?? Uint8List.fromList([]));
+    ).saveFile(response.data);
   }
 
   Future<Profile> saveFile(Uint8List bytes) async {
-    final path = await appPath.tempFilePath;
-    final tempFile = File(path);
-    await tempFile.safeWriteAsBytes(bytes);
-    final message = await coreController.validateConfig(path);
+    final message = await clashCore.validateConfig(utf8.decode(bytes));
     if (message.isNotEmpty) {
       throw message;
     }
-    final mFile = await file;
-    await tempFile.copy(mFile.path);
-    await tempFile.safeDelete();
+    final file = await getFile();
+    await file.writeAsBytes(bytes);
     return copyWith(lastUpdateDate: DateTime.now());
   }
 
-  Future<Profile> saveFileWithPath(String path) async {
-    final message = await coreController.validateConfig(path);
+  Future<Profile> saveFileWithString(String value) async {
+    final message = await clashCore.validateConfig(value);
     if (message.isNotEmpty) {
       throw message;
     }
-    final mFile = await file;
-    await File(path).copy(mFile.path);
+    final file = await getFile();
+    await file.writeAsString(value);
     return copyWith(lastUpdateDate: DateTime.now());
   }
 }

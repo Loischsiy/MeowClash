@@ -1,9 +1,8 @@
 import 'package:meow_clash/common/common.dart';
 import 'package:meow_clash/enum/enum.dart';
-import 'package:meow_clash/state.dart';
+import 'package:meow_clash/widgets/fade_box.dart';
 import 'package:flutter/material.dart';
 
-import 'fade_box.dart';
 import 'text.dart';
 
 class Info {
@@ -16,7 +15,7 @@ class Info {
 class InfoHeader extends StatelessWidget {
   final Info info;
   final List<Widget> actions;
-  final EdgeInsets? padding;
+  final EdgeInsetsGeometry? padding;
 
   const InfoHeader({
     super.key,
@@ -27,12 +26,8 @@ class InfoHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    EdgeInsetsGeometry nextPadding = (padding ?? baseInfoEdgeInsets);
-    if (actions.isNotEmpty) {
-      nextPadding = nextPadding.subtract(EdgeInsets.symmetric(vertical: 8.mAp));
-    }
     return Padding(
-      padding: nextPadding,
+      padding: padding ?? baseInfoEdgeInsets,
       child: Row(
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -52,7 +47,7 @@ class InfoHeader extends StatelessWidget {
                 Flexible(
                   flex: 1,
                   child: TooltipText(
-                    text: Text(
+                    text: EmojiText(
                       info.label,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -66,15 +61,11 @@ class InfoHeader extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          if (actions.isNotEmpty)
-            SizedBox(
-              height: globalState.measure.titleSmallHeight + 16.ap,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [...actions],
-              ),
-            ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [...actions],
+          ),
         ],
       ),
     );
@@ -87,13 +78,13 @@ class CommonCard extends StatelessWidget {
     bool? isSelected,
     this.type = CommonCardType.plain,
     this.onPressed,
+    this.onLongPress,
     this.selectWidget,
-    this.radius,
+    this.radius = 12,
     required this.child,
     this.padding,
     this.enterAnimated = false,
     this.info,
-    this.onLongPress,
   }) : isSelected = isSelected ?? false;
 
   final bool enterAnimated;
@@ -105,7 +96,7 @@ class CommonCard extends StatelessWidget {
   final EdgeInsets? padding;
   final Info? info;
   final CommonCardType type;
-  final double? radius;
+  final double radius;
 
   // final WidgetStateProperty<Color?>? backgroundColor;
   // final WidgetStateProperty<BorderSide?>? borderSide;
@@ -136,26 +127,12 @@ class CommonCard extends StatelessWidget {
       if (isSelected) {
         return colorScheme.secondaryContainer.opacity80;
       }
-      return colorScheme.surfaceContainerHigh;
+      return colorScheme.surfaceContainer;
     }
     if (isSelected) {
       return colorScheme.secondaryContainer;
     }
     return colorScheme.surfaceContainerLow;
-  }
-
-  Color? getForegroundColor(BuildContext context, Set<WidgetState> states) {
-    final colorScheme = context.colorScheme;
-    if (type == CommonCardType.filled) {
-      if (isSelected) {
-        return colorScheme.onSecondaryContainer;
-      }
-      return colorScheme.onSurfaceVariant;
-    }
-    if (isSelected) {
-      return colorScheme.onSecondaryContainer;
-    }
-    return colorScheme.onSurfaceVariant;
   }
 
   @override
@@ -188,17 +165,12 @@ class CommonCard extends StatelessWidget {
       style: ButtonStyle(
         padding: const WidgetStatePropertyAll(EdgeInsets.zero),
         shape: WidgetStatePropertyAll(
-          RoundedSuperellipseBorder(
-            borderRadius: BorderRadius.circular(radius ?? 14),
-          ),
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(radius)),
         ),
         iconColor: WidgetStatePropertyAll(context.colorScheme.primary),
         iconSize: WidgetStateProperty.all(20),
         backgroundColor: WidgetStateProperty.resolveWith(
           (states) => getBackgroundColor(context, states),
-        ),
-        foregroundColor: WidgetStateProperty.resolveWith(
-          (states) => getForegroundColor(context, states),
         ),
         side: WidgetStateProperty.resolveWith(
           (states) => getBorderSide(context, states),

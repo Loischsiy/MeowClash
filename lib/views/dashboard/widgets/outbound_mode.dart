@@ -1,7 +1,4 @@
-import 'dart:math';
-
 import 'package:meow_clash/common/common.dart';
-import 'package:meow_clash/controller.dart';
 import 'package:meow_clash/enum/enum.dart';
 import 'package:meow_clash/providers/config.dart';
 import 'package:meow_clash/state.dart';
@@ -23,67 +20,61 @@ class OutboundMode extends StatelessWidget {
           final mode = ref.watch(
             patchClashConfigProvider.select((state) => state.mode),
           );
-          return Theme(
-            data: Theme.of(context).copyWith(
-              splashColor: Colors.transparent,
-              highlightColor: Colors.transparent,
-              hoverColor: Colors.transparent,
+          return CommonCard(
+            onPressed: () {},
+            info: Info(
+              label: appLocalizations.outboundMode,
+              iconData: Icons.call_split_sharp,
             ),
-            child: CommonCard(
-              onPressed: () {},
-              info: Info(
-                label: appLocalizations.outboundMode,
-                iconData: Icons.call_split_sharp,
-              ),
-              child: Padding(
-                padding: const EdgeInsets.only(top: 12, bottom: 12),
-                child: RadioGroup<Mode>(
-                  groupValue: mode,
-                  onChanged: (value) {
-                    if (value == null) {
-                      return;
-                    }
-                    appController.changeMode(value);
-                  },
-                  child: LayoutBuilder(
-                    builder: (_, constraints) {
-                      final maxHeight = constraints.maxHeight;
-                      return Column(
-                        mainAxisSize: MainAxisSize.max,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          for (final item in Mode.values)
-                            ListItem.radio(
-                              horizontalTitleGap: 8,
-                              tileTitleAlignment: ListTileTitleAlignment.center,
-                              minTileHeight: min(
-                                maxHeight / 3,
-                                globalState.measure.bodyMediumHeight + 16,
-                              ),
-                              minVerticalPadding: 0,
-                              padding: EdgeInsets.only(
-                                left: 12.ap,
-                                right: 16.ap,
-                              ),
-                              delegate: RadioDelegate(
-                                onTab: () {
-                                  appController.changeMode(item);
-                                },
-                                value: item,
-                              ),
-                              title: Text(
-                                Intl.message(item.name),
-                                style: Theme.of(
-                                  context,
-                                ).textTheme.bodyMedium?.toSoftBold,
-                              ),
+            child: Padding(
+              padding: const EdgeInsets.only(top: 12, bottom: 16),
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  for (final item in Mode.values)
+                    Flexible(
+                      fit: FlexFit.tight,
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () {
+                            globalState.appController.changeMode(item);
+                          },
+                          child: Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 16.ap,
+                              vertical: 8.ap,
                             ),
-                        ],
-                      );
-                    },
-                  ),
-                ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  item == mode
+                                      ? Icons.check_circle_rounded
+                                      : Icons.circle_outlined,
+                                  size: 21,
+                                  color: item == mode
+                                      ? context.colorScheme.primary
+                                      : context.colorScheme.onSurfaceVariant
+                                            .withValues(alpha: 0.6),
+                                ),
+                                SizedBox(width: 12.ap),
+                                Expanded(
+                                  child: Text(
+                                    Intl.message(item.name),
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.bodyMedium?.toSoftBold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
               ),
             ),
           );
@@ -106,7 +97,7 @@ class OutboundModeV2 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final height = getWidgetHeight(1);
+    final height = getWidgetHeight(0.72);
     return SizedBox(
       height: height,
       child: CommonCard(
@@ -121,75 +112,42 @@ class OutboundModeV2 extends StatelessWidget {
               Mode.global => globalState.theme.darken3PrimaryContainer,
               Mode.direct => context.colorScheme.tertiaryContainer,
             };
-            return LayoutBuilder(
-              builder: (_, constraints) {
-                return Column(
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    Expanded(
-                      child: Container(
-                        padding: EdgeInsets.all(12),
-                        constraints: BoxConstraints.expand(),
-                        child: CommonTabBar<Mode>(
-                          children: Map.fromEntries(
-                            Mode.values.map(
-                              (item) => MapEntry(
-                                item,
-                                Container(
-                                  clipBehavior: Clip.antiAlias,
-                                  alignment: Alignment.center,
-                                  decoration: BoxDecoration(),
-                                  height: height - 8.ap - 24,
-                                  padding: EdgeInsets.all(4),
-                                  child: Text(
-                                    Intl.message(item.name),
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleSmall
-                                        ?.adjustSize(1)
-                                        .copyWith(
-                                          color: item == mode
-                                              ? _getTextColor(context, item)
-                                              : null,
-                                        ),
-                                  ),
-                                ),
+            return Container(
+              constraints: BoxConstraints.expand(),
+              child: CommonTabBar<Mode>(
+                children: Map.fromEntries(
+                  Mode.values.map(
+                    (item) => MapEntry(
+                      item,
+                      Container(
+                        clipBehavior: Clip.antiAlias,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(),
+                        height: height - 16,
+                        child: Text(
+                          Intl.message(item.name),
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.adjustSize(1)
+                              .copyWith(
+                                color: item == mode
+                                    ? _getTextColor(context, item)
+                                    : null,
                               ),
-                            ),
-                          ),
-                          padding: EdgeInsets.symmetric(horizontal: 0),
-                          groupValue: mode,
-                          onValueChanged: (value) {
-                            if (value == null) {
-                              return;
-                            }
-                            appController.changeMode(value);
-                          },
-                          thumbColor: thumbColor,
                         ),
                       ),
                     ),
-                    Container(
-                      color: thumbColor.opacity50,
-                      height: 8.ap,
-                      width: constraints.maxWidth,
-                      padding: EdgeInsets.symmetric(horizontal: 16),
-                      // child: Row(
-                      //   children: [
-                      //     Container(
-                      //       width: (constraints.maxWidth - 32) / 3,
-                      //       height: 3,
-                      //       decoration: BoxDecoration(
-                      //         color: _getTextColor(context, mode),
-                      //         borderRadius: BorderRadius.circular(2),
-                      //       ),
-                      //     ),
-                      //   ],
-                      // ),
-                    ),
-                  ],
-                );
-              },
+                  ),
+                ),
+                padding: EdgeInsets.symmetric(horizontal: 8),
+                groupValue: mode,
+                onValueChanged: (value) {
+                  if (value == null) {
+                    return;
+                  }
+                  globalState.appController.changeMode(value);
+                },
+                thumbColor: thumbColor,
+              ),
             );
           },
         ),

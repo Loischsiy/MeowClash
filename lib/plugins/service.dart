@@ -1,109 +1,100 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:isolate';
 
-import 'package:meow_clash/common/common.dart';
-import 'package:meow_clash/models/models.dart';
-import 'package:flutter/foundation.dart';
+import 'package:meow_clash/common/system.dart';
+import 'package:meow_clash/state.dart';
 import 'package:flutter/services.dart';
 
-abstract mixin class ServiceListener {
-  void onServiceEvent(CoreEvent event) {}
+import '../clash/lib.dart';
 
-  void onServiceCrash(String message) {}
-}
+typedef NativeEventCallback = Future<void> Function(String method, dynamic arguments);
 
 class Service {
-  static Service? _instance;
-  late MethodChannel methodChannel;
-  ReceivePort? receiver;
+  static final Service _instance = Service._internal();
+  final MethodChannel methodChannel = const MethodChannel('service');
 
-  final ObserverList<ServiceListener> _listeners =
-      ObserverList<ServiceListener>();
-
-  factory Service() {
-    _instance ??= Service._internal();
-    return _instance!;
-  }
+  final List<NativeEventCallback> _nativeEventCallbacks = [];
 
   Service._internal() {
-    methodChannel = const MethodChannel('$packageName/service');
-    methodChannel.setMethodCallHandler((call) async {
-      switch (call.method) {
-        case 'event':
-          final data = call.arguments as String? ?? '';
-          final result = ActionResult.fromJson(json.decode(data));
-          for (final listener in _listeners) {
-            listener.onServiceEvent(CoreEvent.fromJson(result.data));
-          }
-          break;
-        case 'crash':
-          final message = call.arguments as String? ?? '';
-          for (final listener in _listeners) {
-            listener.onServiceCrash(message);
-          }
-          break;
-        default:
-          throw MissingPluginException();
+    methodChannel.setMethodCallHandler(_handleMethodCall);
+  }
+
+  factory Service() => _instance;
+
+  Future<dynamic> _handleMethodCall(MethodCall call) async {
+    if (call.method == 'runStateChanged') {
+      final state = call.arguments as String?;
+      if (state == 'STOP') {
+        globalState.startTime = null;
+        globalState.appState = globalState.appState.copyWith(runTime: null);
       }
+    }
+    for (final callback in _nativeEventCallbacks) {
+      await callback(call.method, call.arguments);
+    }
+  }
+
+  void addNativeEventCallback(NativeEventCallback callback) {
+    _nativeEventCallbacks.add(callback);
+  }
+
+  void removeNativeEventCallback(NativeEventCallback callback) {
+    _nativeEventCallbacks.remove(callback);
+  }
+
+  Future<bool?> init() => methodChannel.invokeMethod<bool>('init');
+
+  Future<bool?> destroy() => methodChannel.invokeMethod<bool>('destroy');
+
+  Future<bool?> startVpn() async {
+    final options = await clashLib?.getAndroidVpnOptions();
+    return await methodChannel.invokeMethod<bool>('startVpn', {
+      'data': json.encode(options),
     });
   }
 
-  Future<ActionResult?> invokeAction(Action action) async {
-    final data = await methodChannel.invokeMethod<String>(
-      'invokeAction',
-      json.encode(action),
-    );
-    if (data == null) {
-      return null;
-    }
-    final dataJson = await data.commonToJSON<dynamic>();
-    return ActionResult.fromJson(dataJson);
+  Future<bool?> stopVpn() => methodChannel.invokeMethod<bool>('stopVpn');
+
+  Future<bool?> smartStop() => methodChannel.invokeMethod<bool>('smartStop');
+
+  Future<bool?> smartResume() async {
+    final options = await clashLib?.getAndroidVpnOptions();
+    return await methodChannel.invokeMethod<bool>('smartResume', {
+      'data': json.encode(options),
+    });
   }
 
-  Future<bool> start() async {
-    return await methodChannel.invokeMethod<bool>('start') ?? false;
+  Future<void> setSmartStopped(bool value) async {
+    await methodChannel.invokeMethod<bool>('setSmartStopped', {'value': value});
   }
 
-  Future<bool> stop() async {
-    return await methodChannel.invokeMethod<bool>('stop') ?? false;
+  Future<bool> isSmartStopped() async {
+    return await methodChannel.invokeMethod<bool>('isSmartStopped') ?? false;
   }
 
-  Future<String> init() async {
-    return await methodChannel.invokeMethod<String>('init') ?? '';
-  }
-
-  Future<String> syncState(SharedState state) async {
-    return await methodChannel.invokeMethod<String>(
-          'syncState',
-          json.encode(state),
+  Future<List<String>> getLocalIpAddresses() async {
+    return await methodChannel.invokeListMethod<String>(
+          'getLocalIpAddresses',
         ) ??
-        '';
+        const [];
   }
 
-  Future<bool> shutdown() async {
-    return await methodChannel.invokeMethod<bool>('shutdown') ?? true;
+  Future<bool?> setQuickResponse(bool enabled) async {
+    return await methodChannel.invokeMethod<bool>('setQuickResponse', {
+      'enabled': enabled,
+    });
   }
 
-  Future<DateTime?> getRunTime() async {
-    final ms = await methodChannel.invokeMethod<int>('getRunTime') ?? 0;
-    if (ms == 0) {
-      return null;
-    }
-    return DateTime.fromMillisecondsSinceEpoch(ms);
+  Future<bool> isServiceEngineRunning() async {
+    return await methodChannel.invokeMethod<bool>('isServiceEngineRunning') ?? false;
   }
 
-  bool get hasListeners {
-    return _listeners.isNotEmpty;
+  Future<bool> getStatus() async {
+    return await methodChannel.invokeMethod<bool>('status') ?? false;
   }
 
-  void addListener(ServiceListener listener) {
-    _listeners.add(listener);
-  }
-
-  void removeListener(ServiceListener listener) {
-    _listeners.remove(listener);
-  }
+  Future<bool?> reconnectIpc() => methodChannel.invokeMethod<bool>('reconnectIpc');
 }
 
-Service? get service => system.isAndroid ? Service() : null;
+Service? get service =>
+    system.isAndroid && !globalState.isService ? Service() : null;

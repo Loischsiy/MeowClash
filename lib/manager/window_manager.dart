@@ -1,9 +1,12 @@
 import 'dart:async';
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 
 import 'package:meow_clash/common/common.dart';
-import 'package:meow_clash/controller.dart';
 import 'package:meow_clash/enum/enum.dart';
 import 'package:meow_clash/providers/providers.dart';
+import 'package:meow_clash/state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:window_ext/window_ext.dart';
@@ -20,54 +23,81 @@ class WindowManager extends ConsumerStatefulWidget {
 
 class _WindowContainerState extends ConsumerState<WindowManager>
     with WindowListener, WindowExtListener {
+  Timer? _renderToggleTimer;
+  bool? _pendingRenderResume;
+
+  void _scheduleRenderToggle(bool resume) {
+    _pendingRenderResume = resume;
+    _renderToggleTimer?.cancel();
+    _renderToggleTimer = Timer(const Duration(milliseconds: 500), () {
+      if (_pendingRenderResume == true) {
+        render?.resume();
+      } else {
+        render?.pause();
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return widget.child;
   }
 
+  ProviderSubscription? _autoLaunchSub;
+  ProviderSubscription? _smartDelaySub;
+
   @override
   void initState() {
     super.initState();
-    ref.listenManual(appSettingProvider.select((state) => state.autoLaunch), (
+    _autoLaunchSub =
+        ref.listenManual(appSettingProvider.select((state) => state.autoLaunch), (
       prev,
       next,
     ) {
       if (prev != next) {
+        final smartDelayLaunch = ref.read(appSettingProvider).smartDelayLaunch;
         debouncer.call(FunctionTag.autoLaunch, () {
-          autoLaunch?.updateStatus(next);
+          autoLaunch?.updateStatus(next, requireNetwork: smartDelayLaunch);
         });
       }
     });
+
+    _smartDelaySub = ref.listenManual(
+      appSettingProvider.select((state) => state.smartDelayLaunch),
+      (prev, next) {
+        if (prev != next) {
+          final autoLaunchEnabled = ref.read(appSettingProvider).autoLaunch;
+          if (autoLaunchEnabled) {
+            autoLaunch?.updateStatus(true, requireNetwork: next);
+          }
+        }
+      },
+    );
     windowExtManager.addListener(this);
     windowManager.addListener(this);
   }
 
   @override
   void onWindowClose() async {
-    await appController.handleBackOrExit();
-    super.onWindowClose();
-  }
-
-  @override
-  void onWindowFocus() {
-    super.onWindowFocus();
-    commonPrint.log('focus');
-    render?.resume();
+    globalState.appController.unBackBlock();
+    await globalState.appController.handleBackOrExit();
   }
 
   @override
   Future<void> onShouldTerminate() async {
-    await appController.handleExit();
+    await globalState.appController.handleExit();
     super.onShouldTerminate();
   }
 
   @override
-  void onWindowMoved() {
+  Future<void> onWindowMoved() async {
     super.onWindowMoved();
-    windowManager.getPosition().then((offset) {
-      ref.read(windowSettingProvider.notifier);
-      // .update((state) => state.copyWith(top: offset.dy, left: offset.dx));
-    });
+    final offset = await windowManager.getPosition();
+    ref
+        .read(windowSettingProvider.notifier)
+        .updateState(
+          (state) => state.copyWith(top: offset.dy, left: offset.dx),
+        );
   }
 
   @override
@@ -76,30 +106,35 @@ class _WindowContainerState extends ConsumerState<WindowManager>
     final size = await windowManager.getSize();
     ref
         .read(windowSettingProvider.notifier)
-        .update(
+        .updateState(
           (state) => state.copyWith(width: size.width, height: size.height),
         );
   }
 
   @override
   void onWindowMinimize() async {
-    appController.savePreferencesDebounce();
-    commonPrint.log('minimize');
-    render?.pause();
+    globalState.appController.savePreferencesDebounce();
+    _renderToggleTimer?.cancel();
+    await globalState.handleBackground();
     super.onWindowMinimize();
   }
 
   @override
   void onWindowRestore() {
-    commonPrint.log('restore');
-    render?.resume();
+    globalState.handleForeground();
+    _scheduleRenderToggle(true);
+    unawaited(globalState.resumeForegroundUpdates());
+    unawaited(globalState.appController.syncWakelockIfNeeded());
     super.onWindowRestore();
   }
 
   @override
   Future<void> dispose() async {
+    _autoLaunchSub?.close();
+    _smartDelaySub?.close();
     windowManager.removeListener(this);
     windowExtManager.removeListener(this);
+    _renderToggleTimer?.cancel();
     super.dispose();
   }
 }
@@ -145,6 +180,7 @@ class WindowHeader extends StatefulWidget {
 class _WindowHeaderState extends State<WindowHeader> {
   final isMaximizedNotifier = ValueNotifier<bool>(false);
   final isPinNotifier = ValueNotifier<bool>(false);
+  final isHoveringNotifier = ValueNotifier<bool>(false); // 新增：鼠标悬停状态
 
   @override
   void initState() {
@@ -161,6 +197,7 @@ class _WindowHeaderState extends State<WindowHeader> {
   void dispose() {
     isMaximizedNotifier.dispose();
     isPinNotifier.dispose();
+    isHoveringNotifier.dispose(); // 新增：释放资源
     super.dispose();
   }
 
@@ -184,50 +221,78 @@ class _WindowHeaderState extends State<WindowHeader> {
   }
 
   Widget _buildActions() {
-    return Row(
-      children: [
-        IconButton(
-          onPressed: () async {
-            _updatePin();
-          },
-          icon: ValueListenableBuilder(
-            valueListenable: isPinNotifier,
-            builder: (_, value, _) {
-              return value
-                  ? const Icon(Icons.push_pin)
-                  : const Icon(Icons.push_pin_outlined);
-            },
-          ),
-        ),
-        IconButton(
-          onPressed: () {
-            windowManager.minimize();
-          },
-          icon: const Icon(Icons.remove),
-        ),
-        IconButton(
-          onPressed: () async {
-            _updateMaximized();
-          },
-          icon: ValueListenableBuilder(
-            valueListenable: isMaximizedNotifier,
-            builder: (_, value, _) {
-              return value
-                  ? const Icon(Icons.filter_none, size: 20)
-                  : const Icon(Icons.crop_square);
-            },
-          ),
-        ),
-        IconButton(
-          onPressed: () {
-            appController.handleBackOrExit();
-          },
-          icon: const Icon(Icons.close),
-        ),
-        // const SizedBox(
-        //   width: 8,
-        // ),
-      ],
+    final shouldUseHoverEffect = system.isWindows || system.isLinux;
+
+    return MouseRegion(
+      onEnter: shouldUseHoverEffect
+          ? (_) => isHoveringNotifier.value = true
+          : null,
+      onExit: shouldUseHoverEffect
+          ? (_) {
+              Future.delayed(const Duration(milliseconds: 100), () {
+                if (mounted) {
+                  isHoveringNotifier.value = false;
+                }
+              });
+            }
+          : null,
+      child: ValueListenableBuilder<bool>(
+        valueListenable: isHoveringNotifier,
+        builder: (_, isHovering, _) {
+          final showButtons = !shouldUseHoverEffect || isHovering;
+          return Opacity(
+            opacity: showButtons ? 1.0 : 0.0,
+            child: IgnorePointer(
+              ignoring: !showButtons,
+              child: Row(
+                children: [
+                  IconButton(
+                    onPressed: () async {
+                      _updatePin();
+                    },
+                    icon: ValueListenableBuilder(
+                      valueListenable: isPinNotifier,
+                      builder: (_, value, _) {
+                        return value
+                            ? const Icon(Icons.push_pin)
+                            : const Icon(Icons.push_pin_outlined);
+                      },
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      windowManager.minimize();
+                    },
+                    icon: const Icon(Icons.remove),
+                  ),
+                  IconButton(
+                    onPressed: () async {
+                      _updateMaximized();
+                    },
+                    icon: ValueListenableBuilder(
+                      valueListenable: isMaximizedNotifier,
+                      builder: (_, value, _) {
+                        return value
+                            ? const Icon(Icons.filter_none, size: 20)
+                            : const Icon(Icons.crop_square);
+                      },
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      FocusManager.instance.primaryFocus?.unfocus();
+                      globalState.appController.unBackBlock();
+                      isHoveringNotifier.value = true;
+                      globalState.appController.handleBackOrExit();
+                    },
+                    icon: const Icon(Icons.close),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -263,23 +328,88 @@ class _WindowHeaderState extends State<WindowHeader> {
   }
 }
 
-class AppIcon extends StatelessWidget {
+final sidebarIconPathProvider =
+    StateNotifierProvider<SidebarIconPathNotifier, String?>((ref) {
+      return SidebarIconPathNotifier();
+    });
+
+class SidebarIconPathNotifier extends StateNotifier<String?> {
+  SidebarIconPathNotifier() : super(null) {
+    _init();
+  }
+
+  Future<void> _init() async {
+    final prefs = await preferences.sharedPreferencesCompleter.future;
+    state = prefs?.getString(customSidebarIconKey);
+  }
+
+  Future<void> updatePath(String? path) async {
+    state = path;
+    final prefs = await preferences.sharedPreferencesCompleter.future;
+    if (path == null) {
+      prefs?.remove(customSidebarIconKey);
+    } else {
+      prefs?.setString(customSidebarIconKey, path);
+    }
+  }
+}
+
+class AppIcon extends ConsumerWidget {
   const AppIcon({super.key});
 
+  Future<void> _handlePickImage(BuildContext context, WidgetRef ref) async {
+    final result = await FilePicker.platform.pickFiles(type: FileType.image);
+
+    if (result != null && result.files.single.path != null) {
+      final path = result.files.single.path!;
+      final file = File(path);
+      final size = await file.length();
+      if (size > 1024 * 1024) {
+        if (context.mounted) {
+          globalState.showNotifier('Image size exceeds 1MB');
+        }
+        return;
+      }
+      ref.read(sidebarIconPathProvider.notifier).updatePath(path);
+    }
+  }
+
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: ShapeDecoration(
-        color: context.colorScheme.surfaceContainerHighest,
-        shape: RoundedSuperellipseBorder(
-          borderRadius: BorderRadius.circular(14),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final customIconPath = ref.watch(sidebarIconPathProvider);
+
+    Widget icon;
+    if (customIconPath != null && customIconPath.isNotEmpty) {
+      icon = ClipOval(
+        child: Image.file(
+          File(customIconPath),
+          width: 32,
+          height: 32,
+          fit: BoxFit.cover,
+          cacheWidth: 64,
+          cacheHeight: 64,
+          errorBuilder: (_, _, _) {
+            // Fallback if file load fails
+            return Image.asset(
+              isDark
+                  ? 'assets/images/icon.png'
+                  : 'assets/images/icon_light.png',
+              fit: BoxFit.contain,
+            );
+          },
         ),
-      ),
-      padding: EdgeInsets.all(8),
-      child: Transform.translate(
-        offset: Offset(0, -1),
-        child: Image.asset('assets/images/icon.png', width: 34, height: 34),
-      ),
+      );
+    } else {
+      icon = Image.asset(
+        isDark ? 'assets/images/icon.png' : 'assets/images/icon_light.png',
+        fit: BoxFit.contain,
+      );
+    }
+
+    return GestureDetector(
+      onLongPress: () => _handlePickImage(context, ref),
+      child: SizedBox(width: 40, height: 40, child: icon),
     );
   }
 }

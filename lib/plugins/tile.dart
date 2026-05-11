@@ -1,6 +1,3 @@
-import 'dart:async';
-
-import 'package:meow_clash/common/constant.dart';
 import 'package:meow_clash/common/system.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -11,46 +8,38 @@ abstract mixin class TileListener {
   void onStop() {}
 
   void onDetached() {}
+
+  void onReconnectIpc() {}
 }
 
 class Tile {
-  final MethodChannel _channel = const MethodChannel('$packageName/tile');
+  static final Tile instance = Tile._();
+
+  final _channel = const MethodChannel('tile');
+  final _listeners = ObserverList<TileListener>();
 
   Tile._() {
     _channel.setMethodCallHandler(_methodCallHandler);
   }
 
-  static final Tile instance = Tile._();
-
-  final ObserverList<TileListener> _listeners = ObserverList<TileListener>();
-
   Future<void> _methodCallHandler(MethodCall call) async {
-    for (final TileListener listener in _listeners) {
-      switch (call.method) {
-        case 'start':
-          listener.onStart();
-          break;
-        case 'stop':
-          listener.onStop();
-          break;
-        case 'detached':
-          listener.onDetached();
-          break;
-      }
+    switch (call.method) {
+      case 'start':
+        for (final l in _listeners) { l.onStart(); }
+      case 'stop':
+        for (final l in _listeners) { l.onStop(); }
+      case 'detached':
+        for (final l in _listeners) { l.onDetached(); }
+      case 'reconnectIpc':
+        for (final l in _listeners) { l.onReconnectIpc(); }
     }
   }
 
-  bool get hasListeners {
-    return _listeners.isNotEmpty;
-  }
+  bool get hasListeners => _listeners.isNotEmpty;
 
-  void addListener(TileListener listener) {
-    _listeners.add(listener);
-  }
+  void addListener(TileListener listener) => _listeners.add(listener);
 
-  void removeListener(TileListener listener) {
-    _listeners.remove(listener);
-  }
+  void removeListener(TileListener listener) => _listeners.remove(listener);
 }
 
 final tile = system.isAndroid ? Tile.instance : null;

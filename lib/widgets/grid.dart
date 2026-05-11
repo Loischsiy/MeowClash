@@ -1,8 +1,7 @@
-import 'dart:math' as math;
-
 import 'package:meow_clash/common/common.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'dart:math' as math;
 
 typedef WrapBuilder = Widget Function(Widget child);
 
@@ -260,7 +259,9 @@ class RenderGrid extends RenderBox
           ? Offset(crossAxisOffset, mainAxisOffset)
           : Offset(mainAxisOffset, crossAxisOffset);
       childParentData.offset = offset;
+
       final nextOffset = mainAxisOffset + mainAxisExtent + mainAxisSpacing;
+
       for (int i = 0; i < crossAxisCellCount; i++) {
         offsets[origin.crossAxisIndex + i] = nextOffset;
       }
@@ -324,12 +325,14 @@ class GridParentData extends ContainerBoxParentData<RenderBox> {
 class GridItem extends ParentDataWidget<GridParentData> {
   final int crossAxisCellCount;
   final num? mainAxisCellCount;
+  final bool isDeletable;
 
   const GridItem({
     super.key,
     required super.child,
     this.mainAxisCellCount,
     this.crossAxisCellCount = 1,
+    this.isDeletable = true,
   });
 
   @override
@@ -363,6 +366,7 @@ class GridItem extends ParentDataWidget<GridParentData> {
     return GridItem(
       mainAxisCellCount: mainAxisCellCount,
       crossAxisCellCount: crossAxisCellCount,
+      isDeletable: isDeletable,
       child: builder(child),
     );
   }

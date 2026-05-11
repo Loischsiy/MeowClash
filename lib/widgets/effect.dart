@@ -123,11 +123,7 @@ class _CommonExpandIconState extends State<CommonExpandIcon>
   }
 }
 
-Widget commonProxyDecorator(
-  Widget child,
-  int index,
-  Animation<double> animation,
-) {
+Widget proxyDecorator(Widget child, int index, Animation<double> animation) {
   return AnimatedBuilder(
     animation: animation,
     builder: (_, Widget? child) {

@@ -1,6 +1,4 @@
-import 'package:meow_clash/l10n/l10n.dart';
-import 'package:meow_clash/manager/manager.dart';
-import 'package:meow_clash/models/state.dart';
+import 'package:meow_clash/manager/message_manager.dart';
 import 'package:meow_clash/widgets/scaffold.dart';
 import 'package:flutter/material.dart';
 
@@ -9,11 +7,10 @@ extension BuildContextExtension on BuildContext {
     return findAncestorStateOfType<CommonScaffoldState>();
   }
 
-  void showNotifier(String text, {MessageActionState? actionState}) {
-    return findAncestorStateOfType<StatusManagerState>()?.message(
-      text,
-      actionState: actionState,
-    );
+  Future<void>? showNotifier(String text,
+      {VoidCallback? onAction, String? actionLabel, bool showCountdown = false}) {
+    return findAncestorStateOfType<MessageManagerState>()
+        ?.message(text, onAction: onAction, actionLabel: actionLabel, showCountdown: showCountdown);
   }
 
   void showSnackBar(String message, {SnackBarAction? action}) {
@@ -46,8 +43,6 @@ extension BuildContextExtension on BuildContext {
   ColorScheme get colorScheme => Theme.of(this).colorScheme;
 
   TextTheme get textTheme => Theme.of(this).textTheme;
-
-  AppLocalizations get appLocalizations => AppLocalizations.of(this);
 
   T? findLastStateOfType<T extends State>() {
     T? state;

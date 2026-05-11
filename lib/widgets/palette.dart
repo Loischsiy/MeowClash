@@ -243,7 +243,7 @@ class _ShadePainter extends CustomPainter {
       effectiveSquareRadius * 2,
       effectiveSquareRadius * 2,
     );
-    final RSuperellipse rSuperellipse = RSuperellipse.fromRectAndRadius(
+    final RRect rRect = RRect.fromRectAndRadius(
       rectBox,
       Radius.circular(trackBorderRadius),
     );
@@ -254,8 +254,8 @@ class _ShadePainter extends CustomPainter {
         HSVColor.fromAHSV(1, colorHue, 1, 1).toColor(),
       ],
     ).createShader(rectBox);
-    canvas.drawRSuperellipse(
-      rSuperellipse,
+    canvas.drawRRect(
+      rRect,
       Paint()
         ..style = PaintingStyle.fill
         ..shader = horizontal,
@@ -266,8 +266,8 @@ class _ShadePainter extends CustomPainter {
       end: Alignment.bottomCenter,
       colors: <Color>[Colors.transparent, Colors.black],
     ).createShader(rectBox);
-    canvas.drawRSuperellipse(
-      rSuperellipse,
+    canvas.drawRRect(
+      rRect,
       Paint()
         ..style = PaintingStyle.fill
         ..shader = vertical,

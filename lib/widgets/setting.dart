@@ -2,6 +2,7 @@ import 'package:meow_clash/common/common.dart';
 import 'package:flutter/material.dart';
 
 import 'card.dart';
+import 'text.dart';
 
 class SettingInfoCard extends StatelessWidget {
   final Info info;
@@ -57,7 +58,7 @@ class SettingTextCard extends StatelessWidget {
       isSelected: isSelected,
       child: Padding(
         padding: const EdgeInsets.all(12),
-        child: Text(text, style: context.textTheme.bodyMedium),
+        child: EmojiText(text, style: context.textTheme.bodyMedium),
       ),
     );
   }

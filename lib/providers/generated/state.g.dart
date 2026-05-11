@@ -6,2567 +6,2102 @@ part of '../state.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-// GENERATED CODE - DO NOT MODIFY BY HAND
-// ignore_for_file: type=lint, type=warning
+String _$configStateHash() => r'1f4ea3cc8f6461ba734e7e0c5d7295bfa4fd5afb';
 
-@ProviderFor(currentGroupsState)
-const currentGroupsStateProvider = CurrentGroupsStateProvider._();
+/// See also [configState].
+@ProviderFor(configState)
+final configStateProvider = AutoDisposeProvider<Config>.internal(
+  configState,
+  name: r'configStateProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$configStateHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
 
-final class CurrentGroupsStateProvider
-    extends $FunctionalProvider<GroupsState, GroupsState, GroupsState>
-    with $Provider<GroupsState> {
-  const CurrentGroupsStateProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'currentGroupsStateProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$currentGroupsStateHash();
-
-  @$internal
-  @override
-  $ProviderElement<GroupsState> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
-
-  @override
-  GroupsState create(Ref ref) {
-    return currentGroupsState(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(GroupsState value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<GroupsState>(value),
-    );
-  }
-}
-
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef ConfigStateRef = AutoDisposeProviderRef<Config>;
 String _$currentGroupsStateHash() =>
-    r'dbf8f02606a31486c99d7b89d19914cd5a1fc496';
+    r'bde3f468dc3a39b68c1d1f908c8a7f40896cb777';
 
-@ProviderFor(navigationItemsState)
-const navigationItemsStateProvider = NavigationItemsStateProvider._();
+/// See also [currentGroupsState].
+@ProviderFor(currentGroupsState)
+final currentGroupsStateProvider = AutoDisposeProvider<GroupsState>.internal(
+  currentGroupsState,
+  name: r'currentGroupsStateProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$currentGroupsStateHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
 
-final class NavigationItemsStateProvider
-    extends
-        $FunctionalProvider<
-          NavigationItemsState,
-          NavigationItemsState,
-          NavigationItemsState
-        >
-    with $Provider<NavigationItemsState> {
-  const NavigationItemsStateProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'navigationItemsStateProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$navigationItemsStateHash();
-
-  @$internal
-  @override
-  $ProviderElement<NavigationItemsState> $createElement(
-    $ProviderPointer pointer,
-  ) => $ProviderElement(pointer);
-
-  @override
-  NavigationItemsState create(Ref ref) {
-    return navigationItemsState(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(NavigationItemsState value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<NavigationItemsState>(value),
-    );
-  }
-}
-
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef CurrentGroupsStateRef = AutoDisposeProviderRef<GroupsState>;
 String _$navigationItemsStateHash() =>
-    r'1fc37c14d129f9725b0e62fd53f6b25382f51102';
+    r'011892d5b7bdb324c51a1b29e448ee9dff8ae0ff';
 
-@ProviderFor(currentNavigationItemsState)
-const currentNavigationItemsStateProvider =
-    CurrentNavigationItemsStateProvider._();
-
-final class CurrentNavigationItemsStateProvider
-    extends
-        $FunctionalProvider<
-          NavigationItemsState,
-          NavigationItemsState,
-          NavigationItemsState
-        >
-    with $Provider<NavigationItemsState> {
-  const CurrentNavigationItemsStateProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'currentNavigationItemsStateProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$currentNavigationItemsStateHash();
-
-  @$internal
-  @override
-  $ProviderElement<NavigationItemsState> $createElement(
-    $ProviderPointer pointer,
-  ) => $ProviderElement(pointer);
-
-  @override
-  NavigationItemsState create(Ref ref) {
-    return currentNavigationItemsState(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(NavigationItemsState value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<NavigationItemsState>(value),
+/// See also [navigationItemsState].
+@ProviderFor(navigationItemsState)
+final navigationItemsStateProvider =
+    AutoDisposeProvider<NavigationItemsState>.internal(
+      navigationItemsState,
+      name: r'navigationItemsStateProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$navigationItemsStateHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
     );
-  }
-}
 
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef NavigationItemsStateRef = AutoDisposeProviderRef<NavigationItemsState>;
 String _$currentNavigationItemsStateHash() =>
     r'06fbdc194f4527b945695fe3b72b16e0585fa440';
 
+/// See also [currentNavigationItemsState].
+@ProviderFor(currentNavigationItemsState)
+final currentNavigationItemsStateProvider =
+    AutoDisposeProvider<NavigationItemsState>.internal(
+      currentNavigationItemsState,
+      name: r'currentNavigationItemsStateProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$currentNavigationItemsStateHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef CurrentNavigationItemsStateRef =
+    AutoDisposeProviderRef<NavigationItemsState>;
+String _$coreStateHash() => r'0fec30a6b2b78e720d08824a11e1cc945c1873bb';
+
+/// See also [coreState].
+@ProviderFor(coreState)
+final coreStateProvider = AutoDisposeProvider<CoreState>.internal(
+  coreState,
+  name: r'coreStateProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$coreStateHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef CoreStateRef = AutoDisposeProviderRef<CoreState>;
+String _$updateParamsHash() => r'aef760656c0e937600e2b8e34d5286123d0ce121';
+
+/// See also [updateParams].
 @ProviderFor(updateParams)
-const updateParamsProvider = UpdateParamsProvider._();
+final updateParamsProvider = AutoDisposeProvider<UpdateParams>.internal(
+  updateParams,
+  name: r'updateParamsProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$updateParamsHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
 
-final class UpdateParamsProvider
-    extends $FunctionalProvider<UpdateParams, UpdateParams, UpdateParams>
-    with $Provider<UpdateParams> {
-  const UpdateParamsProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'updateParamsProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef UpdateParamsRef = AutoDisposeProviderRef<UpdateParams>;
+String _$proxyStateHash() => r'22478fb593aaca11dfe2cf64472013190475a5bc';
 
-  @override
-  String debugGetCreateSourceHash() => _$updateParamsHash();
-
-  @$internal
-  @override
-  $ProviderElement<UpdateParams> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
-
-  @override
-  UpdateParams create(Ref ref) {
-    return updateParams(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(UpdateParams value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<UpdateParams>(value),
-    );
-  }
-}
-
-String _$updateParamsHash() => r'012df72ab0e769a51c573f4692031506d7b1f1b4';
-
+/// See also [proxyState].
 @ProviderFor(proxyState)
-const proxyStateProvider = ProxyStateProvider._();
+final proxyStateProvider = AutoDisposeProvider<ProxyState>.internal(
+  proxyState,
+  name: r'proxyStateProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$proxyStateHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
 
-final class ProxyStateProvider
-    extends $FunctionalProvider<ProxyState, ProxyState, ProxyState>
-    with $Provider<ProxyState> {
-  const ProxyStateProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'proxyStateProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef ProxyStateRef = AutoDisposeProviderRef<ProxyState>;
+String _$trayStateHash() => r'c132e2625c51db486c392c1f5c09bac8748509b0';
 
-  @override
-  String debugGetCreateSourceHash() => _$proxyStateHash();
-
-  @$internal
-  @override
-  $ProviderElement<ProxyState> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
-
-  @override
-  ProxyState create(Ref ref) {
-    return proxyState(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(ProxyState value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<ProxyState>(value),
-    );
-  }
-}
-
-String _$proxyStateHash() => r'3df11daa70bd06de32da43e9b3e09a74389264b2';
-
+/// See also [trayState].
 @ProviderFor(trayState)
-const trayStateProvider = TrayStateProvider._();
+final trayStateProvider = AutoDisposeProvider<TrayState>.internal(
+  trayState,
+  name: r'trayStateProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$trayStateHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
 
-final class TrayStateProvider
-    extends $FunctionalProvider<TrayState, TrayState, TrayState>
-    with $Provider<TrayState> {
-  const TrayStateProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'trayStateProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$trayStateHash();
-
-  @$internal
-  @override
-  $ProviderElement<TrayState> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
-
-  @override
-  TrayState create(Ref ref) {
-    return trayState(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(TrayState value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<TrayState>(value),
-    );
-  }
-}
-
-String _$trayStateHash() => r'b03770ae2eb7fe1a73372f1128af3b38fdebb818';
-
-@ProviderFor(trayTitleState)
-const trayTitleStateProvider = TrayTitleStateProvider._();
-
-final class TrayTitleStateProvider
-    extends $FunctionalProvider<TrayTitleState, TrayTitleState, TrayTitleState>
-    with $Provider<TrayTitleState> {
-  const TrayTitleStateProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'trayTitleStateProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$trayTitleStateHash();
-
-  @$internal
-  @override
-  $ProviderElement<TrayTitleState> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
-
-  @override
-  TrayTitleState create(Ref ref) {
-    return trayTitleState(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(TrayTitleState value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<TrayTitleState>(value),
-    );
-  }
-}
-
-String _$trayTitleStateHash() => r'5f868aaf70480b00bfdc2de18684ee646a93fd12';
-
-@ProviderFor(vpnState)
-const vpnStateProvider = VpnStateProvider._();
-
-final class VpnStateProvider
-    extends $FunctionalProvider<VpnState, VpnState, VpnState>
-    with $Provider<VpnState> {
-  const VpnStateProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'vpnStateProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$vpnStateHash();
-
-  @$internal
-  @override
-  $ProviderElement<VpnState> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
-
-  @override
-  VpnState create(Ref ref) {
-    return vpnState(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(VpnState value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<VpnState>(value),
-    );
-  }
-}
-
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef TrayStateRef = AutoDisposeProviderRef<TrayState>;
 String _$vpnStateHash() => r'128ddad03ce045ad1f8204e47aec3cb6cfa29f6e';
 
-@ProviderFor(navigationState)
-const navigationStateProvider = NavigationStateProvider._();
+/// See also [vpnState].
+@ProviderFor(vpnState)
+final vpnStateProvider = AutoDisposeProvider<VpnState>.internal(
+  vpnState,
+  name: r'vpnStateProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$vpnStateHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
 
-final class NavigationStateProvider
-    extends
-        $FunctionalProvider<NavigationState, NavigationState, NavigationState>
-    with $Provider<NavigationState> {
-  const NavigationStateProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'navigationStateProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$navigationStateHash();
-
-  @$internal
-  @override
-  $ProviderElement<NavigationState> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
-
-  @override
-  NavigationState create(Ref ref) {
-    return navigationState(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(NavigationState value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<NavigationState>(value),
-    );
-  }
-}
-
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef VpnStateRef = AutoDisposeProviderRef<VpnState>;
 String _$navigationStateHash() => r'657dc47ecc35ba0807b58cb37e7f1baa14f6c2f9';
 
-@ProviderFor(contentWidth)
-const contentWidthProvider = ContentWidthProvider._();
+/// See also [navigationState].
+@ProviderFor(navigationState)
+final navigationStateProvider = AutoDisposeProvider<NavigationState>.internal(
+  navigationState,
+  name: r'navigationStateProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$navigationStateHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
 
-final class ContentWidthProvider
-    extends $FunctionalProvider<double, double, double>
-    with $Provider<double> {
-  const ContentWidthProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'contentWidthProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef NavigationStateRef = AutoDisposeProviderRef<NavigationState>;
+String _$dashboardStateHash() => r'6bd5c98196d99af7f198fe1a636f157df5d25c90';
 
-  @override
-  String debugGetCreateSourceHash() => _$contentWidthHash();
-
-  @$internal
-  @override
-  $ProviderElement<double> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
-
-  @override
-  double create(Ref ref) {
-    return contentWidth(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(double value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<double>(value),
-    );
-  }
-}
-
-String _$contentWidthHash() => r'4710fee8f91b08dc88520798fb6b1d4f61f090e6';
-
+/// See also [dashboardState].
 @ProviderFor(dashboardState)
-const dashboardStateProvider = DashboardStateProvider._();
+final dashboardStateProvider = AutoDisposeProvider<DashboardState>.internal(
+  dashboardState,
+  name: r'dashboardStateProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$dashboardStateHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
 
-final class DashboardStateProvider
-    extends $FunctionalProvider<DashboardState, DashboardState, DashboardState>
-    with $Provider<DashboardState> {
-  const DashboardStateProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'dashboardStateProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$dashboardStateHash();
-
-  @$internal
-  @override
-  $ProviderElement<DashboardState> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
-
-  @override
-  DashboardState create(Ref ref) {
-    return dashboardState(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(DashboardState value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<DashboardState>(value),
-    );
-  }
-}
-
-String _$dashboardStateHash() => r'e8616e327c1b96658d917e4e4950f70ecb099d85';
-
-@ProviderFor(proxiesActionsState)
-const proxiesActionsStateProvider = ProxiesActionsStateProvider._();
-
-final class ProxiesActionsStateProvider
-    extends
-        $FunctionalProvider<
-          ProxiesActionsState,
-          ProxiesActionsState,
-          ProxiesActionsState
-        >
-    with $Provider<ProxiesActionsState> {
-  const ProxiesActionsStateProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'proxiesActionsStateProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$proxiesActionsStateHash();
-
-  @$internal
-  @override
-  $ProviderElement<ProxiesActionsState> $createElement(
-    $ProviderPointer pointer,
-  ) => $ProviderElement(pointer);
-
-  @override
-  ProxiesActionsState create(Ref ref) {
-    return proxiesActionsState(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(ProxiesActionsState value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<ProxiesActionsState>(value),
-    );
-  }
-}
-
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef DashboardStateRef = AutoDisposeProviderRef<DashboardState>;
 String _$proxiesActionsStateHash() =>
     r'84f8a94706233ff5d4b8a456291a4e66c1381c62';
 
-@ProviderFor(profilesState)
-const profilesStateProvider = ProfilesStateProvider._();
+/// See also [proxiesActionsState].
+@ProviderFor(proxiesActionsState)
+final proxiesActionsStateProvider =
+    AutoDisposeProvider<ProxiesActionsState>.internal(
+      proxiesActionsState,
+      name: r'proxiesActionsStateProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$proxiesActionsStateHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
-final class ProfilesStateProvider
-    extends $FunctionalProvider<ProfilesState, ProfilesState, ProfilesState>
-    with $Provider<ProfilesState> {
-  const ProfilesStateProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'profilesStateProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef ProxiesActionsStateRef = AutoDisposeProviderRef<ProxiesActionsState>;
+String _$startButtonSelectorStateHash() =>
+    r'537aff93c98b0a689cf8cabd080c610c9c58e611';
 
-  @override
-  String debugGetCreateSourceHash() => _$profilesStateHash();
+/// See also [startButtonSelectorState].
+@ProviderFor(startButtonSelectorState)
+final startButtonSelectorStateProvider =
+    AutoDisposeProvider<StartButtonSelectorState>.internal(
+      startButtonSelectorState,
+      name: r'startButtonSelectorStateProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$startButtonSelectorStateHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
-  @$internal
-  @override
-  $ProviderElement<ProfilesState> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef StartButtonSelectorStateRef =
+    AutoDisposeProviderRef<StartButtonSelectorState>;
+String _$profilesSelectorStateHash() =>
+    r'aac2deee6e747eceaf62cb5f279ec99ce9227a5a';
 
-  @override
-  ProfilesState create(Ref ref) {
-    return profilesState(ref);
+/// See also [profilesSelectorState].
+@ProviderFor(profilesSelectorState)
+final profilesSelectorStateProvider =
+    AutoDisposeProvider<ProfilesSelectorState>.internal(
+      profilesSelectorState,
+      name: r'profilesSelectorStateProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$profilesSelectorStateHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef ProfilesSelectorStateRef =
+    AutoDisposeProviderRef<ProfilesSelectorState>;
+String _$filterGroupsStateHash() => r'c50aafbb50f98a66e21fc069d22031351d93a0ab';
+
+/// Copied from Dart SDK
+class _SystemHash {
+  _SystemHash._();
+
+  static int combine(int hash, int value) {
+    // ignore: parameter_assignments
+    hash = 0x1fffffff & (hash + value);
+    // ignore: parameter_assignments
+    hash = 0x1fffffff & (hash + ((0x0007ffff & hash) << 10));
+    return hash ^ (hash >> 6);
   }
 
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(ProfilesState value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<ProfilesState>(value),
-    );
+  static int finish(int hash) {
+    // ignore: parameter_assignments
+    hash = 0x1fffffff & (hash + ((0x03ffffff & hash) << 3));
+    // ignore: parameter_assignments
+    hash = hash ^ (hash >> 11);
+    return 0x1fffffff & (hash + ((0x00003fff & hash) << 15));
   }
 }
 
-String _$profilesStateHash() => r'8b07eeacb83b9002ba7e6283ff7a7f451a0845a6';
-
+/// See also [filterGroupsState].
 @ProviderFor(filterGroupsState)
-const filterGroupsStateProvider = FilterGroupsStateFamily._();
+const filterGroupsStateProvider = FilterGroupsStateFamily();
 
-final class FilterGroupsStateProvider
-    extends $FunctionalProvider<GroupsState, GroupsState, GroupsState>
-    with $Provider<GroupsState> {
-  const FilterGroupsStateProvider._({
-    required FilterGroupsStateFamily super.from,
-    required String super.argument,
-  }) : super(
-         retry: null,
-         name: r'filterGroupsStateProvider',
-         isAutoDispose: true,
-         dependencies: null,
-         $allTransitiveDependencies: null,
-       );
+/// See also [filterGroupsState].
+class FilterGroupsStateFamily extends Family<GroupsState> {
+  /// See also [filterGroupsState].
+  const FilterGroupsStateFamily();
 
-  @override
-  String debugGetCreateSourceHash() => _$filterGroupsStateHash();
-
-  @override
-  String toString() {
-    return r'filterGroupsStateProvider'
-        ''
-        '($argument)';
+  /// See also [filterGroupsState].
+  FilterGroupsStateProvider call(String query) {
+    return FilterGroupsStateProvider(query);
   }
 
-  @$internal
   @override
-  $ProviderElement<GroupsState> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
-
-  @override
-  GroupsState create(Ref ref) {
-    final argument = this.argument as String;
-    return filterGroupsState(ref, argument);
+  FilterGroupsStateProvider getProviderOverride(
+    covariant FilterGroupsStateProvider provider,
+  ) {
+    return call(provider.query);
   }
 
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(GroupsState value) {
-    return $ProviderOverride(
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'filterGroupsStateProvider';
+}
+
+/// See also [filterGroupsState].
+class FilterGroupsStateProvider extends AutoDisposeProvider<GroupsState> {
+  /// See also [filterGroupsState].
+  FilterGroupsStateProvider(String query)
+    : this._internal(
+        (ref) => filterGroupsState(ref as FilterGroupsStateRef, query),
+        from: filterGroupsStateProvider,
+        name: r'filterGroupsStateProvider',
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$filterGroupsStateHash,
+        dependencies: FilterGroupsStateFamily._dependencies,
+        allTransitiveDependencies:
+            FilterGroupsStateFamily._allTransitiveDependencies,
+        query: query,
+      );
+
+  FilterGroupsStateProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.query,
+  }) : super.internal();
+
+  final String query;
+
+  @override
+  Override overrideWith(
+    GroupsState Function(FilterGroupsStateRef provider) create,
+  ) {
+    return ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<GroupsState>(value),
+      override: FilterGroupsStateProvider._internal(
+        (ref) => create(ref as FilterGroupsStateRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        query: query,
+      ),
     );
+  }
+
+  @override
+  AutoDisposeProviderElement<GroupsState> createElement() {
+    return _FilterGroupsStateProviderElement(this);
   }
 
   @override
   bool operator ==(Object other) {
-    return other is FilterGroupsStateProvider && other.argument == argument;
+    return other is FilterGroupsStateProvider && other.query == query;
   }
 
   @override
   int get hashCode {
-    return argument.hashCode;
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, query.hashCode);
+
+    return _SystemHash.finish(hash);
   }
 }
 
-String _$filterGroupsStateHash() => r'7de7a4603ca5ed7c39a00351af43144eb6c21404';
-
-final class FilterGroupsStateFamily extends $Family
-    with $FunctionalFamilyOverride<GroupsState, String> {
-  const FilterGroupsStateFamily._()
-    : super(
-        retry: null,
-        name: r'filterGroupsStateProvider',
-        dependencies: null,
-        $allTransitiveDependencies: null,
-        isAutoDispose: true,
-      );
-
-  FilterGroupsStateProvider call(String query) =>
-      FilterGroupsStateProvider._(argument: query, from: this);
-
-  @override
-  String toString() => r'filterGroupsStateProvider';
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin FilterGroupsStateRef on AutoDisposeProviderRef<GroupsState> {
+  /// The parameter `query` of this provider.
+  String get query;
 }
 
+class _FilterGroupsStateProviderElement
+    extends AutoDisposeProviderElement<GroupsState>
+    with FilterGroupsStateRef {
+  _FilterGroupsStateProviderElement(super.provider);
+
+  @override
+  String get query => (origin as FilterGroupsStateProvider).query;
+}
+
+String _$proxiesListStateHash() => r'68f712bdbed5be9f9ba7709ec7c861e1d321f8fc';
+
+/// See also [proxiesListState].
 @ProviderFor(proxiesListState)
-const proxiesListStateProvider = ProxiesListStateProvider._();
+final proxiesListStateProvider = AutoDisposeProvider<ProxiesListState>.internal(
+  proxiesListState,
+  name: r'proxiesListStateProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$proxiesListStateHash,
+  dependencies: <ProviderOrFamily>[queryProvider],
+  allTransitiveDependencies: <ProviderOrFamily>{
+    queryProvider,
+    ...?queryProvider.allTransitiveDependencies,
+  },
+);
 
-final class ProxiesListStateProvider
-    extends
-        $FunctionalProvider<
-          ProxiesListState,
-          ProxiesListState,
-          ProxiesListState
-        >
-    with $Provider<ProxiesListState> {
-  const ProxiesListStateProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'proxiesListStateProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef ProxiesListStateRef = AutoDisposeProviderRef<ProxiesListState>;
+String _$proxiesTabStateHash() => r'4b6d355c2892208f67bc843ead7687a5816c18e3';
 
-  @override
-  String debugGetCreateSourceHash() => _$proxiesListStateHash();
-
-  @$internal
-  @override
-  $ProviderElement<ProxiesListState> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
-
-  @override
-  ProxiesListState create(Ref ref) {
-    return proxiesListState(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(ProxiesListState value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<ProxiesListState>(value),
-    );
-  }
-}
-
-String _$proxiesListStateHash() => r'b16ad96516ece78f6cb22f558a0535000b784317';
-
+/// See also [proxiesTabState].
 @ProviderFor(proxiesTabState)
-const proxiesTabStateProvider = ProxiesTabStateProvider._();
+final proxiesTabStateProvider = AutoDisposeProvider<ProxiesTabState>.internal(
+  proxiesTabState,
+  name: r'proxiesTabStateProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$proxiesTabStateHash,
+  dependencies: <ProviderOrFamily>[queryProvider],
+  allTransitiveDependencies: <ProviderOrFamily>{
+    queryProvider,
+    ...?queryProvider.allTransitiveDependencies,
+  },
+);
 
-final class ProxiesTabStateProvider
-    extends
-        $FunctionalProvider<ProxiesTabState, ProxiesTabState, ProxiesTabState>
-    with $Provider<ProxiesTabState> {
-  const ProxiesTabStateProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'proxiesTabStateProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$proxiesTabStateHash();
-
-  @$internal
-  @override
-  $ProviderElement<ProxiesTabState> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
-
-  @override
-  ProxiesTabState create(Ref ref) {
-    return proxiesTabState(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(ProxiesTabState value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<ProxiesTabState>(value),
-    );
-  }
-}
-
-String _$proxiesTabStateHash() => r'143b106d74da618327cbac48af15078efd8cabee';
-
-@ProviderFor(isStart)
-const isStartProvider = IsStartProvider._();
-
-final class IsStartProvider extends $FunctionalProvider<bool, bool, bool>
-    with $Provider<bool> {
-  const IsStartProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'isStartProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$isStartHash();
-
-  @$internal
-  @override
-  $ProviderElement<bool> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
-
-  @override
-  bool create(Ref ref) {
-    return isStart(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(bool value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<bool>(value),
-    );
-  }
-}
-
-String _$isStartHash() => r'f8bcefa8515c44fbe14876a5fc6676110508e9b2';
-
-@ProviderFor(proxiesTabControllerState)
-const proxiesTabControllerStateProvider = ProxiesTabControllerStateProvider._();
-
-final class ProxiesTabControllerStateProvider
-    extends
-        $FunctionalProvider<
-          VM2<List<String>, String?>,
-          VM2<List<String>, String?>,
-          VM2<List<String>, String?>
-        >
-    with $Provider<VM2<List<String>, String?>> {
-  const ProxiesTabControllerStateProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'proxiesTabControllerStateProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$proxiesTabControllerStateHash();
-
-  @$internal
-  @override
-  $ProviderElement<VM2<List<String>, String?>> $createElement(
-    $ProviderPointer pointer,
-  ) => $ProviderElement(pointer);
-
-  @override
-  VM2<List<String>, String?> create(Ref ref) {
-    return proxiesTabControllerState(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(VM2<List<String>, String?> value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<VM2<List<String>, String?>>(value),
-    );
-  }
-}
-
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef ProxiesTabStateRef = AutoDisposeProviderRef<ProxiesTabState>;
 String _$proxiesTabControllerStateHash() =>
-    r'd9c4eb6771262b2a989b053ce6ad94c307cf43fb';
+    r'696c680f6aebe856752c31ce3d961753aaad75ca';
 
-@ProviderFor(proxyGroupSelectorState)
-const proxyGroupSelectorStateProvider = ProxyGroupSelectorStateFamily._();
-
-final class ProxyGroupSelectorStateProvider
-    extends
-        $FunctionalProvider<
-          ProxyGroupSelectorState,
-          ProxyGroupSelectorState,
-          ProxyGroupSelectorState
-        >
-    with $Provider<ProxyGroupSelectorState> {
-  const ProxyGroupSelectorStateProvider._({
-    required ProxyGroupSelectorStateFamily super.from,
-    required (String, String) super.argument,
-  }) : super(
-         retry: null,
-         name: r'proxyGroupSelectorStateProvider',
-         isAutoDispose: true,
-         dependencies: null,
-         $allTransitiveDependencies: null,
-       );
-
-  @override
-  String debugGetCreateSourceHash() => _$proxyGroupSelectorStateHash();
-
-  @override
-  String toString() {
-    return r'proxyGroupSelectorStateProvider'
-        ''
-        '$argument';
-  }
-
-  @$internal
-  @override
-  $ProviderElement<ProxyGroupSelectorState> $createElement(
-    $ProviderPointer pointer,
-  ) => $ProviderElement(pointer);
-
-  @override
-  ProxyGroupSelectorState create(Ref ref) {
-    final argument = this.argument as (String, String);
-    return proxyGroupSelectorState(ref, argument.$1, argument.$2);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(ProxyGroupSelectorState value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<ProxyGroupSelectorState>(value),
+/// See also [proxiesTabControllerState].
+@ProviderFor(proxiesTabControllerState)
+final proxiesTabControllerStateProvider =
+    AutoDisposeProvider<VM2<List<String>, String?>>.internal(
+      proxiesTabControllerState,
+      name: r'proxiesTabControllerStateProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$proxiesTabControllerStateHash,
+      dependencies: <ProviderOrFamily>[proxiesTabStateProvider],
+      allTransitiveDependencies: <ProviderOrFamily>{
+        proxiesTabStateProvider,
+        ...?proxiesTabStateProvider.allTransitiveDependencies,
+      },
     );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef ProxiesTabControllerStateRef =
+    AutoDisposeProviderRef<VM2<List<String>, String?>>;
+String _$proxyGroupSelectorStateHash() =>
+    r'c2a059873a38907071a2664409bacfe21b7d6c3c';
+
+/// See also [proxyGroupSelectorState].
+@ProviderFor(proxyGroupSelectorState)
+const proxyGroupSelectorStateProvider = ProxyGroupSelectorStateFamily();
+
+/// See also [proxyGroupSelectorState].
+class ProxyGroupSelectorStateFamily extends Family<ProxyGroupSelectorState> {
+  /// See also [proxyGroupSelectorState].
+  const ProxyGroupSelectorStateFamily();
+
+  /// See also [proxyGroupSelectorState].
+  ProxyGroupSelectorStateProvider call(String groupName, String query) {
+    return ProxyGroupSelectorStateProvider(groupName, query);
+  }
+
+  @override
+  ProxyGroupSelectorStateProvider getProviderOverride(
+    covariant ProxyGroupSelectorStateProvider provider,
+  ) {
+    return call(provider.groupName, provider.query);
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'proxyGroupSelectorStateProvider';
+}
+
+/// See also [proxyGroupSelectorState].
+class ProxyGroupSelectorStateProvider
+    extends AutoDisposeProvider<ProxyGroupSelectorState> {
+  /// See also [proxyGroupSelectorState].
+  ProxyGroupSelectorStateProvider(String groupName, String query)
+    : this._internal(
+        (ref) => proxyGroupSelectorState(
+          ref as ProxyGroupSelectorStateRef,
+          groupName,
+          query,
+        ),
+        from: proxyGroupSelectorStateProvider,
+        name: r'proxyGroupSelectorStateProvider',
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$proxyGroupSelectorStateHash,
+        dependencies: ProxyGroupSelectorStateFamily._dependencies,
+        allTransitiveDependencies:
+            ProxyGroupSelectorStateFamily._allTransitiveDependencies,
+        groupName: groupName,
+        query: query,
+      );
+
+  ProxyGroupSelectorStateProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.groupName,
+    required this.query,
+  }) : super.internal();
+
+  final String groupName;
+  final String query;
+
+  @override
+  Override overrideWith(
+    ProxyGroupSelectorState Function(ProxyGroupSelectorStateRef provider)
+    create,
+  ) {
+    return ProviderOverride(
+      origin: this,
+      override: ProxyGroupSelectorStateProvider._internal(
+        (ref) => create(ref as ProxyGroupSelectorStateRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        groupName: groupName,
+        query: query,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeProviderElement<ProxyGroupSelectorState> createElement() {
+    return _ProxyGroupSelectorStateProviderElement(this);
   }
 
   @override
   bool operator ==(Object other) {
     return other is ProxyGroupSelectorStateProvider &&
-        other.argument == argument;
+        other.groupName == groupName &&
+        other.query == query;
   }
 
   @override
   int get hashCode {
-    return argument.hashCode;
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, groupName.hashCode);
+    hash = _SystemHash.combine(hash, query.hashCode);
+
+    return _SystemHash.finish(hash);
   }
 }
 
-String _$proxyGroupSelectorStateHash() =>
-    r'c2a059873a38907071a2664409bacfe21b7d6c3c';
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin ProxyGroupSelectorStateRef
+    on AutoDisposeProviderRef<ProxyGroupSelectorState> {
+  /// The parameter `groupName` of this provider.
+  String get groupName;
 
-final class ProxyGroupSelectorStateFamily extends $Family
-    with $FunctionalFamilyOverride<ProxyGroupSelectorState, (String, String)> {
-  const ProxyGroupSelectorStateFamily._()
-    : super(
-        retry: null,
-        name: r'proxyGroupSelectorStateProvider',
-        dependencies: null,
-        $allTransitiveDependencies: null,
-        isAutoDispose: true,
-      );
-
-  ProxyGroupSelectorStateProvider call(String groupName, String query) =>
-      ProxyGroupSelectorStateProvider._(
-        argument: (groupName, query),
-        from: this,
-      );
-
-  @override
-  String toString() => r'proxyGroupSelectorStateProvider';
+  /// The parameter `query` of this provider.
+  String get query;
 }
 
-@ProviderFor(packageListSelectorState)
-const packageListSelectorStateProvider = PackageListSelectorStateProvider._();
-
-final class PackageListSelectorStateProvider
-    extends
-        $FunctionalProvider<
-          PackageListSelectorState,
-          PackageListSelectorState,
-          PackageListSelectorState
-        >
-    with $Provider<PackageListSelectorState> {
-  const PackageListSelectorStateProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'packageListSelectorStateProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+class _ProxyGroupSelectorStateProviderElement
+    extends AutoDisposeProviderElement<ProxyGroupSelectorState>
+    with ProxyGroupSelectorStateRef {
+  _ProxyGroupSelectorStateProviderElement(super.provider);
 
   @override
-  String debugGetCreateSourceHash() => _$packageListSelectorStateHash();
-
-  @$internal
+  String get groupName => (origin as ProxyGroupSelectorStateProvider).groupName;
   @override
-  $ProviderElement<PackageListSelectorState> $createElement(
-    $ProviderPointer pointer,
-  ) => $ProviderElement(pointer);
-
-  @override
-  PackageListSelectorState create(Ref ref) {
-    return packageListSelectorState(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(PackageListSelectorState value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<PackageListSelectorState>(value),
-    );
-  }
+  String get query => (origin as ProxyGroupSelectorStateProvider).query;
 }
 
 String _$packageListSelectorStateHash() =>
-    r'1fa2bebbd8ee07910aa8d6e9c5d5d6128df5c13b';
+    r'26ad58fec2cb0136ece373c7f3ec89b5aafd9324';
 
-@ProviderFor(moreToolsSelectorState)
-const moreToolsSelectorStateProvider = MoreToolsSelectorStateProvider._();
-
-final class MoreToolsSelectorStateProvider
-    extends
-        $FunctionalProvider<
-          MoreToolsSelectorState,
-          MoreToolsSelectorState,
-          MoreToolsSelectorState
-        >
-    with $Provider<MoreToolsSelectorState> {
-  const MoreToolsSelectorStateProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'moreToolsSelectorStateProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$moreToolsSelectorStateHash();
-
-  @$internal
-  @override
-  $ProviderElement<MoreToolsSelectorState> $createElement(
-    $ProviderPointer pointer,
-  ) => $ProviderElement(pointer);
-
-  @override
-  MoreToolsSelectorState create(Ref ref) {
-    return moreToolsSelectorState(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(MoreToolsSelectorState value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<MoreToolsSelectorState>(value),
+/// See also [packageListSelectorState].
+@ProviderFor(packageListSelectorState)
+final packageListSelectorStateProvider =
+    AutoDisposeProvider<PackageListSelectorState>.internal(
+      packageListSelectorState,
+      name: r'packageListSelectorStateProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$packageListSelectorStateHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
     );
-  }
-}
 
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef PackageListSelectorStateRef =
+    AutoDisposeProviderRef<PackageListSelectorState>;
 String _$moreToolsSelectorStateHash() =>
     r'6329d92652135e2af009dddeac590b4369d2fa04';
 
-@ProviderFor(isCurrentPage)
-const isCurrentPageProvider = IsCurrentPageFamily._();
-
-final class IsCurrentPageProvider extends $FunctionalProvider<bool, bool, bool>
-    with $Provider<bool> {
-  const IsCurrentPageProvider._({
-    required IsCurrentPageFamily super.from,
-    required (
-      PageLabel, {
-      bool Function(PageLabel pageLabel, ViewMode viewMode)? handler,
-    })
-    super.argument,
-  }) : super(
-         retry: null,
-         name: r'isCurrentPageProvider',
-         isAutoDispose: true,
-         dependencies: null,
-         $allTransitiveDependencies: null,
-       );
-
-  @override
-  String debugGetCreateSourceHash() => _$isCurrentPageHash();
-
-  @override
-  String toString() {
-    return r'isCurrentPageProvider'
-        ''
-        '$argument';
-  }
-
-  @$internal
-  @override
-  $ProviderElement<bool> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
-
-  @override
-  bool create(Ref ref) {
-    final argument =
-        this.argument
-            as (
-              PageLabel, {
-              bool Function(PageLabel pageLabel, ViewMode viewMode)? handler,
-            });
-    return isCurrentPage(ref, argument.$1, handler: argument.handler);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(bool value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<bool>(value),
+/// See also [moreToolsSelectorState].
+@ProviderFor(moreToolsSelectorState)
+final moreToolsSelectorStateProvider =
+    AutoDisposeProvider<MoreToolsSelectorState>.internal(
+      moreToolsSelectorState,
+      name: r'moreToolsSelectorStateProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$moreToolsSelectorStateHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
     );
-  }
 
-  @override
-  bool operator ==(Object other) {
-    return other is IsCurrentPageProvider && other.argument == argument;
-  }
-
-  @override
-  int get hashCode {
-    return argument.hashCode;
-  }
-}
-
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef MoreToolsSelectorStateRef =
+    AutoDisposeProviderRef<MoreToolsSelectorState>;
 String _$isCurrentPageHash() => r'7c300770aef90da23109d9fcfc3bf26140d8cd08';
 
-final class IsCurrentPageFamily extends $Family
-    with
-        $FunctionalFamilyOverride<
-          bool,
-          (
-            PageLabel, {
-            bool Function(PageLabel pageLabel, ViewMode viewMode)? handler,
-          })
-        > {
-  const IsCurrentPageFamily._()
-    : super(
-        retry: null,
-        name: r'isCurrentPageProvider',
-        dependencies: null,
-        $allTransitiveDependencies: null,
-        isAutoDispose: true,
-      );
+/// See also [isCurrentPage].
+@ProviderFor(isCurrentPage)
+const isCurrentPageProvider = IsCurrentPageFamily();
 
+/// See also [isCurrentPage].
+class IsCurrentPageFamily extends Family<bool> {
+  /// See also [isCurrentPage].
+  const IsCurrentPageFamily();
+
+  /// See also [isCurrentPage].
   IsCurrentPageProvider call(
     PageLabel pageLabel, {
-    bool Function(PageLabel pageLabel, ViewMode viewMode)? handler,
-  }) => IsCurrentPageProvider._(
-    argument: (pageLabel, handler: handler),
-    from: this,
-  );
+    bool Function(PageLabel, ViewMode)? handler,
+  }) {
+    return IsCurrentPageProvider(pageLabel, handler: handler);
+  }
 
   @override
-  String toString() => r'isCurrentPageProvider';
+  IsCurrentPageProvider getProviderOverride(
+    covariant IsCurrentPageProvider provider,
+  ) {
+    return call(provider.pageLabel, handler: provider.handler);
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'isCurrentPageProvider';
 }
 
-@ProviderFor(realTestUrl)
-const realTestUrlProvider = RealTestUrlFamily._();
-
-final class RealTestUrlProvider
-    extends $FunctionalProvider<String, String, String>
-    with $Provider<String> {
-  const RealTestUrlProvider._({
-    required RealTestUrlFamily super.from,
-    required String? super.argument,
-  }) : super(
-         retry: null,
-         name: r'realTestUrlProvider',
-         isAutoDispose: true,
-         dependencies: null,
-         $allTransitiveDependencies: null,
+/// See also [isCurrentPage].
+class IsCurrentPageProvider extends AutoDisposeProvider<bool> {
+  /// See also [isCurrentPage].
+  IsCurrentPageProvider(
+    PageLabel pageLabel, {
+    bool Function(PageLabel, ViewMode)? handler,
+  }) : this._internal(
+         (ref) => isCurrentPage(
+           ref as IsCurrentPageRef,
+           pageLabel,
+           handler: handler,
+         ),
+         from: isCurrentPageProvider,
+         name: r'isCurrentPageProvider',
+         debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+             ? null
+             : _$isCurrentPageHash,
+         dependencies: IsCurrentPageFamily._dependencies,
+         allTransitiveDependencies:
+             IsCurrentPageFamily._allTransitiveDependencies,
+         pageLabel: pageLabel,
+         handler: handler,
        );
 
-  @override
-  String debugGetCreateSourceHash() => _$realTestUrlHash();
+  IsCurrentPageProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.pageLabel,
+    required this.handler,
+  }) : super.internal();
+
+  final PageLabel pageLabel;
+  final bool Function(PageLabel, ViewMode)? handler;
 
   @override
-  String toString() {
-    return r'realTestUrlProvider'
-        ''
-        '($argument)';
-  }
-
-  @$internal
-  @override
-  $ProviderElement<String> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
-
-  @override
-  String create(Ref ref) {
-    final argument = this.argument as String?;
-    return realTestUrl(ref, argument);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(String value) {
-    return $ProviderOverride(
+  Override overrideWith(bool Function(IsCurrentPageRef provider) create) {
+    return ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<String>(value),
+      override: IsCurrentPageProvider._internal(
+        (ref) => create(ref as IsCurrentPageRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        pageLabel: pageLabel,
+        handler: handler,
+      ),
     );
   }
 
   @override
+  AutoDisposeProviderElement<bool> createElement() {
+    return _IsCurrentPageProviderElement(this);
+  }
+
+  @override
   bool operator ==(Object other) {
-    return other is RealTestUrlProvider && other.argument == argument;
+    return other is IsCurrentPageProvider &&
+        other.pageLabel == pageLabel &&
+        other.handler == handler;
   }
 
   @override
   int get hashCode {
-    return argument.hashCode;
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, pageLabel.hashCode);
+    hash = _SystemHash.combine(hash, handler.hashCode);
+
+    return _SystemHash.finish(hash);
   }
 }
 
-String _$realTestUrlHash() => r'6d68caa7a526b6788e3e4899d3ec8ad1c065b15e';
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin IsCurrentPageRef on AutoDisposeProviderRef<bool> {
+  /// The parameter `pageLabel` of this provider.
+  PageLabel get pageLabel;
 
-final class RealTestUrlFamily extends $Family
-    with $FunctionalFamilyOverride<String, String?> {
-  const RealTestUrlFamily._()
-    : super(
-        retry: null,
-        name: r'realTestUrlProvider',
-        dependencies: null,
-        $allTransitiveDependencies: null,
-        isAutoDispose: true,
-      );
-
-  RealTestUrlProvider call([String? testUrl]) =>
-      RealTestUrlProvider._(argument: testUrl, from: this);
-
-  @override
-  String toString() => r'realTestUrlProvider';
+  /// The parameter `handler` of this provider.
+  bool Function(PageLabel, ViewMode)? get handler;
 }
 
+class _IsCurrentPageProviderElement extends AutoDisposeProviderElement<bool>
+    with IsCurrentPageRef {
+  _IsCurrentPageProviderElement(super.provider);
+
+  @override
+  PageLabel get pageLabel => (origin as IsCurrentPageProvider).pageLabel;
+  @override
+  bool Function(PageLabel, ViewMode)? get handler =>
+      (origin as IsCurrentPageProvider).handler;
+}
+
+String _$getRealTestUrlHash() => r'f2ac58afa6b99fbdab493e730e771ffd80440198';
+
+/// See also [getRealTestUrl].
+@ProviderFor(getRealTestUrl)
+const getRealTestUrlProvider = GetRealTestUrlFamily();
+
+/// See also [getRealTestUrl].
+class GetRealTestUrlFamily extends Family<String> {
+  /// See also [getRealTestUrl].
+  const GetRealTestUrlFamily();
+
+  /// See also [getRealTestUrl].
+  GetRealTestUrlProvider call([String? testUrl]) {
+    return GetRealTestUrlProvider(testUrl);
+  }
+
+  @override
+  GetRealTestUrlProvider getProviderOverride(
+    covariant GetRealTestUrlProvider provider,
+  ) {
+    return call(provider.testUrl);
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'getRealTestUrlProvider';
+}
+
+/// See also [getRealTestUrl].
+class GetRealTestUrlProvider extends AutoDisposeProvider<String> {
+  /// See also [getRealTestUrl].
+  GetRealTestUrlProvider([String? testUrl])
+    : this._internal(
+        (ref) => getRealTestUrl(ref as GetRealTestUrlRef, testUrl),
+        from: getRealTestUrlProvider,
+        name: r'getRealTestUrlProvider',
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$getRealTestUrlHash,
+        dependencies: GetRealTestUrlFamily._dependencies,
+        allTransitiveDependencies:
+            GetRealTestUrlFamily._allTransitiveDependencies,
+        testUrl: testUrl,
+      );
+
+  GetRealTestUrlProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.testUrl,
+  }) : super.internal();
+
+  final String? testUrl;
+
+  @override
+  Override overrideWith(String Function(GetRealTestUrlRef provider) create) {
+    return ProviderOverride(
+      origin: this,
+      override: GetRealTestUrlProvider._internal(
+        (ref) => create(ref as GetRealTestUrlRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        testUrl: testUrl,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeProviderElement<String> createElement() {
+    return _GetRealTestUrlProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is GetRealTestUrlProvider && other.testUrl == testUrl;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, testUrl.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin GetRealTestUrlRef on AutoDisposeProviderRef<String> {
+  /// The parameter `testUrl` of this provider.
+  String? get testUrl;
+}
+
+class _GetRealTestUrlProviderElement extends AutoDisposeProviderElement<String>
+    with GetRealTestUrlRef {
+  _GetRealTestUrlProviderElement(super.provider);
+
+  @override
+  String? get testUrl => (origin as GetRealTestUrlProvider).testUrl;
+}
+
+String _$getDelayHash() => r'541f25ef7ee423966a5e0d33a8522231c6ca12b1';
+
+/// See also [getDelay].
 @ProviderFor(getDelay)
-const getDelayProvider = GetDelayFamily._();
+const getDelayProvider = GetDelayFamily();
 
-final class GetDelayProvider extends $FunctionalProvider<int?, int?, int?>
-    with $Provider<int?> {
-  const GetDelayProvider._({
-    required GetDelayFamily super.from,
-    required ({String proxyName, String? testUrl}) super.argument,
-  }) : super(
-         retry: null,
-         name: r'getDelayProvider',
-         isAutoDispose: true,
-         dependencies: null,
-         $allTransitiveDependencies: null,
-       );
+/// See also [getDelay].
+class GetDelayFamily extends Family<int?> {
+  /// See also [getDelay].
+  const GetDelayFamily();
 
-  @override
-  String debugGetCreateSourceHash() => _$getDelayHash();
-
-  @override
-  String toString() {
-    return r'getDelayProvider'
-        ''
-        '$argument';
+  /// See also [getDelay].
+  GetDelayProvider call({required String proxyName, String? testUrl}) {
+    return GetDelayProvider(proxyName: proxyName, testUrl: testUrl);
   }
 
-  @$internal
   @override
-  $ProviderElement<int?> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
-
-  @override
-  int? create(Ref ref) {
-    final argument = this.argument as ({String proxyName, String? testUrl});
-    return getDelay(
-      ref,
-      proxyName: argument.proxyName,
-      testUrl: argument.testUrl,
-    );
+  GetDelayProvider getProviderOverride(covariant GetDelayProvider provider) {
+    return call(proxyName: provider.proxyName, testUrl: provider.testUrl);
   }
 
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(int? value) {
-    return $ProviderOverride(
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'getDelayProvider';
+}
+
+/// See also [getDelay].
+class GetDelayProvider extends AutoDisposeProvider<int?> {
+  /// See also [getDelay].
+  GetDelayProvider({required String proxyName, String? testUrl})
+    : this._internal(
+        (ref) => getDelay(
+          ref as GetDelayRef,
+          proxyName: proxyName,
+          testUrl: testUrl,
+        ),
+        from: getDelayProvider,
+        name: r'getDelayProvider',
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$getDelayHash,
+        dependencies: GetDelayFamily._dependencies,
+        allTransitiveDependencies: GetDelayFamily._allTransitiveDependencies,
+        proxyName: proxyName,
+        testUrl: testUrl,
+      );
+
+  GetDelayProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.proxyName,
+    required this.testUrl,
+  }) : super.internal();
+
+  final String proxyName;
+  final String? testUrl;
+
+  @override
+  Override overrideWith(int? Function(GetDelayRef provider) create) {
+    return ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<int?>(value),
+      override: GetDelayProvider._internal(
+        (ref) => create(ref as GetDelayRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        proxyName: proxyName,
+        testUrl: testUrl,
+      ),
     );
+  }
+
+  @override
+  AutoDisposeProviderElement<int?> createElement() {
+    return _GetDelayProviderElement(this);
   }
 
   @override
   bool operator ==(Object other) {
-    return other is GetDelayProvider && other.argument == argument;
+    return other is GetDelayProvider &&
+        other.proxyName == proxyName &&
+        other.testUrl == testUrl;
   }
 
   @override
   int get hashCode {
-    return argument.hashCode;
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, proxyName.hashCode);
+    hash = _SystemHash.combine(hash, testUrl.hashCode);
+
+    return _SystemHash.finish(hash);
   }
 }
 
-String _$getDelayHash() => r'ee2df2db2b12d599794f77519a9ac518f42245a7';
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin GetDelayRef on AutoDisposeProviderRef<int?> {
+  /// The parameter `proxyName` of this provider.
+  String get proxyName;
 
-final class GetDelayFamily extends $Family
-    with
-        $FunctionalFamilyOverride<int?, ({String proxyName, String? testUrl})> {
-  const GetDelayFamily._()
-    : super(
-        retry: null,
-        name: r'getDelayProvider',
-        dependencies: null,
-        $allTransitiveDependencies: null,
-        isAutoDispose: true,
-      );
-
-  GetDelayProvider call({required String proxyName, String? testUrl}) =>
-      GetDelayProvider._(
-        argument: (proxyName: proxyName, testUrl: testUrl),
-        from: this,
-      );
-
-  @override
-  String toString() => r'getDelayProvider';
+  /// The parameter `testUrl` of this provider.
+  String? get testUrl;
 }
 
+class _GetDelayProviderElement extends AutoDisposeProviderElement<int?>
+    with GetDelayRef {
+  _GetDelayProviderElement(super.provider);
+
+  @override
+  String get proxyName => (origin as GetDelayProvider).proxyName;
+  @override
+  String? get testUrl => (origin as GetDelayProvider).testUrl;
+}
+
+String _$selectedMapHash() => r'0d7a3610d9005e74e1a88595d7e22897dc8240a5';
+
+/// See also [selectedMap].
 @ProviderFor(selectedMap)
-const selectedMapProvider = SelectedMapProvider._();
+final selectedMapProvider = AutoDisposeProvider<SelectedMap>.internal(
+  selectedMap,
+  name: r'selectedMapProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$selectedMapHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
 
-final class SelectedMapProvider
-    extends
-        $FunctionalProvider<
-          Map<String, String>,
-          Map<String, String>,
-          Map<String, String>
-        >
-    with $Provider<Map<String, String>> {
-  const SelectedMapProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'selectedMapProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$selectedMapHash();
-
-  @$internal
-  @override
-  $ProviderElement<Map<String, String>> $createElement(
-    $ProviderPointer pointer,
-  ) => $ProviderElement(pointer);
-
-  @override
-  Map<String, String> create(Ref ref) {
-    return selectedMap(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(Map<String, String> value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<Map<String, String>>(value),
-    );
-  }
-}
-
-String _$selectedMapHash() => r'd4438d8d87d0c7ec7d9c5d02f577cdba6ba2a785';
-
-@ProviderFor(unfoldSet)
-const unfoldSetProvider = UnfoldSetProvider._();
-
-final class UnfoldSetProvider
-    extends $FunctionalProvider<Set<String>, Set<String>, Set<String>>
-    with $Provider<Set<String>> {
-  const UnfoldSetProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'unfoldSetProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$unfoldSetHash();
-
-  @$internal
-  @override
-  $ProviderElement<Set<String>> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
-
-  @override
-  Set<String> create(Ref ref) {
-    return unfoldSet(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(Set<String> value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<Set<String>>(value),
-    );
-  }
-}
-
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef SelectedMapRef = AutoDisposeProviderRef<SelectedMap>;
 String _$unfoldSetHash() => r'59a5b417611533069462ddf31eca080ab2f74ac9';
 
+/// See also [unfoldSet].
+@ProviderFor(unfoldSet)
+final unfoldSetProvider = AutoDisposeProvider<Set<String>>.internal(
+  unfoldSet,
+  name: r'unfoldSetProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$unfoldSetHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef UnfoldSetRef = AutoDisposeProviderRef<Set<String>>;
+String _$getHotKeyActionHash() => r'4dc74ea7ffb25624ce70c7c8214806f3ef022223';
+
+/// See also [getHotKeyAction].
 @ProviderFor(getHotKeyAction)
-const getHotKeyActionProvider = GetHotKeyActionFamily._();
+const getHotKeyActionProvider = GetHotKeyActionFamily();
 
-final class GetHotKeyActionProvider
-    extends $FunctionalProvider<HotKeyAction, HotKeyAction, HotKeyAction>
-    with $Provider<HotKeyAction> {
-  const GetHotKeyActionProvider._({
-    required GetHotKeyActionFamily super.from,
-    required HotAction super.argument,
-  }) : super(
-         retry: null,
-         name: r'getHotKeyActionProvider',
-         isAutoDispose: true,
-         dependencies: null,
-         $allTransitiveDependencies: null,
-       );
+/// See also [getHotKeyAction].
+class GetHotKeyActionFamily extends Family<HotKeyAction> {
+  /// See also [getHotKeyAction].
+  const GetHotKeyActionFamily();
 
-  @override
-  String debugGetCreateSourceHash() => _$getHotKeyActionHash();
-
-  @override
-  String toString() {
-    return r'getHotKeyActionProvider'
-        ''
-        '($argument)';
+  /// See also [getHotKeyAction].
+  GetHotKeyActionProvider call(HotAction hotAction) {
+    return GetHotKeyActionProvider(hotAction);
   }
 
-  @$internal
   @override
-  $ProviderElement<HotKeyAction> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
-
-  @override
-  HotKeyAction create(Ref ref) {
-    final argument = this.argument as HotAction;
-    return getHotKeyAction(ref, argument);
+  GetHotKeyActionProvider getProviderOverride(
+    covariant GetHotKeyActionProvider provider,
+  ) {
+    return call(provider.hotAction);
   }
 
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(HotKeyAction value) {
-    return $ProviderOverride(
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'getHotKeyActionProvider';
+}
+
+/// See also [getHotKeyAction].
+class GetHotKeyActionProvider extends AutoDisposeProvider<HotKeyAction> {
+  /// See also [getHotKeyAction].
+  GetHotKeyActionProvider(HotAction hotAction)
+    : this._internal(
+        (ref) => getHotKeyAction(ref as GetHotKeyActionRef, hotAction),
+        from: getHotKeyActionProvider,
+        name: r'getHotKeyActionProvider',
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$getHotKeyActionHash,
+        dependencies: GetHotKeyActionFamily._dependencies,
+        allTransitiveDependencies:
+            GetHotKeyActionFamily._allTransitiveDependencies,
+        hotAction: hotAction,
+      );
+
+  GetHotKeyActionProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.hotAction,
+  }) : super.internal();
+
+  final HotAction hotAction;
+
+  @override
+  Override overrideWith(
+    HotKeyAction Function(GetHotKeyActionRef provider) create,
+  ) {
+    return ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<HotKeyAction>(value),
+      override: GetHotKeyActionProvider._internal(
+        (ref) => create(ref as GetHotKeyActionRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        hotAction: hotAction,
+      ),
     );
+  }
+
+  @override
+  AutoDisposeProviderElement<HotKeyAction> createElement() {
+    return _GetHotKeyActionProviderElement(this);
   }
 
   @override
   bool operator ==(Object other) {
-    return other is GetHotKeyActionProvider && other.argument == argument;
+    return other is GetHotKeyActionProvider && other.hotAction == hotAction;
   }
 
   @override
   int get hashCode {
-    return argument.hashCode;
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, hotAction.hashCode);
+
+    return _SystemHash.finish(hash);
   }
 }
 
-String _$getHotKeyActionHash() => r'4dc74ea7ffb25624ce70c7c8214806f3ef022223';
-
-final class GetHotKeyActionFamily extends $Family
-    with $FunctionalFamilyOverride<HotKeyAction, HotAction> {
-  const GetHotKeyActionFamily._()
-    : super(
-        retry: null,
-        name: r'getHotKeyActionProvider',
-        dependencies: null,
-        $allTransitiveDependencies: null,
-        isAutoDispose: true,
-      );
-
-  GetHotKeyActionProvider call(HotAction hotAction) =>
-      GetHotKeyActionProvider._(argument: hotAction, from: this);
-
-  @override
-  String toString() => r'getHotKeyActionProvider';
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin GetHotKeyActionRef on AutoDisposeProviderRef<HotKeyAction> {
+  /// The parameter `hotAction` of this provider.
+  HotAction get hotAction;
 }
 
-@ProviderFor(currentProfile)
-const currentProfileProvider = CurrentProfileProvider._();
-
-final class CurrentProfileProvider
-    extends $FunctionalProvider<Profile?, Profile?, Profile?>
-    with $Provider<Profile?> {
-  const CurrentProfileProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'currentProfileProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+class _GetHotKeyActionProviderElement
+    extends AutoDisposeProviderElement<HotKeyAction>
+    with GetHotKeyActionRef {
+  _GetHotKeyActionProviderElement(super.provider);
 
   @override
-  String debugGetCreateSourceHash() => _$currentProfileHash();
-
-  @$internal
-  @override
-  $ProviderElement<Profile?> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
-
-  @override
-  Profile? create(Ref ref) {
-    return currentProfile(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(Profile? value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<Profile?>(value),
-    );
-  }
+  HotAction get hotAction => (origin as GetHotKeyActionProvider).hotAction;
 }
 
 String _$currentProfileHash() => r'55f3cb9570a0aa6b9e0b83a36693b69d52e753ab';
 
+/// See also [currentProfile].
+@ProviderFor(currentProfile)
+final currentProfileProvider = AutoDisposeProvider<Profile?>.internal(
+  currentProfile,
+  name: r'currentProfileProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$currentProfileHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef CurrentProfileRef = AutoDisposeProviderRef<Profile?>;
+String _$getProxiesColumnsHash() => r'725066b5fc21f590a4c2656a1fd5e14ab7079079';
+
+/// See also [getProxiesColumns].
 @ProviderFor(getProxiesColumns)
-const getProxiesColumnsProvider = GetProxiesColumnsProvider._();
+final getProxiesColumnsProvider = AutoDisposeProvider<int>.internal(
+  getProxiesColumns,
+  name: r'getProxiesColumnsProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$getProxiesColumnsHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
 
-final class GetProxiesColumnsProvider extends $FunctionalProvider<int, int, int>
-    with $Provider<int> {
-  const GetProxiesColumnsProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'getProxiesColumnsProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef GetProxiesColumnsRef = AutoDisposeProviderRef<int>;
+String _$getProxyCardStateHash() => r'0f131148cb5ed60c9c4c4f31fbe32f114ac346bb';
 
-  @override
-  String debugGetCreateSourceHash() => _$getProxiesColumnsHash();
+/// See also [getProxyCardState].
+@ProviderFor(getProxyCardState)
+const getProxyCardStateProvider = GetProxyCardStateFamily();
 
-  @$internal
-  @override
-  $ProviderElement<int> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
+/// See also [getProxyCardState].
+class GetProxyCardStateFamily extends Family<ProxyCardState> {
+  /// See also [getProxyCardState].
+  const GetProxyCardStateFamily();
 
-  @override
-  int create(Ref ref) {
-    return getProxiesColumns(ref);
+  /// See also [getProxyCardState].
+  GetProxyCardStateProvider call(String proxyName) {
+    return GetProxyCardStateProvider(proxyName);
   }
 
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(int value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<int>(value),
-    );
+  @override
+  GetProxyCardStateProvider getProviderOverride(
+    covariant GetProxyCardStateProvider provider,
+  ) {
+    return call(provider.proxyName);
   }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'getProxyCardStateProvider';
 }
 
-String _$getProxiesColumnsHash() => r'd5340932d4812727caa670065bce30450f1c4da5';
+/// See also [getProxyCardState].
+class GetProxyCardStateProvider extends AutoDisposeProvider<ProxyCardState> {
+  /// See also [getProxyCardState].
+  GetProxyCardStateProvider(String proxyName)
+    : this._internal(
+        (ref) => getProxyCardState(ref as GetProxyCardStateRef, proxyName),
+        from: getProxyCardStateProvider,
+        name: r'getProxyCardStateProvider',
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$getProxyCardStateHash,
+        dependencies: GetProxyCardStateFamily._dependencies,
+        allTransitiveDependencies:
+            GetProxyCardStateFamily._allTransitiveDependencies,
+        proxyName: proxyName,
+      );
 
-@ProviderFor(realSelectedProxyState)
-const realSelectedProxyStateProvider = RealSelectedProxyStateFamily._();
+  GetProxyCardStateProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.proxyName,
+  }) : super.internal();
 
-final class RealSelectedProxyStateProvider
-    extends
-        $FunctionalProvider<
-          SelectedProxyState,
-          SelectedProxyState,
-          SelectedProxyState
-        >
-    with $Provider<SelectedProxyState> {
-  const RealSelectedProxyStateProvider._({
-    required RealSelectedProxyStateFamily super.from,
-    required String super.argument,
-  }) : super(
-         retry: null,
-         name: r'realSelectedProxyStateProvider',
-         isAutoDispose: true,
-         dependencies: null,
-         $allTransitiveDependencies: null,
-       );
-
-  @override
-  String debugGetCreateSourceHash() => _$realSelectedProxyStateHash();
-
-  @override
-  String toString() {
-    return r'realSelectedProxyStateProvider'
-        ''
-        '($argument)';
-  }
-
-  @$internal
-  @override
-  $ProviderElement<SelectedProxyState> $createElement(
-    $ProviderPointer pointer,
-  ) => $ProviderElement(pointer);
+  final String proxyName;
 
   @override
-  SelectedProxyState create(Ref ref) {
-    final argument = this.argument as String;
-    return realSelectedProxyState(ref, argument);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(SelectedProxyState value) {
-    return $ProviderOverride(
+  Override overrideWith(
+    ProxyCardState Function(GetProxyCardStateRef provider) create,
+  ) {
+    return ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<SelectedProxyState>(value),
+      override: GetProxyCardStateProvider._internal(
+        (ref) => create(ref as GetProxyCardStateRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        proxyName: proxyName,
+      ),
     );
+  }
+
+  @override
+  AutoDisposeProviderElement<ProxyCardState> createElement() {
+    return _GetProxyCardStateProviderElement(this);
   }
 
   @override
   bool operator ==(Object other) {
-    return other is RealSelectedProxyStateProvider &&
-        other.argument == argument;
+    return other is GetProxyCardStateProvider && other.proxyName == proxyName;
   }
 
   @override
   int get hashCode {
-    return argument.hashCode;
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, proxyName.hashCode);
+
+    return _SystemHash.finish(hash);
   }
 }
 
-String _$realSelectedProxyStateHash() =>
-    r'42fa131419f0a26e30c4f5269bf020893b7f828c';
-
-final class RealSelectedProxyStateFamily extends $Family
-    with $FunctionalFamilyOverride<SelectedProxyState, String> {
-  const RealSelectedProxyStateFamily._()
-    : super(
-        retry: null,
-        name: r'realSelectedProxyStateProvider',
-        dependencies: null,
-        $allTransitiveDependencies: null,
-        isAutoDispose: true,
-      );
-
-  RealSelectedProxyStateProvider call(String proxyName) =>
-      RealSelectedProxyStateProvider._(argument: proxyName, from: this);
-
-  @override
-  String toString() => r'realSelectedProxyStateProvider';
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin GetProxyCardStateRef on AutoDisposeProviderRef<ProxyCardState> {
+  /// The parameter `proxyName` of this provider.
+  String get proxyName;
 }
 
-@ProviderFor(getProxyName)
-const getProxyNameProvider = GetProxyNameFamily._();
-
-final class GetProxyNameProvider
-    extends $FunctionalProvider<String?, String?, String?>
-    with $Provider<String?> {
-  const GetProxyNameProvider._({
-    required GetProxyNameFamily super.from,
-    required String super.argument,
-  }) : super(
-         retry: null,
-         name: r'getProxyNameProvider',
-         isAutoDispose: true,
-         dependencies: null,
-         $allTransitiveDependencies: null,
-       );
+class _GetProxyCardStateProviderElement
+    extends AutoDisposeProviderElement<ProxyCardState>
+    with GetProxyCardStateRef {
+  _GetProxyCardStateProviderElement(super.provider);
 
   @override
-  String debugGetCreateSourceHash() => _$getProxyNameHash();
-
-  @override
-  String toString() {
-    return r'getProxyNameProvider'
-        ''
-        '($argument)';
-  }
-
-  @$internal
-  @override
-  $ProviderElement<String?> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
-
-  @override
-  String? create(Ref ref) {
-    final argument = this.argument as String;
-    return getProxyName(ref, argument);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(String? value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<String?>(value),
-    );
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return other is GetProxyNameProvider && other.argument == argument;
-  }
-
-  @override
-  int get hashCode {
-    return argument.hashCode;
-  }
+  String get proxyName => (origin as GetProxyCardStateProvider).proxyName;
 }
 
 String _$getProxyNameHash() => r'204a477ea18c8e1eeef55b3efd3d47e45b0d2350';
 
-final class GetProxyNameFamily extends $Family
-    with $FunctionalFamilyOverride<String?, String> {
-  const GetProxyNameFamily._()
-    : super(
-        retry: null,
-        name: r'getProxyNameProvider',
-        dependencies: null,
-        $allTransitiveDependencies: null,
-        isAutoDispose: true,
-      );
+/// See also [getProxyName].
+@ProviderFor(getProxyName)
+const getProxyNameProvider = GetProxyNameFamily();
 
-  GetProxyNameProvider call(String groupName) =>
-      GetProxyNameProvider._(argument: groupName, from: this);
+/// See also [getProxyName].
+class GetProxyNameFamily extends Family<String?> {
+  /// See also [getProxyName].
+  const GetProxyNameFamily();
+
+  /// See also [getProxyName].
+  GetProxyNameProvider call(String groupName) {
+    return GetProxyNameProvider(groupName);
+  }
 
   @override
-  String toString() => r'getProxyNameProvider';
+  GetProxyNameProvider getProviderOverride(
+    covariant GetProxyNameProvider provider,
+  ) {
+    return call(provider.groupName);
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'getProxyNameProvider';
 }
 
-@ProviderFor(getSelectedProxyName)
-const getSelectedProxyNameProvider = GetSelectedProxyNameFamily._();
+/// See also [getProxyName].
+class GetProxyNameProvider extends AutoDisposeProvider<String?> {
+  /// See also [getProxyName].
+  GetProxyNameProvider(String groupName)
+    : this._internal(
+        (ref) => getProxyName(ref as GetProxyNameRef, groupName),
+        from: getProxyNameProvider,
+        name: r'getProxyNameProvider',
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$getProxyNameHash,
+        dependencies: GetProxyNameFamily._dependencies,
+        allTransitiveDependencies:
+            GetProxyNameFamily._allTransitiveDependencies,
+        groupName: groupName,
+      );
 
-final class GetSelectedProxyNameProvider
-    extends $FunctionalProvider<String?, String?, String?>
-    with $Provider<String?> {
-  const GetSelectedProxyNameProvider._({
-    required GetSelectedProxyNameFamily super.from,
-    required String super.argument,
-  }) : super(
-         retry: null,
-         name: r'getSelectedProxyNameProvider',
-         isAutoDispose: true,
-         dependencies: null,
-         $allTransitiveDependencies: null,
-       );
+  GetProxyNameProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.groupName,
+  }) : super.internal();
 
-  @override
-  String debugGetCreateSourceHash() => _$getSelectedProxyNameHash();
-
-  @override
-  String toString() {
-    return r'getSelectedProxyNameProvider'
-        ''
-        '($argument)';
-  }
-
-  @$internal
-  @override
-  $ProviderElement<String?> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
+  final String groupName;
 
   @override
-  String? create(Ref ref) {
-    final argument = this.argument as String;
-    return getSelectedProxyName(ref, argument);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(String? value) {
-    return $ProviderOverride(
+  Override overrideWith(String? Function(GetProxyNameRef provider) create) {
+    return ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<String?>(value),
+      override: GetProxyNameProvider._internal(
+        (ref) => create(ref as GetProxyNameRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        groupName: groupName,
+      ),
     );
   }
 
   @override
+  AutoDisposeProviderElement<String?> createElement() {
+    return _GetProxyNameProviderElement(this);
+  }
+
+  @override
   bool operator ==(Object other) {
-    return other is GetSelectedProxyNameProvider && other.argument == argument;
+    return other is GetProxyNameProvider && other.groupName == groupName;
   }
 
   @override
   int get hashCode {
-    return argument.hashCode;
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, groupName.hashCode);
+
+    return _SystemHash.finish(hash);
   }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin GetProxyNameRef on AutoDisposeProviderRef<String?> {
+  /// The parameter `groupName` of this provider.
+  String get groupName;
+}
+
+class _GetProxyNameProviderElement extends AutoDisposeProviderElement<String?>
+    with GetProxyNameRef {
+  _GetProxyNameProviderElement(super.provider);
+
+  @override
+  String get groupName => (origin as GetProxyNameProvider).groupName;
 }
 
 String _$getSelectedProxyNameHash() =>
     r'13aeae1fede234983d262d824a85c7375f9e4e78';
 
-final class GetSelectedProxyNameFamily extends $Family
-    with $FunctionalFamilyOverride<String?, String> {
-  const GetSelectedProxyNameFamily._()
-    : super(
-        retry: null,
+/// See also [getSelectedProxyName].
+@ProviderFor(getSelectedProxyName)
+const getSelectedProxyNameProvider = GetSelectedProxyNameFamily();
+
+/// See also [getSelectedProxyName].
+class GetSelectedProxyNameFamily extends Family<String?> {
+  /// See also [getSelectedProxyName].
+  const GetSelectedProxyNameFamily();
+
+  /// See also [getSelectedProxyName].
+  GetSelectedProxyNameProvider call(String groupName) {
+    return GetSelectedProxyNameProvider(groupName);
+  }
+
+  @override
+  GetSelectedProxyNameProvider getProviderOverride(
+    covariant GetSelectedProxyNameProvider provider,
+  ) {
+    return call(provider.groupName);
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'getSelectedProxyNameProvider';
+}
+
+/// See also [getSelectedProxyName].
+class GetSelectedProxyNameProvider extends AutoDisposeProvider<String?> {
+  /// See also [getSelectedProxyName].
+  GetSelectedProxyNameProvider(String groupName)
+    : this._internal(
+        (ref) =>
+            getSelectedProxyName(ref as GetSelectedProxyNameRef, groupName),
+        from: getSelectedProxyNameProvider,
         name: r'getSelectedProxyNameProvider',
-        dependencies: null,
-        $allTransitiveDependencies: null,
-        isAutoDispose: true,
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$getSelectedProxyNameHash,
+        dependencies: GetSelectedProxyNameFamily._dependencies,
+        allTransitiveDependencies:
+            GetSelectedProxyNameFamily._allTransitiveDependencies,
+        groupName: groupName,
       );
 
-  GetSelectedProxyNameProvider call(String groupName) =>
-      GetSelectedProxyNameProvider._(argument: groupName, from: this);
+  GetSelectedProxyNameProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.groupName,
+  }) : super.internal();
+
+  final String groupName;
 
   @override
-  String toString() => r'getSelectedProxyNameProvider';
+  Override overrideWith(
+    String? Function(GetSelectedProxyNameRef provider) create,
+  ) {
+    return ProviderOverride(
+      origin: this,
+      override: GetSelectedProxyNameProvider._internal(
+        (ref) => create(ref as GetSelectedProxyNameRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        groupName: groupName,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeProviderElement<String?> createElement() {
+    return _GetSelectedProxyNameProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is GetSelectedProxyNameProvider &&
+        other.groupName == groupName;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, groupName.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
 }
 
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin GetSelectedProxyNameRef on AutoDisposeProviderRef<String?> {
+  /// The parameter `groupName` of this provider.
+  String get groupName;
+}
+
+class _GetSelectedProxyNameProviderElement
+    extends AutoDisposeProviderElement<String?>
+    with GetSelectedProxyNameRef {
+  _GetSelectedProxyNameProviderElement(super.provider);
+
+  @override
+  String get groupName => (origin as GetSelectedProxyNameProvider).groupName;
+}
+
+String _$getProxyDescHash() => r'c173fe2393d9c4f5d5d17480e69f9126bb76a17d';
+
+/// See also [getProxyDesc].
 @ProviderFor(getProxyDesc)
-const getProxyDescProvider = GetProxyDescFamily._();
+const getProxyDescProvider = GetProxyDescFamily();
 
-final class GetProxyDescProvider
-    extends $FunctionalProvider<String, String, String>
-    with $Provider<String> {
-  const GetProxyDescProvider._({
-    required GetProxyDescFamily super.from,
-    required Proxy super.argument,
-  }) : super(
-         retry: null,
-         name: r'getProxyDescProvider',
-         isAutoDispose: true,
-         dependencies: null,
-         $allTransitiveDependencies: null,
-       );
+/// See also [getProxyDesc].
+class GetProxyDescFamily extends Family<String> {
+  /// See also [getProxyDesc].
+  const GetProxyDescFamily();
 
-  @override
-  String debugGetCreateSourceHash() => _$getProxyDescHash();
-
-  @override
-  String toString() {
-    return r'getProxyDescProvider'
-        ''
-        '($argument)';
-  }
-
-  @$internal
-  @override
-  $ProviderElement<String> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
-
-  @override
-  String create(Ref ref) {
-    final argument = this.argument as Proxy;
-    return getProxyDesc(ref, argument);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(String value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<String>(value),
-    );
+  /// See also [getProxyDesc].
+  GetProxyDescProvider call(Proxy proxy) {
+    return GetProxyDescProvider(proxy);
   }
 
   @override
-  bool operator ==(Object other) {
-    return other is GetProxyDescProvider && other.argument == argument;
+  GetProxyDescProvider getProviderOverride(
+    covariant GetProxyDescProvider provider,
+  ) {
+    return call(provider.proxy);
   }
 
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
   @override
-  int get hashCode {
-    return argument.hashCode;
-  }
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'getProxyDescProvider';
 }
 
-String _$getProxyDescHash() => r'4579b55bf7e9fbcfdf91b91619bd0320c585f23d';
-
-final class GetProxyDescFamily extends $Family
-    with $FunctionalFamilyOverride<String, Proxy> {
-  const GetProxyDescFamily._()
-    : super(
-        retry: null,
+/// See also [getProxyDesc].
+class GetProxyDescProvider extends AutoDisposeProvider<String> {
+  /// See also [getProxyDesc].
+  GetProxyDescProvider(Proxy proxy)
+    : this._internal(
+        (ref) => getProxyDesc(ref as GetProxyDescRef, proxy),
+        from: getProxyDescProvider,
         name: r'getProxyDescProvider',
-        dependencies: null,
-        $allTransitiveDependencies: null,
-        isAutoDispose: true,
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$getProxyDescHash,
+        dependencies: GetProxyDescFamily._dependencies,
+        allTransitiveDependencies:
+            GetProxyDescFamily._allTransitiveDependencies,
+        proxy: proxy,
       );
 
-  GetProxyDescProvider call(Proxy proxy) =>
-      GetProxyDescProvider._(argument: proxy, from: this);
+  GetProxyDescProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.proxy,
+  }) : super.internal();
+
+  final Proxy proxy;
 
   @override
-  String toString() => r'getProxyDescProvider';
-}
-
-@ProviderFor(checkIp)
-const checkIpProvider = CheckIpProvider._();
-
-final class CheckIpProvider
-    extends
-        $FunctionalProvider<
-          VM3<bool, int, bool>,
-          VM3<bool, int, bool>,
-          VM3<bool, int, bool>
-        >
-    with $Provider<VM3<bool, int, bool>> {
-  const CheckIpProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'checkIpProvider',
-        isAutoDispose: true,
+  Override overrideWith(String Function(GetProxyDescRef provider) create) {
+    return ProviderOverride(
+      origin: this,
+      override: GetProxyDescProvider._internal(
+        (ref) => create(ref as GetProxyDescRef),
+        from: from,
+        name: null,
         dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$checkIpHash();
-
-  @$internal
-  @override
-  $ProviderElement<VM3<bool, int, bool>> $createElement(
-    $ProviderPointer pointer,
-  ) => $ProviderElement(pointer);
-
-  @override
-  VM3<bool, int, bool> create(Ref ref) {
-    return checkIp(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(VM3<bool, int, bool> value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<VM3<bool, int, bool>>(value),
-    );
-  }
-}
-
-String _$checkIpHash() => r'7d8be66f0e8164bcf20c32659da2a4bea9893596';
-
-@ProviderFor(genColorScheme)
-const genColorSchemeProvider = GenColorSchemeFamily._();
-
-final class GenColorSchemeProvider
-    extends $FunctionalProvider<ColorScheme, ColorScheme, ColorScheme>
-    with $Provider<ColorScheme> {
-  const GenColorSchemeProvider._({
-    required GenColorSchemeFamily super.from,
-    required (Brightness, {Color? color, bool ignoreConfig}) super.argument,
-  }) : super(
-         retry: null,
-         name: r'genColorSchemeProvider',
-         isAutoDispose: true,
-         dependencies: null,
-         $allTransitiveDependencies: null,
-       );
-
-  @override
-  String debugGetCreateSourceHash() => _$genColorSchemeHash();
-
-  @override
-  String toString() {
-    return r'genColorSchemeProvider'
-        ''
-        '$argument';
-  }
-
-  @$internal
-  @override
-  $ProviderElement<ColorScheme> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
-
-  @override
-  ColorScheme create(Ref ref) {
-    final argument =
-        this.argument as (Brightness, {Color? color, bool ignoreConfig});
-    return genColorScheme(
-      ref,
-      argument.$1,
-      color: argument.color,
-      ignoreConfig: argument.ignoreConfig,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        proxy: proxy,
+      ),
     );
   }
 
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(ColorScheme value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<ColorScheme>(value),
-    );
+  @override
+  AutoDisposeProviderElement<String> createElement() {
+    return _GetProxyDescProviderElement(this);
   }
 
   @override
   bool operator ==(Object other) {
-    return other is GenColorSchemeProvider && other.argument == argument;
+    return other is GetProxyDescProvider && other.proxy == proxy;
   }
 
   @override
   int get hashCode {
-    return argument.hashCode;
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, proxy.hashCode);
+
+    return _SystemHash.finish(hash);
   }
 }
 
-String _$genColorSchemeHash() => r'25f648db7c33ac00e7152f3d304da372a4de9fdd';
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin GetProxyDescRef on AutoDisposeProviderRef<String> {
+  /// The parameter `proxy` of this provider.
+  Proxy get proxy;
+}
 
-final class GenColorSchemeFamily extends $Family
-    with
-        $FunctionalFamilyOverride<
-          ColorScheme,
-          (Brightness, {Color? color, bool ignoreConfig})
-        > {
-  const GenColorSchemeFamily._()
-    : super(
-        retry: null,
-        name: r'genColorSchemeProvider',
-        dependencies: null,
-        $allTransitiveDependencies: null,
-        isAutoDispose: true,
+class _GetProxyDescProviderElement extends AutoDisposeProviderElement<String>
+    with GetProxyDescRef {
+  _GetProxyDescProviderElement(super.provider);
+
+  @override
+  Proxy get proxy => (origin as GetProxyDescProvider).proxy;
+}
+
+String _$getProfileOverrideDataHash() =>
+    r'a17ec085f1733b63b123ac08aa7737588c048c5f';
+
+/// See also [getProfileOverrideData].
+@ProviderFor(getProfileOverrideData)
+const getProfileOverrideDataProvider = GetProfileOverrideDataFamily();
+
+/// See also [getProfileOverrideData].
+class GetProfileOverrideDataFamily extends Family<OverrideData?> {
+  /// See also [getProfileOverrideData].
+  const GetProfileOverrideDataFamily();
+
+  /// See also [getProfileOverrideData].
+  GetProfileOverrideDataProvider call(String profileId) {
+    return GetProfileOverrideDataProvider(profileId);
+  }
+
+  @override
+  GetProfileOverrideDataProvider getProviderOverride(
+    covariant GetProfileOverrideDataProvider provider,
+  ) {
+    return call(provider.profileId);
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'getProfileOverrideDataProvider';
+}
+
+/// See also [getProfileOverrideData].
+class GetProfileOverrideDataProvider
+    extends AutoDisposeProvider<OverrideData?> {
+  /// See also [getProfileOverrideData].
+  GetProfileOverrideDataProvider(String profileId)
+    : this._internal(
+        (ref) =>
+            getProfileOverrideData(ref as GetProfileOverrideDataRef, profileId),
+        from: getProfileOverrideDataProvider,
+        name: r'getProfileOverrideDataProvider',
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$getProfileOverrideDataHash,
+        dependencies: GetProfileOverrideDataFamily._dependencies,
+        allTransitiveDependencies:
+            GetProfileOverrideDataFamily._allTransitiveDependencies,
+        profileId: profileId,
       );
 
+  GetProfileOverrideDataProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.profileId,
+  }) : super.internal();
+
+  final String profileId;
+
+  @override
+  Override overrideWith(
+    OverrideData? Function(GetProfileOverrideDataRef provider) create,
+  ) {
+    return ProviderOverride(
+      origin: this,
+      override: GetProfileOverrideDataProvider._internal(
+        (ref) => create(ref as GetProfileOverrideDataRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        profileId: profileId,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeProviderElement<OverrideData?> createElement() {
+    return _GetProfileOverrideDataProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is GetProfileOverrideDataProvider &&
+        other.profileId == profileId;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, profileId.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin GetProfileOverrideDataRef on AutoDisposeProviderRef<OverrideData?> {
+  /// The parameter `profileId` of this provider.
+  String get profileId;
+}
+
+class _GetProfileOverrideDataProviderElement
+    extends AutoDisposeProviderElement<OverrideData?>
+    with GetProfileOverrideDataRef {
+  _GetProfileOverrideDataProviderElement(super.provider);
+
+  @override
+  String get profileId => (origin as GetProfileOverrideDataProvider).profileId;
+}
+
+String _$layoutChangeHash() => r'f25182e1dfaf3c70000404d7635bb1e1db09efbb';
+
+/// See also [layoutChange].
+@ProviderFor(layoutChange)
+final layoutChangeProvider = AutoDisposeProvider<VM2?>.internal(
+  layoutChange,
+  name: r'layoutChangeProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$layoutChangeHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef LayoutChangeRef = AutoDisposeProviderRef<VM2?>;
+String _$checkIpHash() => r'07ebf8d032349e2b3adda483e68b1936ffbed68d';
+
+/// See also [checkIp].
+@ProviderFor(checkIp)
+final checkIpProvider = AutoDisposeProvider<VM2<int, bool>>.internal(
+  checkIp,
+  name: r'checkIpProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$checkIpHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef CheckIpRef = AutoDisposeProviderRef<VM2<int, bool>>;
+String _$genColorSchemeHash() => r'b18f15c938a8132ee4ed02cdfc02f3b9f01724e2';
+
+/// See also [genColorScheme].
+@ProviderFor(genColorScheme)
+const genColorSchemeProvider = GenColorSchemeFamily();
+
+/// See also [genColorScheme].
+class GenColorSchemeFamily extends Family<ColorScheme> {
+  /// See also [genColorScheme].
+  const GenColorSchemeFamily();
+
+  /// See also [genColorScheme].
   GenColorSchemeProvider call(
     Brightness brightness, {
     Color? color,
     bool ignoreConfig = false,
-  }) => GenColorSchemeProvider._(
-    argument: (brightness, color: color, ignoreConfig: ignoreConfig),
-    from: this,
-  );
-
-  @override
-  String toString() => r'genColorSchemeProvider';
-}
-
-@ProviderFor(currentSetupState)
-const currentSetupStateProvider = CurrentSetupStateProvider._();
-
-final class CurrentSetupStateProvider
-    extends $FunctionalProvider<SetupState?, SetupState?, SetupState?>
-    with $Provider<SetupState?> {
-  const CurrentSetupStateProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'currentSetupStateProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$currentSetupStateHash();
-
-  @$internal
-  @override
-  $ProviderElement<SetupState?> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
-
-  @override
-  SetupState? create(Ref ref) {
-    return currentSetupState(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(SetupState? value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<SetupState?>(value),
+  }) {
+    return GenColorSchemeProvider(
+      brightness,
+      color: color,
+      ignoreConfig: ignoreConfig,
     );
   }
-}
-
-String _$currentSetupStateHash() => r'd687b0563ea8cc8eb1ca345fdfeee3411d67ad47';
-
-@ProviderFor(currentBrightness)
-const currentBrightnessProvider = CurrentBrightnessProvider._();
-
-final class CurrentBrightnessProvider
-    extends $FunctionalProvider<Brightness, Brightness, Brightness>
-    with $Provider<Brightness> {
-  const CurrentBrightnessProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'currentBrightnessProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
 
   @override
-  String debugGetCreateSourceHash() => _$currentBrightnessHash();
-
-  @$internal
-  @override
-  $ProviderElement<Brightness> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
-
-  @override
-  Brightness create(Ref ref) {
-    return currentBrightness(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(Brightness value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<Brightness>(value),
+  GenColorSchemeProvider getProviderOverride(
+    covariant GenColorSchemeProvider provider,
+  ) {
+    return call(
+      provider.brightness,
+      color: provider.color,
+      ignoreConfig: provider.ignoreConfig,
     );
   }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'genColorSchemeProvider';
 }
 
-String _$currentBrightnessHash() => r'ab56c47af4fcae773c8f9f81c91800c1e1890b70';
+/// See also [genColorScheme].
+class GenColorSchemeProvider extends AutoDisposeProvider<ColorScheme> {
+  /// See also [genColorScheme].
+  GenColorSchemeProvider(
+    Brightness brightness, {
+    Color? color,
+    bool ignoreConfig = false,
+  }) : this._internal(
+         (ref) => genColorScheme(
+           ref as GenColorSchemeRef,
+           brightness,
+           color: color,
+           ignoreConfig: ignoreConfig,
+         ),
+         from: genColorSchemeProvider,
+         name: r'genColorSchemeProvider',
+         debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+             ? null
+             : _$genColorSchemeHash,
+         dependencies: GenColorSchemeFamily._dependencies,
+         allTransitiveDependencies:
+             GenColorSchemeFamily._allTransitiveDependencies,
+         brightness: brightness,
+         color: color,
+         ignoreConfig: ignoreConfig,
+       );
 
-@ProviderFor(autoSetSystemDnsState)
-const autoSetSystemDnsStateProvider = AutoSetSystemDnsStateProvider._();
+  GenColorSchemeProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.brightness,
+    required this.color,
+    required this.ignoreConfig,
+  }) : super.internal();
 
-final class AutoSetSystemDnsStateProvider
-    extends
-        $FunctionalProvider<VM2<bool, bool>, VM2<bool, bool>, VM2<bool, bool>>
-    with $Provider<VM2<bool, bool>> {
-  const AutoSetSystemDnsStateProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'autoSetSystemDnsStateProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+  final Brightness brightness;
+  final Color? color;
+  final bool ignoreConfig;
 
   @override
-  String debugGetCreateSourceHash() => _$autoSetSystemDnsStateHash();
-
-  @$internal
-  @override
-  $ProviderElement<VM2<bool, bool>> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
-
-  @override
-  VM2<bool, bool> create(Ref ref) {
-    return autoSetSystemDnsState(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(VM2<bool, bool> value) {
-    return $ProviderOverride(
+  Override overrideWith(
+    ColorScheme Function(GenColorSchemeRef provider) create,
+  ) {
+    return ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<VM2<bool, bool>>(value),
-    );
-  }
-}
-
-String _$autoSetSystemDnsStateHash() =>
-    r'a8805965efe78241613bfde55f4ea8fa12a6ea32';
-
-@ProviderFor(needUpdateGroups)
-const needUpdateGroupsProvider = NeedUpdateGroupsProvider._();
-
-final class NeedUpdateGroupsProvider
-    extends
-        $FunctionalProvider<
-          VM3<bool, int, ProxiesSortType>,
-          VM3<bool, int, ProxiesSortType>,
-          VM3<bool, int, ProxiesSortType>
-        >
-    with $Provider<VM3<bool, int, ProxiesSortType>> {
-  const NeedUpdateGroupsProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'needUpdateGroupsProvider',
-        isAutoDispose: true,
+      override: GenColorSchemeProvider._internal(
+        (ref) => create(ref as GenColorSchemeRef),
+        from: from,
+        name: null,
         dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$needUpdateGroupsHash();
-
-  @$internal
-  @override
-  $ProviderElement<VM3<bool, int, ProxiesSortType>> $createElement(
-    $ProviderPointer pointer,
-  ) => $ProviderElement(pointer);
-
-  @override
-  VM3<bool, int, ProxiesSortType> create(Ref ref) {
-    return needUpdateGroups(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(VM3<bool, int, ProxiesSortType> value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<VM3<bool, int, ProxiesSortType>>(
-        value,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        brightness: brightness,
+        color: color,
+        ignoreConfig: ignoreConfig,
       ),
     );
   }
-}
-
-String _$needUpdateGroupsHash() => r'7913b7b74caf9f2c72fd32729d52b7c6ac9258e8';
-
-@ProviderFor(sharedState)
-const sharedStateProvider = SharedStateProvider._();
-
-final class SharedStateProvider
-    extends $FunctionalProvider<SharedState, SharedState, SharedState>
-    with $Provider<SharedState> {
-  const SharedStateProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'sharedStateProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
 
   @override
-  String debugGetCreateSourceHash() => _$sharedStateHash();
-
-  @$internal
-  @override
-  $ProviderElement<SharedState> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
-
-  @override
-  SharedState create(Ref ref) {
-    return sharedState(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(SharedState value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<SharedState>(value),
-    );
-  }
-}
-
-String _$sharedStateHash() => r'864fdf3f750fb6d1beadcb5f9226a614a9cb2caa';
-
-@ProviderFor(overlayTopOffset)
-const overlayTopOffsetProvider = OverlayTopOffsetProvider._();
-
-final class OverlayTopOffsetProvider
-    extends $FunctionalProvider<double, double, double>
-    with $Provider<double> {
-  const OverlayTopOffsetProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'overlayTopOffsetProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$overlayTopOffsetHash();
-
-  @$internal
-  @override
-  $ProviderElement<double> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
-
-  @override
-  double create(Ref ref) {
-    return overlayTopOffset(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(double value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<double>(value),
-    );
-  }
-}
-
-String _$overlayTopOffsetHash() => r'b2462f67acbd88b7a881dfe4c6353e68ba49961d';
-
-@ProviderFor(profile)
-const profileProvider = ProfileFamily._();
-
-final class ProfileProvider
-    extends $FunctionalProvider<Profile?, Profile?, Profile?>
-    with $Provider<Profile?> {
-  const ProfileProvider._({
-    required ProfileFamily super.from,
-    required int? super.argument,
-  }) : super(
-         retry: null,
-         name: r'profileProvider',
-         isAutoDispose: true,
-         dependencies: null,
-         $allTransitiveDependencies: null,
-       );
-
-  @override
-  String debugGetCreateSourceHash() => _$profileHash();
-
-  @override
-  String toString() {
-    return r'profileProvider'
-        ''
-        '($argument)';
-  }
-
-  @$internal
-  @override
-  $ProviderElement<Profile?> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
-
-  @override
-  Profile? create(Ref ref) {
-    final argument = this.argument as int?;
-    return profile(ref, argument);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(Profile? value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<Profile?>(value),
-    );
+  AutoDisposeProviderElement<ColorScheme> createElement() {
+    return _GenColorSchemeProviderElement(this);
   }
 
   @override
   bool operator ==(Object other) {
-    return other is ProfileProvider && other.argument == argument;
+    return other is GenColorSchemeProvider &&
+        other.brightness == brightness &&
+        other.color == color &&
+        other.ignoreConfig == ignoreConfig;
   }
 
   @override
   int get hashCode {
-    return argument.hashCode;
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, brightness.hashCode);
+    hash = _SystemHash.combine(hash, color.hashCode);
+    hash = _SystemHash.combine(hash, ignoreConfig.hashCode);
+
+    return _SystemHash.finish(hash);
   }
 }
 
-String _$profileHash() => r'8de429dc0844c6b6155032ad3c9546231e08cead';
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin GenColorSchemeRef on AutoDisposeProviderRef<ColorScheme> {
+  /// The parameter `brightness` of this provider.
+  Brightness get brightness;
 
-final class ProfileFamily extends $Family
-    with $FunctionalFamilyOverride<Profile?, int?> {
-  const ProfileFamily._()
-    : super(
-        retry: null,
-        name: r'profileProvider',
-        dependencies: null,
-        $allTransitiveDependencies: null,
-        isAutoDispose: true,
-      );
+  /// The parameter `color` of this provider.
+  Color? get color;
 
-  ProfileProvider call(int? profileId) =>
-      ProfileProvider._(argument: profileId, from: this);
-
-  @override
-  String toString() => r'profileProvider';
+  /// The parameter `ignoreConfig` of this provider.
+  bool get ignoreConfig;
 }
 
-@ProviderFor(overwriteType)
-const overwriteTypeProvider = OverwriteTypeFamily._();
-
-final class OverwriteTypeProvider
-    extends $FunctionalProvider<OverwriteType, OverwriteType, OverwriteType>
-    with $Provider<OverwriteType> {
-  const OverwriteTypeProvider._({
-    required OverwriteTypeFamily super.from,
-    required int? super.argument,
-  }) : super(
-         retry: null,
-         name: r'overwriteTypeProvider',
-         isAutoDispose: true,
-         dependencies: null,
-         $allTransitiveDependencies: null,
-       );
+class _GenColorSchemeProviderElement
+    extends AutoDisposeProviderElement<ColorScheme>
+    with GenColorSchemeRef {
+  _GenColorSchemeProviderElement(super.provider);
 
   @override
-  String debugGetCreateSourceHash() => _$overwriteTypeHash();
-
+  Brightness get brightness => (origin as GenColorSchemeProvider).brightness;
   @override
-  String toString() {
-    return r'overwriteTypeProvider'
-        ''
-        '($argument)';
-  }
-
-  @$internal
+  Color? get color => (origin as GenColorSchemeProvider).color;
   @override
-  $ProviderElement<OverwriteType> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
+  bool get ignoreConfig => (origin as GenColorSchemeProvider).ignoreConfig;
+}
 
-  @override
-  OverwriteType create(Ref ref) {
-    final argument = this.argument as int?;
-    return overwriteType(ref, argument);
-  }
+String _$needSetupHash() => r'3668e8dc9f40a9bea45c94321804eb3afa0e7c51';
 
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(OverwriteType value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<OverwriteType>(value),
+/// See also [needSetup].
+@ProviderFor(needSetup)
+final needSetupProvider =
+    AutoDisposeProvider<VM3<String?, String?, Dns?>>.internal(
+      needSetup,
+      name: r'needSetupProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$needSetupHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
     );
-  }
 
-  @override
-  bool operator ==(Object other) {
-    return other is OverwriteTypeProvider && other.argument == argument;
-  }
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef NeedSetupRef = AutoDisposeProviderRef<VM3<String?, String?, Dns?>>;
+String _$currentBrightnessHash() => r'ab56c47af4fcae773c8f9f81c91800c1e1890b70';
 
-  @override
-  int get hashCode {
-    return argument.hashCode;
-  }
-}
+/// See also [currentBrightness].
+@ProviderFor(currentBrightness)
+final currentBrightnessProvider = AutoDisposeProvider<Brightness>.internal(
+  currentBrightness,
+  name: r'currentBrightnessProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$currentBrightnessHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
 
-String _$overwriteTypeHash() => r'03a8ab8ddec76935da5fa231270b65baa70fd727';
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef CurrentBrightnessRef = AutoDisposeProviderRef<Brightness>;
+String _$autoSetSystemDnsStateHash() =>
+    r'2e0976e079100325b1ca797285df48a94c2c066c';
 
-final class OverwriteTypeFamily extends $Family
-    with $FunctionalFamilyOverride<OverwriteType, int?> {
-  const OverwriteTypeFamily._()
-    : super(
-        retry: null,
-        name: r'overwriteTypeProvider',
-        dependencies: null,
-        $allTransitiveDependencies: null,
-        isAutoDispose: true,
-      );
-
-  OverwriteTypeProvider call(int? profileId) =>
-      OverwriteTypeProvider._(argument: profileId, from: this);
-
-  @override
-  String toString() => r'overwriteTypeProvider';
-}
-
-@ProviderFor(script)
-const scriptProvider = ScriptFamily._();
-
-final class ScriptProvider
-    extends $FunctionalProvider<AsyncValue<Script?>, Script?, FutureOr<Script?>>
-    with $FutureModifier<Script?>, $FutureProvider<Script?> {
-  const ScriptProvider._({
-    required ScriptFamily super.from,
-    required int? super.argument,
-  }) : super(
-         retry: null,
-         name: r'scriptProvider',
-         isAutoDispose: true,
-         dependencies: null,
-         $allTransitiveDependencies: null,
-       );
-
-  @override
-  String debugGetCreateSourceHash() => _$scriptHash();
-
-  @override
-  String toString() {
-    return r'scriptProvider'
-        ''
-        '($argument)';
-  }
-
-  @$internal
-  @override
-  $FutureProviderElement<Script?> $createElement($ProviderPointer pointer) =>
-      $FutureProviderElement(pointer);
-
-  @override
-  FutureOr<Script?> create(Ref ref) {
-    final argument = this.argument as int?;
-    return script(ref, argument);
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return other is ScriptProvider && other.argument == argument;
-  }
-
-  @override
-  int get hashCode {
-    return argument.hashCode;
-  }
-}
-
-String _$scriptHash() => r'b12a6dbe34e08cb1232afafa8b0b0f5363d28bc0';
-
-final class ScriptFamily extends $Family
-    with $FunctionalFamilyOverride<FutureOr<Script?>, int?> {
-  const ScriptFamily._()
-    : super(
-        retry: null,
-        name: r'scriptProvider',
-        dependencies: null,
-        $allTransitiveDependencies: null,
-        isAutoDispose: true,
-      );
-
-  ScriptProvider call(int? scriptId) =>
-      ScriptProvider._(argument: scriptId, from: this);
-
-  @override
-  String toString() => r'scriptProvider';
-}
-
-@ProviderFor(setupState)
-const setupStateProvider = SetupStateFamily._();
-
-final class SetupStateProvider
-    extends
-        $FunctionalProvider<
-          AsyncValue<SetupState>,
-          SetupState,
-          FutureOr<SetupState>
-        >
-    with $FutureModifier<SetupState>, $FutureProvider<SetupState> {
-  const SetupStateProvider._({
-    required SetupStateFamily super.from,
-    required int? super.argument,
-  }) : super(
-         retry: null,
-         name: r'setupStateProvider',
-         isAutoDispose: true,
-         dependencies: null,
-         $allTransitiveDependencies: null,
-       );
-
-  @override
-  String debugGetCreateSourceHash() => _$setupStateHash();
-
-  @override
-  String toString() {
-    return r'setupStateProvider'
-        ''
-        '($argument)';
-  }
-
-  @$internal
-  @override
-  $FutureProviderElement<SetupState> $createElement($ProviderPointer pointer) =>
-      $FutureProviderElement(pointer);
-
-  @override
-  FutureOr<SetupState> create(Ref ref) {
-    final argument = this.argument as int?;
-    return setupState(ref, argument);
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return other is SetupStateProvider && other.argument == argument;
-  }
-
-  @override
-  int get hashCode {
-    return argument.hashCode;
-  }
-}
-
-String _$setupStateHash() => r'8e0c849fa1a51ee15f8b40be94e3094182325b58';
-
-final class SetupStateFamily extends $Family
-    with $FunctionalFamilyOverride<FutureOr<SetupState>, int?> {
-  const SetupStateFamily._()
-    : super(
-        retry: null,
-        name: r'setupStateProvider',
-        dependencies: null,
-        $allTransitiveDependencies: null,
-        isAutoDispose: true,
-      );
-
-  SetupStateProvider call(int? profileId) =>
-      SetupStateProvider._(argument: profileId, from: this);
-
-  @override
-  String toString() => r'setupStateProvider';
-}
-
-@ProviderFor(AccessControlState)
-const accessControlStateProvider = AccessControlStateProvider._();
-
-final class AccessControlStateProvider
-    extends $NotifierProvider<AccessControlState, AccessControlProps> {
-  const AccessControlStateProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'accessControlStateProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$accessControlStateHash();
-
-  @$internal
-  @override
-  AccessControlState create() => AccessControlState();
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(AccessControlProps value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<AccessControlProps>(value),
+/// See also [autoSetSystemDnsState].
+@ProviderFor(autoSetSystemDnsState)
+final autoSetSystemDnsStateProvider =
+    AutoDisposeProvider<VM2<bool, bool>>.internal(
+      autoSetSystemDnsState,
+      name: r'autoSetSystemDnsStateProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$autoSetSystemDnsStateHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
     );
-  }
-}
 
-String _$accessControlStateHash() =>
-    r'08fda2e342d027c1bdd49c1ef9a13f2e775db204';
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef AutoSetSystemDnsStateRef = AutoDisposeProviderRef<VM2<bool, bool>>;
+String _$profileOverrideStateHash() =>
+    r'0a1657ff3b4657fcc481a4cdd1deda5b353bf845';
 
-abstract class _$AccessControlState extends $Notifier<AccessControlProps> {
-  AccessControlProps build();
-  @$mustCallSuper
-  @override
-  void runBuild() {
-    final created = build();
-    final ref = this.ref as $Ref<AccessControlProps, AccessControlProps>;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<AccessControlProps, AccessControlProps>,
-              AccessControlProps,
-              Object?,
-              Object?
-            >;
-    element.handleValue(ref, created);
-  }
-}
+/// See also [ProfileOverrideState].
+@ProviderFor(ProfileOverrideState)
+final profileOverrideStateProvider =
+    AutoDisposeNotifierProvider<
+      ProfileOverrideState,
+      ProfileOverrideStateModel
+    >.internal(
+      ProfileOverrideState.new,
+      name: r'profileOverrideStateProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$profileOverrideStateHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+typedef _$ProfileOverrideState = AutoDisposeNotifier<ProfileOverrideStateModel>;
+String _$queryHash() => r'e99b2a2439872f88f09fee8d63f0cc7fb4852186';
+
+/// See also [Query].
+@ProviderFor(Query)
+final queryProvider = AutoDisposeNotifierProvider<Query, String>.internal(
+  Query.new,
+  name: r'queryProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$queryHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef _$Query = AutoDisposeNotifier<String>;
+// ignore_for_file: type=lint
+// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

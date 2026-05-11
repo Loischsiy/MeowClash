@@ -1,8 +1,8 @@
 import 'package:meow_clash/common/common.dart';
-import 'package:meow_clash/controller.dart';
 import 'package:meow_clash/enum/enum.dart';
 import 'package:meow_clash/models/common.dart';
 import 'package:meow_clash/providers/config.dart';
+import 'package:meow_clash/state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -31,15 +31,15 @@ class _HotKeyManagerState extends ConsumerState<HotKeyManager> {
   Future<void> _handleHotKeyAction(HotAction action) async {
     switch (action) {
       case HotAction.mode:
-        appController.updateMode();
+        globalState.appController.updateMode();
       case HotAction.start:
-        appController.updateStart();
+        globalState.appController.updateStart();
       case HotAction.view:
-        appController.updateVisible();
+        globalState.appController.updateVisible();
       case HotAction.proxy:
-        appController.updateSystemProxy();
+        globalState.appController.updateSystemProxy();
       case HotAction.tun:
-        appController.updateTun();
+        globalState.appController.updateTun();
     }
   }
 
@@ -78,7 +78,7 @@ class _HotKeyManagerState extends ConsumerState<HotKeyManager> {
       child: Actions(
         actions: {
           CloseWindowIntent: CallbackAction<CloseWindowIntent>(
-            onInvoke: (_) => appController.handleBackOrExit(),
+            onInvoke: (_) => globalState.appController.handleBackOrExit(),
           ),
           DoNothingIntent: CallbackAction<DoNothingIntent>(
             onInvoke: (_) => null,

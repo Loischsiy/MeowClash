@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$AppSettingProps {
 
- String? get locale;@JsonKey(fromJson: dashboardWidgetsSafeFormJson) List<DashboardWidget> get dashboardWidgets; bool get onlyStatisticsProxy; bool get autoLaunch; bool get silentLaunch; bool get autoRun; bool get openLogs; bool get closeConnections; String get testUrl; bool get isAnimateToPage; bool get autoCheckUpdate; bool get showLabel; bool get disclaimerAccepted; bool get crashlyticsTip; bool get crashlytics; bool get minimizeOnExit; bool get hidden; bool get developerMode; RestoreStrategy get restoreStrategy; bool get showTrayTitle;
+ String? get locale;@JsonKey(fromJson: dashboardWidgetsSafeFormJson) List<DashboardWidget> get dashboardWidgets; bool get onlyStatisticsProxy; bool get autoLaunch; bool get silentLaunch; bool get smartDelayLaunch; bool get autoRun; bool get openLogs; bool get closeConnections; String get testUrl; bool get isAnimateToPage; bool get enableNavBarHapticFeedback; bool get autoCheckUpdate; bool get showLabel; bool get disclaimerAccepted; bool get minimizeOnExit; bool get hidden; bool get developerMode; bool get enableHighRefreshRate; RecoveryStrategy get recoveryStrategy;
 /// Create a copy of AppSettingProps
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $AppSettingPropsCopyWith<AppSettingProps> get copyWith => _$AppSettingPropsCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AppSettingProps&&(identical(other.locale, locale) || other.locale == locale)&&const DeepCollectionEquality().equals(other.dashboardWidgets, dashboardWidgets)&&(identical(other.onlyStatisticsProxy, onlyStatisticsProxy) || other.onlyStatisticsProxy == onlyStatisticsProxy)&&(identical(other.autoLaunch, autoLaunch) || other.autoLaunch == autoLaunch)&&(identical(other.silentLaunch, silentLaunch) || other.silentLaunch == silentLaunch)&&(identical(other.autoRun, autoRun) || other.autoRun == autoRun)&&(identical(other.openLogs, openLogs) || other.openLogs == openLogs)&&(identical(other.closeConnections, closeConnections) || other.closeConnections == closeConnections)&&(identical(other.testUrl, testUrl) || other.testUrl == testUrl)&&(identical(other.isAnimateToPage, isAnimateToPage) || other.isAnimateToPage == isAnimateToPage)&&(identical(other.autoCheckUpdate, autoCheckUpdate) || other.autoCheckUpdate == autoCheckUpdate)&&(identical(other.showLabel, showLabel) || other.showLabel == showLabel)&&(identical(other.disclaimerAccepted, disclaimerAccepted) || other.disclaimerAccepted == disclaimerAccepted)&&(identical(other.crashlyticsTip, crashlyticsTip) || other.crashlyticsTip == crashlyticsTip)&&(identical(other.crashlytics, crashlytics) || other.crashlytics == crashlytics)&&(identical(other.minimizeOnExit, minimizeOnExit) || other.minimizeOnExit == minimizeOnExit)&&(identical(other.hidden, hidden) || other.hidden == hidden)&&(identical(other.developerMode, developerMode) || other.developerMode == developerMode)&&(identical(other.restoreStrategy, restoreStrategy) || other.restoreStrategy == restoreStrategy)&&(identical(other.showTrayTitle, showTrayTitle) || other.showTrayTitle == showTrayTitle));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AppSettingProps&&(identical(other.locale, locale) || other.locale == locale)&&const DeepCollectionEquality().equals(other.dashboardWidgets, dashboardWidgets)&&(identical(other.onlyStatisticsProxy, onlyStatisticsProxy) || other.onlyStatisticsProxy == onlyStatisticsProxy)&&(identical(other.autoLaunch, autoLaunch) || other.autoLaunch == autoLaunch)&&(identical(other.silentLaunch, silentLaunch) || other.silentLaunch == silentLaunch)&&(identical(other.smartDelayLaunch, smartDelayLaunch) || other.smartDelayLaunch == smartDelayLaunch)&&(identical(other.autoRun, autoRun) || other.autoRun == autoRun)&&(identical(other.openLogs, openLogs) || other.openLogs == openLogs)&&(identical(other.closeConnections, closeConnections) || other.closeConnections == closeConnections)&&(identical(other.testUrl, testUrl) || other.testUrl == testUrl)&&(identical(other.isAnimateToPage, isAnimateToPage) || other.isAnimateToPage == isAnimateToPage)&&(identical(other.enableNavBarHapticFeedback, enableNavBarHapticFeedback) || other.enableNavBarHapticFeedback == enableNavBarHapticFeedback)&&(identical(other.autoCheckUpdate, autoCheckUpdate) || other.autoCheckUpdate == autoCheckUpdate)&&(identical(other.showLabel, showLabel) || other.showLabel == showLabel)&&(identical(other.disclaimerAccepted, disclaimerAccepted) || other.disclaimerAccepted == disclaimerAccepted)&&(identical(other.minimizeOnExit, minimizeOnExit) || other.minimizeOnExit == minimizeOnExit)&&(identical(other.hidden, hidden) || other.hidden == hidden)&&(identical(other.developerMode, developerMode) || other.developerMode == developerMode)&&(identical(other.enableHighRefreshRate, enableHighRefreshRate) || other.enableHighRefreshRate == enableHighRefreshRate)&&(identical(other.recoveryStrategy, recoveryStrategy) || other.recoveryStrategy == recoveryStrategy));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hashAll([runtimeType,locale,const DeepCollectionEquality().hash(dashboardWidgets),onlyStatisticsProxy,autoLaunch,silentLaunch,autoRun,openLogs,closeConnections,testUrl,isAnimateToPage,autoCheckUpdate,showLabel,disclaimerAccepted,crashlyticsTip,crashlytics,minimizeOnExit,hidden,developerMode,restoreStrategy,showTrayTitle]);
+int get hashCode => Object.hashAll([runtimeType,locale,const DeepCollectionEquality().hash(dashboardWidgets),onlyStatisticsProxy,autoLaunch,silentLaunch,smartDelayLaunch,autoRun,openLogs,closeConnections,testUrl,isAnimateToPage,enableNavBarHapticFeedback,autoCheckUpdate,showLabel,disclaimerAccepted,minimizeOnExit,hidden,developerMode,enableHighRefreshRate,recoveryStrategy]);
 
 @override
 String toString() {
-  return 'AppSettingProps(locale: $locale, dashboardWidgets: $dashboardWidgets, onlyStatisticsProxy: $onlyStatisticsProxy, autoLaunch: $autoLaunch, silentLaunch: $silentLaunch, autoRun: $autoRun, openLogs: $openLogs, closeConnections: $closeConnections, testUrl: $testUrl, isAnimateToPage: $isAnimateToPage, autoCheckUpdate: $autoCheckUpdate, showLabel: $showLabel, disclaimerAccepted: $disclaimerAccepted, crashlyticsTip: $crashlyticsTip, crashlytics: $crashlytics, minimizeOnExit: $minimizeOnExit, hidden: $hidden, developerMode: $developerMode, restoreStrategy: $restoreStrategy, showTrayTitle: $showTrayTitle)';
+  return 'AppSettingProps(locale: $locale, dashboardWidgets: $dashboardWidgets, onlyStatisticsProxy: $onlyStatisticsProxy, autoLaunch: $autoLaunch, silentLaunch: $silentLaunch, smartDelayLaunch: $smartDelayLaunch, autoRun: $autoRun, openLogs: $openLogs, closeConnections: $closeConnections, testUrl: $testUrl, isAnimateToPage: $isAnimateToPage, enableNavBarHapticFeedback: $enableNavBarHapticFeedback, autoCheckUpdate: $autoCheckUpdate, showLabel: $showLabel, disclaimerAccepted: $disclaimerAccepted, minimizeOnExit: $minimizeOnExit, hidden: $hidden, developerMode: $developerMode, enableHighRefreshRate: $enableHighRefreshRate, recoveryStrategy: $recoveryStrategy)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $AppSettingPropsCopyWith<$Res>  {
   factory $AppSettingPropsCopyWith(AppSettingProps value, $Res Function(AppSettingProps) _then) = _$AppSettingPropsCopyWithImpl;
 @useResult
 $Res call({
- String? locale,@JsonKey(fromJson: dashboardWidgetsSafeFormJson) List<DashboardWidget> dashboardWidgets, bool onlyStatisticsProxy, bool autoLaunch, bool silentLaunch, bool autoRun, bool openLogs, bool closeConnections, String testUrl, bool isAnimateToPage, bool autoCheckUpdate, bool showLabel, bool disclaimerAccepted, bool crashlyticsTip, bool crashlytics, bool minimizeOnExit, bool hidden, bool developerMode, RestoreStrategy restoreStrategy, bool showTrayTitle
+ String? locale,@JsonKey(fromJson: dashboardWidgetsSafeFormJson) List<DashboardWidget> dashboardWidgets, bool onlyStatisticsProxy, bool autoLaunch, bool silentLaunch, bool smartDelayLaunch, bool autoRun, bool openLogs, bool closeConnections, String testUrl, bool isAnimateToPage, bool enableNavBarHapticFeedback, bool autoCheckUpdate, bool showLabel, bool disclaimerAccepted, bool minimizeOnExit, bool hidden, bool developerMode, bool enableHighRefreshRate, RecoveryStrategy recoveryStrategy
 });
 
 
@@ -65,29 +65,29 @@ class _$AppSettingPropsCopyWithImpl<$Res>
 
 /// Create a copy of AppSettingProps
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? locale = freezed,Object? dashboardWidgets = null,Object? onlyStatisticsProxy = null,Object? autoLaunch = null,Object? silentLaunch = null,Object? autoRun = null,Object? openLogs = null,Object? closeConnections = null,Object? testUrl = null,Object? isAnimateToPage = null,Object? autoCheckUpdate = null,Object? showLabel = null,Object? disclaimerAccepted = null,Object? crashlyticsTip = null,Object? crashlytics = null,Object? minimizeOnExit = null,Object? hidden = null,Object? developerMode = null,Object? restoreStrategy = null,Object? showTrayTitle = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? locale = freezed,Object? dashboardWidgets = null,Object? onlyStatisticsProxy = null,Object? autoLaunch = null,Object? silentLaunch = null,Object? smartDelayLaunch = null,Object? autoRun = null,Object? openLogs = null,Object? closeConnections = null,Object? testUrl = null,Object? isAnimateToPage = null,Object? enableNavBarHapticFeedback = null,Object? autoCheckUpdate = null,Object? showLabel = null,Object? disclaimerAccepted = null,Object? minimizeOnExit = null,Object? hidden = null,Object? developerMode = null,Object? enableHighRefreshRate = null,Object? recoveryStrategy = null,}) {
   return _then(_self.copyWith(
 locale: freezed == locale ? _self.locale : locale // ignore: cast_nullable_to_non_nullable
 as String?,dashboardWidgets: null == dashboardWidgets ? _self.dashboardWidgets : dashboardWidgets // ignore: cast_nullable_to_non_nullable
 as List<DashboardWidget>,onlyStatisticsProxy: null == onlyStatisticsProxy ? _self.onlyStatisticsProxy : onlyStatisticsProxy // ignore: cast_nullable_to_non_nullable
 as bool,autoLaunch: null == autoLaunch ? _self.autoLaunch : autoLaunch // ignore: cast_nullable_to_non_nullable
 as bool,silentLaunch: null == silentLaunch ? _self.silentLaunch : silentLaunch // ignore: cast_nullable_to_non_nullable
+as bool,smartDelayLaunch: null == smartDelayLaunch ? _self.smartDelayLaunch : smartDelayLaunch // ignore: cast_nullable_to_non_nullable
 as bool,autoRun: null == autoRun ? _self.autoRun : autoRun // ignore: cast_nullable_to_non_nullable
 as bool,openLogs: null == openLogs ? _self.openLogs : openLogs // ignore: cast_nullable_to_non_nullable
 as bool,closeConnections: null == closeConnections ? _self.closeConnections : closeConnections // ignore: cast_nullable_to_non_nullable
 as bool,testUrl: null == testUrl ? _self.testUrl : testUrl // ignore: cast_nullable_to_non_nullable
 as String,isAnimateToPage: null == isAnimateToPage ? _self.isAnimateToPage : isAnimateToPage // ignore: cast_nullable_to_non_nullable
+as bool,enableNavBarHapticFeedback: null == enableNavBarHapticFeedback ? _self.enableNavBarHapticFeedback : enableNavBarHapticFeedback // ignore: cast_nullable_to_non_nullable
 as bool,autoCheckUpdate: null == autoCheckUpdate ? _self.autoCheckUpdate : autoCheckUpdate // ignore: cast_nullable_to_non_nullable
 as bool,showLabel: null == showLabel ? _self.showLabel : showLabel // ignore: cast_nullable_to_non_nullable
 as bool,disclaimerAccepted: null == disclaimerAccepted ? _self.disclaimerAccepted : disclaimerAccepted // ignore: cast_nullable_to_non_nullable
-as bool,crashlyticsTip: null == crashlyticsTip ? _self.crashlyticsTip : crashlyticsTip // ignore: cast_nullable_to_non_nullable
-as bool,crashlytics: null == crashlytics ? _self.crashlytics : crashlytics // ignore: cast_nullable_to_non_nullable
 as bool,minimizeOnExit: null == minimizeOnExit ? _self.minimizeOnExit : minimizeOnExit // ignore: cast_nullable_to_non_nullable
 as bool,hidden: null == hidden ? _self.hidden : hidden // ignore: cast_nullable_to_non_nullable
 as bool,developerMode: null == developerMode ? _self.developerMode : developerMode // ignore: cast_nullable_to_non_nullable
-as bool,restoreStrategy: null == restoreStrategy ? _self.restoreStrategy : restoreStrategy // ignore: cast_nullable_to_non_nullable
-as RestoreStrategy,showTrayTitle: null == showTrayTitle ? _self.showTrayTitle : showTrayTitle // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,enableHighRefreshRate: null == enableHighRefreshRate ? _self.enableHighRefreshRate : enableHighRefreshRate // ignore: cast_nullable_to_non_nullable
+as bool,recoveryStrategy: null == recoveryStrategy ? _self.recoveryStrategy : recoveryStrategy // ignore: cast_nullable_to_non_nullable
+as RecoveryStrategy,
   ));
 }
 
@@ -172,10 +172,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? locale, @JsonKey(fromJson: dashboardWidgetsSafeFormJson)  List<DashboardWidget> dashboardWidgets,  bool onlyStatisticsProxy,  bool autoLaunch,  bool silentLaunch,  bool autoRun,  bool openLogs,  bool closeConnections,  String testUrl,  bool isAnimateToPage,  bool autoCheckUpdate,  bool showLabel,  bool disclaimerAccepted,  bool crashlyticsTip,  bool crashlytics,  bool minimizeOnExit,  bool hidden,  bool developerMode,  RestoreStrategy restoreStrategy,  bool showTrayTitle)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? locale, @JsonKey(fromJson: dashboardWidgetsSafeFormJson)  List<DashboardWidget> dashboardWidgets,  bool onlyStatisticsProxy,  bool autoLaunch,  bool silentLaunch,  bool smartDelayLaunch,  bool autoRun,  bool openLogs,  bool closeConnections,  String testUrl,  bool isAnimateToPage,  bool enableNavBarHapticFeedback,  bool autoCheckUpdate,  bool showLabel,  bool disclaimerAccepted,  bool minimizeOnExit,  bool hidden,  bool developerMode,  bool enableHighRefreshRate,  RecoveryStrategy recoveryStrategy)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AppSettingProps() when $default != null:
-return $default(_that.locale,_that.dashboardWidgets,_that.onlyStatisticsProxy,_that.autoLaunch,_that.silentLaunch,_that.autoRun,_that.openLogs,_that.closeConnections,_that.testUrl,_that.isAnimateToPage,_that.autoCheckUpdate,_that.showLabel,_that.disclaimerAccepted,_that.crashlyticsTip,_that.crashlytics,_that.minimizeOnExit,_that.hidden,_that.developerMode,_that.restoreStrategy,_that.showTrayTitle);case _:
+return $default(_that.locale,_that.dashboardWidgets,_that.onlyStatisticsProxy,_that.autoLaunch,_that.silentLaunch,_that.smartDelayLaunch,_that.autoRun,_that.openLogs,_that.closeConnections,_that.testUrl,_that.isAnimateToPage,_that.enableNavBarHapticFeedback,_that.autoCheckUpdate,_that.showLabel,_that.disclaimerAccepted,_that.minimizeOnExit,_that.hidden,_that.developerMode,_that.enableHighRefreshRate,_that.recoveryStrategy);case _:
   return orElse();
 
 }
@@ -193,10 +193,10 @@ return $default(_that.locale,_that.dashboardWidgets,_that.onlyStatisticsProxy,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? locale, @JsonKey(fromJson: dashboardWidgetsSafeFormJson)  List<DashboardWidget> dashboardWidgets,  bool onlyStatisticsProxy,  bool autoLaunch,  bool silentLaunch,  bool autoRun,  bool openLogs,  bool closeConnections,  String testUrl,  bool isAnimateToPage,  bool autoCheckUpdate,  bool showLabel,  bool disclaimerAccepted,  bool crashlyticsTip,  bool crashlytics,  bool minimizeOnExit,  bool hidden,  bool developerMode,  RestoreStrategy restoreStrategy,  bool showTrayTitle)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? locale, @JsonKey(fromJson: dashboardWidgetsSafeFormJson)  List<DashboardWidget> dashboardWidgets,  bool onlyStatisticsProxy,  bool autoLaunch,  bool silentLaunch,  bool smartDelayLaunch,  bool autoRun,  bool openLogs,  bool closeConnections,  String testUrl,  bool isAnimateToPage,  bool enableNavBarHapticFeedback,  bool autoCheckUpdate,  bool showLabel,  bool disclaimerAccepted,  bool minimizeOnExit,  bool hidden,  bool developerMode,  bool enableHighRefreshRate,  RecoveryStrategy recoveryStrategy)  $default,) {final _that = this;
 switch (_that) {
 case _AppSettingProps():
-return $default(_that.locale,_that.dashboardWidgets,_that.onlyStatisticsProxy,_that.autoLaunch,_that.silentLaunch,_that.autoRun,_that.openLogs,_that.closeConnections,_that.testUrl,_that.isAnimateToPage,_that.autoCheckUpdate,_that.showLabel,_that.disclaimerAccepted,_that.crashlyticsTip,_that.crashlytics,_that.minimizeOnExit,_that.hidden,_that.developerMode,_that.restoreStrategy,_that.showTrayTitle);case _:
+return $default(_that.locale,_that.dashboardWidgets,_that.onlyStatisticsProxy,_that.autoLaunch,_that.silentLaunch,_that.smartDelayLaunch,_that.autoRun,_that.openLogs,_that.closeConnections,_that.testUrl,_that.isAnimateToPage,_that.enableNavBarHapticFeedback,_that.autoCheckUpdate,_that.showLabel,_that.disclaimerAccepted,_that.minimizeOnExit,_that.hidden,_that.developerMode,_that.enableHighRefreshRate,_that.recoveryStrategy);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -213,10 +213,10 @@ return $default(_that.locale,_that.dashboardWidgets,_that.onlyStatisticsProxy,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? locale, @JsonKey(fromJson: dashboardWidgetsSafeFormJson)  List<DashboardWidget> dashboardWidgets,  bool onlyStatisticsProxy,  bool autoLaunch,  bool silentLaunch,  bool autoRun,  bool openLogs,  bool closeConnections,  String testUrl,  bool isAnimateToPage,  bool autoCheckUpdate,  bool showLabel,  bool disclaimerAccepted,  bool crashlyticsTip,  bool crashlytics,  bool minimizeOnExit,  bool hidden,  bool developerMode,  RestoreStrategy restoreStrategy,  bool showTrayTitle)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? locale, @JsonKey(fromJson: dashboardWidgetsSafeFormJson)  List<DashboardWidget> dashboardWidgets,  bool onlyStatisticsProxy,  bool autoLaunch,  bool silentLaunch,  bool smartDelayLaunch,  bool autoRun,  bool openLogs,  bool closeConnections,  String testUrl,  bool isAnimateToPage,  bool enableNavBarHapticFeedback,  bool autoCheckUpdate,  bool showLabel,  bool disclaimerAccepted,  bool minimizeOnExit,  bool hidden,  bool developerMode,  bool enableHighRefreshRate,  RecoveryStrategy recoveryStrategy)?  $default,) {final _that = this;
 switch (_that) {
 case _AppSettingProps() when $default != null:
-return $default(_that.locale,_that.dashboardWidgets,_that.onlyStatisticsProxy,_that.autoLaunch,_that.silentLaunch,_that.autoRun,_that.openLogs,_that.closeConnections,_that.testUrl,_that.isAnimateToPage,_that.autoCheckUpdate,_that.showLabel,_that.disclaimerAccepted,_that.crashlyticsTip,_that.crashlytics,_that.minimizeOnExit,_that.hidden,_that.developerMode,_that.restoreStrategy,_that.showTrayTitle);case _:
+return $default(_that.locale,_that.dashboardWidgets,_that.onlyStatisticsProxy,_that.autoLaunch,_that.silentLaunch,_that.smartDelayLaunch,_that.autoRun,_that.openLogs,_that.closeConnections,_that.testUrl,_that.isAnimateToPage,_that.enableNavBarHapticFeedback,_that.autoCheckUpdate,_that.showLabel,_that.disclaimerAccepted,_that.minimizeOnExit,_that.hidden,_that.developerMode,_that.enableHighRefreshRate,_that.recoveryStrategy);case _:
   return null;
 
 }
@@ -228,7 +228,7 @@ return $default(_that.locale,_that.dashboardWidgets,_that.onlyStatisticsProxy,_t
 @JsonSerializable()
 
 class _AppSettingProps implements AppSettingProps {
-  const _AppSettingProps({this.locale, @JsonKey(fromJson: dashboardWidgetsSafeFormJson) final  List<DashboardWidget> dashboardWidgets = defaultDashboardWidgets, this.onlyStatisticsProxy = false, this.autoLaunch = false, this.silentLaunch = false, this.autoRun = false, this.openLogs = false, this.closeConnections = true, this.testUrl = defaultTestUrl, this.isAnimateToPage = true, this.autoCheckUpdate = true, this.showLabel = false, this.disclaimerAccepted = false, this.crashlyticsTip = false, this.crashlytics = false, this.minimizeOnExit = true, this.hidden = false, this.developerMode = false, this.restoreStrategy = RestoreStrategy.compatible, this.showTrayTitle = true}): _dashboardWidgets = dashboardWidgets;
+  const _AppSettingProps({this.locale, @JsonKey(fromJson: dashboardWidgetsSafeFormJson) final  List<DashboardWidget> dashboardWidgets = defaultDashboardWidgets, this.onlyStatisticsProxy = false, this.autoLaunch = false, this.silentLaunch = false, this.smartDelayLaunch = true, this.autoRun = false, this.openLogs = true, this.closeConnections = true, this.testUrl = defaultTestUrl, this.isAnimateToPage = true, this.enableNavBarHapticFeedback = false, this.autoCheckUpdate = true, this.showLabel = false, this.disclaimerAccepted = false, this.minimizeOnExit = true, this.hidden = false, this.developerMode = false, this.enableHighRefreshRate = false, this.recoveryStrategy = RecoveryStrategy.compatible}): _dashboardWidgets = dashboardWidgets;
   factory _AppSettingProps.fromJson(Map<String, dynamic> json) => _$AppSettingPropsFromJson(json);
 
 @override final  String? locale;
@@ -242,21 +242,21 @@ class _AppSettingProps implements AppSettingProps {
 @override@JsonKey() final  bool onlyStatisticsProxy;
 @override@JsonKey() final  bool autoLaunch;
 @override@JsonKey() final  bool silentLaunch;
+@override@JsonKey() final  bool smartDelayLaunch;
 @override@JsonKey() final  bool autoRun;
 @override@JsonKey() final  bool openLogs;
 @override@JsonKey() final  bool closeConnections;
 @override@JsonKey() final  String testUrl;
 @override@JsonKey() final  bool isAnimateToPage;
+@override@JsonKey() final  bool enableNavBarHapticFeedback;
 @override@JsonKey() final  bool autoCheckUpdate;
 @override@JsonKey() final  bool showLabel;
 @override@JsonKey() final  bool disclaimerAccepted;
-@override@JsonKey() final  bool crashlyticsTip;
-@override@JsonKey() final  bool crashlytics;
 @override@JsonKey() final  bool minimizeOnExit;
 @override@JsonKey() final  bool hidden;
 @override@JsonKey() final  bool developerMode;
-@override@JsonKey() final  RestoreStrategy restoreStrategy;
-@override@JsonKey() final  bool showTrayTitle;
+@override@JsonKey() final  bool enableHighRefreshRate;
+@override@JsonKey() final  RecoveryStrategy recoveryStrategy;
 
 /// Create a copy of AppSettingProps
 /// with the given fields replaced by the non-null parameter values.
@@ -271,16 +271,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AppSettingProps&&(identical(other.locale, locale) || other.locale == locale)&&const DeepCollectionEquality().equals(other._dashboardWidgets, _dashboardWidgets)&&(identical(other.onlyStatisticsProxy, onlyStatisticsProxy) || other.onlyStatisticsProxy == onlyStatisticsProxy)&&(identical(other.autoLaunch, autoLaunch) || other.autoLaunch == autoLaunch)&&(identical(other.silentLaunch, silentLaunch) || other.silentLaunch == silentLaunch)&&(identical(other.autoRun, autoRun) || other.autoRun == autoRun)&&(identical(other.openLogs, openLogs) || other.openLogs == openLogs)&&(identical(other.closeConnections, closeConnections) || other.closeConnections == closeConnections)&&(identical(other.testUrl, testUrl) || other.testUrl == testUrl)&&(identical(other.isAnimateToPage, isAnimateToPage) || other.isAnimateToPage == isAnimateToPage)&&(identical(other.autoCheckUpdate, autoCheckUpdate) || other.autoCheckUpdate == autoCheckUpdate)&&(identical(other.showLabel, showLabel) || other.showLabel == showLabel)&&(identical(other.disclaimerAccepted, disclaimerAccepted) || other.disclaimerAccepted == disclaimerAccepted)&&(identical(other.crashlyticsTip, crashlyticsTip) || other.crashlyticsTip == crashlyticsTip)&&(identical(other.crashlytics, crashlytics) || other.crashlytics == crashlytics)&&(identical(other.minimizeOnExit, minimizeOnExit) || other.minimizeOnExit == minimizeOnExit)&&(identical(other.hidden, hidden) || other.hidden == hidden)&&(identical(other.developerMode, developerMode) || other.developerMode == developerMode)&&(identical(other.restoreStrategy, restoreStrategy) || other.restoreStrategy == restoreStrategy)&&(identical(other.showTrayTitle, showTrayTitle) || other.showTrayTitle == showTrayTitle));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AppSettingProps&&(identical(other.locale, locale) || other.locale == locale)&&const DeepCollectionEquality().equals(other._dashboardWidgets, _dashboardWidgets)&&(identical(other.onlyStatisticsProxy, onlyStatisticsProxy) || other.onlyStatisticsProxy == onlyStatisticsProxy)&&(identical(other.autoLaunch, autoLaunch) || other.autoLaunch == autoLaunch)&&(identical(other.silentLaunch, silentLaunch) || other.silentLaunch == silentLaunch)&&(identical(other.smartDelayLaunch, smartDelayLaunch) || other.smartDelayLaunch == smartDelayLaunch)&&(identical(other.autoRun, autoRun) || other.autoRun == autoRun)&&(identical(other.openLogs, openLogs) || other.openLogs == openLogs)&&(identical(other.closeConnections, closeConnections) || other.closeConnections == closeConnections)&&(identical(other.testUrl, testUrl) || other.testUrl == testUrl)&&(identical(other.isAnimateToPage, isAnimateToPage) || other.isAnimateToPage == isAnimateToPage)&&(identical(other.enableNavBarHapticFeedback, enableNavBarHapticFeedback) || other.enableNavBarHapticFeedback == enableNavBarHapticFeedback)&&(identical(other.autoCheckUpdate, autoCheckUpdate) || other.autoCheckUpdate == autoCheckUpdate)&&(identical(other.showLabel, showLabel) || other.showLabel == showLabel)&&(identical(other.disclaimerAccepted, disclaimerAccepted) || other.disclaimerAccepted == disclaimerAccepted)&&(identical(other.minimizeOnExit, minimizeOnExit) || other.minimizeOnExit == minimizeOnExit)&&(identical(other.hidden, hidden) || other.hidden == hidden)&&(identical(other.developerMode, developerMode) || other.developerMode == developerMode)&&(identical(other.enableHighRefreshRate, enableHighRefreshRate) || other.enableHighRefreshRate == enableHighRefreshRate)&&(identical(other.recoveryStrategy, recoveryStrategy) || other.recoveryStrategy == recoveryStrategy));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hashAll([runtimeType,locale,const DeepCollectionEquality().hash(_dashboardWidgets),onlyStatisticsProxy,autoLaunch,silentLaunch,autoRun,openLogs,closeConnections,testUrl,isAnimateToPage,autoCheckUpdate,showLabel,disclaimerAccepted,crashlyticsTip,crashlytics,minimizeOnExit,hidden,developerMode,restoreStrategy,showTrayTitle]);
+int get hashCode => Object.hashAll([runtimeType,locale,const DeepCollectionEquality().hash(_dashboardWidgets),onlyStatisticsProxy,autoLaunch,silentLaunch,smartDelayLaunch,autoRun,openLogs,closeConnections,testUrl,isAnimateToPage,enableNavBarHapticFeedback,autoCheckUpdate,showLabel,disclaimerAccepted,minimizeOnExit,hidden,developerMode,enableHighRefreshRate,recoveryStrategy]);
 
 @override
 String toString() {
-  return 'AppSettingProps(locale: $locale, dashboardWidgets: $dashboardWidgets, onlyStatisticsProxy: $onlyStatisticsProxy, autoLaunch: $autoLaunch, silentLaunch: $silentLaunch, autoRun: $autoRun, openLogs: $openLogs, closeConnections: $closeConnections, testUrl: $testUrl, isAnimateToPage: $isAnimateToPage, autoCheckUpdate: $autoCheckUpdate, showLabel: $showLabel, disclaimerAccepted: $disclaimerAccepted, crashlyticsTip: $crashlyticsTip, crashlytics: $crashlytics, minimizeOnExit: $minimizeOnExit, hidden: $hidden, developerMode: $developerMode, restoreStrategy: $restoreStrategy, showTrayTitle: $showTrayTitle)';
+  return 'AppSettingProps(locale: $locale, dashboardWidgets: $dashboardWidgets, onlyStatisticsProxy: $onlyStatisticsProxy, autoLaunch: $autoLaunch, silentLaunch: $silentLaunch, smartDelayLaunch: $smartDelayLaunch, autoRun: $autoRun, openLogs: $openLogs, closeConnections: $closeConnections, testUrl: $testUrl, isAnimateToPage: $isAnimateToPage, enableNavBarHapticFeedback: $enableNavBarHapticFeedback, autoCheckUpdate: $autoCheckUpdate, showLabel: $showLabel, disclaimerAccepted: $disclaimerAccepted, minimizeOnExit: $minimizeOnExit, hidden: $hidden, developerMode: $developerMode, enableHighRefreshRate: $enableHighRefreshRate, recoveryStrategy: $recoveryStrategy)';
 }
 
 
@@ -291,7 +291,7 @@ abstract mixin class _$AppSettingPropsCopyWith<$Res> implements $AppSettingProps
   factory _$AppSettingPropsCopyWith(_AppSettingProps value, $Res Function(_AppSettingProps) _then) = __$AppSettingPropsCopyWithImpl;
 @override @useResult
 $Res call({
- String? locale,@JsonKey(fromJson: dashboardWidgetsSafeFormJson) List<DashboardWidget> dashboardWidgets, bool onlyStatisticsProxy, bool autoLaunch, bool silentLaunch, bool autoRun, bool openLogs, bool closeConnections, String testUrl, bool isAnimateToPage, bool autoCheckUpdate, bool showLabel, bool disclaimerAccepted, bool crashlyticsTip, bool crashlytics, bool minimizeOnExit, bool hidden, bool developerMode, RestoreStrategy restoreStrategy, bool showTrayTitle
+ String? locale,@JsonKey(fromJson: dashboardWidgetsSafeFormJson) List<DashboardWidget> dashboardWidgets, bool onlyStatisticsProxy, bool autoLaunch, bool silentLaunch, bool smartDelayLaunch, bool autoRun, bool openLogs, bool closeConnections, String testUrl, bool isAnimateToPage, bool enableNavBarHapticFeedback, bool autoCheckUpdate, bool showLabel, bool disclaimerAccepted, bool minimizeOnExit, bool hidden, bool developerMode, bool enableHighRefreshRate, RecoveryStrategy recoveryStrategy
 });
 
 
@@ -308,29 +308,29 @@ class __$AppSettingPropsCopyWithImpl<$Res>
 
 /// Create a copy of AppSettingProps
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? locale = freezed,Object? dashboardWidgets = null,Object? onlyStatisticsProxy = null,Object? autoLaunch = null,Object? silentLaunch = null,Object? autoRun = null,Object? openLogs = null,Object? closeConnections = null,Object? testUrl = null,Object? isAnimateToPage = null,Object? autoCheckUpdate = null,Object? showLabel = null,Object? disclaimerAccepted = null,Object? crashlyticsTip = null,Object? crashlytics = null,Object? minimizeOnExit = null,Object? hidden = null,Object? developerMode = null,Object? restoreStrategy = null,Object? showTrayTitle = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? locale = freezed,Object? dashboardWidgets = null,Object? onlyStatisticsProxy = null,Object? autoLaunch = null,Object? silentLaunch = null,Object? smartDelayLaunch = null,Object? autoRun = null,Object? openLogs = null,Object? closeConnections = null,Object? testUrl = null,Object? isAnimateToPage = null,Object? enableNavBarHapticFeedback = null,Object? autoCheckUpdate = null,Object? showLabel = null,Object? disclaimerAccepted = null,Object? minimizeOnExit = null,Object? hidden = null,Object? developerMode = null,Object? enableHighRefreshRate = null,Object? recoveryStrategy = null,}) {
   return _then(_AppSettingProps(
 locale: freezed == locale ? _self.locale : locale // ignore: cast_nullable_to_non_nullable
 as String?,dashboardWidgets: null == dashboardWidgets ? _self._dashboardWidgets : dashboardWidgets // ignore: cast_nullable_to_non_nullable
 as List<DashboardWidget>,onlyStatisticsProxy: null == onlyStatisticsProxy ? _self.onlyStatisticsProxy : onlyStatisticsProxy // ignore: cast_nullable_to_non_nullable
 as bool,autoLaunch: null == autoLaunch ? _self.autoLaunch : autoLaunch // ignore: cast_nullable_to_non_nullable
 as bool,silentLaunch: null == silentLaunch ? _self.silentLaunch : silentLaunch // ignore: cast_nullable_to_non_nullable
+as bool,smartDelayLaunch: null == smartDelayLaunch ? _self.smartDelayLaunch : smartDelayLaunch // ignore: cast_nullable_to_non_nullable
 as bool,autoRun: null == autoRun ? _self.autoRun : autoRun // ignore: cast_nullable_to_non_nullable
 as bool,openLogs: null == openLogs ? _self.openLogs : openLogs // ignore: cast_nullable_to_non_nullable
 as bool,closeConnections: null == closeConnections ? _self.closeConnections : closeConnections // ignore: cast_nullable_to_non_nullable
 as bool,testUrl: null == testUrl ? _self.testUrl : testUrl // ignore: cast_nullable_to_non_nullable
 as String,isAnimateToPage: null == isAnimateToPage ? _self.isAnimateToPage : isAnimateToPage // ignore: cast_nullable_to_non_nullable
+as bool,enableNavBarHapticFeedback: null == enableNavBarHapticFeedback ? _self.enableNavBarHapticFeedback : enableNavBarHapticFeedback // ignore: cast_nullable_to_non_nullable
 as bool,autoCheckUpdate: null == autoCheckUpdate ? _self.autoCheckUpdate : autoCheckUpdate // ignore: cast_nullable_to_non_nullable
 as bool,showLabel: null == showLabel ? _self.showLabel : showLabel // ignore: cast_nullable_to_non_nullable
 as bool,disclaimerAccepted: null == disclaimerAccepted ? _self.disclaimerAccepted : disclaimerAccepted // ignore: cast_nullable_to_non_nullable
-as bool,crashlyticsTip: null == crashlyticsTip ? _self.crashlyticsTip : crashlyticsTip // ignore: cast_nullable_to_non_nullable
-as bool,crashlytics: null == crashlytics ? _self.crashlytics : crashlytics // ignore: cast_nullable_to_non_nullable
 as bool,minimizeOnExit: null == minimizeOnExit ? _self.minimizeOnExit : minimizeOnExit // ignore: cast_nullable_to_non_nullable
 as bool,hidden: null == hidden ? _self.hidden : hidden // ignore: cast_nullable_to_non_nullable
 as bool,developerMode: null == developerMode ? _self.developerMode : developerMode // ignore: cast_nullable_to_non_nullable
-as bool,restoreStrategy: null == restoreStrategy ? _self.restoreStrategy : restoreStrategy // ignore: cast_nullable_to_non_nullable
-as RestoreStrategy,showTrayTitle: null == showTrayTitle ? _self.showTrayTitle : showTrayTitle // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,enableHighRefreshRate: null == enableHighRefreshRate ? _self.enableHighRefreshRate : enableHighRefreshRate // ignore: cast_nullable_to_non_nullable
+as bool,recoveryStrategy: null == recoveryStrategy ? _self.recoveryStrategy : recoveryStrategy // ignore: cast_nullable_to_non_nullable
+as RecoveryStrategy,
   ));
 }
 
@@ -339,22 +339,22 @@ as bool,
 
 
 /// @nodoc
-mixin _$AccessControlProps {
+mixin _$AccessControl {
 
  bool get enable; AccessControlMode get mode; List<String> get acceptList; List<String> get rejectList; AccessSortType get sort; bool get isFilterSystemApp; bool get isFilterNonInternetApp;
-/// Create a copy of AccessControlProps
+/// Create a copy of AccessControl
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
-$AccessControlPropsCopyWith<AccessControlProps> get copyWith => _$AccessControlPropsCopyWithImpl<AccessControlProps>(this as AccessControlProps, _$identity);
+$AccessControlCopyWith<AccessControl> get copyWith => _$AccessControlCopyWithImpl<AccessControl>(this as AccessControl, _$identity);
 
-  /// Serializes this AccessControlProps to a JSON map.
+  /// Serializes this AccessControl to a JSON map.
   Map<String, dynamic> toJson();
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AccessControlProps&&(identical(other.enable, enable) || other.enable == enable)&&(identical(other.mode, mode) || other.mode == mode)&&const DeepCollectionEquality().equals(other.acceptList, acceptList)&&const DeepCollectionEquality().equals(other.rejectList, rejectList)&&(identical(other.sort, sort) || other.sort == sort)&&(identical(other.isFilterSystemApp, isFilterSystemApp) || other.isFilterSystemApp == isFilterSystemApp)&&(identical(other.isFilterNonInternetApp, isFilterNonInternetApp) || other.isFilterNonInternetApp == isFilterNonInternetApp));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AccessControl&&(identical(other.enable, enable) || other.enable == enable)&&(identical(other.mode, mode) || other.mode == mode)&&const DeepCollectionEquality().equals(other.acceptList, acceptList)&&const DeepCollectionEquality().equals(other.rejectList, rejectList)&&(identical(other.sort, sort) || other.sort == sort)&&(identical(other.isFilterSystemApp, isFilterSystemApp) || other.isFilterSystemApp == isFilterSystemApp)&&(identical(other.isFilterNonInternetApp, isFilterNonInternetApp) || other.isFilterNonInternetApp == isFilterNonInternetApp));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -363,15 +363,15 @@ int get hashCode => Object.hash(runtimeType,enable,mode,const DeepCollectionEqua
 
 @override
 String toString() {
-  return 'AccessControlProps(enable: $enable, mode: $mode, acceptList: $acceptList, rejectList: $rejectList, sort: $sort, isFilterSystemApp: $isFilterSystemApp, isFilterNonInternetApp: $isFilterNonInternetApp)';
+  return 'AccessControl(enable: $enable, mode: $mode, acceptList: $acceptList, rejectList: $rejectList, sort: $sort, isFilterSystemApp: $isFilterSystemApp, isFilterNonInternetApp: $isFilterNonInternetApp)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class $AccessControlPropsCopyWith<$Res>  {
-  factory $AccessControlPropsCopyWith(AccessControlProps value, $Res Function(AccessControlProps) _then) = _$AccessControlPropsCopyWithImpl;
+abstract mixin class $AccessControlCopyWith<$Res>  {
+  factory $AccessControlCopyWith(AccessControl value, $Res Function(AccessControl) _then) = _$AccessControlCopyWithImpl;
 @useResult
 $Res call({
  bool enable, AccessControlMode mode, List<String> acceptList, List<String> rejectList, AccessSortType sort, bool isFilterSystemApp, bool isFilterNonInternetApp
@@ -382,14 +382,14 @@ $Res call({
 
 }
 /// @nodoc
-class _$AccessControlPropsCopyWithImpl<$Res>
-    implements $AccessControlPropsCopyWith<$Res> {
-  _$AccessControlPropsCopyWithImpl(this._self, this._then);
+class _$AccessControlCopyWithImpl<$Res>
+    implements $AccessControlCopyWith<$Res> {
+  _$AccessControlCopyWithImpl(this._self, this._then);
 
-  final AccessControlProps _self;
-  final $Res Function(AccessControlProps) _then;
+  final AccessControl _self;
+  final $Res Function(AccessControl) _then;
 
-/// Create a copy of AccessControlProps
+/// Create a copy of AccessControl
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? enable = null,Object? mode = null,Object? acceptList = null,Object? rejectList = null,Object? sort = null,Object? isFilterSystemApp = null,Object? isFilterNonInternetApp = null,}) {
   return _then(_self.copyWith(
@@ -407,8 +407,8 @@ as bool,
 }
 
 
-/// Adds pattern-matching-related methods to [AccessControlProps].
-extension AccessControlPropsPatterns on AccessControlProps {
+/// Adds pattern-matching-related methods to [AccessControl].
+extension AccessControlPatterns on AccessControl {
 /// A variant of `map` that fallback to returning `orElse`.
 ///
 /// It is equivalent to doing:
@@ -421,10 +421,10 @@ extension AccessControlPropsPatterns on AccessControlProps {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _AccessControlProps value)?  $default,{required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _AccessControl value)?  $default,{required TResult orElse(),}){
 final _that = this;
 switch (_that) {
-case _AccessControlProps() when $default != null:
+case _AccessControl() when $default != null:
 return $default(_that);case _:
   return orElse();
 
@@ -443,10 +443,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _AccessControlProps value)  $default,){
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _AccessControl value)  $default,){
 final _that = this;
 switch (_that) {
-case _AccessControlProps():
+case _AccessControl():
 return $default(_that);case _:
   throw StateError('Unexpected subclass');
 
@@ -464,10 +464,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _AccessControlProps value)?  $default,){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _AccessControl value)?  $default,){
 final _that = this;
 switch (_that) {
-case _AccessControlProps() when $default != null:
+case _AccessControl() when $default != null:
 return $default(_that);case _:
   return null;
 
@@ -487,7 +487,7 @@ return $default(_that);case _:
 
 @optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool enable,  AccessControlMode mode,  List<String> acceptList,  List<String> rejectList,  AccessSortType sort,  bool isFilterSystemApp,  bool isFilterNonInternetApp)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
-case _AccessControlProps() when $default != null:
+case _AccessControl() when $default != null:
 return $default(_that.enable,_that.mode,_that.acceptList,_that.rejectList,_that.sort,_that.isFilterSystemApp,_that.isFilterNonInternetApp);case _:
   return orElse();
 
@@ -508,7 +508,7 @@ return $default(_that.enable,_that.mode,_that.acceptList,_that.rejectList,_that.
 
 @optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool enable,  AccessControlMode mode,  List<String> acceptList,  List<String> rejectList,  AccessSortType sort,  bool isFilterSystemApp,  bool isFilterNonInternetApp)  $default,) {final _that = this;
 switch (_that) {
-case _AccessControlProps():
+case _AccessControl():
 return $default(_that.enable,_that.mode,_that.acceptList,_that.rejectList,_that.sort,_that.isFilterSystemApp,_that.isFilterNonInternetApp);case _:
   throw StateError('Unexpected subclass');
 
@@ -528,7 +528,7 @@ return $default(_that.enable,_that.mode,_that.acceptList,_that.rejectList,_that.
 
 @optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool enable,  AccessControlMode mode,  List<String> acceptList,  List<String> rejectList,  AccessSortType sort,  bool isFilterSystemApp,  bool isFilterNonInternetApp)?  $default,) {final _that = this;
 switch (_that) {
-case _AccessControlProps() when $default != null:
+case _AccessControl() when $default != null:
 return $default(_that.enable,_that.mode,_that.acceptList,_that.rejectList,_that.sort,_that.isFilterSystemApp,_that.isFilterNonInternetApp);case _:
   return null;
 
@@ -540,9 +540,9 @@ return $default(_that.enable,_that.mode,_that.acceptList,_that.rejectList,_that.
 /// @nodoc
 @JsonSerializable()
 
-class _AccessControlProps implements AccessControlProps {
-  const _AccessControlProps({this.enable = false, this.mode = AccessControlMode.rejectSelected, final  List<String> acceptList = const [], final  List<String> rejectList = const [], this.sort = AccessSortType.none, this.isFilterSystemApp = true, this.isFilterNonInternetApp = true}): _acceptList = acceptList,_rejectList = rejectList;
-  factory _AccessControlProps.fromJson(Map<String, dynamic> json) => _$AccessControlPropsFromJson(json);
+class _AccessControl implements AccessControl {
+  const _AccessControl({this.enable = false, this.mode = AccessControlMode.rejectSelected, final  List<String> acceptList = const [], final  List<String> rejectList = const [], this.sort = AccessSortType.none, this.isFilterSystemApp = true, this.isFilterNonInternetApp = true}): _acceptList = acceptList,_rejectList = rejectList;
+  factory _AccessControl.fromJson(Map<String, dynamic> json) => _$AccessControlFromJson(json);
 
 @override@JsonKey() final  bool enable;
 @override@JsonKey() final  AccessControlMode mode;
@@ -564,20 +564,20 @@ class _AccessControlProps implements AccessControlProps {
 @override@JsonKey() final  bool isFilterSystemApp;
 @override@JsonKey() final  bool isFilterNonInternetApp;
 
-/// Create a copy of AccessControlProps
+/// Create a copy of AccessControl
 /// with the given fields replaced by the non-null parameter values.
 @override @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
-_$AccessControlPropsCopyWith<_AccessControlProps> get copyWith => __$AccessControlPropsCopyWithImpl<_AccessControlProps>(this, _$identity);
+_$AccessControlCopyWith<_AccessControl> get copyWith => __$AccessControlCopyWithImpl<_AccessControl>(this, _$identity);
 
 @override
 Map<String, dynamic> toJson() {
-  return _$AccessControlPropsToJson(this, );
+  return _$AccessControlToJson(this, );
 }
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AccessControlProps&&(identical(other.enable, enable) || other.enable == enable)&&(identical(other.mode, mode) || other.mode == mode)&&const DeepCollectionEquality().equals(other._acceptList, _acceptList)&&const DeepCollectionEquality().equals(other._rejectList, _rejectList)&&(identical(other.sort, sort) || other.sort == sort)&&(identical(other.isFilterSystemApp, isFilterSystemApp) || other.isFilterSystemApp == isFilterSystemApp)&&(identical(other.isFilterNonInternetApp, isFilterNonInternetApp) || other.isFilterNonInternetApp == isFilterNonInternetApp));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AccessControl&&(identical(other.enable, enable) || other.enable == enable)&&(identical(other.mode, mode) || other.mode == mode)&&const DeepCollectionEquality().equals(other._acceptList, _acceptList)&&const DeepCollectionEquality().equals(other._rejectList, _rejectList)&&(identical(other.sort, sort) || other.sort == sort)&&(identical(other.isFilterSystemApp, isFilterSystemApp) || other.isFilterSystemApp == isFilterSystemApp)&&(identical(other.isFilterNonInternetApp, isFilterNonInternetApp) || other.isFilterNonInternetApp == isFilterNonInternetApp));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -586,15 +586,15 @@ int get hashCode => Object.hash(runtimeType,enable,mode,const DeepCollectionEqua
 
 @override
 String toString() {
-  return 'AccessControlProps(enable: $enable, mode: $mode, acceptList: $acceptList, rejectList: $rejectList, sort: $sort, isFilterSystemApp: $isFilterSystemApp, isFilterNonInternetApp: $isFilterNonInternetApp)';
+  return 'AccessControl(enable: $enable, mode: $mode, acceptList: $acceptList, rejectList: $rejectList, sort: $sort, isFilterSystemApp: $isFilterSystemApp, isFilterNonInternetApp: $isFilterNonInternetApp)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class _$AccessControlPropsCopyWith<$Res> implements $AccessControlPropsCopyWith<$Res> {
-  factory _$AccessControlPropsCopyWith(_AccessControlProps value, $Res Function(_AccessControlProps) _then) = __$AccessControlPropsCopyWithImpl;
+abstract mixin class _$AccessControlCopyWith<$Res> implements $AccessControlCopyWith<$Res> {
+  factory _$AccessControlCopyWith(_AccessControl value, $Res Function(_AccessControl) _then) = __$AccessControlCopyWithImpl;
 @override @useResult
 $Res call({
  bool enable, AccessControlMode mode, List<String> acceptList, List<String> rejectList, AccessSortType sort, bool isFilterSystemApp, bool isFilterNonInternetApp
@@ -605,17 +605,17 @@ $Res call({
 
 }
 /// @nodoc
-class __$AccessControlPropsCopyWithImpl<$Res>
-    implements _$AccessControlPropsCopyWith<$Res> {
-  __$AccessControlPropsCopyWithImpl(this._self, this._then);
+class __$AccessControlCopyWithImpl<$Res>
+    implements _$AccessControlCopyWith<$Res> {
+  __$AccessControlCopyWithImpl(this._self, this._then);
 
-  final _AccessControlProps _self;
-  final $Res Function(_AccessControlProps) _then;
+  final _AccessControl _self;
+  final $Res Function(_AccessControl) _then;
 
-/// Create a copy of AccessControlProps
+/// Create a copy of AccessControl
 /// with the given fields replaced by the non-null parameter values.
 @override @pragma('vm:prefer-inline') $Res call({Object? enable = null,Object? mode = null,Object? acceptList = null,Object? rejectList = null,Object? sort = null,Object? isFilterSystemApp = null,Object? isFilterNonInternetApp = null,}) {
-  return _then(_AccessControlProps(
+  return _then(_AccessControl(
 enable: null == enable ? _self.enable : enable // ignore: cast_nullable_to_non_nullable
 as bool,mode: null == mode ? _self.mode : mode // ignore: cast_nullable_to_non_nullable
 as AccessControlMode,acceptList: null == acceptList ? _self._acceptList : acceptList // ignore: cast_nullable_to_non_nullable
@@ -634,7 +634,7 @@ as bool,
 /// @nodoc
 mixin _$WindowProps {
 
- double get width; double get height; double? get top; double? get left;
+ double get width; double get height; double? get top; double? get left; bool get isLocked;
 /// Create a copy of WindowProps
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -647,16 +647,16 @@ $WindowPropsCopyWith<WindowProps> get copyWith => _$WindowPropsCopyWithImpl<Wind
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is WindowProps&&(identical(other.width, width) || other.width == width)&&(identical(other.height, height) || other.height == height)&&(identical(other.top, top) || other.top == top)&&(identical(other.left, left) || other.left == left));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is WindowProps&&(identical(other.width, width) || other.width == width)&&(identical(other.height, height) || other.height == height)&&(identical(other.top, top) || other.top == top)&&(identical(other.left, left) || other.left == left)&&(identical(other.isLocked, isLocked) || other.isLocked == isLocked));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,width,height,top,left);
+int get hashCode => Object.hash(runtimeType,width,height,top,left,isLocked);
 
 @override
 String toString() {
-  return 'WindowProps(width: $width, height: $height, top: $top, left: $left)';
+  return 'WindowProps(width: $width, height: $height, top: $top, left: $left, isLocked: $isLocked)';
 }
 
 
@@ -667,7 +667,7 @@ abstract mixin class $WindowPropsCopyWith<$Res>  {
   factory $WindowPropsCopyWith(WindowProps value, $Res Function(WindowProps) _then) = _$WindowPropsCopyWithImpl;
 @useResult
 $Res call({
- double width, double height, double? top, double? left
+ double width, double height, double? top, double? left, bool isLocked
 });
 
 
@@ -684,13 +684,14 @@ class _$WindowPropsCopyWithImpl<$Res>
 
 /// Create a copy of WindowProps
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? width = null,Object? height = null,Object? top = freezed,Object? left = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? width = null,Object? height = null,Object? top = freezed,Object? left = freezed,Object? isLocked = null,}) {
   return _then(_self.copyWith(
 width: null == width ? _self.width : width // ignore: cast_nullable_to_non_nullable
 as double,height: null == height ? _self.height : height // ignore: cast_nullable_to_non_nullable
 as double,top: freezed == top ? _self.top : top // ignore: cast_nullable_to_non_nullable
 as double?,left: freezed == left ? _self.left : left // ignore: cast_nullable_to_non_nullable
-as double?,
+as double?,isLocked: null == isLocked ? _self.isLocked : isLocked // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
@@ -775,10 +776,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( double width,  double height,  double? top,  double? left)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( double width,  double height,  double? top,  double? left,  bool isLocked)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _WindowProps() when $default != null:
-return $default(_that.width,_that.height,_that.top,_that.left);case _:
+return $default(_that.width,_that.height,_that.top,_that.left,_that.isLocked);case _:
   return orElse();
 
 }
@@ -796,10 +797,10 @@ return $default(_that.width,_that.height,_that.top,_that.left);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( double width,  double height,  double? top,  double? left)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( double width,  double height,  double? top,  double? left,  bool isLocked)  $default,) {final _that = this;
 switch (_that) {
 case _WindowProps():
-return $default(_that.width,_that.height,_that.top,_that.left);case _:
+return $default(_that.width,_that.height,_that.top,_that.left,_that.isLocked);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -816,10 +817,10 @@ return $default(_that.width,_that.height,_that.top,_that.left);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( double width,  double height,  double? top,  double? left)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( double width,  double height,  double? top,  double? left,  bool isLocked)?  $default,) {final _that = this;
 switch (_that) {
 case _WindowProps() when $default != null:
-return $default(_that.width,_that.height,_that.top,_that.left);case _:
+return $default(_that.width,_that.height,_that.top,_that.left,_that.isLocked);case _:
   return null;
 
 }
@@ -831,13 +832,14 @@ return $default(_that.width,_that.height,_that.top,_that.left);case _:
 @JsonSerializable()
 
 class _WindowProps implements WindowProps {
-  const _WindowProps({this.width = 0, this.height = 0, this.top, this.left});
+  const _WindowProps({this.width = 750, this.height = 600, this.top, this.left, this.isLocked = false});
   factory _WindowProps.fromJson(Map<String, dynamic> json) => _$WindowPropsFromJson(json);
 
 @override@JsonKey() final  double width;
 @override@JsonKey() final  double height;
 @override final  double? top;
 @override final  double? left;
+@override@JsonKey() final  bool isLocked;
 
 /// Create a copy of WindowProps
 /// with the given fields replaced by the non-null parameter values.
@@ -852,16 +854,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _WindowProps&&(identical(other.width, width) || other.width == width)&&(identical(other.height, height) || other.height == height)&&(identical(other.top, top) || other.top == top)&&(identical(other.left, left) || other.left == left));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _WindowProps&&(identical(other.width, width) || other.width == width)&&(identical(other.height, height) || other.height == height)&&(identical(other.top, top) || other.top == top)&&(identical(other.left, left) || other.left == left)&&(identical(other.isLocked, isLocked) || other.isLocked == isLocked));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,width,height,top,left);
+int get hashCode => Object.hash(runtimeType,width,height,top,left,isLocked);
 
 @override
 String toString() {
-  return 'WindowProps(width: $width, height: $height, top: $top, left: $left)';
+  return 'WindowProps(width: $width, height: $height, top: $top, left: $left, isLocked: $isLocked)';
 }
 
 
@@ -872,7 +874,7 @@ abstract mixin class _$WindowPropsCopyWith<$Res> implements $WindowPropsCopyWith
   factory _$WindowPropsCopyWith(_WindowProps value, $Res Function(_WindowProps) _then) = __$WindowPropsCopyWithImpl;
 @override @useResult
 $Res call({
- double width, double height, double? top, double? left
+ double width, double height, double? top, double? left, bool isLocked
 });
 
 
@@ -889,13 +891,14 @@ class __$WindowPropsCopyWithImpl<$Res>
 
 /// Create a copy of WindowProps
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? width = null,Object? height = null,Object? top = freezed,Object? left = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? width = null,Object? height = null,Object? top = freezed,Object? left = freezed,Object? isLocked = null,}) {
   return _then(_WindowProps(
 width: null == width ? _self.width : width // ignore: cast_nullable_to_non_nullable
 as double,height: null == height ? _self.height : height // ignore: cast_nullable_to_non_nullable
 as double,top: freezed == top ? _self.top : top // ignore: cast_nullable_to_non_nullable
 as double?,left: freezed == left ? _self.left : left // ignore: cast_nullable_to_non_nullable
-as double?,
+as double?,isLocked: null == isLocked ? _self.isLocked : isLocked // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
@@ -906,7 +909,7 @@ as double?,
 /// @nodoc
 mixin _$VpnProps {
 
- bool get enable; bool get systemProxy; bool get ipv6; bool get allowBypass; bool get dnsHijacking; AccessControlProps get accessControlProps;
+ bool get enable; bool get systemProxy; bool get allowBypass; bool get bypassPrivateRoute; bool get dozeSuspend; bool get smartAutoStop; String get smartAutoStopNetworks; bool get storeFix; bool get networkFix; bool get disableQuic; bool get excludeChina; bool get fcmOptimization; bool get quickResponse; AccessControl get accessControl;
 /// Create a copy of VpnProps
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -919,16 +922,16 @@ $VpnPropsCopyWith<VpnProps> get copyWith => _$VpnPropsCopyWithImpl<VpnProps>(thi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is VpnProps&&(identical(other.enable, enable) || other.enable == enable)&&(identical(other.systemProxy, systemProxy) || other.systemProxy == systemProxy)&&(identical(other.ipv6, ipv6) || other.ipv6 == ipv6)&&(identical(other.allowBypass, allowBypass) || other.allowBypass == allowBypass)&&(identical(other.dnsHijacking, dnsHijacking) || other.dnsHijacking == dnsHijacking)&&(identical(other.accessControlProps, accessControlProps) || other.accessControlProps == accessControlProps));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is VpnProps&&(identical(other.enable, enable) || other.enable == enable)&&(identical(other.systemProxy, systemProxy) || other.systemProxy == systemProxy)&&(identical(other.allowBypass, allowBypass) || other.allowBypass == allowBypass)&&(identical(other.bypassPrivateRoute, bypassPrivateRoute) || other.bypassPrivateRoute == bypassPrivateRoute)&&(identical(other.dozeSuspend, dozeSuspend) || other.dozeSuspend == dozeSuspend)&&(identical(other.smartAutoStop, smartAutoStop) || other.smartAutoStop == smartAutoStop)&&(identical(other.smartAutoStopNetworks, smartAutoStopNetworks) || other.smartAutoStopNetworks == smartAutoStopNetworks)&&(identical(other.storeFix, storeFix) || other.storeFix == storeFix)&&(identical(other.networkFix, networkFix) || other.networkFix == networkFix)&&(identical(other.disableQuic, disableQuic) || other.disableQuic == disableQuic)&&(identical(other.excludeChina, excludeChina) || other.excludeChina == excludeChina)&&(identical(other.fcmOptimization, fcmOptimization) || other.fcmOptimization == fcmOptimization)&&(identical(other.quickResponse, quickResponse) || other.quickResponse == quickResponse)&&(identical(other.accessControl, accessControl) || other.accessControl == accessControl));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,enable,systemProxy,ipv6,allowBypass,dnsHijacking,accessControlProps);
+int get hashCode => Object.hash(runtimeType,enable,systemProxy,allowBypass,bypassPrivateRoute,dozeSuspend,smartAutoStop,smartAutoStopNetworks,storeFix,networkFix,disableQuic,excludeChina,fcmOptimization,quickResponse,accessControl);
 
 @override
 String toString() {
-  return 'VpnProps(enable: $enable, systemProxy: $systemProxy, ipv6: $ipv6, allowBypass: $allowBypass, dnsHijacking: $dnsHijacking, accessControlProps: $accessControlProps)';
+  return 'VpnProps(enable: $enable, systemProxy: $systemProxy, allowBypass: $allowBypass, bypassPrivateRoute: $bypassPrivateRoute, dozeSuspend: $dozeSuspend, smartAutoStop: $smartAutoStop, smartAutoStopNetworks: $smartAutoStopNetworks, storeFix: $storeFix, networkFix: $networkFix, disableQuic: $disableQuic, excludeChina: $excludeChina, fcmOptimization: $fcmOptimization, quickResponse: $quickResponse, accessControl: $accessControl)';
 }
 
 
@@ -939,11 +942,11 @@ abstract mixin class $VpnPropsCopyWith<$Res>  {
   factory $VpnPropsCopyWith(VpnProps value, $Res Function(VpnProps) _then) = _$VpnPropsCopyWithImpl;
 @useResult
 $Res call({
- bool enable, bool systemProxy, bool ipv6, bool allowBypass, bool dnsHijacking, AccessControlProps accessControlProps
+ bool enable, bool systemProxy, bool allowBypass, bool bypassPrivateRoute, bool dozeSuspend, bool smartAutoStop, String smartAutoStopNetworks, bool storeFix, bool networkFix, bool disableQuic, bool excludeChina, bool fcmOptimization, bool quickResponse, AccessControl accessControl
 });
 
 
-$AccessControlPropsCopyWith<$Res> get accessControlProps;
+$AccessControlCopyWith<$Res> get accessControl;
 
 }
 /// @nodoc
@@ -956,25 +959,33 @@ class _$VpnPropsCopyWithImpl<$Res>
 
 /// Create a copy of VpnProps
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? enable = null,Object? systemProxy = null,Object? ipv6 = null,Object? allowBypass = null,Object? dnsHijacking = null,Object? accessControlProps = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? enable = null,Object? systemProxy = null,Object? allowBypass = null,Object? bypassPrivateRoute = null,Object? dozeSuspend = null,Object? smartAutoStop = null,Object? smartAutoStopNetworks = null,Object? storeFix = null,Object? networkFix = null,Object? disableQuic = null,Object? excludeChina = null,Object? fcmOptimization = null,Object? quickResponse = null,Object? accessControl = null,}) {
   return _then(_self.copyWith(
 enable: null == enable ? _self.enable : enable // ignore: cast_nullable_to_non_nullable
 as bool,systemProxy: null == systemProxy ? _self.systemProxy : systemProxy // ignore: cast_nullable_to_non_nullable
-as bool,ipv6: null == ipv6 ? _self.ipv6 : ipv6 // ignore: cast_nullable_to_non_nullable
 as bool,allowBypass: null == allowBypass ? _self.allowBypass : allowBypass // ignore: cast_nullable_to_non_nullable
-as bool,dnsHijacking: null == dnsHijacking ? _self.dnsHijacking : dnsHijacking // ignore: cast_nullable_to_non_nullable
-as bool,accessControlProps: null == accessControlProps ? _self.accessControlProps : accessControlProps // ignore: cast_nullable_to_non_nullable
-as AccessControlProps,
+as bool,bypassPrivateRoute: null == bypassPrivateRoute ? _self.bypassPrivateRoute : bypassPrivateRoute // ignore: cast_nullable_to_non_nullable
+as bool,dozeSuspend: null == dozeSuspend ? _self.dozeSuspend : dozeSuspend // ignore: cast_nullable_to_non_nullable
+as bool,smartAutoStop: null == smartAutoStop ? _self.smartAutoStop : smartAutoStop // ignore: cast_nullable_to_non_nullable
+as bool,smartAutoStopNetworks: null == smartAutoStopNetworks ? _self.smartAutoStopNetworks : smartAutoStopNetworks // ignore: cast_nullable_to_non_nullable
+as String,storeFix: null == storeFix ? _self.storeFix : storeFix // ignore: cast_nullable_to_non_nullable
+as bool,networkFix: null == networkFix ? _self.networkFix : networkFix // ignore: cast_nullable_to_non_nullable
+as bool,disableQuic: null == disableQuic ? _self.disableQuic : disableQuic // ignore: cast_nullable_to_non_nullable
+as bool,excludeChina: null == excludeChina ? _self.excludeChina : excludeChina // ignore: cast_nullable_to_non_nullable
+as bool,fcmOptimization: null == fcmOptimization ? _self.fcmOptimization : fcmOptimization // ignore: cast_nullable_to_non_nullable
+as bool,quickResponse: null == quickResponse ? _self.quickResponse : quickResponse // ignore: cast_nullable_to_non_nullable
+as bool,accessControl: null == accessControl ? _self.accessControl : accessControl // ignore: cast_nullable_to_non_nullable
+as AccessControl,
   ));
 }
 /// Create a copy of VpnProps
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
-$AccessControlPropsCopyWith<$Res> get accessControlProps {
+$AccessControlCopyWith<$Res> get accessControl {
   
-  return $AccessControlPropsCopyWith<$Res>(_self.accessControlProps, (value) {
-    return _then(_self.copyWith(accessControlProps: value));
+  return $AccessControlCopyWith<$Res>(_self.accessControl, (value) {
+    return _then(_self.copyWith(accessControl: value));
   });
 }
 }
@@ -1058,10 +1069,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool enable,  bool systemProxy,  bool ipv6,  bool allowBypass,  bool dnsHijacking,  AccessControlProps accessControlProps)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool enable,  bool systemProxy,  bool allowBypass,  bool bypassPrivateRoute,  bool dozeSuspend,  bool smartAutoStop,  String smartAutoStopNetworks,  bool storeFix,  bool networkFix,  bool disableQuic,  bool excludeChina,  bool fcmOptimization,  bool quickResponse,  AccessControl accessControl)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _VpnProps() when $default != null:
-return $default(_that.enable,_that.systemProxy,_that.ipv6,_that.allowBypass,_that.dnsHijacking,_that.accessControlProps);case _:
+return $default(_that.enable,_that.systemProxy,_that.allowBypass,_that.bypassPrivateRoute,_that.dozeSuspend,_that.smartAutoStop,_that.smartAutoStopNetworks,_that.storeFix,_that.networkFix,_that.disableQuic,_that.excludeChina,_that.fcmOptimization,_that.quickResponse,_that.accessControl);case _:
   return orElse();
 
 }
@@ -1079,10 +1090,10 @@ return $default(_that.enable,_that.systemProxy,_that.ipv6,_that.allowBypass,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool enable,  bool systemProxy,  bool ipv6,  bool allowBypass,  bool dnsHijacking,  AccessControlProps accessControlProps)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool enable,  bool systemProxy,  bool allowBypass,  bool bypassPrivateRoute,  bool dozeSuspend,  bool smartAutoStop,  String smartAutoStopNetworks,  bool storeFix,  bool networkFix,  bool disableQuic,  bool excludeChina,  bool fcmOptimization,  bool quickResponse,  AccessControl accessControl)  $default,) {final _that = this;
 switch (_that) {
 case _VpnProps():
-return $default(_that.enable,_that.systemProxy,_that.ipv6,_that.allowBypass,_that.dnsHijacking,_that.accessControlProps);case _:
+return $default(_that.enable,_that.systemProxy,_that.allowBypass,_that.bypassPrivateRoute,_that.dozeSuspend,_that.smartAutoStop,_that.smartAutoStopNetworks,_that.storeFix,_that.networkFix,_that.disableQuic,_that.excludeChina,_that.fcmOptimization,_that.quickResponse,_that.accessControl);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -1099,10 +1110,10 @@ return $default(_that.enable,_that.systemProxy,_that.ipv6,_that.allowBypass,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool enable,  bool systemProxy,  bool ipv6,  bool allowBypass,  bool dnsHijacking,  AccessControlProps accessControlProps)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool enable,  bool systemProxy,  bool allowBypass,  bool bypassPrivateRoute,  bool dozeSuspend,  bool smartAutoStop,  String smartAutoStopNetworks,  bool storeFix,  bool networkFix,  bool disableQuic,  bool excludeChina,  bool fcmOptimization,  bool quickResponse,  AccessControl accessControl)?  $default,) {final _that = this;
 switch (_that) {
 case _VpnProps() when $default != null:
-return $default(_that.enable,_that.systemProxy,_that.ipv6,_that.allowBypass,_that.dnsHijacking,_that.accessControlProps);case _:
+return $default(_that.enable,_that.systemProxy,_that.allowBypass,_that.bypassPrivateRoute,_that.dozeSuspend,_that.smartAutoStop,_that.smartAutoStopNetworks,_that.storeFix,_that.networkFix,_that.disableQuic,_that.excludeChina,_that.fcmOptimization,_that.quickResponse,_that.accessControl);case _:
   return null;
 
 }
@@ -1114,15 +1125,23 @@ return $default(_that.enable,_that.systemProxy,_that.ipv6,_that.allowBypass,_tha
 @JsonSerializable()
 
 class _VpnProps implements VpnProps {
-  const _VpnProps({this.enable = true, this.systemProxy = true, this.ipv6 = false, this.allowBypass = true, this.dnsHijacking = false, this.accessControlProps = defaultAccessControlProps});
+  const _VpnProps({this.enable = true, this.systemProxy = false, this.allowBypass = false, this.bypassPrivateRoute = true, this.dozeSuspend = true, this.smartAutoStop = false, this.smartAutoStopNetworks = '', this.storeFix = false, this.networkFix = false, this.disableQuic = false, this.excludeChina = false, this.fcmOptimization = false, this.quickResponse = false, this.accessControl = defaultAccessControl});
   factory _VpnProps.fromJson(Map<String, dynamic> json) => _$VpnPropsFromJson(json);
 
 @override@JsonKey() final  bool enable;
 @override@JsonKey() final  bool systemProxy;
-@override@JsonKey() final  bool ipv6;
 @override@JsonKey() final  bool allowBypass;
-@override@JsonKey() final  bool dnsHijacking;
-@override@JsonKey() final  AccessControlProps accessControlProps;
+@override@JsonKey() final  bool bypassPrivateRoute;
+@override@JsonKey() final  bool dozeSuspend;
+@override@JsonKey() final  bool smartAutoStop;
+@override@JsonKey() final  String smartAutoStopNetworks;
+@override@JsonKey() final  bool storeFix;
+@override@JsonKey() final  bool networkFix;
+@override@JsonKey() final  bool disableQuic;
+@override@JsonKey() final  bool excludeChina;
+@override@JsonKey() final  bool fcmOptimization;
+@override@JsonKey() final  bool quickResponse;
+@override@JsonKey() final  AccessControl accessControl;
 
 /// Create a copy of VpnProps
 /// with the given fields replaced by the non-null parameter values.
@@ -1137,16 +1156,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _VpnProps&&(identical(other.enable, enable) || other.enable == enable)&&(identical(other.systemProxy, systemProxy) || other.systemProxy == systemProxy)&&(identical(other.ipv6, ipv6) || other.ipv6 == ipv6)&&(identical(other.allowBypass, allowBypass) || other.allowBypass == allowBypass)&&(identical(other.dnsHijacking, dnsHijacking) || other.dnsHijacking == dnsHijacking)&&(identical(other.accessControlProps, accessControlProps) || other.accessControlProps == accessControlProps));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _VpnProps&&(identical(other.enable, enable) || other.enable == enable)&&(identical(other.systemProxy, systemProxy) || other.systemProxy == systemProxy)&&(identical(other.allowBypass, allowBypass) || other.allowBypass == allowBypass)&&(identical(other.bypassPrivateRoute, bypassPrivateRoute) || other.bypassPrivateRoute == bypassPrivateRoute)&&(identical(other.dozeSuspend, dozeSuspend) || other.dozeSuspend == dozeSuspend)&&(identical(other.smartAutoStop, smartAutoStop) || other.smartAutoStop == smartAutoStop)&&(identical(other.smartAutoStopNetworks, smartAutoStopNetworks) || other.smartAutoStopNetworks == smartAutoStopNetworks)&&(identical(other.storeFix, storeFix) || other.storeFix == storeFix)&&(identical(other.networkFix, networkFix) || other.networkFix == networkFix)&&(identical(other.disableQuic, disableQuic) || other.disableQuic == disableQuic)&&(identical(other.excludeChina, excludeChina) || other.excludeChina == excludeChina)&&(identical(other.fcmOptimization, fcmOptimization) || other.fcmOptimization == fcmOptimization)&&(identical(other.quickResponse, quickResponse) || other.quickResponse == quickResponse)&&(identical(other.accessControl, accessControl) || other.accessControl == accessControl));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,enable,systemProxy,ipv6,allowBypass,dnsHijacking,accessControlProps);
+int get hashCode => Object.hash(runtimeType,enable,systemProxy,allowBypass,bypassPrivateRoute,dozeSuspend,smartAutoStop,smartAutoStopNetworks,storeFix,networkFix,disableQuic,excludeChina,fcmOptimization,quickResponse,accessControl);
 
 @override
 String toString() {
-  return 'VpnProps(enable: $enable, systemProxy: $systemProxy, ipv6: $ipv6, allowBypass: $allowBypass, dnsHijacking: $dnsHijacking, accessControlProps: $accessControlProps)';
+  return 'VpnProps(enable: $enable, systemProxy: $systemProxy, allowBypass: $allowBypass, bypassPrivateRoute: $bypassPrivateRoute, dozeSuspend: $dozeSuspend, smartAutoStop: $smartAutoStop, smartAutoStopNetworks: $smartAutoStopNetworks, storeFix: $storeFix, networkFix: $networkFix, disableQuic: $disableQuic, excludeChina: $excludeChina, fcmOptimization: $fcmOptimization, quickResponse: $quickResponse, accessControl: $accessControl)';
 }
 
 
@@ -1157,11 +1176,11 @@ abstract mixin class _$VpnPropsCopyWith<$Res> implements $VpnPropsCopyWith<$Res>
   factory _$VpnPropsCopyWith(_VpnProps value, $Res Function(_VpnProps) _then) = __$VpnPropsCopyWithImpl;
 @override @useResult
 $Res call({
- bool enable, bool systemProxy, bool ipv6, bool allowBypass, bool dnsHijacking, AccessControlProps accessControlProps
+ bool enable, bool systemProxy, bool allowBypass, bool bypassPrivateRoute, bool dozeSuspend, bool smartAutoStop, String smartAutoStopNetworks, bool storeFix, bool networkFix, bool disableQuic, bool excludeChina, bool fcmOptimization, bool quickResponse, AccessControl accessControl
 });
 
 
-@override $AccessControlPropsCopyWith<$Res> get accessControlProps;
+@override $AccessControlCopyWith<$Res> get accessControl;
 
 }
 /// @nodoc
@@ -1174,15 +1193,23 @@ class __$VpnPropsCopyWithImpl<$Res>
 
 /// Create a copy of VpnProps
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? enable = null,Object? systemProxy = null,Object? ipv6 = null,Object? allowBypass = null,Object? dnsHijacking = null,Object? accessControlProps = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? enable = null,Object? systemProxy = null,Object? allowBypass = null,Object? bypassPrivateRoute = null,Object? dozeSuspend = null,Object? smartAutoStop = null,Object? smartAutoStopNetworks = null,Object? storeFix = null,Object? networkFix = null,Object? disableQuic = null,Object? excludeChina = null,Object? fcmOptimization = null,Object? quickResponse = null,Object? accessControl = null,}) {
   return _then(_VpnProps(
 enable: null == enable ? _self.enable : enable // ignore: cast_nullable_to_non_nullable
 as bool,systemProxy: null == systemProxy ? _self.systemProxy : systemProxy // ignore: cast_nullable_to_non_nullable
-as bool,ipv6: null == ipv6 ? _self.ipv6 : ipv6 // ignore: cast_nullable_to_non_nullable
 as bool,allowBypass: null == allowBypass ? _self.allowBypass : allowBypass // ignore: cast_nullable_to_non_nullable
-as bool,dnsHijacking: null == dnsHijacking ? _self.dnsHijacking : dnsHijacking // ignore: cast_nullable_to_non_nullable
-as bool,accessControlProps: null == accessControlProps ? _self.accessControlProps : accessControlProps // ignore: cast_nullable_to_non_nullable
-as AccessControlProps,
+as bool,bypassPrivateRoute: null == bypassPrivateRoute ? _self.bypassPrivateRoute : bypassPrivateRoute // ignore: cast_nullable_to_non_nullable
+as bool,dozeSuspend: null == dozeSuspend ? _self.dozeSuspend : dozeSuspend // ignore: cast_nullable_to_non_nullable
+as bool,smartAutoStop: null == smartAutoStop ? _self.smartAutoStop : smartAutoStop // ignore: cast_nullable_to_non_nullable
+as bool,smartAutoStopNetworks: null == smartAutoStopNetworks ? _self.smartAutoStopNetworks : smartAutoStopNetworks // ignore: cast_nullable_to_non_nullable
+as String,storeFix: null == storeFix ? _self.storeFix : storeFix // ignore: cast_nullable_to_non_nullable
+as bool,networkFix: null == networkFix ? _self.networkFix : networkFix // ignore: cast_nullable_to_non_nullable
+as bool,disableQuic: null == disableQuic ? _self.disableQuic : disableQuic // ignore: cast_nullable_to_non_nullable
+as bool,excludeChina: null == excludeChina ? _self.excludeChina : excludeChina // ignore: cast_nullable_to_non_nullable
+as bool,fcmOptimization: null == fcmOptimization ? _self.fcmOptimization : fcmOptimization // ignore: cast_nullable_to_non_nullable
+as bool,quickResponse: null == quickResponse ? _self.quickResponse : quickResponse // ignore: cast_nullable_to_non_nullable
+as bool,accessControl: null == accessControl ? _self.accessControl : accessControl // ignore: cast_nullable_to_non_nullable
+as AccessControl,
   ));
 }
 
@@ -1190,10 +1217,10 @@ as AccessControlProps,
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
-$AccessControlPropsCopyWith<$Res> get accessControlProps {
+$AccessControlCopyWith<$Res> get accessControl {
   
-  return $AccessControlPropsCopyWith<$Res>(_self.accessControlProps, (value) {
-    return _then(_self.copyWith(accessControlProps: value));
+  return $AccessControlCopyWith<$Res>(_self.accessControl, (value) {
+    return _then(_self.copyWith(accessControl: value));
   });
 }
 }
@@ -1202,7 +1229,7 @@ $AccessControlPropsCopyWith<$Res> get accessControlProps {
 /// @nodoc
 mixin _$NetworkProps {
 
- bool get systemProxy; List<String> get bypassDomain; RouteMode get routeMode; bool get autoSetSystemDns; bool get appendSystemDns;
+ bool get systemProxy; List<String> get bypassDomain; bool get bypassPrivateRoute; bool get autoSetSystemDns;
 /// Create a copy of NetworkProps
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1215,16 +1242,16 @@ $NetworkPropsCopyWith<NetworkProps> get copyWith => _$NetworkPropsCopyWithImpl<N
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is NetworkProps&&(identical(other.systemProxy, systemProxy) || other.systemProxy == systemProxy)&&const DeepCollectionEquality().equals(other.bypassDomain, bypassDomain)&&(identical(other.routeMode, routeMode) || other.routeMode == routeMode)&&(identical(other.autoSetSystemDns, autoSetSystemDns) || other.autoSetSystemDns == autoSetSystemDns)&&(identical(other.appendSystemDns, appendSystemDns) || other.appendSystemDns == appendSystemDns));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is NetworkProps&&(identical(other.systemProxy, systemProxy) || other.systemProxy == systemProxy)&&const DeepCollectionEquality().equals(other.bypassDomain, bypassDomain)&&(identical(other.bypassPrivateRoute, bypassPrivateRoute) || other.bypassPrivateRoute == bypassPrivateRoute)&&(identical(other.autoSetSystemDns, autoSetSystemDns) || other.autoSetSystemDns == autoSetSystemDns));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,systemProxy,const DeepCollectionEquality().hash(bypassDomain),routeMode,autoSetSystemDns,appendSystemDns);
+int get hashCode => Object.hash(runtimeType,systemProxy,const DeepCollectionEquality().hash(bypassDomain),bypassPrivateRoute,autoSetSystemDns);
 
 @override
 String toString() {
-  return 'NetworkProps(systemProxy: $systemProxy, bypassDomain: $bypassDomain, routeMode: $routeMode, autoSetSystemDns: $autoSetSystemDns, appendSystemDns: $appendSystemDns)';
+  return 'NetworkProps(systemProxy: $systemProxy, bypassDomain: $bypassDomain, bypassPrivateRoute: $bypassPrivateRoute, autoSetSystemDns: $autoSetSystemDns)';
 }
 
 
@@ -1235,7 +1262,7 @@ abstract mixin class $NetworkPropsCopyWith<$Res>  {
   factory $NetworkPropsCopyWith(NetworkProps value, $Res Function(NetworkProps) _then) = _$NetworkPropsCopyWithImpl;
 @useResult
 $Res call({
- bool systemProxy, List<String> bypassDomain, RouteMode routeMode, bool autoSetSystemDns, bool appendSystemDns
+ bool systemProxy, List<String> bypassDomain, bool bypassPrivateRoute, bool autoSetSystemDns
 });
 
 
@@ -1252,13 +1279,12 @@ class _$NetworkPropsCopyWithImpl<$Res>
 
 /// Create a copy of NetworkProps
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? systemProxy = null,Object? bypassDomain = null,Object? routeMode = null,Object? autoSetSystemDns = null,Object? appendSystemDns = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? systemProxy = null,Object? bypassDomain = null,Object? bypassPrivateRoute = null,Object? autoSetSystemDns = null,}) {
   return _then(_self.copyWith(
 systemProxy: null == systemProxy ? _self.systemProxy : systemProxy // ignore: cast_nullable_to_non_nullable
 as bool,bypassDomain: null == bypassDomain ? _self.bypassDomain : bypassDomain // ignore: cast_nullable_to_non_nullable
-as List<String>,routeMode: null == routeMode ? _self.routeMode : routeMode // ignore: cast_nullable_to_non_nullable
-as RouteMode,autoSetSystemDns: null == autoSetSystemDns ? _self.autoSetSystemDns : autoSetSystemDns // ignore: cast_nullable_to_non_nullable
-as bool,appendSystemDns: null == appendSystemDns ? _self.appendSystemDns : appendSystemDns // ignore: cast_nullable_to_non_nullable
+as List<String>,bypassPrivateRoute: null == bypassPrivateRoute ? _self.bypassPrivateRoute : bypassPrivateRoute // ignore: cast_nullable_to_non_nullable
+as bool,autoSetSystemDns: null == autoSetSystemDns ? _self.autoSetSystemDns : autoSetSystemDns // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }
@@ -1344,10 +1370,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool systemProxy,  List<String> bypassDomain,  RouteMode routeMode,  bool autoSetSystemDns,  bool appendSystemDns)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool systemProxy,  List<String> bypassDomain,  bool bypassPrivateRoute,  bool autoSetSystemDns)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _NetworkProps() when $default != null:
-return $default(_that.systemProxy,_that.bypassDomain,_that.routeMode,_that.autoSetSystemDns,_that.appendSystemDns);case _:
+return $default(_that.systemProxy,_that.bypassDomain,_that.bypassPrivateRoute,_that.autoSetSystemDns);case _:
   return orElse();
 
 }
@@ -1365,10 +1391,10 @@ return $default(_that.systemProxy,_that.bypassDomain,_that.routeMode,_that.autoS
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool systemProxy,  List<String> bypassDomain,  RouteMode routeMode,  bool autoSetSystemDns,  bool appendSystemDns)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool systemProxy,  List<String> bypassDomain,  bool bypassPrivateRoute,  bool autoSetSystemDns)  $default,) {final _that = this;
 switch (_that) {
 case _NetworkProps():
-return $default(_that.systemProxy,_that.bypassDomain,_that.routeMode,_that.autoSetSystemDns,_that.appendSystemDns);case _:
+return $default(_that.systemProxy,_that.bypassDomain,_that.bypassPrivateRoute,_that.autoSetSystemDns);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -1385,10 +1411,10 @@ return $default(_that.systemProxy,_that.bypassDomain,_that.routeMode,_that.autoS
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool systemProxy,  List<String> bypassDomain,  RouteMode routeMode,  bool autoSetSystemDns,  bool appendSystemDns)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool systemProxy,  List<String> bypassDomain,  bool bypassPrivateRoute,  bool autoSetSystemDns)?  $default,) {final _that = this;
 switch (_that) {
 case _NetworkProps() when $default != null:
-return $default(_that.systemProxy,_that.bypassDomain,_that.routeMode,_that.autoSetSystemDns,_that.appendSystemDns);case _:
+return $default(_that.systemProxy,_that.bypassDomain,_that.bypassPrivateRoute,_that.autoSetSystemDns);case _:
   return null;
 
 }
@@ -1400,7 +1426,7 @@ return $default(_that.systemProxy,_that.bypassDomain,_that.routeMode,_that.autoS
 @JsonSerializable()
 
 class _NetworkProps implements NetworkProps {
-  const _NetworkProps({this.systemProxy = true, final  List<String> bypassDomain = defaultBypassDomain, this.routeMode = RouteMode.config, this.autoSetSystemDns = true, this.appendSystemDns = false}): _bypassDomain = bypassDomain;
+  const _NetworkProps({this.systemProxy = false, final  List<String> bypassDomain = defaultBypassDomain, this.bypassPrivateRoute = true, this.autoSetSystemDns = true}): _bypassDomain = bypassDomain;
   factory _NetworkProps.fromJson(Map<String, dynamic> json) => _$NetworkPropsFromJson(json);
 
 @override@JsonKey() final  bool systemProxy;
@@ -1411,9 +1437,8 @@ class _NetworkProps implements NetworkProps {
   return EqualUnmodifiableListView(_bypassDomain);
 }
 
-@override@JsonKey() final  RouteMode routeMode;
+@override@JsonKey() final  bool bypassPrivateRoute;
 @override@JsonKey() final  bool autoSetSystemDns;
-@override@JsonKey() final  bool appendSystemDns;
 
 /// Create a copy of NetworkProps
 /// with the given fields replaced by the non-null parameter values.
@@ -1428,16 +1453,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _NetworkProps&&(identical(other.systemProxy, systemProxy) || other.systemProxy == systemProxy)&&const DeepCollectionEquality().equals(other._bypassDomain, _bypassDomain)&&(identical(other.routeMode, routeMode) || other.routeMode == routeMode)&&(identical(other.autoSetSystemDns, autoSetSystemDns) || other.autoSetSystemDns == autoSetSystemDns)&&(identical(other.appendSystemDns, appendSystemDns) || other.appendSystemDns == appendSystemDns));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _NetworkProps&&(identical(other.systemProxy, systemProxy) || other.systemProxy == systemProxy)&&const DeepCollectionEquality().equals(other._bypassDomain, _bypassDomain)&&(identical(other.bypassPrivateRoute, bypassPrivateRoute) || other.bypassPrivateRoute == bypassPrivateRoute)&&(identical(other.autoSetSystemDns, autoSetSystemDns) || other.autoSetSystemDns == autoSetSystemDns));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,systemProxy,const DeepCollectionEquality().hash(_bypassDomain),routeMode,autoSetSystemDns,appendSystemDns);
+int get hashCode => Object.hash(runtimeType,systemProxy,const DeepCollectionEquality().hash(_bypassDomain),bypassPrivateRoute,autoSetSystemDns);
 
 @override
 String toString() {
-  return 'NetworkProps(systemProxy: $systemProxy, bypassDomain: $bypassDomain, routeMode: $routeMode, autoSetSystemDns: $autoSetSystemDns, appendSystemDns: $appendSystemDns)';
+  return 'NetworkProps(systemProxy: $systemProxy, bypassDomain: $bypassDomain, bypassPrivateRoute: $bypassPrivateRoute, autoSetSystemDns: $autoSetSystemDns)';
 }
 
 
@@ -1448,7 +1473,7 @@ abstract mixin class _$NetworkPropsCopyWith<$Res> implements $NetworkPropsCopyWi
   factory _$NetworkPropsCopyWith(_NetworkProps value, $Res Function(_NetworkProps) _then) = __$NetworkPropsCopyWithImpl;
 @override @useResult
 $Res call({
- bool systemProxy, List<String> bypassDomain, RouteMode routeMode, bool autoSetSystemDns, bool appendSystemDns
+ bool systemProxy, List<String> bypassDomain, bool bypassPrivateRoute, bool autoSetSystemDns
 });
 
 
@@ -1465,13 +1490,12 @@ class __$NetworkPropsCopyWithImpl<$Res>
 
 /// Create a copy of NetworkProps
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? systemProxy = null,Object? bypassDomain = null,Object? routeMode = null,Object? autoSetSystemDns = null,Object? appendSystemDns = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? systemProxy = null,Object? bypassDomain = null,Object? bypassPrivateRoute = null,Object? autoSetSystemDns = null,}) {
   return _then(_NetworkProps(
 systemProxy: null == systemProxy ? _self.systemProxy : systemProxy // ignore: cast_nullable_to_non_nullable
 as bool,bypassDomain: null == bypassDomain ? _self._bypassDomain : bypassDomain // ignore: cast_nullable_to_non_nullable
-as List<String>,routeMode: null == routeMode ? _self.routeMode : routeMode // ignore: cast_nullable_to_non_nullable
-as RouteMode,autoSetSystemDns: null == autoSetSystemDns ? _self.autoSetSystemDns : autoSetSystemDns // ignore: cast_nullable_to_non_nullable
-as bool,appendSystemDns: null == appendSystemDns ? _self.appendSystemDns : appendSystemDns // ignore: cast_nullable_to_non_nullable
+as List<String>,bypassPrivateRoute: null == bypassPrivateRoute ? _self.bypassPrivateRoute : bypassPrivateRoute // ignore: cast_nullable_to_non_nullable
+as bool,autoSetSystemDns: null == autoSetSystemDns ? _self.autoSetSystemDns : autoSetSystemDns // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }
@@ -1481,42 +1505,42 @@ as bool,
 
 
 /// @nodoc
-mixin _$ProxiesStyleProps {
+mixin _$ProxiesStyle {
 
- ProxiesType get type; ProxiesSortType get sortType; ProxiesLayout get layout; ProxiesIconStyle get iconStyle; ProxyCardType get cardType;
-/// Create a copy of ProxiesStyleProps
+ ProxiesType get type; ProxiesSortType get sortType; ProxiesLayout get layout; ProxiesIconStyle get iconStyle; ProxyCardType get cardType; DelayAnimationType get delayAnimation; Map<String, String> get iconMap; int get concurrencyLimit;
+/// Create a copy of ProxiesStyle
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
-$ProxiesStylePropsCopyWith<ProxiesStyleProps> get copyWith => _$ProxiesStylePropsCopyWithImpl<ProxiesStyleProps>(this as ProxiesStyleProps, _$identity);
+$ProxiesStyleCopyWith<ProxiesStyle> get copyWith => _$ProxiesStyleCopyWithImpl<ProxiesStyle>(this as ProxiesStyle, _$identity);
 
-  /// Serializes this ProxiesStyleProps to a JSON map.
+  /// Serializes this ProxiesStyle to a JSON map.
   Map<String, dynamic> toJson();
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProxiesStyleProps&&(identical(other.type, type) || other.type == type)&&(identical(other.sortType, sortType) || other.sortType == sortType)&&(identical(other.layout, layout) || other.layout == layout)&&(identical(other.iconStyle, iconStyle) || other.iconStyle == iconStyle)&&(identical(other.cardType, cardType) || other.cardType == cardType));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProxiesStyle&&(identical(other.type, type) || other.type == type)&&(identical(other.sortType, sortType) || other.sortType == sortType)&&(identical(other.layout, layout) || other.layout == layout)&&(identical(other.iconStyle, iconStyle) || other.iconStyle == iconStyle)&&(identical(other.cardType, cardType) || other.cardType == cardType)&&(identical(other.delayAnimation, delayAnimation) || other.delayAnimation == delayAnimation)&&const DeepCollectionEquality().equals(other.iconMap, iconMap)&&(identical(other.concurrencyLimit, concurrencyLimit) || other.concurrencyLimit == concurrencyLimit));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,type,sortType,layout,iconStyle,cardType);
+int get hashCode => Object.hash(runtimeType,type,sortType,layout,iconStyle,cardType,delayAnimation,const DeepCollectionEquality().hash(iconMap),concurrencyLimit);
 
 @override
 String toString() {
-  return 'ProxiesStyleProps(type: $type, sortType: $sortType, layout: $layout, iconStyle: $iconStyle, cardType: $cardType)';
+  return 'ProxiesStyle(type: $type, sortType: $sortType, layout: $layout, iconStyle: $iconStyle, cardType: $cardType, delayAnimation: $delayAnimation, iconMap: $iconMap, concurrencyLimit: $concurrencyLimit)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class $ProxiesStylePropsCopyWith<$Res>  {
-  factory $ProxiesStylePropsCopyWith(ProxiesStyleProps value, $Res Function(ProxiesStyleProps) _then) = _$ProxiesStylePropsCopyWithImpl;
+abstract mixin class $ProxiesStyleCopyWith<$Res>  {
+  factory $ProxiesStyleCopyWith(ProxiesStyle value, $Res Function(ProxiesStyle) _then) = _$ProxiesStyleCopyWithImpl;
 @useResult
 $Res call({
- ProxiesType type, ProxiesSortType sortType, ProxiesLayout layout, ProxiesIconStyle iconStyle, ProxyCardType cardType
+ ProxiesType type, ProxiesSortType sortType, ProxiesLayout layout, ProxiesIconStyle iconStyle, ProxyCardType cardType, DelayAnimationType delayAnimation, Map<String, String> iconMap, int concurrencyLimit
 });
 
 
@@ -1524,31 +1548,34 @@ $Res call({
 
 }
 /// @nodoc
-class _$ProxiesStylePropsCopyWithImpl<$Res>
-    implements $ProxiesStylePropsCopyWith<$Res> {
-  _$ProxiesStylePropsCopyWithImpl(this._self, this._then);
+class _$ProxiesStyleCopyWithImpl<$Res>
+    implements $ProxiesStyleCopyWith<$Res> {
+  _$ProxiesStyleCopyWithImpl(this._self, this._then);
 
-  final ProxiesStyleProps _self;
-  final $Res Function(ProxiesStyleProps) _then;
+  final ProxiesStyle _self;
+  final $Res Function(ProxiesStyle) _then;
 
-/// Create a copy of ProxiesStyleProps
+/// Create a copy of ProxiesStyle
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? type = null,Object? sortType = null,Object? layout = null,Object? iconStyle = null,Object? cardType = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? type = null,Object? sortType = null,Object? layout = null,Object? iconStyle = null,Object? cardType = null,Object? delayAnimation = null,Object? iconMap = null,Object? concurrencyLimit = null,}) {
   return _then(_self.copyWith(
 type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
 as ProxiesType,sortType: null == sortType ? _self.sortType : sortType // ignore: cast_nullable_to_non_nullable
 as ProxiesSortType,layout: null == layout ? _self.layout : layout // ignore: cast_nullable_to_non_nullable
 as ProxiesLayout,iconStyle: null == iconStyle ? _self.iconStyle : iconStyle // ignore: cast_nullable_to_non_nullable
 as ProxiesIconStyle,cardType: null == cardType ? _self.cardType : cardType // ignore: cast_nullable_to_non_nullable
-as ProxyCardType,
+as ProxyCardType,delayAnimation: null == delayAnimation ? _self.delayAnimation : delayAnimation // ignore: cast_nullable_to_non_nullable
+as DelayAnimationType,iconMap: null == iconMap ? _self.iconMap : iconMap // ignore: cast_nullable_to_non_nullable
+as Map<String, String>,concurrencyLimit: null == concurrencyLimit ? _self.concurrencyLimit : concurrencyLimit // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 
 }
 
 
-/// Adds pattern-matching-related methods to [ProxiesStyleProps].
-extension ProxiesStylePropsPatterns on ProxiesStyleProps {
+/// Adds pattern-matching-related methods to [ProxiesStyle].
+extension ProxiesStylePatterns on ProxiesStyle {
 /// A variant of `map` that fallback to returning `orElse`.
 ///
 /// It is equivalent to doing:
@@ -1561,10 +1588,10 @@ extension ProxiesStylePropsPatterns on ProxiesStyleProps {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _ProxiesStyleProps value)?  $default,{required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _ProxiesStyle value)?  $default,{required TResult orElse(),}){
 final _that = this;
 switch (_that) {
-case _ProxiesStyleProps() when $default != null:
+case _ProxiesStyle() when $default != null:
 return $default(_that);case _:
   return orElse();
 
@@ -1583,10 +1610,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _ProxiesStyleProps value)  $default,){
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _ProxiesStyle value)  $default,){
 final _that = this;
 switch (_that) {
-case _ProxiesStyleProps():
+case _ProxiesStyle():
 return $default(_that);case _:
   throw StateError('Unexpected subclass');
 
@@ -1604,10 +1631,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _ProxiesStyleProps value)?  $default,){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _ProxiesStyle value)?  $default,){
 final _that = this;
 switch (_that) {
-case _ProxiesStyleProps() when $default != null:
+case _ProxiesStyle() when $default != null:
 return $default(_that);case _:
   return null;
 
@@ -1625,10 +1652,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( ProxiesType type,  ProxiesSortType sortType,  ProxiesLayout layout,  ProxiesIconStyle iconStyle,  ProxyCardType cardType)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( ProxiesType type,  ProxiesSortType sortType,  ProxiesLayout layout,  ProxiesIconStyle iconStyle,  ProxyCardType cardType,  DelayAnimationType delayAnimation,  Map<String, String> iconMap,  int concurrencyLimit)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
-case _ProxiesStyleProps() when $default != null:
-return $default(_that.type,_that.sortType,_that.layout,_that.iconStyle,_that.cardType);case _:
+case _ProxiesStyle() when $default != null:
+return $default(_that.type,_that.sortType,_that.layout,_that.iconStyle,_that.cardType,_that.delayAnimation,_that.iconMap,_that.concurrencyLimit);case _:
   return orElse();
 
 }
@@ -1646,10 +1673,10 @@ return $default(_that.type,_that.sortType,_that.layout,_that.iconStyle,_that.car
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( ProxiesType type,  ProxiesSortType sortType,  ProxiesLayout layout,  ProxiesIconStyle iconStyle,  ProxyCardType cardType)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( ProxiesType type,  ProxiesSortType sortType,  ProxiesLayout layout,  ProxiesIconStyle iconStyle,  ProxyCardType cardType,  DelayAnimationType delayAnimation,  Map<String, String> iconMap,  int concurrencyLimit)  $default,) {final _that = this;
 switch (_that) {
-case _ProxiesStyleProps():
-return $default(_that.type,_that.sortType,_that.layout,_that.iconStyle,_that.cardType);case _:
+case _ProxiesStyle():
+return $default(_that.type,_that.sortType,_that.layout,_that.iconStyle,_that.cardType,_that.delayAnimation,_that.iconMap,_that.concurrencyLimit);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -1666,10 +1693,10 @@ return $default(_that.type,_that.sortType,_that.layout,_that.iconStyle,_that.car
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( ProxiesType type,  ProxiesSortType sortType,  ProxiesLayout layout,  ProxiesIconStyle iconStyle,  ProxyCardType cardType)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( ProxiesType type,  ProxiesSortType sortType,  ProxiesLayout layout,  ProxiesIconStyle iconStyle,  ProxyCardType cardType,  DelayAnimationType delayAnimation,  Map<String, String> iconMap,  int concurrencyLimit)?  $default,) {final _that = this;
 switch (_that) {
-case _ProxiesStyleProps() when $default != null:
-return $default(_that.type,_that.sortType,_that.layout,_that.iconStyle,_that.cardType);case _:
+case _ProxiesStyle() when $default != null:
+return $default(_that.type,_that.sortType,_that.layout,_that.iconStyle,_that.cardType,_that.delayAnimation,_that.iconMap,_that.concurrencyLimit);case _:
   return null;
 
 }
@@ -1680,50 +1707,59 @@ return $default(_that.type,_that.sortType,_that.layout,_that.iconStyle,_that.car
 /// @nodoc
 @JsonSerializable()
 
-class _ProxiesStyleProps implements ProxiesStyleProps {
-  const _ProxiesStyleProps({this.type = ProxiesType.tab, this.sortType = ProxiesSortType.none, this.layout = ProxiesLayout.standard, this.iconStyle = ProxiesIconStyle.standard, this.cardType = ProxyCardType.expand});
-  factory _ProxiesStyleProps.fromJson(Map<String, dynamic> json) => _$ProxiesStylePropsFromJson(json);
+class _ProxiesStyle implements ProxiesStyle {
+  const _ProxiesStyle({this.type = ProxiesType.tab, this.sortType = ProxiesSortType.none, this.layout = ProxiesLayout.standard, this.iconStyle = ProxiesIconStyle.none, this.cardType = ProxyCardType.shrink, this.delayAnimation = DelayAnimationType.none, final  Map<String, String> iconMap = const {}, this.concurrencyLimit = 16}): _iconMap = iconMap;
+  factory _ProxiesStyle.fromJson(Map<String, dynamic> json) => _$ProxiesStyleFromJson(json);
 
 @override@JsonKey() final  ProxiesType type;
 @override@JsonKey() final  ProxiesSortType sortType;
 @override@JsonKey() final  ProxiesLayout layout;
 @override@JsonKey() final  ProxiesIconStyle iconStyle;
 @override@JsonKey() final  ProxyCardType cardType;
+@override@JsonKey() final  DelayAnimationType delayAnimation;
+ final  Map<String, String> _iconMap;
+@override@JsonKey() Map<String, String> get iconMap {
+  if (_iconMap is EqualUnmodifiableMapView) return _iconMap;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(_iconMap);
+}
 
-/// Create a copy of ProxiesStyleProps
+@override@JsonKey() final  int concurrencyLimit;
+
+/// Create a copy of ProxiesStyle
 /// with the given fields replaced by the non-null parameter values.
 @override @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
-_$ProxiesStylePropsCopyWith<_ProxiesStyleProps> get copyWith => __$ProxiesStylePropsCopyWithImpl<_ProxiesStyleProps>(this, _$identity);
+_$ProxiesStyleCopyWith<_ProxiesStyle> get copyWith => __$ProxiesStyleCopyWithImpl<_ProxiesStyle>(this, _$identity);
 
 @override
 Map<String, dynamic> toJson() {
-  return _$ProxiesStylePropsToJson(this, );
+  return _$ProxiesStyleToJson(this, );
 }
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProxiesStyleProps&&(identical(other.type, type) || other.type == type)&&(identical(other.sortType, sortType) || other.sortType == sortType)&&(identical(other.layout, layout) || other.layout == layout)&&(identical(other.iconStyle, iconStyle) || other.iconStyle == iconStyle)&&(identical(other.cardType, cardType) || other.cardType == cardType));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProxiesStyle&&(identical(other.type, type) || other.type == type)&&(identical(other.sortType, sortType) || other.sortType == sortType)&&(identical(other.layout, layout) || other.layout == layout)&&(identical(other.iconStyle, iconStyle) || other.iconStyle == iconStyle)&&(identical(other.cardType, cardType) || other.cardType == cardType)&&(identical(other.delayAnimation, delayAnimation) || other.delayAnimation == delayAnimation)&&const DeepCollectionEquality().equals(other._iconMap, _iconMap)&&(identical(other.concurrencyLimit, concurrencyLimit) || other.concurrencyLimit == concurrencyLimit));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,type,sortType,layout,iconStyle,cardType);
+int get hashCode => Object.hash(runtimeType,type,sortType,layout,iconStyle,cardType,delayAnimation,const DeepCollectionEquality().hash(_iconMap),concurrencyLimit);
 
 @override
 String toString() {
-  return 'ProxiesStyleProps(type: $type, sortType: $sortType, layout: $layout, iconStyle: $iconStyle, cardType: $cardType)';
+  return 'ProxiesStyle(type: $type, sortType: $sortType, layout: $layout, iconStyle: $iconStyle, cardType: $cardType, delayAnimation: $delayAnimation, iconMap: $iconMap, concurrencyLimit: $concurrencyLimit)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class _$ProxiesStylePropsCopyWith<$Res> implements $ProxiesStylePropsCopyWith<$Res> {
-  factory _$ProxiesStylePropsCopyWith(_ProxiesStyleProps value, $Res Function(_ProxiesStyleProps) _then) = __$ProxiesStylePropsCopyWithImpl;
+abstract mixin class _$ProxiesStyleCopyWith<$Res> implements $ProxiesStyleCopyWith<$Res> {
+  factory _$ProxiesStyleCopyWith(_ProxiesStyle value, $Res Function(_ProxiesStyle) _then) = __$ProxiesStyleCopyWithImpl;
 @override @useResult
 $Res call({
- ProxiesType type, ProxiesSortType sortType, ProxiesLayout layout, ProxiesIconStyle iconStyle, ProxyCardType cardType
+ ProxiesType type, ProxiesSortType sortType, ProxiesLayout layout, ProxiesIconStyle iconStyle, ProxyCardType cardType, DelayAnimationType delayAnimation, Map<String, String> iconMap, int concurrencyLimit
 });
 
 
@@ -1731,23 +1767,26 @@ $Res call({
 
 }
 /// @nodoc
-class __$ProxiesStylePropsCopyWithImpl<$Res>
-    implements _$ProxiesStylePropsCopyWith<$Res> {
-  __$ProxiesStylePropsCopyWithImpl(this._self, this._then);
+class __$ProxiesStyleCopyWithImpl<$Res>
+    implements _$ProxiesStyleCopyWith<$Res> {
+  __$ProxiesStyleCopyWithImpl(this._self, this._then);
 
-  final _ProxiesStyleProps _self;
-  final $Res Function(_ProxiesStyleProps) _then;
+  final _ProxiesStyle _self;
+  final $Res Function(_ProxiesStyle) _then;
 
-/// Create a copy of ProxiesStyleProps
+/// Create a copy of ProxiesStyle
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? type = null,Object? sortType = null,Object? layout = null,Object? iconStyle = null,Object? cardType = null,}) {
-  return _then(_ProxiesStyleProps(
+@override @pragma('vm:prefer-inline') $Res call({Object? type = null,Object? sortType = null,Object? layout = null,Object? iconStyle = null,Object? cardType = null,Object? delayAnimation = null,Object? iconMap = null,Object? concurrencyLimit = null,}) {
+  return _then(_ProxiesStyle(
 type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
 as ProxiesType,sortType: null == sortType ? _self.sortType : sortType // ignore: cast_nullable_to_non_nullable
 as ProxiesSortType,layout: null == layout ? _self.layout : layout // ignore: cast_nullable_to_non_nullable
 as ProxiesLayout,iconStyle: null == iconStyle ? _self.iconStyle : iconStyle // ignore: cast_nullable_to_non_nullable
 as ProxiesIconStyle,cardType: null == cardType ? _self.cardType : cardType // ignore: cast_nullable_to_non_nullable
-as ProxyCardType,
+as ProxyCardType,delayAnimation: null == delayAnimation ? _self.delayAnimation : delayAnimation // ignore: cast_nullable_to_non_nullable
+as DelayAnimationType,iconMap: null == iconMap ? _self._iconMap : iconMap // ignore: cast_nullable_to_non_nullable
+as Map<String, String>,concurrencyLimit: null == concurrencyLimit ? _self.concurrencyLimit : concurrencyLimit // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 
@@ -2024,7 +2063,7 @@ as double,
 /// @nodoc
 mixin _$ThemeProps {
 
- int? get primaryColor; List<int> get primaryColors; ThemeMode get themeMode; DynamicSchemeVariant get schemeVariant; bool get pureBlack; TextScale get textScale;
+ int? get primaryColor; List<int> get primaryColors; ThemeMode get themeMode; DynamicSchemeVariant get schemeVariant; bool get pureBlack; TextScale get textScale; bool get useLightIcon; bool get useHarmonyFont;
 /// Create a copy of ThemeProps
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -2037,16 +2076,16 @@ $ThemePropsCopyWith<ThemeProps> get copyWith => _$ThemePropsCopyWithImpl<ThemePr
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ThemeProps&&(identical(other.primaryColor, primaryColor) || other.primaryColor == primaryColor)&&const DeepCollectionEquality().equals(other.primaryColors, primaryColors)&&(identical(other.themeMode, themeMode) || other.themeMode == themeMode)&&(identical(other.schemeVariant, schemeVariant) || other.schemeVariant == schemeVariant)&&(identical(other.pureBlack, pureBlack) || other.pureBlack == pureBlack)&&(identical(other.textScale, textScale) || other.textScale == textScale));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ThemeProps&&(identical(other.primaryColor, primaryColor) || other.primaryColor == primaryColor)&&const DeepCollectionEquality().equals(other.primaryColors, primaryColors)&&(identical(other.themeMode, themeMode) || other.themeMode == themeMode)&&(identical(other.schemeVariant, schemeVariant) || other.schemeVariant == schemeVariant)&&(identical(other.pureBlack, pureBlack) || other.pureBlack == pureBlack)&&(identical(other.textScale, textScale) || other.textScale == textScale)&&(identical(other.useLightIcon, useLightIcon) || other.useLightIcon == useLightIcon)&&(identical(other.useHarmonyFont, useHarmonyFont) || other.useHarmonyFont == useHarmonyFont));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,primaryColor,const DeepCollectionEquality().hash(primaryColors),themeMode,schemeVariant,pureBlack,textScale);
+int get hashCode => Object.hash(runtimeType,primaryColor,const DeepCollectionEquality().hash(primaryColors),themeMode,schemeVariant,pureBlack,textScale,useLightIcon,useHarmonyFont);
 
 @override
 String toString() {
-  return 'ThemeProps(primaryColor: $primaryColor, primaryColors: $primaryColors, themeMode: $themeMode, schemeVariant: $schemeVariant, pureBlack: $pureBlack, textScale: $textScale)';
+  return 'ThemeProps(primaryColor: $primaryColor, primaryColors: $primaryColors, themeMode: $themeMode, schemeVariant: $schemeVariant, pureBlack: $pureBlack, textScale: $textScale, useLightIcon: $useLightIcon, useHarmonyFont: $useHarmonyFont)';
 }
 
 
@@ -2057,7 +2096,7 @@ abstract mixin class $ThemePropsCopyWith<$Res>  {
   factory $ThemePropsCopyWith(ThemeProps value, $Res Function(ThemeProps) _then) = _$ThemePropsCopyWithImpl;
 @useResult
 $Res call({
- int? primaryColor, List<int> primaryColors, ThemeMode themeMode, DynamicSchemeVariant schemeVariant, bool pureBlack, TextScale textScale
+ int? primaryColor, List<int> primaryColors, ThemeMode themeMode, DynamicSchemeVariant schemeVariant, bool pureBlack, TextScale textScale, bool useLightIcon, bool useHarmonyFont
 });
 
 
@@ -2074,7 +2113,7 @@ class _$ThemePropsCopyWithImpl<$Res>
 
 /// Create a copy of ThemeProps
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? primaryColor = freezed,Object? primaryColors = null,Object? themeMode = null,Object? schemeVariant = null,Object? pureBlack = null,Object? textScale = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? primaryColor = freezed,Object? primaryColors = null,Object? themeMode = null,Object? schemeVariant = null,Object? pureBlack = null,Object? textScale = null,Object? useLightIcon = null,Object? useHarmonyFont = null,}) {
   return _then(_self.copyWith(
 primaryColor: freezed == primaryColor ? _self.primaryColor : primaryColor // ignore: cast_nullable_to_non_nullable
 as int?,primaryColors: null == primaryColors ? _self.primaryColors : primaryColors // ignore: cast_nullable_to_non_nullable
@@ -2082,7 +2121,9 @@ as List<int>,themeMode: null == themeMode ? _self.themeMode : themeMode // ignor
 as ThemeMode,schemeVariant: null == schemeVariant ? _self.schemeVariant : schemeVariant // ignore: cast_nullable_to_non_nullable
 as DynamicSchemeVariant,pureBlack: null == pureBlack ? _self.pureBlack : pureBlack // ignore: cast_nullable_to_non_nullable
 as bool,textScale: null == textScale ? _self.textScale : textScale // ignore: cast_nullable_to_non_nullable
-as TextScale,
+as TextScale,useLightIcon: null == useLightIcon ? _self.useLightIcon : useLightIcon // ignore: cast_nullable_to_non_nullable
+as bool,useHarmonyFont: null == useHarmonyFont ? _self.useHarmonyFont : useHarmonyFont // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 /// Create a copy of ThemeProps
@@ -2176,10 +2217,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int? primaryColor,  List<int> primaryColors,  ThemeMode themeMode,  DynamicSchemeVariant schemeVariant,  bool pureBlack,  TextScale textScale)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int? primaryColor,  List<int> primaryColors,  ThemeMode themeMode,  DynamicSchemeVariant schemeVariant,  bool pureBlack,  TextScale textScale,  bool useLightIcon,  bool useHarmonyFont)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ThemeProps() when $default != null:
-return $default(_that.primaryColor,_that.primaryColors,_that.themeMode,_that.schemeVariant,_that.pureBlack,_that.textScale);case _:
+return $default(_that.primaryColor,_that.primaryColors,_that.themeMode,_that.schemeVariant,_that.pureBlack,_that.textScale,_that.useLightIcon,_that.useHarmonyFont);case _:
   return orElse();
 
 }
@@ -2197,10 +2238,10 @@ return $default(_that.primaryColor,_that.primaryColors,_that.themeMode,_that.sch
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int? primaryColor,  List<int> primaryColors,  ThemeMode themeMode,  DynamicSchemeVariant schemeVariant,  bool pureBlack,  TextScale textScale)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int? primaryColor,  List<int> primaryColors,  ThemeMode themeMode,  DynamicSchemeVariant schemeVariant,  bool pureBlack,  TextScale textScale,  bool useLightIcon,  bool useHarmonyFont)  $default,) {final _that = this;
 switch (_that) {
 case _ThemeProps():
-return $default(_that.primaryColor,_that.primaryColors,_that.themeMode,_that.schemeVariant,_that.pureBlack,_that.textScale);case _:
+return $default(_that.primaryColor,_that.primaryColors,_that.themeMode,_that.schemeVariant,_that.pureBlack,_that.textScale,_that.useLightIcon,_that.useHarmonyFont);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -2217,10 +2258,10 @@ return $default(_that.primaryColor,_that.primaryColors,_that.themeMode,_that.sch
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int? primaryColor,  List<int> primaryColors,  ThemeMode themeMode,  DynamicSchemeVariant schemeVariant,  bool pureBlack,  TextScale textScale)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int? primaryColor,  List<int> primaryColors,  ThemeMode themeMode,  DynamicSchemeVariant schemeVariant,  bool pureBlack,  TextScale textScale,  bool useLightIcon,  bool useHarmonyFont)?  $default,) {final _that = this;
 switch (_that) {
 case _ThemeProps() when $default != null:
-return $default(_that.primaryColor,_that.primaryColors,_that.themeMode,_that.schemeVariant,_that.pureBlack,_that.textScale);case _:
+return $default(_that.primaryColor,_that.primaryColors,_that.themeMode,_that.schemeVariant,_that.pureBlack,_that.textScale,_that.useLightIcon,_that.useHarmonyFont);case _:
   return null;
 
 }
@@ -2232,7 +2273,7 @@ return $default(_that.primaryColor,_that.primaryColors,_that.themeMode,_that.sch
 @JsonSerializable()
 
 class _ThemeProps implements ThemeProps {
-  const _ThemeProps({this.primaryColor, final  List<int> primaryColors = defaultPrimaryColors, this.themeMode = ThemeMode.dark, this.schemeVariant = DynamicSchemeVariant.content, this.pureBlack = false, this.textScale = const TextScale()}): _primaryColors = primaryColors;
+  const _ThemeProps({this.primaryColor, final  List<int> primaryColors = defaultPrimaryColors, this.themeMode = ThemeMode.system, this.schemeVariant = DynamicSchemeVariant.content, this.pureBlack = false, this.textScale = const TextScale(), this.useLightIcon = false, this.useHarmonyFont = false}): _primaryColors = primaryColors;
   factory _ThemeProps.fromJson(Map<String, dynamic> json) => _$ThemePropsFromJson(json);
 
 @override final  int? primaryColor;
@@ -2247,6 +2288,8 @@ class _ThemeProps implements ThemeProps {
 @override@JsonKey() final  DynamicSchemeVariant schemeVariant;
 @override@JsonKey() final  bool pureBlack;
 @override@JsonKey() final  TextScale textScale;
+@override@JsonKey() final  bool useLightIcon;
+@override@JsonKey() final  bool useHarmonyFont;
 
 /// Create a copy of ThemeProps
 /// with the given fields replaced by the non-null parameter values.
@@ -2261,16 +2304,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ThemeProps&&(identical(other.primaryColor, primaryColor) || other.primaryColor == primaryColor)&&const DeepCollectionEquality().equals(other._primaryColors, _primaryColors)&&(identical(other.themeMode, themeMode) || other.themeMode == themeMode)&&(identical(other.schemeVariant, schemeVariant) || other.schemeVariant == schemeVariant)&&(identical(other.pureBlack, pureBlack) || other.pureBlack == pureBlack)&&(identical(other.textScale, textScale) || other.textScale == textScale));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ThemeProps&&(identical(other.primaryColor, primaryColor) || other.primaryColor == primaryColor)&&const DeepCollectionEquality().equals(other._primaryColors, _primaryColors)&&(identical(other.themeMode, themeMode) || other.themeMode == themeMode)&&(identical(other.schemeVariant, schemeVariant) || other.schemeVariant == schemeVariant)&&(identical(other.pureBlack, pureBlack) || other.pureBlack == pureBlack)&&(identical(other.textScale, textScale) || other.textScale == textScale)&&(identical(other.useLightIcon, useLightIcon) || other.useLightIcon == useLightIcon)&&(identical(other.useHarmonyFont, useHarmonyFont) || other.useHarmonyFont == useHarmonyFont));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,primaryColor,const DeepCollectionEquality().hash(_primaryColors),themeMode,schemeVariant,pureBlack,textScale);
+int get hashCode => Object.hash(runtimeType,primaryColor,const DeepCollectionEquality().hash(_primaryColors),themeMode,schemeVariant,pureBlack,textScale,useLightIcon,useHarmonyFont);
 
 @override
 String toString() {
-  return 'ThemeProps(primaryColor: $primaryColor, primaryColors: $primaryColors, themeMode: $themeMode, schemeVariant: $schemeVariant, pureBlack: $pureBlack, textScale: $textScale)';
+  return 'ThemeProps(primaryColor: $primaryColor, primaryColors: $primaryColors, themeMode: $themeMode, schemeVariant: $schemeVariant, pureBlack: $pureBlack, textScale: $textScale, useLightIcon: $useLightIcon, useHarmonyFont: $useHarmonyFont)';
 }
 
 
@@ -2281,7 +2324,7 @@ abstract mixin class _$ThemePropsCopyWith<$Res> implements $ThemePropsCopyWith<$
   factory _$ThemePropsCopyWith(_ThemeProps value, $Res Function(_ThemeProps) _then) = __$ThemePropsCopyWithImpl;
 @override @useResult
 $Res call({
- int? primaryColor, List<int> primaryColors, ThemeMode themeMode, DynamicSchemeVariant schemeVariant, bool pureBlack, TextScale textScale
+ int? primaryColor, List<int> primaryColors, ThemeMode themeMode, DynamicSchemeVariant schemeVariant, bool pureBlack, TextScale textScale, bool useLightIcon, bool useHarmonyFont
 });
 
 
@@ -2298,7 +2341,7 @@ class __$ThemePropsCopyWithImpl<$Res>
 
 /// Create a copy of ThemeProps
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? primaryColor = freezed,Object? primaryColors = null,Object? themeMode = null,Object? schemeVariant = null,Object? pureBlack = null,Object? textScale = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? primaryColor = freezed,Object? primaryColors = null,Object? themeMode = null,Object? schemeVariant = null,Object? pureBlack = null,Object? textScale = null,Object? useLightIcon = null,Object? useHarmonyFont = null,}) {
   return _then(_ThemeProps(
 primaryColor: freezed == primaryColor ? _self.primaryColor : primaryColor // ignore: cast_nullable_to_non_nullable
 as int?,primaryColors: null == primaryColors ? _self._primaryColors : primaryColors // ignore: cast_nullable_to_non_nullable
@@ -2306,7 +2349,9 @@ as List<int>,themeMode: null == themeMode ? _self.themeMode : themeMode // ignor
 as ThemeMode,schemeVariant: null == schemeVariant ? _self.schemeVariant : schemeVariant // ignore: cast_nullable_to_non_nullable
 as DynamicSchemeVariant,pureBlack: null == pureBlack ? _self.pureBlack : pureBlack // ignore: cast_nullable_to_non_nullable
 as bool,textScale: null == textScale ? _self.textScale : textScale // ignore: cast_nullable_to_non_nullable
-as TextScale,
+as TextScale,useLightIcon: null == useLightIcon ? _self.useLightIcon : useLightIcon // ignore: cast_nullable_to_non_nullable
+as bool,useHarmonyFont: null == useHarmonyFont ? _self.useHarmonyFont : useHarmonyFont // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
@@ -2324,9 +2369,281 @@ $TextScaleCopyWith<$Res> get textScale {
 
 
 /// @nodoc
+mixin _$ScriptProps {
+
+ String? get currentId; List<Script> get scripts;
+/// Create a copy of ScriptProps
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$ScriptPropsCopyWith<ScriptProps> get copyWith => _$ScriptPropsCopyWithImpl<ScriptProps>(this as ScriptProps, _$identity);
+
+  /// Serializes this ScriptProps to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ScriptProps&&(identical(other.currentId, currentId) || other.currentId == currentId)&&const DeepCollectionEquality().equals(other.scripts, scripts));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,currentId,const DeepCollectionEquality().hash(scripts));
+
+@override
+String toString() {
+  return 'ScriptProps(currentId: $currentId, scripts: $scripts)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $ScriptPropsCopyWith<$Res>  {
+  factory $ScriptPropsCopyWith(ScriptProps value, $Res Function(ScriptProps) _then) = _$ScriptPropsCopyWithImpl;
+@useResult
+$Res call({
+ String? currentId, List<Script> scripts
+});
+
+
+
+
+}
+/// @nodoc
+class _$ScriptPropsCopyWithImpl<$Res>
+    implements $ScriptPropsCopyWith<$Res> {
+  _$ScriptPropsCopyWithImpl(this._self, this._then);
+
+  final ScriptProps _self;
+  final $Res Function(ScriptProps) _then;
+
+/// Create a copy of ScriptProps
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? currentId = freezed,Object? scripts = null,}) {
+  return _then(_self.copyWith(
+currentId: freezed == currentId ? _self.currentId : currentId // ignore: cast_nullable_to_non_nullable
+as String?,scripts: null == scripts ? _self.scripts : scripts // ignore: cast_nullable_to_non_nullable
+as List<Script>,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [ScriptProps].
+extension ScriptPropsPatterns on ScriptProps {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _ScriptProps value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _ScriptProps() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _ScriptProps value)  $default,){
+final _that = this;
+switch (_that) {
+case _ScriptProps():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _ScriptProps value)?  $default,){
+final _that = this;
+switch (_that) {
+case _ScriptProps() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? currentId,  List<Script> scripts)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _ScriptProps() when $default != null:
+return $default(_that.currentId,_that.scripts);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? currentId,  List<Script> scripts)  $default,) {final _that = this;
+switch (_that) {
+case _ScriptProps():
+return $default(_that.currentId,_that.scripts);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? currentId,  List<Script> scripts)?  $default,) {final _that = this;
+switch (_that) {
+case _ScriptProps() when $default != null:
+return $default(_that.currentId,_that.scripts);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _ScriptProps implements ScriptProps {
+  const _ScriptProps({this.currentId, final  List<Script> scripts = const []}): _scripts = scripts;
+  factory _ScriptProps.fromJson(Map<String, dynamic> json) => _$ScriptPropsFromJson(json);
+
+@override final  String? currentId;
+ final  List<Script> _scripts;
+@override@JsonKey() List<Script> get scripts {
+  if (_scripts is EqualUnmodifiableListView) return _scripts;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_scripts);
+}
+
+
+/// Create a copy of ScriptProps
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$ScriptPropsCopyWith<_ScriptProps> get copyWith => __$ScriptPropsCopyWithImpl<_ScriptProps>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$ScriptPropsToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ScriptProps&&(identical(other.currentId, currentId) || other.currentId == currentId)&&const DeepCollectionEquality().equals(other._scripts, _scripts));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,currentId,const DeepCollectionEquality().hash(_scripts));
+
+@override
+String toString() {
+  return 'ScriptProps(currentId: $currentId, scripts: $scripts)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$ScriptPropsCopyWith<$Res> implements $ScriptPropsCopyWith<$Res> {
+  factory _$ScriptPropsCopyWith(_ScriptProps value, $Res Function(_ScriptProps) _then) = __$ScriptPropsCopyWithImpl;
+@override @useResult
+$Res call({
+ String? currentId, List<Script> scripts
+});
+
+
+
+
+}
+/// @nodoc
+class __$ScriptPropsCopyWithImpl<$Res>
+    implements _$ScriptPropsCopyWith<$Res> {
+  __$ScriptPropsCopyWithImpl(this._self, this._then);
+
+  final _ScriptProps _self;
+  final $Res Function(_ScriptProps) _then;
+
+/// Create a copy of ScriptProps
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? currentId = freezed,Object? scripts = null,}) {
+  return _then(_ScriptProps(
+currentId: freezed == currentId ? _self.currentId : currentId // ignore: cast_nullable_to_non_nullable
+as String?,scripts: null == scripts ? _self._scripts : scripts // ignore: cast_nullable_to_non_nullable
+as List<Script>,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
 mixin _$Config {
 
- int? get currentProfileId; bool get overrideDns; List<HotKeyAction> get hotKeyActions;@JsonKey(fromJson: AppSettingProps.safeFromJson) AppSettingProps get appSettingProps; DAVProps? get davProps; NetworkProps get networkProps; VpnProps get vpnProps;@JsonKey(fromJson: ThemeProps.safeFromJson) ThemeProps get themeProps; ProxiesStyleProps get proxiesStyleProps; WindowProps get windowProps; ClashConfig get patchClashConfig;
+@JsonKey(fromJson: AppSettingProps.safeFromJson) AppSettingProps get appSetting; List<Profile> get profiles; List<HotKeyAction> get hotKeyActions; String? get currentProfileId; bool get overrideDns; bool get overrideNtp; bool get overrideSniffer; bool get overrideTunnel; bool get overrideExperimental; bool get overrideTestUrl; DAV? get dav; NetworkProps get networkProps;@JsonKey(fromJson: VpnProps.safeFromJson) VpnProps get vpnProps;@JsonKey(fromJson: ThemeProps.safeFromJson) ThemeProps get themeProps; ProxiesStyle get proxiesStyle; WindowProps get windowProps; ClashConfig get patchClashConfig; ScriptProps get scriptProps; String get nodeExcludeFilter; int get healthCheckTimeout;
 /// Create a copy of Config
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -2339,16 +2656,16 @@ $ConfigCopyWith<Config> get copyWith => _$ConfigCopyWithImpl<Config>(this as Con
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Config&&(identical(other.currentProfileId, currentProfileId) || other.currentProfileId == currentProfileId)&&(identical(other.overrideDns, overrideDns) || other.overrideDns == overrideDns)&&const DeepCollectionEquality().equals(other.hotKeyActions, hotKeyActions)&&(identical(other.appSettingProps, appSettingProps) || other.appSettingProps == appSettingProps)&&(identical(other.davProps, davProps) || other.davProps == davProps)&&(identical(other.networkProps, networkProps) || other.networkProps == networkProps)&&(identical(other.vpnProps, vpnProps) || other.vpnProps == vpnProps)&&(identical(other.themeProps, themeProps) || other.themeProps == themeProps)&&(identical(other.proxiesStyleProps, proxiesStyleProps) || other.proxiesStyleProps == proxiesStyleProps)&&(identical(other.windowProps, windowProps) || other.windowProps == windowProps)&&(identical(other.patchClashConfig, patchClashConfig) || other.patchClashConfig == patchClashConfig));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Config&&(identical(other.appSetting, appSetting) || other.appSetting == appSetting)&&const DeepCollectionEquality().equals(other.profiles, profiles)&&const DeepCollectionEquality().equals(other.hotKeyActions, hotKeyActions)&&(identical(other.currentProfileId, currentProfileId) || other.currentProfileId == currentProfileId)&&(identical(other.overrideDns, overrideDns) || other.overrideDns == overrideDns)&&(identical(other.overrideNtp, overrideNtp) || other.overrideNtp == overrideNtp)&&(identical(other.overrideSniffer, overrideSniffer) || other.overrideSniffer == overrideSniffer)&&(identical(other.overrideTunnel, overrideTunnel) || other.overrideTunnel == overrideTunnel)&&(identical(other.overrideExperimental, overrideExperimental) || other.overrideExperimental == overrideExperimental)&&(identical(other.overrideTestUrl, overrideTestUrl) || other.overrideTestUrl == overrideTestUrl)&&(identical(other.dav, dav) || other.dav == dav)&&(identical(other.networkProps, networkProps) || other.networkProps == networkProps)&&(identical(other.vpnProps, vpnProps) || other.vpnProps == vpnProps)&&(identical(other.themeProps, themeProps) || other.themeProps == themeProps)&&(identical(other.proxiesStyle, proxiesStyle) || other.proxiesStyle == proxiesStyle)&&(identical(other.windowProps, windowProps) || other.windowProps == windowProps)&&(identical(other.patchClashConfig, patchClashConfig) || other.patchClashConfig == patchClashConfig)&&(identical(other.scriptProps, scriptProps) || other.scriptProps == scriptProps)&&(identical(other.nodeExcludeFilter, nodeExcludeFilter) || other.nodeExcludeFilter == nodeExcludeFilter)&&(identical(other.healthCheckTimeout, healthCheckTimeout) || other.healthCheckTimeout == healthCheckTimeout));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,currentProfileId,overrideDns,const DeepCollectionEquality().hash(hotKeyActions),appSettingProps,davProps,networkProps,vpnProps,themeProps,proxiesStyleProps,windowProps,patchClashConfig);
+int get hashCode => Object.hashAll([runtimeType,appSetting,const DeepCollectionEquality().hash(profiles),const DeepCollectionEquality().hash(hotKeyActions),currentProfileId,overrideDns,overrideNtp,overrideSniffer,overrideTunnel,overrideExperimental,overrideTestUrl,dav,networkProps,vpnProps,themeProps,proxiesStyle,windowProps,patchClashConfig,scriptProps,nodeExcludeFilter,healthCheckTimeout]);
 
 @override
 String toString() {
-  return 'Config(currentProfileId: $currentProfileId, overrideDns: $overrideDns, hotKeyActions: $hotKeyActions, appSettingProps: $appSettingProps, davProps: $davProps, networkProps: $networkProps, vpnProps: $vpnProps, themeProps: $themeProps, proxiesStyleProps: $proxiesStyleProps, windowProps: $windowProps, patchClashConfig: $patchClashConfig)';
+  return 'Config(appSetting: $appSetting, profiles: $profiles, hotKeyActions: $hotKeyActions, currentProfileId: $currentProfileId, overrideDns: $overrideDns, overrideNtp: $overrideNtp, overrideSniffer: $overrideSniffer, overrideTunnel: $overrideTunnel, overrideExperimental: $overrideExperimental, overrideTestUrl: $overrideTestUrl, dav: $dav, networkProps: $networkProps, vpnProps: $vpnProps, themeProps: $themeProps, proxiesStyle: $proxiesStyle, windowProps: $windowProps, patchClashConfig: $patchClashConfig, scriptProps: $scriptProps, nodeExcludeFilter: $nodeExcludeFilter, healthCheckTimeout: $healthCheckTimeout)';
 }
 
 
@@ -2359,11 +2676,11 @@ abstract mixin class $ConfigCopyWith<$Res>  {
   factory $ConfigCopyWith(Config value, $Res Function(Config) _then) = _$ConfigCopyWithImpl;
 @useResult
 $Res call({
- int? currentProfileId, bool overrideDns, List<HotKeyAction> hotKeyActions,@JsonKey(fromJson: AppSettingProps.safeFromJson) AppSettingProps appSettingProps, DAVProps? davProps, NetworkProps networkProps, VpnProps vpnProps,@JsonKey(fromJson: ThemeProps.safeFromJson) ThemeProps themeProps, ProxiesStyleProps proxiesStyleProps, WindowProps windowProps, ClashConfig patchClashConfig
+@JsonKey(fromJson: AppSettingProps.safeFromJson) AppSettingProps appSetting, List<Profile> profiles, List<HotKeyAction> hotKeyActions, String? currentProfileId, bool overrideDns, bool overrideNtp, bool overrideSniffer, bool overrideTunnel, bool overrideExperimental, bool overrideTestUrl, DAV? dav, NetworkProps networkProps,@JsonKey(fromJson: VpnProps.safeFromJson) VpnProps vpnProps,@JsonKey(fromJson: ThemeProps.safeFromJson) ThemeProps themeProps, ProxiesStyle proxiesStyle, WindowProps windowProps, ClashConfig patchClashConfig, ScriptProps scriptProps, String nodeExcludeFilter, int healthCheckTimeout
 });
 
 
-$AppSettingPropsCopyWith<$Res> get appSettingProps;$DAVPropsCopyWith<$Res>? get davProps;$NetworkPropsCopyWith<$Res> get networkProps;$VpnPropsCopyWith<$Res> get vpnProps;$ThemePropsCopyWith<$Res> get themeProps;$ProxiesStylePropsCopyWith<$Res> get proxiesStyleProps;$WindowPropsCopyWith<$Res> get windowProps;$ClashConfigCopyWith<$Res> get patchClashConfig;
+$AppSettingPropsCopyWith<$Res> get appSetting;$DAVCopyWith<$Res>? get dav;$NetworkPropsCopyWith<$Res> get networkProps;$VpnPropsCopyWith<$Res> get vpnProps;$ThemePropsCopyWith<$Res> get themeProps;$ProxiesStyleCopyWith<$Res> get proxiesStyle;$WindowPropsCopyWith<$Res> get windowProps;$ClashConfigCopyWith<$Res> get patchClashConfig;$ScriptPropsCopyWith<$Res> get scriptProps;
 
 }
 /// @nodoc
@@ -2376,42 +2693,51 @@ class _$ConfigCopyWithImpl<$Res>
 
 /// Create a copy of Config
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? currentProfileId = freezed,Object? overrideDns = null,Object? hotKeyActions = null,Object? appSettingProps = null,Object? davProps = freezed,Object? networkProps = null,Object? vpnProps = null,Object? themeProps = null,Object? proxiesStyleProps = null,Object? windowProps = null,Object? patchClashConfig = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? appSetting = null,Object? profiles = null,Object? hotKeyActions = null,Object? currentProfileId = freezed,Object? overrideDns = null,Object? overrideNtp = null,Object? overrideSniffer = null,Object? overrideTunnel = null,Object? overrideExperimental = null,Object? overrideTestUrl = null,Object? dav = freezed,Object? networkProps = null,Object? vpnProps = null,Object? themeProps = null,Object? proxiesStyle = null,Object? windowProps = null,Object? patchClashConfig = null,Object? scriptProps = null,Object? nodeExcludeFilter = null,Object? healthCheckTimeout = null,}) {
   return _then(_self.copyWith(
-currentProfileId: freezed == currentProfileId ? _self.currentProfileId : currentProfileId // ignore: cast_nullable_to_non_nullable
-as int?,overrideDns: null == overrideDns ? _self.overrideDns : overrideDns // ignore: cast_nullable_to_non_nullable
-as bool,hotKeyActions: null == hotKeyActions ? _self.hotKeyActions : hotKeyActions // ignore: cast_nullable_to_non_nullable
-as List<HotKeyAction>,appSettingProps: null == appSettingProps ? _self.appSettingProps : appSettingProps // ignore: cast_nullable_to_non_nullable
-as AppSettingProps,davProps: freezed == davProps ? _self.davProps : davProps // ignore: cast_nullable_to_non_nullable
-as DAVProps?,networkProps: null == networkProps ? _self.networkProps : networkProps // ignore: cast_nullable_to_non_nullable
+appSetting: null == appSetting ? _self.appSetting : appSetting // ignore: cast_nullable_to_non_nullable
+as AppSettingProps,profiles: null == profiles ? _self.profiles : profiles // ignore: cast_nullable_to_non_nullable
+as List<Profile>,hotKeyActions: null == hotKeyActions ? _self.hotKeyActions : hotKeyActions // ignore: cast_nullable_to_non_nullable
+as List<HotKeyAction>,currentProfileId: freezed == currentProfileId ? _self.currentProfileId : currentProfileId // ignore: cast_nullable_to_non_nullable
+as String?,overrideDns: null == overrideDns ? _self.overrideDns : overrideDns // ignore: cast_nullable_to_non_nullable
+as bool,overrideNtp: null == overrideNtp ? _self.overrideNtp : overrideNtp // ignore: cast_nullable_to_non_nullable
+as bool,overrideSniffer: null == overrideSniffer ? _self.overrideSniffer : overrideSniffer // ignore: cast_nullable_to_non_nullable
+as bool,overrideTunnel: null == overrideTunnel ? _self.overrideTunnel : overrideTunnel // ignore: cast_nullable_to_non_nullable
+as bool,overrideExperimental: null == overrideExperimental ? _self.overrideExperimental : overrideExperimental // ignore: cast_nullable_to_non_nullable
+as bool,overrideTestUrl: null == overrideTestUrl ? _self.overrideTestUrl : overrideTestUrl // ignore: cast_nullable_to_non_nullable
+as bool,dav: freezed == dav ? _self.dav : dav // ignore: cast_nullable_to_non_nullable
+as DAV?,networkProps: null == networkProps ? _self.networkProps : networkProps // ignore: cast_nullable_to_non_nullable
 as NetworkProps,vpnProps: null == vpnProps ? _self.vpnProps : vpnProps // ignore: cast_nullable_to_non_nullable
 as VpnProps,themeProps: null == themeProps ? _self.themeProps : themeProps // ignore: cast_nullable_to_non_nullable
-as ThemeProps,proxiesStyleProps: null == proxiesStyleProps ? _self.proxiesStyleProps : proxiesStyleProps // ignore: cast_nullable_to_non_nullable
-as ProxiesStyleProps,windowProps: null == windowProps ? _self.windowProps : windowProps // ignore: cast_nullable_to_non_nullable
+as ThemeProps,proxiesStyle: null == proxiesStyle ? _self.proxiesStyle : proxiesStyle // ignore: cast_nullable_to_non_nullable
+as ProxiesStyle,windowProps: null == windowProps ? _self.windowProps : windowProps // ignore: cast_nullable_to_non_nullable
 as WindowProps,patchClashConfig: null == patchClashConfig ? _self.patchClashConfig : patchClashConfig // ignore: cast_nullable_to_non_nullable
-as ClashConfig,
+as ClashConfig,scriptProps: null == scriptProps ? _self.scriptProps : scriptProps // ignore: cast_nullable_to_non_nullable
+as ScriptProps,nodeExcludeFilter: null == nodeExcludeFilter ? _self.nodeExcludeFilter : nodeExcludeFilter // ignore: cast_nullable_to_non_nullable
+as String,healthCheckTimeout: null == healthCheckTimeout ? _self.healthCheckTimeout : healthCheckTimeout // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 /// Create a copy of Config
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
-$AppSettingPropsCopyWith<$Res> get appSettingProps {
+$AppSettingPropsCopyWith<$Res> get appSetting {
   
-  return $AppSettingPropsCopyWith<$Res>(_self.appSettingProps, (value) {
-    return _then(_self.copyWith(appSettingProps: value));
+  return $AppSettingPropsCopyWith<$Res>(_self.appSetting, (value) {
+    return _then(_self.copyWith(appSetting: value));
   });
 }/// Create a copy of Config
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
-$DAVPropsCopyWith<$Res>? get davProps {
-    if (_self.davProps == null) {
+$DAVCopyWith<$Res>? get dav {
+    if (_self.dav == null) {
     return null;
   }
 
-  return $DAVPropsCopyWith<$Res>(_self.davProps!, (value) {
-    return _then(_self.copyWith(davProps: value));
+  return $DAVCopyWith<$Res>(_self.dav!, (value) {
+    return _then(_self.copyWith(dav: value));
   });
 }/// Create a copy of Config
 /// with the given fields replaced by the non-null parameter values.
@@ -2444,10 +2770,10 @@ $ThemePropsCopyWith<$Res> get themeProps {
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
-$ProxiesStylePropsCopyWith<$Res> get proxiesStyleProps {
+$ProxiesStyleCopyWith<$Res> get proxiesStyle {
   
-  return $ProxiesStylePropsCopyWith<$Res>(_self.proxiesStyleProps, (value) {
-    return _then(_self.copyWith(proxiesStyleProps: value));
+  return $ProxiesStyleCopyWith<$Res>(_self.proxiesStyle, (value) {
+    return _then(_self.copyWith(proxiesStyle: value));
   });
 }/// Create a copy of Config
 /// with the given fields replaced by the non-null parameter values.
@@ -2466,6 +2792,15 @@ $ClashConfigCopyWith<$Res> get patchClashConfig {
   
   return $ClashConfigCopyWith<$Res>(_self.patchClashConfig, (value) {
     return _then(_self.copyWith(patchClashConfig: value));
+  });
+}/// Create a copy of Config
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$ScriptPropsCopyWith<$Res> get scriptProps {
+  
+  return $ScriptPropsCopyWith<$Res>(_self.scriptProps, (value) {
+    return _then(_self.copyWith(scriptProps: value));
   });
 }
 }
@@ -2549,10 +2884,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int? currentProfileId,  bool overrideDns,  List<HotKeyAction> hotKeyActions, @JsonKey(fromJson: AppSettingProps.safeFromJson)  AppSettingProps appSettingProps,  DAVProps? davProps,  NetworkProps networkProps,  VpnProps vpnProps, @JsonKey(fromJson: ThemeProps.safeFromJson)  ThemeProps themeProps,  ProxiesStyleProps proxiesStyleProps,  WindowProps windowProps,  ClashConfig patchClashConfig)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(fromJson: AppSettingProps.safeFromJson)  AppSettingProps appSetting,  List<Profile> profiles,  List<HotKeyAction> hotKeyActions,  String? currentProfileId,  bool overrideDns,  bool overrideNtp,  bool overrideSniffer,  bool overrideTunnel,  bool overrideExperimental,  bool overrideTestUrl,  DAV? dav,  NetworkProps networkProps, @JsonKey(fromJson: VpnProps.safeFromJson)  VpnProps vpnProps, @JsonKey(fromJson: ThemeProps.safeFromJson)  ThemeProps themeProps,  ProxiesStyle proxiesStyle,  WindowProps windowProps,  ClashConfig patchClashConfig,  ScriptProps scriptProps,  String nodeExcludeFilter,  int healthCheckTimeout)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Config() when $default != null:
-return $default(_that.currentProfileId,_that.overrideDns,_that.hotKeyActions,_that.appSettingProps,_that.davProps,_that.networkProps,_that.vpnProps,_that.themeProps,_that.proxiesStyleProps,_that.windowProps,_that.patchClashConfig);case _:
+return $default(_that.appSetting,_that.profiles,_that.hotKeyActions,_that.currentProfileId,_that.overrideDns,_that.overrideNtp,_that.overrideSniffer,_that.overrideTunnel,_that.overrideExperimental,_that.overrideTestUrl,_that.dav,_that.networkProps,_that.vpnProps,_that.themeProps,_that.proxiesStyle,_that.windowProps,_that.patchClashConfig,_that.scriptProps,_that.nodeExcludeFilter,_that.healthCheckTimeout);case _:
   return orElse();
 
 }
@@ -2570,10 +2905,10 @@ return $default(_that.currentProfileId,_that.overrideDns,_that.hotKeyActions,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int? currentProfileId,  bool overrideDns,  List<HotKeyAction> hotKeyActions, @JsonKey(fromJson: AppSettingProps.safeFromJson)  AppSettingProps appSettingProps,  DAVProps? davProps,  NetworkProps networkProps,  VpnProps vpnProps, @JsonKey(fromJson: ThemeProps.safeFromJson)  ThemeProps themeProps,  ProxiesStyleProps proxiesStyleProps,  WindowProps windowProps,  ClashConfig patchClashConfig)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(fromJson: AppSettingProps.safeFromJson)  AppSettingProps appSetting,  List<Profile> profiles,  List<HotKeyAction> hotKeyActions,  String? currentProfileId,  bool overrideDns,  bool overrideNtp,  bool overrideSniffer,  bool overrideTunnel,  bool overrideExperimental,  bool overrideTestUrl,  DAV? dav,  NetworkProps networkProps, @JsonKey(fromJson: VpnProps.safeFromJson)  VpnProps vpnProps, @JsonKey(fromJson: ThemeProps.safeFromJson)  ThemeProps themeProps,  ProxiesStyle proxiesStyle,  WindowProps windowProps,  ClashConfig patchClashConfig,  ScriptProps scriptProps,  String nodeExcludeFilter,  int healthCheckTimeout)  $default,) {final _that = this;
 switch (_that) {
 case _Config():
-return $default(_that.currentProfileId,_that.overrideDns,_that.hotKeyActions,_that.appSettingProps,_that.davProps,_that.networkProps,_that.vpnProps,_that.themeProps,_that.proxiesStyleProps,_that.windowProps,_that.patchClashConfig);case _:
+return $default(_that.appSetting,_that.profiles,_that.hotKeyActions,_that.currentProfileId,_that.overrideDns,_that.overrideNtp,_that.overrideSniffer,_that.overrideTunnel,_that.overrideExperimental,_that.overrideTestUrl,_that.dav,_that.networkProps,_that.vpnProps,_that.themeProps,_that.proxiesStyle,_that.windowProps,_that.patchClashConfig,_that.scriptProps,_that.nodeExcludeFilter,_that.healthCheckTimeout);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -2590,10 +2925,10 @@ return $default(_that.currentProfileId,_that.overrideDns,_that.hotKeyActions,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int? currentProfileId,  bool overrideDns,  List<HotKeyAction> hotKeyActions, @JsonKey(fromJson: AppSettingProps.safeFromJson)  AppSettingProps appSettingProps,  DAVProps? davProps,  NetworkProps networkProps,  VpnProps vpnProps, @JsonKey(fromJson: ThemeProps.safeFromJson)  ThemeProps themeProps,  ProxiesStyleProps proxiesStyleProps,  WindowProps windowProps,  ClashConfig patchClashConfig)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(fromJson: AppSettingProps.safeFromJson)  AppSettingProps appSetting,  List<Profile> profiles,  List<HotKeyAction> hotKeyActions,  String? currentProfileId,  bool overrideDns,  bool overrideNtp,  bool overrideSniffer,  bool overrideTunnel,  bool overrideExperimental,  bool overrideTestUrl,  DAV? dav,  NetworkProps networkProps, @JsonKey(fromJson: VpnProps.safeFromJson)  VpnProps vpnProps, @JsonKey(fromJson: ThemeProps.safeFromJson)  ThemeProps themeProps,  ProxiesStyle proxiesStyle,  WindowProps windowProps,  ClashConfig patchClashConfig,  ScriptProps scriptProps,  String nodeExcludeFilter,  int healthCheckTimeout)?  $default,) {final _that = this;
 switch (_that) {
 case _Config() when $default != null:
-return $default(_that.currentProfileId,_that.overrideDns,_that.hotKeyActions,_that.appSettingProps,_that.davProps,_that.networkProps,_that.vpnProps,_that.themeProps,_that.proxiesStyleProps,_that.windowProps,_that.patchClashConfig);case _:
+return $default(_that.appSetting,_that.profiles,_that.hotKeyActions,_that.currentProfileId,_that.overrideDns,_that.overrideNtp,_that.overrideSniffer,_that.overrideTunnel,_that.overrideExperimental,_that.overrideTestUrl,_that.dav,_that.networkProps,_that.vpnProps,_that.themeProps,_that.proxiesStyle,_that.windowProps,_that.patchClashConfig,_that.scriptProps,_that.nodeExcludeFilter,_that.healthCheckTimeout);case _:
   return null;
 
 }
@@ -2605,11 +2940,17 @@ return $default(_that.currentProfileId,_that.overrideDns,_that.hotKeyActions,_th
 @JsonSerializable()
 
 class _Config implements Config {
-  const _Config({this.currentProfileId, this.overrideDns = false, final  List<HotKeyAction> hotKeyActions = const [], @JsonKey(fromJson: AppSettingProps.safeFromJson) this.appSettingProps = defaultAppSettingProps, this.davProps, this.networkProps = defaultNetworkProps, this.vpnProps = defaultVpnProps, @JsonKey(fromJson: ThemeProps.safeFromJson) required this.themeProps, this.proxiesStyleProps = defaultProxiesStyleProps, this.windowProps = defaultWindowProps, this.patchClashConfig = defaultClashConfig}): _hotKeyActions = hotKeyActions;
+  const _Config({@JsonKey(fromJson: AppSettingProps.safeFromJson) this.appSetting = defaultAppSettingProps, final  List<Profile> profiles = const [], final  List<HotKeyAction> hotKeyActions = const [], this.currentProfileId, this.overrideDns = false, this.overrideNtp = false, this.overrideSniffer = false, this.overrideTunnel = false, this.overrideExperimental = false, this.overrideTestUrl = true, this.dav, this.networkProps = defaultNetworkProps, @JsonKey(fromJson: VpnProps.safeFromJson) this.vpnProps = defaultVpnProps, @JsonKey(fromJson: ThemeProps.safeFromJson) required this.themeProps, this.proxiesStyle = defaultProxiesStyle, this.windowProps = defaultWindowProps, this.patchClashConfig = defaultClashConfig, this.scriptProps = const ScriptProps(), this.nodeExcludeFilter = '', this.healthCheckTimeout = 5000}): _profiles = profiles,_hotKeyActions = hotKeyActions;
   factory _Config.fromJson(Map<String, dynamic> json) => _$ConfigFromJson(json);
 
-@override final  int? currentProfileId;
-@override@JsonKey() final  bool overrideDns;
+@override@JsonKey(fromJson: AppSettingProps.safeFromJson) final  AppSettingProps appSetting;
+ final  List<Profile> _profiles;
+@override@JsonKey() List<Profile> get profiles {
+  if (_profiles is EqualUnmodifiableListView) return _profiles;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_profiles);
+}
+
  final  List<HotKeyAction> _hotKeyActions;
 @override@JsonKey() List<HotKeyAction> get hotKeyActions {
   if (_hotKeyActions is EqualUnmodifiableListView) return _hotKeyActions;
@@ -2617,14 +2958,23 @@ class _Config implements Config {
   return EqualUnmodifiableListView(_hotKeyActions);
 }
 
-@override@JsonKey(fromJson: AppSettingProps.safeFromJson) final  AppSettingProps appSettingProps;
-@override final  DAVProps? davProps;
+@override final  String? currentProfileId;
+@override@JsonKey() final  bool overrideDns;
+@override@JsonKey() final  bool overrideNtp;
+@override@JsonKey() final  bool overrideSniffer;
+@override@JsonKey() final  bool overrideTunnel;
+@override@JsonKey() final  bool overrideExperimental;
+@override@JsonKey() final  bool overrideTestUrl;
+@override final  DAV? dav;
 @override@JsonKey() final  NetworkProps networkProps;
-@override@JsonKey() final  VpnProps vpnProps;
+@override@JsonKey(fromJson: VpnProps.safeFromJson) final  VpnProps vpnProps;
 @override@JsonKey(fromJson: ThemeProps.safeFromJson) final  ThemeProps themeProps;
-@override@JsonKey() final  ProxiesStyleProps proxiesStyleProps;
+@override@JsonKey() final  ProxiesStyle proxiesStyle;
 @override@JsonKey() final  WindowProps windowProps;
 @override@JsonKey() final  ClashConfig patchClashConfig;
+@override@JsonKey() final  ScriptProps scriptProps;
+@override@JsonKey() final  String nodeExcludeFilter;
+@override@JsonKey() final  int healthCheckTimeout;
 
 /// Create a copy of Config
 /// with the given fields replaced by the non-null parameter values.
@@ -2639,16 +2989,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Config&&(identical(other.currentProfileId, currentProfileId) || other.currentProfileId == currentProfileId)&&(identical(other.overrideDns, overrideDns) || other.overrideDns == overrideDns)&&const DeepCollectionEquality().equals(other._hotKeyActions, _hotKeyActions)&&(identical(other.appSettingProps, appSettingProps) || other.appSettingProps == appSettingProps)&&(identical(other.davProps, davProps) || other.davProps == davProps)&&(identical(other.networkProps, networkProps) || other.networkProps == networkProps)&&(identical(other.vpnProps, vpnProps) || other.vpnProps == vpnProps)&&(identical(other.themeProps, themeProps) || other.themeProps == themeProps)&&(identical(other.proxiesStyleProps, proxiesStyleProps) || other.proxiesStyleProps == proxiesStyleProps)&&(identical(other.windowProps, windowProps) || other.windowProps == windowProps)&&(identical(other.patchClashConfig, patchClashConfig) || other.patchClashConfig == patchClashConfig));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Config&&(identical(other.appSetting, appSetting) || other.appSetting == appSetting)&&const DeepCollectionEquality().equals(other._profiles, _profiles)&&const DeepCollectionEquality().equals(other._hotKeyActions, _hotKeyActions)&&(identical(other.currentProfileId, currentProfileId) || other.currentProfileId == currentProfileId)&&(identical(other.overrideDns, overrideDns) || other.overrideDns == overrideDns)&&(identical(other.overrideNtp, overrideNtp) || other.overrideNtp == overrideNtp)&&(identical(other.overrideSniffer, overrideSniffer) || other.overrideSniffer == overrideSniffer)&&(identical(other.overrideTunnel, overrideTunnel) || other.overrideTunnel == overrideTunnel)&&(identical(other.overrideExperimental, overrideExperimental) || other.overrideExperimental == overrideExperimental)&&(identical(other.overrideTestUrl, overrideTestUrl) || other.overrideTestUrl == overrideTestUrl)&&(identical(other.dav, dav) || other.dav == dav)&&(identical(other.networkProps, networkProps) || other.networkProps == networkProps)&&(identical(other.vpnProps, vpnProps) || other.vpnProps == vpnProps)&&(identical(other.themeProps, themeProps) || other.themeProps == themeProps)&&(identical(other.proxiesStyle, proxiesStyle) || other.proxiesStyle == proxiesStyle)&&(identical(other.windowProps, windowProps) || other.windowProps == windowProps)&&(identical(other.patchClashConfig, patchClashConfig) || other.patchClashConfig == patchClashConfig)&&(identical(other.scriptProps, scriptProps) || other.scriptProps == scriptProps)&&(identical(other.nodeExcludeFilter, nodeExcludeFilter) || other.nodeExcludeFilter == nodeExcludeFilter)&&(identical(other.healthCheckTimeout, healthCheckTimeout) || other.healthCheckTimeout == healthCheckTimeout));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,currentProfileId,overrideDns,const DeepCollectionEquality().hash(_hotKeyActions),appSettingProps,davProps,networkProps,vpnProps,themeProps,proxiesStyleProps,windowProps,patchClashConfig);
+int get hashCode => Object.hashAll([runtimeType,appSetting,const DeepCollectionEquality().hash(_profiles),const DeepCollectionEquality().hash(_hotKeyActions),currentProfileId,overrideDns,overrideNtp,overrideSniffer,overrideTunnel,overrideExperimental,overrideTestUrl,dav,networkProps,vpnProps,themeProps,proxiesStyle,windowProps,patchClashConfig,scriptProps,nodeExcludeFilter,healthCheckTimeout]);
 
 @override
 String toString() {
-  return 'Config(currentProfileId: $currentProfileId, overrideDns: $overrideDns, hotKeyActions: $hotKeyActions, appSettingProps: $appSettingProps, davProps: $davProps, networkProps: $networkProps, vpnProps: $vpnProps, themeProps: $themeProps, proxiesStyleProps: $proxiesStyleProps, windowProps: $windowProps, patchClashConfig: $patchClashConfig)';
+  return 'Config(appSetting: $appSetting, profiles: $profiles, hotKeyActions: $hotKeyActions, currentProfileId: $currentProfileId, overrideDns: $overrideDns, overrideNtp: $overrideNtp, overrideSniffer: $overrideSniffer, overrideTunnel: $overrideTunnel, overrideExperimental: $overrideExperimental, overrideTestUrl: $overrideTestUrl, dav: $dav, networkProps: $networkProps, vpnProps: $vpnProps, themeProps: $themeProps, proxiesStyle: $proxiesStyle, windowProps: $windowProps, patchClashConfig: $patchClashConfig, scriptProps: $scriptProps, nodeExcludeFilter: $nodeExcludeFilter, healthCheckTimeout: $healthCheckTimeout)';
 }
 
 
@@ -2659,11 +3009,11 @@ abstract mixin class _$ConfigCopyWith<$Res> implements $ConfigCopyWith<$Res> {
   factory _$ConfigCopyWith(_Config value, $Res Function(_Config) _then) = __$ConfigCopyWithImpl;
 @override @useResult
 $Res call({
- int? currentProfileId, bool overrideDns, List<HotKeyAction> hotKeyActions,@JsonKey(fromJson: AppSettingProps.safeFromJson) AppSettingProps appSettingProps, DAVProps? davProps, NetworkProps networkProps, VpnProps vpnProps,@JsonKey(fromJson: ThemeProps.safeFromJson) ThemeProps themeProps, ProxiesStyleProps proxiesStyleProps, WindowProps windowProps, ClashConfig patchClashConfig
+@JsonKey(fromJson: AppSettingProps.safeFromJson) AppSettingProps appSetting, List<Profile> profiles, List<HotKeyAction> hotKeyActions, String? currentProfileId, bool overrideDns, bool overrideNtp, bool overrideSniffer, bool overrideTunnel, bool overrideExperimental, bool overrideTestUrl, DAV? dav, NetworkProps networkProps,@JsonKey(fromJson: VpnProps.safeFromJson) VpnProps vpnProps,@JsonKey(fromJson: ThemeProps.safeFromJson) ThemeProps themeProps, ProxiesStyle proxiesStyle, WindowProps windowProps, ClashConfig patchClashConfig, ScriptProps scriptProps, String nodeExcludeFilter, int healthCheckTimeout
 });
 
 
-@override $AppSettingPropsCopyWith<$Res> get appSettingProps;@override $DAVPropsCopyWith<$Res>? get davProps;@override $NetworkPropsCopyWith<$Res> get networkProps;@override $VpnPropsCopyWith<$Res> get vpnProps;@override $ThemePropsCopyWith<$Res> get themeProps;@override $ProxiesStylePropsCopyWith<$Res> get proxiesStyleProps;@override $WindowPropsCopyWith<$Res> get windowProps;@override $ClashConfigCopyWith<$Res> get patchClashConfig;
+@override $AppSettingPropsCopyWith<$Res> get appSetting;@override $DAVCopyWith<$Res>? get dav;@override $NetworkPropsCopyWith<$Res> get networkProps;@override $VpnPropsCopyWith<$Res> get vpnProps;@override $ThemePropsCopyWith<$Res> get themeProps;@override $ProxiesStyleCopyWith<$Res> get proxiesStyle;@override $WindowPropsCopyWith<$Res> get windowProps;@override $ClashConfigCopyWith<$Res> get patchClashConfig;@override $ScriptPropsCopyWith<$Res> get scriptProps;
 
 }
 /// @nodoc
@@ -2676,20 +3026,29 @@ class __$ConfigCopyWithImpl<$Res>
 
 /// Create a copy of Config
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? currentProfileId = freezed,Object? overrideDns = null,Object? hotKeyActions = null,Object? appSettingProps = null,Object? davProps = freezed,Object? networkProps = null,Object? vpnProps = null,Object? themeProps = null,Object? proxiesStyleProps = null,Object? windowProps = null,Object? patchClashConfig = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? appSetting = null,Object? profiles = null,Object? hotKeyActions = null,Object? currentProfileId = freezed,Object? overrideDns = null,Object? overrideNtp = null,Object? overrideSniffer = null,Object? overrideTunnel = null,Object? overrideExperimental = null,Object? overrideTestUrl = null,Object? dav = freezed,Object? networkProps = null,Object? vpnProps = null,Object? themeProps = null,Object? proxiesStyle = null,Object? windowProps = null,Object? patchClashConfig = null,Object? scriptProps = null,Object? nodeExcludeFilter = null,Object? healthCheckTimeout = null,}) {
   return _then(_Config(
-currentProfileId: freezed == currentProfileId ? _self.currentProfileId : currentProfileId // ignore: cast_nullable_to_non_nullable
-as int?,overrideDns: null == overrideDns ? _self.overrideDns : overrideDns // ignore: cast_nullable_to_non_nullable
-as bool,hotKeyActions: null == hotKeyActions ? _self._hotKeyActions : hotKeyActions // ignore: cast_nullable_to_non_nullable
-as List<HotKeyAction>,appSettingProps: null == appSettingProps ? _self.appSettingProps : appSettingProps // ignore: cast_nullable_to_non_nullable
-as AppSettingProps,davProps: freezed == davProps ? _self.davProps : davProps // ignore: cast_nullable_to_non_nullable
-as DAVProps?,networkProps: null == networkProps ? _self.networkProps : networkProps // ignore: cast_nullable_to_non_nullable
+appSetting: null == appSetting ? _self.appSetting : appSetting // ignore: cast_nullable_to_non_nullable
+as AppSettingProps,profiles: null == profiles ? _self._profiles : profiles // ignore: cast_nullable_to_non_nullable
+as List<Profile>,hotKeyActions: null == hotKeyActions ? _self._hotKeyActions : hotKeyActions // ignore: cast_nullable_to_non_nullable
+as List<HotKeyAction>,currentProfileId: freezed == currentProfileId ? _self.currentProfileId : currentProfileId // ignore: cast_nullable_to_non_nullable
+as String?,overrideDns: null == overrideDns ? _self.overrideDns : overrideDns // ignore: cast_nullable_to_non_nullable
+as bool,overrideNtp: null == overrideNtp ? _self.overrideNtp : overrideNtp // ignore: cast_nullable_to_non_nullable
+as bool,overrideSniffer: null == overrideSniffer ? _self.overrideSniffer : overrideSniffer // ignore: cast_nullable_to_non_nullable
+as bool,overrideTunnel: null == overrideTunnel ? _self.overrideTunnel : overrideTunnel // ignore: cast_nullable_to_non_nullable
+as bool,overrideExperimental: null == overrideExperimental ? _self.overrideExperimental : overrideExperimental // ignore: cast_nullable_to_non_nullable
+as bool,overrideTestUrl: null == overrideTestUrl ? _self.overrideTestUrl : overrideTestUrl // ignore: cast_nullable_to_non_nullable
+as bool,dav: freezed == dav ? _self.dav : dav // ignore: cast_nullable_to_non_nullable
+as DAV?,networkProps: null == networkProps ? _self.networkProps : networkProps // ignore: cast_nullable_to_non_nullable
 as NetworkProps,vpnProps: null == vpnProps ? _self.vpnProps : vpnProps // ignore: cast_nullable_to_non_nullable
 as VpnProps,themeProps: null == themeProps ? _self.themeProps : themeProps // ignore: cast_nullable_to_non_nullable
-as ThemeProps,proxiesStyleProps: null == proxiesStyleProps ? _self.proxiesStyleProps : proxiesStyleProps // ignore: cast_nullable_to_non_nullable
-as ProxiesStyleProps,windowProps: null == windowProps ? _self.windowProps : windowProps // ignore: cast_nullable_to_non_nullable
+as ThemeProps,proxiesStyle: null == proxiesStyle ? _self.proxiesStyle : proxiesStyle // ignore: cast_nullable_to_non_nullable
+as ProxiesStyle,windowProps: null == windowProps ? _self.windowProps : windowProps // ignore: cast_nullable_to_non_nullable
 as WindowProps,patchClashConfig: null == patchClashConfig ? _self.patchClashConfig : patchClashConfig // ignore: cast_nullable_to_non_nullable
-as ClashConfig,
+as ClashConfig,scriptProps: null == scriptProps ? _self.scriptProps : scriptProps // ignore: cast_nullable_to_non_nullable
+as ScriptProps,nodeExcludeFilter: null == nodeExcludeFilter ? _self.nodeExcludeFilter : nodeExcludeFilter // ignore: cast_nullable_to_non_nullable
+as String,healthCheckTimeout: null == healthCheckTimeout ? _self.healthCheckTimeout : healthCheckTimeout // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 
@@ -2697,22 +3056,22 @@ as ClashConfig,
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
-$AppSettingPropsCopyWith<$Res> get appSettingProps {
+$AppSettingPropsCopyWith<$Res> get appSetting {
   
-  return $AppSettingPropsCopyWith<$Res>(_self.appSettingProps, (value) {
-    return _then(_self.copyWith(appSettingProps: value));
+  return $AppSettingPropsCopyWith<$Res>(_self.appSetting, (value) {
+    return _then(_self.copyWith(appSetting: value));
   });
 }/// Create a copy of Config
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
-$DAVPropsCopyWith<$Res>? get davProps {
-    if (_self.davProps == null) {
+$DAVCopyWith<$Res>? get dav {
+    if (_self.dav == null) {
     return null;
   }
 
-  return $DAVPropsCopyWith<$Res>(_self.davProps!, (value) {
-    return _then(_self.copyWith(davProps: value));
+  return $DAVCopyWith<$Res>(_self.dav!, (value) {
+    return _then(_self.copyWith(dav: value));
   });
 }/// Create a copy of Config
 /// with the given fields replaced by the non-null parameter values.
@@ -2745,10 +3104,10 @@ $ThemePropsCopyWith<$Res> get themeProps {
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
-$ProxiesStylePropsCopyWith<$Res> get proxiesStyleProps {
+$ProxiesStyleCopyWith<$Res> get proxiesStyle {
   
-  return $ProxiesStylePropsCopyWith<$Res>(_self.proxiesStyleProps, (value) {
-    return _then(_self.copyWith(proxiesStyleProps: value));
+  return $ProxiesStyleCopyWith<$Res>(_self.proxiesStyle, (value) {
+    return _then(_self.copyWith(proxiesStyle: value));
   });
 }/// Create a copy of Config
 /// with the given fields replaced by the non-null parameter values.
@@ -2767,6 +3126,15 @@ $ClashConfigCopyWith<$Res> get patchClashConfig {
   
   return $ClashConfigCopyWith<$Res>(_self.patchClashConfig, (value) {
     return _then(_self.copyWith(patchClashConfig: value));
+  });
+}/// Create a copy of Config
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$ScriptPropsCopyWith<$Res> get scriptProps {
+  
+  return $ScriptPropsCopyWith<$Res>(_self.scriptProps, (value) {
+    return _then(_self.copyWith(scriptProps: value));
   });
 }
 }

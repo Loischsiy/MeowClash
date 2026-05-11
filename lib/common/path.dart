@@ -10,7 +10,6 @@ class AppPath {
   Completer<Directory> dataDir = Completer();
   Completer<Directory> downloadDir = Completer();
   Completer<Directory> tempDir = Completer();
-  Completer<Directory> cacheDir = Completer();
   late String appDirPath;
 
   AppPath._internal() {
@@ -23,9 +22,6 @@ class AppPath {
     });
     getDownloadsDirectory().then((value) {
       downloadDir.complete(value);
-    });
-    getApplicationCacheDirectory().then((value) {
-      cacheDir.complete(value);
     });
   }
 
@@ -44,7 +40,7 @@ class AppPath {
   }
 
   String get corePath {
-    return join(executableDirPath, 'FlClashCore$executableExtension');
+    return join(executableDirPath, 'MeowClashCore$executableExtension');
   }
 
   String get helperPath {
@@ -61,39 +57,9 @@ class AppPath {
     return directory.path;
   }
 
-  Future<String> get databasePath async {
-    final mHomeDirPath = await homeDirPath;
-    return join(mHomeDirPath, 'database.sqlite');
-  }
-
-  Future<String> get backupFilePath async {
-    final mHomeDirPath = await homeDirPath;
-    return join(mHomeDirPath, 'backup.zip');
-  }
-
-  Future<String> get restoreDirPath async {
-    final mHomeDirPath = await homeDirPath;
-    return join(mHomeDirPath, 'restore');
-  }
-
-  Future<String> get tempFilePath async {
-    final mTempDir = await tempDir.future;
-    return join(mTempDir.path, 'temp${utils.id}');
-  }
-
   Future<String> get lockFilePath async {
-    final homeDirPath = await appPath.homeDirPath;
-    return join(homeDirPath, 'FlClash.lock');
-  }
-
-  Future<String> get configFilePath async {
-    final mHomeDirPath = await homeDirPath;
-    return join(mHomeDirPath, 'config.yaml');
-  }
-
-  Future<String> get sharedFilePath async {
-    final mHomeDirPath = await homeDirPath;
-    return join(mHomeDirPath, 'shared.json');
+    final directory = await dataDir.future;
+    return join(directory.path, 'MeowClash.lock');
   }
 
   Future<String> get sharedPreferencesPath async {
@@ -101,33 +67,19 @@ class AppPath {
     return join(directory.path, 'shared_preferences.json');
   }
 
+  Future<String> get helperAuthKeyPath async {
+    final directory = await dataDir.future;
+    return join(directory.path, 'helper_auth.key');
+  }
+
   Future<String> get profilesPath async {
     final directory = await dataDir.future;
     return join(directory.path, profilesDirectoryName);
   }
 
-  Future<String> getProfilePath(String fileName) async {
-    return join(await profilesPath, '$fileName.yaml');
-  }
-
-  Future<String> get scriptsDirPath async {
-    final path = await homeDirPath;
-    return join(path, 'scripts');
-  }
-
-  Future<String> getScriptPath(String fileName) async {
-    final path = await scriptsDirPath;
-    return join(path, '$fileName.js');
-  }
-
-  Future<String> getIconsCacheDir() async {
-    final directory = await cacheDir.future;
-    return join(directory.path, 'icons');
-  }
-
-  Future<String> getProvidersRootPath() async {
+  Future<String> getProfilePath(String id) async {
     final directory = await profilesPath;
-    return join(directory, 'providers');
+    return join(directory, '$id.yaml');
   }
 
   Future<String> getProvidersDirPath(String id) async {
@@ -147,6 +99,11 @@ class AppPath {
   Future<String> get tempPath async {
     final directory = await tempDir.future;
     return directory.path;
+  }
+
+  Future<String> get uiPath async {
+    final directory = await dataDir.future;
+    return join(directory.path, 'ui');
   }
 }
 

@@ -9,21 +9,20 @@ part of '../clash_config.dart';
 _ProxyGroup _$ProxyGroupFromJson(Map<String, dynamic> json) => _ProxyGroup(
   name: json['name'] as String,
   type: GroupType.parseProfileType(json['type'] as String),
-  proxies: (json['proxies'] as List<dynamic>?)
-      ?.map((e) => e as String)
-      .toList(),
-  use: (json['use'] as List<dynamic>?)?.map((e) => e as String).toList(),
-  interval: (json['interval'] as num?)?.toInt(),
-  lazy: json['lazy'] as bool?,
+  proxies: _parseStringList(json['proxies']),
+  use: _parseStringList(json['use']),
+  interval: _parseInt(json['interval']),
+  lazy: _parseBool(json['lazy']),
   url: json['url'] as String?,
-  timeout: (json['timeout'] as num?)?.toInt(),
-  maxFailedTimes: (json['max-failed-times'] as num?)?.toInt(),
+  timeout: _parseInt(json['timeout']),
+  maxFailedTimes: _parseInt(json['max-failed-times']),
   filter: json['filter'] as String?,
   excludeFilter: json['expected-filter'] as String?,
   excludeType: json['exclude-type'] as String?,
   expectedStatus: json['expected-status'],
-  hidden: json['hidden'] as bool?,
+  hidden: _parseBool(json['hidden']),
   icon: json['icon'] as String?,
+  tolerance: _parseInt(json['tolerance']),
 );
 
 Map<String, dynamic> _$ProxyGroupToJson(_ProxyGroup instance) =>
@@ -43,6 +42,7 @@ Map<String, dynamic> _$ProxyGroupToJson(_ProxyGroup instance) =>
       'expected-status': instance.expectedStatus,
       'hidden': instance.hidden,
       'icon': instance.icon,
+      'tolerance': instance.tolerance,
     };
 
 const _$GroupTypeEnumMap = {
@@ -50,7 +50,6 @@ const _$GroupTypeEnumMap = {
   GroupType.URLTest: 'URLTest',
   GroupType.Fallback: 'Fallback',
   GroupType.LoadBalance: 'LoadBalance',
-  GroupType.Relay: 'Relay',
 };
 
 _RuleProvider _$RuleProviderFromJson(Map<String, dynamic> json) =>
@@ -60,8 +59,8 @@ Map<String, dynamic> _$RuleProviderToJson(_RuleProvider instance) =>
     <String, dynamic>{'name': instance.name};
 
 _Sniffer _$SnifferFromJson(Map<String, dynamic> json) => _Sniffer(
-  enable: json['enable'] as bool? ?? false,
-  overrideDest: json['override-destination'] as bool? ?? true,
+  enable: json['enable'] as bool? ?? true,
+  overrideDest: json['override-destination'] as bool? ?? false,
   sniffing:
       (json['sniffing'] as List<dynamic>?)?.map((e) => e as String).toList() ??
       const [],
@@ -69,22 +68,37 @@ _Sniffer _$SnifferFromJson(Map<String, dynamic> json) => _Sniffer(
       (json['force-domain'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList() ??
-      const [],
+      const ['+.v2ex.com'],
   skipSrcAddress:
       (json['skip-src-address'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList() ??
-      const [],
+      const ['192.168.0.3/32'],
   skipDstAddress:
       (json['skip-dst-address'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList() ??
-      const [],
+      const [
+        '91.108.56.0/22',
+        '91.108.4.0/22',
+        '91.108.8.0/22',
+        '91.108.16.0/22',
+        '91.108.12.0/22',
+        '149.154.160.0/20',
+        '91.105.192.0/23',
+        '91.108.20.0/22',
+        '185.76.151.0/24',
+        '2001:b28:f23d::/48',
+        '2001:b28:f23f::/48',
+        '2001:67c:4e8::/48',
+        '2001:b28:f23c::/48',
+        '2a0a:f280::/32',
+      ],
   skipDomain:
       (json['skip-domain'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList() ??
-      const [],
+      const ['Mijia Cloud', '+.push.apple.com'],
   port:
       (json['port-whitelist'] as List<dynamic>?)
           ?.map((e) => e as String)
@@ -97,7 +111,11 @@ _Sniffer _$SnifferFromJson(Map<String, dynamic> json) => _Sniffer(
         (k, e) =>
             MapEntry(k, SnifferConfig.fromJson(e as Map<String, dynamic>)),
       ) ??
-      const {},
+      const {
+        'HTTP': SnifferConfig(ports: ['80', '8080-8880'], overrideDest: true),
+        'TLS': SnifferConfig(ports: ['443', '8443']),
+        'QUIC': SnifferConfig(ports: ['443', '8443']),
+      },
 );
 
 Map<String, dynamic> _$SnifferToJson(_Sniffer instance) => <String, dynamic>{
@@ -113,6 +131,25 @@ Map<String, dynamic> _$SnifferToJson(_Sniffer instance) => <String, dynamic>{
   'parse-pure-ip': instance.parsePureIp,
   'sniff': instance.sniff,
 };
+
+_TunnelEntry _$TunnelEntryFromJson(Map<String, dynamic> json) => _TunnelEntry(
+  id: json['id'] as String,
+  network: (json['network'] as List<dynamic>?)
+      ?.map((e) => e as String)
+      .toList(),
+  address: json['address'] as String?,
+  target: json['target'] as String?,
+  proxyName: json['proxyName'] as String?,
+);
+
+Map<String, dynamic> _$TunnelEntryToJson(_TunnelEntry instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'network': instance.network,
+      'address': instance.address,
+      'target': instance.target,
+      'proxyName': instance.proxyName,
+    };
 
 _SnifferConfig _$SnifferConfigFromJson(Map<String, dynamic> json) =>
     _SnifferConfig(
@@ -130,10 +167,10 @@ Map<String, dynamic> _$SnifferConfigToJson(_SnifferConfig instance) =>
 
 _Tun _$TunFromJson(Map<String, dynamic> json) => _Tun(
   enable: json['enable'] as bool? ?? false,
-  device: json['device'] as String? ?? appName,
+  device: json['device'] as String? ?? tunDeviceName,
   autoRoute: json['auto-route'] as bool? ?? false,
   stack:
-      $enumDecodeNullable(_$TunStackEnumMap, json['stack']) ?? TunStack.mixed,
+      $enumDecodeNullable(_$TunStackEnumMap, json['stack']) ?? TunStack.system,
   dnsHijack:
       (json['dns-hijack'] as List<dynamic>?)
           ?.map((e) => e as String)
@@ -144,6 +181,15 @@ _Tun _$TunFromJson(Map<String, dynamic> json) => _Tun(
           ?.map((e) => e as String)
           .toList() ??
       const [],
+  routeExcludeAddress:
+      (json['route-exclude-address'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      const [],
+  strictRoute: json['strict-route'] as bool? ?? false,
+  disableIcmpForwarding: json['disable-icmp-forwarding'] as bool? ?? true,
+  mtu: (json['mtu'] as num?)?.toInt() ?? 4064,
+  endpointIndependentNat: json['endpoint-independent-nat'] as bool? ?? false,
 );
 
 Map<String, dynamic> _$TunToJson(_Tun instance) => <String, dynamic>{
@@ -153,6 +199,11 @@ Map<String, dynamic> _$TunToJson(_Tun instance) => <String, dynamic>{
   'stack': _$TunStackEnumMap[instance.stack]!,
   'dns-hijack': instance.dnsHijack,
   'route-address': instance.routeAddress,
+  'route-exclude-address': instance.routeExcludeAddress,
+  'strict-route': instance.strictRoute,
+  'disable-icmp-forwarding': instance.disableIcmpForwarding,
+  'mtu': instance.mtu,
+  'endpoint-independent-nat': instance.endpointIndependentNat,
 };
 
 const _$TunStackEnumMap = {
@@ -164,17 +215,17 @@ const _$TunStackEnumMap = {
 _FallbackFilter _$FallbackFilterFromJson(
   Map<String, dynamic> json,
 ) => _FallbackFilter(
-  geoip: json['geoip'] as bool? ?? true,
+  geoip: json['geoip'] as bool? ?? false,
   geoipCode: json['geoip-code'] as String? ?? 'CN',
   geosite:
       (json['geosite'] as List<dynamic>?)?.map((e) => e as String).toList() ??
-      const ['gfw'],
+      const [],
   ipcidr:
       (json['ipcidr'] as List<dynamic>?)?.map((e) => e as String).toList() ??
-      const ['240.0.0.0/4'],
+      const [],
   domain:
       (json['domain'] as List<dynamic>?)?.map((e) => e as String).toList() ??
-      const ['+.google.com', '+.facebook.com', '+.youtube.com'],
+      const [],
 );
 
 Map<String, dynamic> _$FallbackFilterToJson(_FallbackFilter instance) =>
@@ -190,6 +241,9 @@ _Dns _$DnsFromJson(Map<String, dynamic> json) => _Dns(
   enable: json['enable'] as bool? ?? true,
   listen: json['listen'] as String? ?? '0.0.0.0:1053',
   preferH3: json['prefer-h3'] as bool? ?? false,
+  cacheAlgorithm:
+      $enumDecodeNullable(_$CacheAlgorithmEnumMap, json['cache-algorithm']) ??
+      CacheAlgorithm.arc,
   useHosts: json['use-hosts'] as bool? ?? true,
   useSystemHosts: json['use-system-hosts'] as bool? ?? true,
   respectRules: json['respect-rules'] as bool? ?? false,
@@ -198,38 +252,57 @@ _Dns _$DnsFromJson(Map<String, dynamic> json) => _Dns(
       (json['default-nameserver'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList() ??
-      const ['223.5.5.5'],
+      const ['114.114.114.114'],
   enhancedMode:
       $enumDecodeNullable(_$DnsModeEnumMap, json['enhanced-mode']) ??
       DnsMode.fakeIp,
-  fakeIpRange: json['fake-ip-range'] as String? ?? '198.18.0.1/16',
+  fakeIpRange: json['fake-ip-range'] as String? ?? '198.18.0.1/15',
+  fakeIpRangeV6: json['fake-ip-range-v6'] as String? ?? 'fc00::/18',
+  fakeIpFilterMode:
+      $enumDecodeNullable(_$FilterModeEnumMap, json['fake-ip-filter-mode']) ??
+      FilterMode.blacklist,
   fakeIpFilter:
       (json['fake-ip-filter'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList() ??
-      const ['*.lan', 'localhost.ptlogin2.qq.com'],
+      const [
+        '*',
+        'geosite:private',
+        'geosite:category-ntp',
+        'geosite:geolocation-cn',
+        'geosite:connectivity-check',
+      ],
+  fakeIpTtl: (json['fake-ip-ttl'] as num?)?.toInt() ?? 1,
   nameserverPolicy:
       (json['nameserver-policy'] as Map<String, dynamic>?)?.map(
         (k, e) => MapEntry(k, e as String),
       ) ??
       const {
-        'www.baidu.com': '114.114.114.114',
         '+.internal.crop.com': '10.0.0.1',
-        'geosite:cn': 'https://doh.pub/dns-query',
+        'geosite:cn': '119.29.29.29',
+        'geosite:private': 'system',
+        '*': 'system',
       },
   nameserver:
       (json['nameserver'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList() ??
-      const ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query'],
+      const ['1.1.1.1'],
   fallback:
       (json['fallback'] as List<dynamic>?)?.map((e) => e as String).toList() ??
-      const ['tls://8.8.4.4', 'tls://1.1.1.1'],
+      const [],
   proxyServerNameserver:
       (json['proxy-server-nameserver'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList() ??
-      const ['https://doh.pub/dns-query'],
+      const ['https://doh.pub/dns-query#DIRECT'],
+  directNameserver:
+      (json['direct-nameserver'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      const [],
+  directNameserverFollowPolicy:
+      json['direct-nameserver-follow-policy'] as bool? ?? false,
   fallbackFilter: json['fallback-filter'] == null
       ? const FallbackFilter()
       : FallbackFilter.fromJson(
@@ -241,6 +314,7 @@ Map<String, dynamic> _$DnsToJson(_Dns instance) => <String, dynamic>{
   'enable': instance.enable,
   'listen': instance.listen,
   'prefer-h3': instance.preferH3,
+  'cache-algorithm': _$CacheAlgorithmEnumMap[instance.cacheAlgorithm]!,
   'use-hosts': instance.useHosts,
   'use-system-hosts': instance.useSystemHosts,
   'respect-rules': instance.respectRules,
@@ -248,12 +322,22 @@ Map<String, dynamic> _$DnsToJson(_Dns instance) => <String, dynamic>{
   'default-nameserver': instance.defaultNameserver,
   'enhanced-mode': _$DnsModeEnumMap[instance.enhancedMode]!,
   'fake-ip-range': instance.fakeIpRange,
+  'fake-ip-range-v6': instance.fakeIpRangeV6,
+  'fake-ip-filter-mode': _$FilterModeEnumMap[instance.fakeIpFilterMode]!,
   'fake-ip-filter': instance.fakeIpFilter,
+  'fake-ip-ttl': instance.fakeIpTtl,
   'nameserver-policy': instance.nameserverPolicy,
   'nameserver': instance.nameserver,
   'fallback': instance.fallback,
   'proxy-server-nameserver': instance.proxyServerNameserver,
+  'direct-nameserver': instance.directNameserver,
+  'direct-nameserver-follow-policy': instance.directNameserverFollowPolicy,
   'fallback-filter': instance.fallbackFilter,
+};
+
+const _$CacheAlgorithmEnumMap = {
+  CacheAlgorithm.arc: 'arc',
+  CacheAlgorithm.lru: 'lru',
 };
 
 const _$DnsModeEnumMap = {
@@ -263,19 +347,55 @@ const _$DnsModeEnumMap = {
   DnsMode.hosts: 'hosts',
 };
 
+const _$FilterModeEnumMap = {
+  FilterMode.blacklist: 'blacklist',
+  FilterMode.whitelist: 'whitelist',
+  FilterMode.rule: 'rule',
+};
+
+_Ntp _$NtpFromJson(Map<String, dynamic> json) => _Ntp(
+  enable: json['enable'] as bool? ?? true,
+  writeToSystem: json['write-to-system'] as bool? ?? false,
+  server: json['server'] as String? ?? 'ntp.aliyun.com',
+  port: (json['port'] as num?)?.toInt() ?? 123,
+  interval: (json['interval'] as num?)?.toInt() ?? 60,
+);
+
+Map<String, dynamic> _$NtpToJson(_Ntp instance) => <String, dynamic>{
+  'enable': instance.enable,
+  'write-to-system': instance.writeToSystem,
+  'server': instance.server,
+  'port': instance.port,
+  'interval': instance.interval,
+};
+
+_Experimental _$ExperimentalFromJson(Map<String, dynamic> json) =>
+    _Experimental(
+      quicGoDisableGso: json['quic-go-disable-gso'] as bool? ?? true,
+      quicGoDisableEcn: json['quic-go-disable-ecn'] as bool? ?? true,
+      dialerIp4pConvert: json['dialer-ip4p-convert'] as bool? ?? false,
+    );
+
+Map<String, dynamic> _$ExperimentalToJson(_Experimental instance) =>
+    <String, dynamic>{
+      'quic-go-disable-gso': instance.quicGoDisableGso,
+      'quic-go-disable-ecn': instance.quicGoDisableEcn,
+      'dialer-ip4p-convert': instance.dialerIp4pConvert,
+    };
+
 _GeoXUrl _$GeoXUrlFromJson(Map<String, dynamic> json) => _GeoXUrl(
   mmdb:
       json['mmdb'] as String? ??
-      'https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geoip.metadb',
+      'https://fastly.jsdelivr.net/gh/appshubcc/bett-rules@release/geoip.metadb',
   asn:
       json['asn'] as String? ??
-      'https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/GeoLite2-ASN.mmdb',
+      'https://fastly.jsdelivr.net/gh/appshubcc/bett-rules@release/GeoLite2-ASN.mmdb',
   geoip:
       json['geoip'] as String? ??
-      'https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geoip.dat',
+      'https://fastly.jsdelivr.net/gh/appshubcc/bett-rules@release/geoip.dat',
   geosite:
       json['geosite'] as String? ??
-      'https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geosite.dat',
+      'https://fastly.jsdelivr.net/gh/appshubcc/bett-rules@release/geosite.dat',
 );
 
 Map<String, dynamic> _$GeoXUrlToJson(_GeoXUrl instance) => <String, dynamic>{
@@ -285,16 +405,12 @@ Map<String, dynamic> _$GeoXUrlToJson(_GeoXUrl instance) => <String, dynamic>{
   'geosite': instance.geosite,
 };
 
-_Rule _$RuleFromJson(Map<String, dynamic> json) => _Rule(
-  id: (json['id'] as num).toInt(),
-  value: json['value'] as String,
-  order: json['order'] as String?,
-);
+_Rule _$RuleFromJson(Map<String, dynamic> json) =>
+    _Rule(id: json['id'] as String, value: json['value'] as String);
 
 Map<String, dynamic> _$RuleToJson(_Rule instance) => <String, dynamic>{
   'id': instance.id,
   'value': instance.value,
-  'order': instance.order,
 };
 
 _SubRule _$SubRuleFromJson(Map<String, dynamic> json) =>
@@ -346,7 +462,7 @@ _ClashConfig _$ClashConfigFromJson(Map<String, dynamic> json) => _ClashConfig(
         json['find-process-mode'],
         unknownValue: FindProcessMode.always,
       ) ??
-      FindProcessMode.always,
+      FindProcessMode.off,
   keepAliveInterval:
       (json['keep-alive-interval'] as num?)?.toInt() ??
       defaultKeepAliveInterval,
@@ -358,6 +474,22 @@ _ClashConfig _$ClashConfigFromJson(Map<String, dynamic> json) => _ClashConfig(
   dns: json['dns'] == null
       ? defaultDns
       : Dns.safeDnsFromJson(json['dns'] as Map<String, Object?>),
+  ntp: json['ntp'] == null
+      ? defaultNtp
+      : Ntp.safeNtpFromJson(json['ntp'] as Map<String, Object?>),
+  sniffer: json['sniffer'] == null
+      ? defaultSniffer
+      : Sniffer.safeSnifferFromJson(json['sniffer'] as Map<String, Object?>),
+  tunnels:
+      (json['tunnels'] as List<dynamic>?)
+          ?.map((e) => TunnelEntry.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      defaultTunnel,
+  experimental: json['experimental'] == null
+      ? defaultExperimental
+      : Experimental.safeExperimentalFromJson(
+          json['experimental'] as Map<String, Object?>,
+        ),
   geoXUrl: json['geox-url'] == null
       ? defaultGeoXUrl
       : GeoXUrl.safeFormJson(json['geox-url'] as Map<String, Object?>?),
@@ -379,6 +511,9 @@ _ClashConfig _$ClashConfigFromJson(Map<String, dynamic> json) => _ClashConfig(
         json['external-controller'],
       ) ??
       ExternalControllerStatus.close,
+  secret: json['secret'] as String?,
+  externalUiName: json['external-ui-name'] as String?,
+  externalUiUrl: json['external-ui-url'] as String?,
   hosts:
       (json['hosts'] as Map<String, dynamic>?)?.map(
         (k, e) => MapEntry(k, e as String),
@@ -403,6 +538,10 @@ Map<String, dynamic> _$ClashConfigToJson(_ClashConfig instance) =>
       'tcp-concurrent': instance.tcpConcurrent,
       'tun': instance.tun,
       'dns': instance.dns,
+      'ntp': instance.ntp,
+      'sniffer': instance.sniffer,
+      'tunnels': instance.tunnels,
+      'experimental': instance.experimental,
       'geox-url': instance.geoXUrl,
       'geodata-loader': _$GeodataLoaderEnumMap[instance.geodataLoader]!,
       'proxy-groups': instance.proxyGroups,
@@ -410,6 +549,9 @@ Map<String, dynamic> _$ClashConfigToJson(_ClashConfig instance) =>
       'global-ua': instance.globalUa,
       'external-controller':
           _$ExternalControllerStatusEnumMap[instance.externalController]!,
+      'secret': instance.secret,
+      'external-ui-name': instance.externalUiName,
+      'external-ui-url': instance.externalUiUrl,
       'hosts': instance.hosts,
     };
 

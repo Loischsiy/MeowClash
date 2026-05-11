@@ -1,16 +1,40 @@
 import 'dart:math';
 
+import 'package:meow_clash/state.dart';
+
 import 'package:defer_pointer/defer_pointer.dart';
 import 'package:meow_clash/common/common.dart';
-import 'package:meow_clash/controller.dart';
 import 'package:meow_clash/enum/enum.dart';
 import 'package:meow_clash/providers/providers.dart';
-import 'package:meow_clash/state.dart';
 import 'package:meow_clash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'widgets/start_button.dart';
+final customDashboardTitleProvider =
+    StateNotifierProvider<CustomDashboardTitleNotifier, String?>((ref) {
+      return CustomDashboardTitleNotifier();
+    });
+
+class CustomDashboardTitleNotifier extends StateNotifier<String?> {
+  CustomDashboardTitleNotifier() : super(null) {
+    _init();
+  }
+
+  Future<void> _init() async {
+    final prefs = await preferences.sharedPreferencesCompleter.future;
+    state = prefs?.getString(customDashboardTitleKey);
+  }
+
+  Future<void> updateTitle(String? title) async {
+    state = title;
+    final prefs = await preferences.sharedPreferencesCompleter.future;
+    if (title == null) {
+      prefs?.remove(customDashboardTitleKey);
+    } else {
+      prefs?.setString(customDashboardTitleKey, title);
+    }
+  }
+}
 
 typedef _IsEditWidgetBuilder = Widget Function(bool isEdit);
 
@@ -42,136 +66,45 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
     );
   }
 
-  Future<void> _handleConnection() async {
-    final coreStatus = ref.read(coreStatusProvider);
-    if (coreStatus == CoreStatus.connecting) {
-      return;
-    }
-    final tip = coreStatus == CoreStatus.connected
-        ? appLocalizations.forceRestartCoreTip
-        : appLocalizations.restartCoreTip;
-    final res = await globalState.showMessage(message: TextSpan(text: tip));
-    if (res != true) {
-      return;
-    }
-    appController.restartCore();
-  }
-
-  List<Widget> _buildActions(bool isEdit) {
+  List<Widget> _buildActions() {
     return [
-      if (!isEdit)
-        Consumer(
-          builder: (_, ref, _) {
-            final coreStatus = ref.watch(coreStatusProvider);
-            return Tooltip(
-              message: appLocalizations.coreStatus,
-              child: FadeScaleBox(
-                alignment: Alignment.centerRight,
-                child: coreStatus == CoreStatus.connected
-                    ? IconButton.filled(
-                        visualDensity: VisualDensity.compact,
-                        iconSize: 20,
-                        padding: EdgeInsets.zero,
-                        style: IconButton.styleFrom(
-                          backgroundColor: Colors.greenAccent,
-                          foregroundColor: switch (Theme.brightnessOf(
-                            context,
-                          )) {
-                            Brightness.light =>
-                              context.colorScheme.onSurfaceVariant,
-                            Brightness.dark =>
-                              context.colorScheme.onPrimaryFixedVariant,
-                          },
-                        ),
-                        onPressed: _handleConnection,
-                        icon: Icon(Icons.check, fontWeight: FontWeight.w900),
-                      )
-                    : FilledButton.icon(
-                        key: ValueKey(coreStatus),
-                        onPressed: _handleConnection,
-                        style: FilledButton.styleFrom(
-                          visualDensity: VisualDensity.compact,
-                          padding: EdgeInsets.symmetric(horizontal: 12),
-                          backgroundColor: switch (coreStatus) {
-                            CoreStatus.connecting => null,
-                            CoreStatus.connected => Colors.greenAccent,
-                            CoreStatus.disconnected =>
-                              context.colorScheme.error,
-                          },
-                          foregroundColor: switch (coreStatus) {
-                            CoreStatus.connecting => null,
-                            CoreStatus.connected => switch (Theme.brightnessOf(
-                              context,
-                            )) {
-                              Brightness.light =>
-                                context.colorScheme.onSurfaceVariant,
-                              Brightness.dark => null,
-                            },
-                            CoreStatus.disconnected =>
-                              context.colorScheme.onError,
-                          },
-                        ),
-                        icon: SizedBox(
-                          height: globalState.measure.bodyMediumHeight,
-                          width: globalState.measure.bodyMediumHeight,
-                          child: switch (coreStatus) {
-                            CoreStatus.connecting => Padding(
-                              padding: EdgeInsets.all(2),
-                              child: CircularProgressIndicator(
-                                strokeWidth: 3,
-                                color: context.colorScheme.onPrimary,
-                                backgroundColor: Colors.transparent,
-                              ),
-                            ),
-                            CoreStatus.connected => Icon(
-                              Icons.check_sharp,
-                              fontWeight: FontWeight.w900,
-                            ),
-                            CoreStatus.disconnected => Icon(
-                              Icons.restart_alt_sharp,
-                              fontWeight: FontWeight.w900,
-                            ),
-                          },
-                        ),
-                        label: Text(switch (coreStatus) {
-                          CoreStatus.connecting => appLocalizations.connecting,
-                          CoreStatus.connected => appLocalizations.connected,
-                          CoreStatus.disconnected =>
-                            appLocalizations.disconnected,
-                        }),
-                      ),
-              ),
-            );
-          },
-        ),
-      if (isEdit)
-        ValueListenableBuilder(
-          valueListenable: _addedWidgetsNotifier,
-          builder: (_, addedChildren, child) {
-            if (addedChildren.isEmpty) {
-              return Container();
+      _buildIsEdit((isEdit) {
+        return isEdit
+            ? ValueListenableBuilder(
+                valueListenable: _addedWidgetsNotifier,
+                builder: (_, addedChildren, child) {
+                  if (addedChildren.isEmpty) {
+                    return Container();
+                  }
+                  return child!;
+                },
+                child: IconButton(
+                  onPressed: () {
+                    _showAddWidgetsModal();
+                  },
+                  icon: Icon(Icons.add_circle),
+                ),
+              )
+            : SizedBox();
+      }),
+      Material(
+        type: MaterialType.transparency,
+        shape: const CircleBorder(),
+        clipBehavior: Clip.hardEdge,
+        child: InkWell(
+          onTap: _handleUpdateIsEdit,
+          onLongPress: () {
+            if (!_isEditNotifier.value) {
+              _showEditTitleDialog();
             }
-            return child!;
           },
-          child: IconButton(
-            onPressed: () {
-              _showAddWidgetsModal();
-            },
-            icon: Icon(Icons.add_circle),
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: _buildIsEdit((isEdit) {
+              return isEdit ? const Icon(Icons.save) : const Icon(Icons.edit);
+            }),
           ),
         ),
-      FadeRotationScaleBox(
-        child: isEdit
-            ? IconButton(
-                key: ValueKey(true),
-                icon: Icon(Icons.save, key: ValueKey('save-icon')),
-                onPressed: _handleUpdateIsEdit,
-              )
-            : IconButton(
-                key: ValueKey(false),
-                icon: Icon(Icons.edit, key: ValueKey('edit-icon')),
-                onPressed: _handleUpdateIsEdit,
-              ),
       ),
     ];
   }
@@ -199,36 +132,47 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
     );
   }
 
-  Future<void> _handleUpdateIsEdit() async {
+  void _showEditTitleDialog() async {
+    final currentTitle = ref.read(customDashboardTitleProvider) ?? '';
+    final title = await globalState.showCommonDialog<String>(
+      child: _DashboardTitleDialog(initialValue: currentTitle),
+    );
+    if (title != null) {
+      ref
+          .read(customDashboardTitleProvider.notifier)
+          .updateTitle(title.isEmpty ? null : title);
+    }
+  }
+
+  void _handleUpdateIsEdit() {
     if (_isEditNotifier.value == true) {
-      await _handleSave();
+      _handleSave();
     }
     _isEditNotifier.value = !_isEditNotifier.value;
   }
 
-  Future<void> _handleSave() async {
-    final currentState = key.currentState;
-    if (currentState == null) {
+  void _handleSave() {
+    final children = key.currentState?.children;
+    if (children == null) {
       return;
     }
-    if (mounted) {
-      await currentState.isTransformCompleter;
-      final dashboardWidgets = currentState.children
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final dashboardWidgets = children
           .map((item) => DashboardWidget.getDashboardWidget(item))
           .toList();
       ref
           .read(appSettingProvider.notifier)
-          .update(
+          .updateState(
             (state) => state.copyWith(dashboardWidgets: dashboardWidgets),
           );
-    }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final dashboardState = ref.watch(dashboardStateProvider);
-    final columns = max(4 * ((dashboardState.contentWidth / 280).ceil()), 8);
-    final spacing = 14.mAp;
+    final columns = max(4 * ((dashboardState.viewWidth / 320).ceil()), 8);
+    final spacing = 16.ap;
     final children = [
       ...dashboardState.dashboardWidgets
           .where(
@@ -246,19 +190,22 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
           .map((item) => item.widget)
           .toList();
     });
-    return _buildIsEdit(
-      (isEdit) => CommonScaffold(
-        title: appLocalizations.dashboard,
-        actions: _buildActions(isEdit),
-        floatingActionButton: const StartButton(),
-        body: Align(
-          alignment: Alignment.topCenter,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16).copyWith(bottom: 88),
-            child: isEdit
-                ? SystemBackBlock(
-                    child: CommonPopScope(
-                      child: SuperGrid(
+    return CommonScaffold(
+      title:
+          ref.watch(customDashboardTitleProvider) ?? appLocalizations.dashboard,
+      actions: _buildActions(),
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16).copyWith(bottom: 16),
+          child: _buildIsEdit((isEdit) {
+            if (isEdit) {
+              return SystemBackBlock(
+                child: CommonPopScope(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SuperGrid(
                         key: key,
                         crossAxisCount: columns,
                         crossAxisSpacing: spacing,
@@ -276,19 +223,23 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                           _handleSave();
                         },
                       ),
-                      onPop: (context) {
-                        _handleUpdateIsEdit();
-                        return false;
-                      },
-                    ),
-                  )
-                : Grid(
-                    crossAxisCount: columns,
-                    crossAxisSpacing: spacing,
-                    mainAxisSpacing: spacing,
-                    children: children,
+                    ],
                   ),
-          ),
+                  onPop: () {
+                    _handleUpdateIsEdit();
+                    return false;
+                  },
+                ),
+              );
+            } else {
+              return Grid(
+                crossAxisCount: columns,
+                crossAxisSpacing: spacing,
+                mainAxisSpacing: spacing,
+                children: [...children],
+              );
+            }
+          }),
         ),
       ),
     );
@@ -384,6 +335,81 @@ class _AddedContainerState extends State<_AddedContainer> {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _DashboardTitleDialog extends StatefulWidget {
+  final String initialValue;
+
+  const _DashboardTitleDialog({required this.initialValue});
+
+  @override
+  State<_DashboardTitleDialog> createState() => _DashboardTitleDialogState();
+}
+
+class _DashboardTitleDialogState extends State<_DashboardTitleDialog> {
+  late final TextEditingController _controller;
+  String? _errorText;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.initialValue);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _validate(String value) {
+    int len = 0;
+    for (int i = 0; i < value.length; i++) {
+      len += value.codeUnitAt(i) > 127 ? 2 : 1;
+    }
+    setState(() {
+      if (len > 12) {
+        _errorText = 'Too long (Max 6 Chinese or 12 English)';
+      } else {
+        _errorText = null;
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return CommonDialog(
+      title: '^_^',
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: Text(appLocalizations.cancel),
+        ),
+        TextButton(
+          onPressed: _errorText == null
+              ? () {
+                  Navigator.of(context).pop(_controller.text);
+                }
+              : null,
+          child: Text(appLocalizations.confirm),
+        ),
+      ],
+      child: Padding(
+        padding: const EdgeInsets.only(top: 8.0),
+        child: TextField(
+          controller: _controller,
+          decoration: InputDecoration(
+            hintText: 'Have fun with MeowClash',
+            errorText: _errorText,
+            border: const OutlineInputBorder(),
+          ),
+          onChanged: _validate,
+        ),
+      ),
     );
   }
 }

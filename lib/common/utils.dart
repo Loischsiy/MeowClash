@@ -6,19 +6,12 @@ import 'dart:ui';
 import 'package:meow_clash/common/common.dart';
 import 'package:meow_clash/enum/enum.dart';
 import 'package:flutter/foundation.dart';
+import 'package:meow_clash/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:lpinyin/lpinyin.dart';
 
 class Utils {
-  static Utils? _instance;
-
-  Utils._internal();
-
-  factory Utils() {
-    _instance ??= Utils._internal();
-    return _instance!;
-  }
-
   Color? getDelayColor(int? delay) {
     if (delay == null) return null;
     if (delay < 0) return Colors.red;
@@ -100,6 +93,28 @@ class Utils {
     return '${getDateStringLast2(inHours)}:${getDateStringLast2(inMinutes)}:${getDateStringLast2(inSeconds)}';
   }
 
+  Locale getSystemLocale() {
+    final platformLocale = WidgetsBinding.instance.platformDispatcher.locale;
+    final supportedLocales = AppLocalizations.delegate.supportedLocales;
+    
+    if (platformLocale.languageCode.toLowerCase() == 'zh') {
+      final isTraditional = 
+        (platformLocale.countryCode?.toUpperCase() == 'TW') ||
+        (platformLocale.countryCode?.toUpperCase() == 'HK') ||
+        (platformLocale.countryCode?.toUpperCase() == 'MO') ||
+        (platformLocale.scriptCode?.toLowerCase() == 'hant');
+      return isTraditional ? const Locale('zh', 'TC') : const Locale('zh', 'CN');
+    }
+    
+    for (final locale in supportedLocales) {
+      if (locale.languageCode == platformLocale.languageCode) {
+        return locale;
+      }
+    }
+    
+    return const Locale('zh', 'CN');
+  }
+
   Locale? getLocaleForString(String? localString) {
     if (localString == null) return null;
     var localSplit = localString.split('_');
@@ -151,9 +166,30 @@ class Utils {
     }
   }
 
-  String get traySuffix {
+  String getTrayIconPath({
+    required Brightness brightness,
+    bool isStart = false,
+  }) {
+    if (system.isMacOS) {
+      return 'assets/images/icon_template.png';
+    }
+
+    if (system.isLinux) {
+      return 'assets/images/icon.png';
+    }
+
     final suffix = system.isWindows ? 'ico' : 'png';
-    return 'assets/images/icon/status_2.$suffix';
+
+    return switch (brightness) {
+      Brightness.dark =>
+        !isStart
+            ? 'assets/images/icon.$suffix'
+            : 'assets/images/icon_white.$suffix',
+      Brightness.light =>
+        !isStart
+            ? 'assets/images/icon_light.$suffix'
+            : 'assets/images/icon_black.$suffix',
+    };
   }
 
   int compareVersions(String version1, String version2) {
@@ -179,11 +215,11 @@ class Utils {
     return build1.compareTo(build2);
   }
 
-  // String getPinyin(String value) {
-  //   return value.isNotEmpty
-  //       ? PinyinHelper.getFirstWordPinyin(value.substring(0, 1))
-  //       : '';
-  // }
+  String getPinyin(String value) {
+    return value.isNotEmpty
+        ? PinyinHelper.getFirstWordPinyin(value.substring(0, 1))
+        : '';
+  }
 
   String? getFileNameForDisposition(String? disposition) {
     if (disposition == null) return null;
@@ -229,7 +265,7 @@ class Utils {
   }
 
   int getProxiesColumns(double viewWidth, ProxiesLayout proxiesLayout) {
-    final columns = max((viewWidth / 250).ceil(), 2);
+    final columns = max((viewWidth / 300).ceil(), 2);
     return switch (proxiesLayout) {
       ProxiesLayout.tight => columns + 1,
       ProxiesLayout.standard => columns,
@@ -238,7 +274,7 @@ class Utils {
   }
 
   int getProfilesColumns(double viewWidth) {
-    return max((viewWidth / 280).floor(), 1);
+    return min(max((viewWidth / 320).floor(), 1), 3);
   }
 
   final _indexPrimary = [50, 100, 200, 300, 400, 500, 600, 700, 800, 850, 900];
@@ -324,33 +360,23 @@ class Utils {
     return SingleActivator(trigger, control: control, meta: !control);
   }
 
-  FutureOr<T> handleWatch<T>({
-    required Function function,
-    required void Function(T data, int elapsedMilliseconds) onWatch,
-  }) async {
-    if (kDebugMode && watchExecution) {
+
+  FutureOr<T> handleWatch<T>(Function function) async {
+    if (kDebugMode) {
       final stopwatch = Stopwatch()..start();
       final res = await function();
       stopwatch.stop();
-      onWatch(res, stopwatch.elapsedMilliseconds);
+      commonPrint.log('Time：${stopwatch.elapsedMilliseconds} ms');
       return res;
     }
     return await function();
   }
 
-  int fastHash(String string) {
-    var hash = 0xcbf29ce484222325;
-
-    var i = 0;
-    while (i < string.length) {
-      final codeUnit = string.codeUnitAt(i++);
-      hash ^= codeUnit >> 8;
-      hash *= 0x100000001b3;
-      hash ^= codeUnit & 0xFF;
-      hash *= 0x100000001b3;
-    }
-
-    return hash;
+  String generateSecret() {
+    final random = Random();
+    // Generate an 8-digit number (10000000 to 99999999)
+    final secret = 10000000 + random.nextInt(90000000);
+    return secret.toString();
   }
 }
 

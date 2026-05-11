@@ -5,6 +5,7 @@ import 'package:meow_clash/providers/providers.dart';
 import 'package:meow_clash/state.dart';
 import 'package:meow_clash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class LogLevelItem extends ConsumerWidget {
@@ -28,7 +29,7 @@ class LogLevelItem extends ConsumerWidget {
           }
           ref
               .read(patchClashConfigProvider.notifier)
-              .update((state) => state.copyWith(logLevel: value));
+              .updateState((state) => state.copyWith(logLevel: value));
         },
         textBuilder: (logLevel) => logLevel.name,
         value: logLevel,
@@ -37,28 +38,143 @@ class LogLevelItem extends ConsumerWidget {
   }
 }
 
-class UaItem extends ConsumerWidget {
+class UaItem extends ConsumerStatefulWidget {
   const UaItem({super.key});
 
   @override
-  Widget build(BuildContext context, ref) {
+  ConsumerState<UaItem> createState() => _UaItemState();
+}
+
+class _UaItemState extends ConsumerState<UaItem> {
+  String _lastCustomUa = '';
+
+  @override
+  Widget build(BuildContext context) {
     final globalUa = ref.watch(
       patchClashConfigProvider.select((state) => state.globalUa),
     );
-    return ListItem<String?>.options(
+    final isCustom = globalUa != null;
+
+    if (isCustom) {
+      _lastCustomUa = globalUa;
+    }
+
+    return ListItem(
       leading: const Icon(Icons.computer_outlined),
       title: const Text('UA'),
-      subtitle: Text(globalUa ?? appLocalizations.defaultText),
-      delegate: OptionsDelegate<String?>(
-        title: 'UA',
-        options: [null, 'clash-verge/v2.4.2', 'ClashforWindows/0.19.23'],
-        value: globalUa,
-        onChanged: (value) {
-          ref
-              .read(patchClashConfigProvider.notifier)
-              .update((state) => state.copyWith(globalUa: value));
-        },
-        textBuilder: (ua) => ua ?? appLocalizations.defaultText,
+      subtitle: Text(isCustom ? appLocalizations.custom : appLocalizations.defaultText),
+      onTap: () async {
+        final notifier = ref.read(patchClashConfigProvider.notifier);
+        final result = await globalState.showCommonDialog<_UaOption>(
+          child: _UaDialog(isCustom: isCustom),
+        );
+
+        if (result == null) return;
+
+        switch (result.type) {
+          case _UaOptionType.default_:
+            notifier.updateState((state) => state.copyWith(globalUa: null));
+          case _UaOptionType.custom:
+            final customUa = await globalState.showCommonDialog<String>(
+              child: InputDialog(
+                title: appLocalizations.custom,
+                value: _lastCustomUa,
+                hintText: 'Clash.Meta',
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return appLocalizations.emptyTip('UA');
+                  }
+                  return null;
+                },
+              ),
+            );
+            if (customUa != null && customUa.trim().isNotEmpty) {
+              notifier.updateState((state) => state.copyWith(globalUa: customUa.trim()));
+            }
+        }
+      },
+    );
+  }
+}
+
+enum _UaOptionType { default_, custom }
+
+class _UaOption {
+  final _UaOptionType type;
+
+  const _UaOption(this.type);
+}
+
+class _UaDialog extends StatelessWidget {
+  final bool isCustom;
+
+  const _UaDialog({required this.isCustom});
+
+  @override
+  Widget build(BuildContext context) {
+    return CommonDialog(
+      title: 'UA',
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Default option
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () {
+                Navigator.of(context, rootNavigator: true).pop(const _UaOption(_UaOptionType.default_));
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                child: Row(
+                  children: [
+                    Icon(
+                      !isCustom ? Icons.check_circle_rounded : Icons.circle_outlined,
+                      size: 21,
+                      color: !isCustom
+                          ? context.colorScheme.primary
+                          : context.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      appLocalizations.defaultText,
+                      style: context.textTheme.bodyMedium,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          // Custom option
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () {
+                Navigator.of(context, rootNavigator: true).pop(const _UaOption(_UaOptionType.custom));
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                child: Row(
+                  children: [
+                    Icon(
+                      isCustom ? Icons.check_circle_rounded : Icons.circle_outlined,
+                      size: 21,
+                      color: isCustom
+                          ? context.colorScheme.primary
+                          : context.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      appLocalizations.custom,
+                      style: context.textTheme.bodyMedium,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -98,7 +214,9 @@ class KeepAliveIntervalItem extends ConsumerWidget {
           final intValue = int.parse(value);
           ref
               .read(patchClashConfigProvider.notifier)
-              .update((state) => state.copyWith(keepAliveInterval: intValue));
+              .updateState(
+                (state) => state.copyWith(keepAliveInterval: intValue),
+              );
         },
       ),
     );
@@ -113,31 +231,181 @@ class TestUrlItem extends ConsumerWidget {
     final testUrl = ref.watch(
       appSettingProvider.select((state) => state.testUrl),
     );
-    return ListItem.input(
+
+    return ListItem(
       leading: const Icon(Icons.timeline),
       title: Text(appLocalizations.testUrl),
-      subtitle: Text(testUrl),
-      delegate: InputDelegate(
-        resetValue: defaultTestUrl,
-        title: appLocalizations.testUrl,
-        value: testUrl,
-        validator: (String? value) {
-          if (value == null || value.isEmpty) {
-            return appLocalizations.emptyTip(appLocalizations.testUrl);
-          }
-          if (!value.isUrl) {
-            return appLocalizations.urlTip(appLocalizations.testUrl);
-          }
-          return null;
-        },
-        onChanged: (String? value) {
-          if (value == null) {
-            return;
-          }
-          ref
-              .read(appSettingProvider.notifier)
-              .update((state) => state.copyWith(testUrl: value));
-        },
+      subtitle: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Text(testUrl),
+      ),
+      onTap: () async {
+        await globalState.showCommonDialog(
+          child: _TestUrlDialog(currentUrl: testUrl),
+        );
+      },
+    );
+  }
+}
+
+class _TestUrlDialog extends ConsumerWidget {
+  final String currentUrl;
+
+  const _TestUrlDialog({required this.currentUrl});
+
+  @override
+  Widget build(BuildContext context, ref) {
+    final overrideTestUrl = ref.watch(overrideTestUrlProvider);
+    final isPresetUrl = presetTestUrls.contains(currentUrl);
+
+    return CommonDialog(
+      title: appLocalizations.testUrl,
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Override switch
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  appLocalizations.overrideTestUrl,
+                  style: context.textTheme.bodyMedium,
+                ),
+                Switch(
+                  value: overrideTestUrl,
+                  onChanged: (bool value) async {
+                    ref.read(overrideTestUrlProvider.notifier).value = value;
+                    globalState.appController.applyProfileDebounce(silence: true);
+                  },
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          // URL list
+          ...presetTestUrls.map((url) {
+            final isSelected = currentUrl == url;
+            return Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () async {
+                  ref
+                      .read(appSettingProvider.notifier)
+                      .updateState((state) => state.copyWith(testUrl: url));
+                  if (ref.read(overrideTestUrlProvider)) {
+                    globalState.appController.applyProfileDebounce(silence: true);
+                  }
+                  if (context.mounted) {
+                    Navigator.of(context, rootNavigator: true).pop();
+                  }
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        isSelected
+                            ? Icons.check_circle_rounded
+                            : Icons.circle_outlined,
+                        size: 21,
+                        color: isSelected
+                            ? context.colorScheme.primary
+                            : context.colorScheme.onSurfaceVariant.withValues(
+                                alpha: 0.6,
+                              ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: isSelected
+                            ? SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Text(
+                                  url,
+                                  style: context.textTheme.bodyMedium,
+                                ),
+                              )
+                            : Text(
+                                url,
+                                style: context.textTheme.bodyMedium,
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                              ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }),
+          // Custom URL option
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () async {
+                final notifier = ref.read(appSettingProvider.notifier);
+                final overrideTestUrl = ref.read(overrideTestUrlProvider);
+                Navigator.of(context, rootNavigator: true).pop();
+                final customUrl = await globalState.showCommonDialog<String>(
+                  child: InputDialog(
+                    title: appLocalizations.customUrl,
+                    value: isPresetUrl ? '' : currentUrl,
+                    resetValue: defaultTestUrl,
+                    validator: (String? inputValue) {
+                      if (inputValue == null || inputValue.isEmpty) {
+                        return appLocalizations.emptyTip(appLocalizations.testUrl);
+                      }
+                      if (!inputValue.isUrl) {
+                        return appLocalizations.urlTip(appLocalizations.testUrl);
+                      }
+                      return null;
+                    },
+                  ),
+                );
+
+                if (customUrl != null) {
+                  notifier.updateState((state) => state.copyWith(testUrl: customUrl));
+                  if (overrideTestUrl) {
+                    globalState.appController.applyProfileDebounce(silence: true);
+                  }
+                }
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      !isPresetUrl
+                          ? Icons.check_circle_rounded
+                          : Icons.circle_outlined,
+                      size: 21,
+                      color: !isPresetUrl
+                          ? context.colorScheme.primary
+                          : context.colorScheme.onSurfaceVariant.withValues(
+                              alpha: 0.6,
+                            ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        appLocalizations.customUrl,
+                        style: context.textTheme.bodyMedium,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -184,7 +452,7 @@ class PortItem extends ConsumerWidget {
       //       return;
       //     }
       //     final mixedPort = int.parse(value);
-      //     ref.read(patchClashConfigProvider.notifier).update(
+      //     ref.read(patchClashConfigProvider.notifier).updateState(
       //           (state) => state.copyWith(
       //             mixedPort: mixedPort,
       //           ),
@@ -192,36 +460,6 @@ class PortItem extends ConsumerWidget {
       //   },
       //   resetValue: "$defaultMixedPort",
       // ),
-    );
-  }
-}
-
-class HostsItem extends ConsumerWidget {
-  const HostsItem({super.key});
-
-  @override
-  Widget build(BuildContext context, ref) {
-    final hosts = ref.watch(
-      patchClashConfigProvider.select((state) => state.hosts),
-    );
-    return ListItem.open(
-      leading: const Icon(Icons.view_list_outlined),
-      title: const Text('Hosts'),
-      subtitle: Text(appLocalizations.hostsDesc),
-      delegate: OpenDelegate(
-        blur: false,
-        widget: MapInputPage(
-          title: 'Hosts',
-          map: hosts,
-          titleBuilder: (item) => Text(item.key),
-          subtitleBuilder: (item) => Text(item.value),
-        ),
-        onChanged: (value) {
-          ref
-              .read(patchClashConfigProvider.notifier)
-              .update((state) => state.copyWith(hosts: value));
-        },
-      ),
     );
   }
 }
@@ -235,7 +473,7 @@ class Ipv6Item extends ConsumerWidget {
       patchClashConfigProvider.select((state) => state.ipv6),
     );
     return ListItem.switchItem(
-      leading: const Icon(Icons.water_outlined),
+      leading: const Icon(Icons.filter_6_rounded),
       title: const Text('IPv6'),
       subtitle: Text(appLocalizations.ipv6Desc),
       delegate: SwitchDelegate(
@@ -243,31 +481,7 @@ class Ipv6Item extends ConsumerWidget {
         onChanged: (bool value) async {
           ref
               .read(patchClashConfigProvider.notifier)
-              .update((state) => state.copyWith(ipv6: value));
-        },
-      ),
-    );
-  }
-}
-
-class AppendSystemDNSItem extends ConsumerWidget {
-  const AppendSystemDNSItem({super.key});
-
-  @override
-  Widget build(BuildContext context, ref) {
-    final appendSystemDNS = ref.watch(
-      networkSettingProvider.select((state) => state.appendSystemDns),
-    );
-    return ListItem.switchItem(
-      leading: const Icon(Icons.dns_outlined),
-      title: Text(appLocalizations.appendSystemDns),
-      subtitle: Text(appLocalizations.appendSystemDnsTip),
-      delegate: SwitchDelegate(
-        value: appendSystemDNS,
-        onChanged: (bool value) async {
-          ref
-              .read(networkSettingProvider.notifier)
-              .update((state) => state.copyWith(appendSystemDns: value));
+              .updateState((state) => state.copyWith(ipv6: value));
         },
       ),
     );
@@ -291,7 +505,7 @@ class AllowLanItem extends ConsumerWidget {
         onChanged: (bool value) async {
           ref
               .read(patchClashConfigProvider.notifier)
-              .update((state) => state.copyWith(allowLan: value));
+              .updateState((state) => state.copyWith(allowLan: value));
         },
       ),
     );
@@ -316,7 +530,7 @@ class UnifiedDelayItem extends ConsumerWidget {
         onChanged: (bool value) async {
           ref
               .read(patchClashConfigProvider.notifier)
-              .update((state) => state.copyWith(unifiedDelay: value));
+              .updateState((state) => state.copyWith(unifiedDelay: value));
         },
       ),
     );
@@ -343,7 +557,7 @@ class FindProcessItem extends ConsumerWidget {
         onChanged: (bool value) async {
           ref
               .read(patchClashConfigProvider.notifier)
-              .update(
+              .updateState(
                 (state) => state.copyWith(
                   findProcessMode: value
                       ? FindProcessMode.always
@@ -373,7 +587,7 @@ class TcpConcurrentItem extends ConsumerWidget {
         onChanged: (value) async {
           ref
               .read(patchClashConfigProvider.notifier)
-              .update((state) => state.copyWith(tcpConcurrent: value));
+              .updateState((state) => state.copyWith(tcpConcurrent: value));
         },
       ),
     );
@@ -399,7 +613,7 @@ class GeodataLoaderItem extends ConsumerWidget {
         onChanged: (bool value) async {
           ref
               .read(patchClashConfigProvider.notifier)
-              .update(
+              .updateState(
                 (state) => state.copyWith(
                   geodataLoader: value
                       ? GeodataLoader.memconservative
@@ -429,16 +643,139 @@ class ExternalControllerItem extends ConsumerWidget {
       delegate: SwitchDelegate(
         value: hasExternalController,
         onChanged: (bool value) async {
-          ref
-              .read(patchClashConfigProvider.notifier)
-              .update(
-                (state) => state.copyWith(
-                  externalController: value
-                      ? ExternalControllerStatus.open
-                      : ExternalControllerStatus.close,
-                ),
-              );
+          if (value) {
+            // Auto-generate 8-digit password when enabling external controller
+            final newSecret = utils.generateSecret();
+            ref
+                .read(patchClashConfigProvider.notifier)
+                .updateState(
+                  (state) => state.copyWith(
+                    externalController: ExternalControllerStatus.open,
+                    secret: newSecret,
+                  ),
+                );
+            // Apply config
+            await globalState.appController.applyProfile();
+          } else {
+            // Disable external controller
+            ref
+                .read(patchClashConfigProvider.notifier)
+                .updateState(
+                  (state) => state.copyWith(
+                    externalController: ExternalControllerStatus.close,
+                  ),
+                );
+            // Apply config
+            await globalState.appController.applyProfile();
+          }
         },
+      ),
+    );
+  }
+}
+
+class ControlSecretItem extends ConsumerWidget {
+  const ControlSecretItem({super.key});
+
+  @override
+  Widget build(BuildContext context, ref) {
+    final hasExternalController = ref.watch(
+      patchClashConfigProvider.select(
+        (state) => state.externalController == ExternalControllerStatus.open,
+      ),
+    );
+
+    // Only show when external controller is enabled
+    if (!hasExternalController) {
+      return const SizedBox.shrink();
+    }
+
+    final secret =
+        ref.watch(patchClashConfigProvider.select((state) => state.secret)) ??
+        '';
+
+    return ListItem(
+      leading: const Icon(Icons.password_outlined),
+      title: Text(appLocalizations.controlSecret),
+      subtitle: Text(
+        secret.isEmpty ? appLocalizations.controlSecretDesc : secret,
+      ),
+      trailing: secret.isNotEmpty
+          ? IconButton(
+              icon: const Icon(Icons.copy),
+              tooltip: appLocalizations.copy,
+              onPressed: () {
+                Clipboard.setData(ClipboardData(text: secret));
+                if (context.mounted) {
+                  context.showSnackBar(appLocalizations.secretCopied);
+                }
+              },
+            )
+          : null,
+      onTap: () async {
+        await globalState.showCommonDialog(
+          child: _SecretDialog(currentSecret: secret),
+        );
+      },
+    );
+  }
+}
+
+class _SecretDialog extends ConsumerStatefulWidget {
+  final String currentSecret;
+
+  const _SecretDialog({required this.currentSecret});
+
+  @override
+  ConsumerState<_SecretDialog> createState() => _SecretDialogState();
+}
+
+class _SecretDialogState extends ConsumerState<_SecretDialog> {
+  late TextEditingController _controller;
+  final _formKey = GlobalKey<FormState>();
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.currentSecret);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleSave() async {
+    if (_formKey.currentState?.validate() == false) return;
+    ref
+        .read(patchClashConfigProvider.notifier)
+        .updateState((state) => state.copyWith(secret: _controller.text));
+    Navigator.of(context).pop();
+    // Apply config after manual password change
+    await globalState.appController.applyProfile();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return CommonDialog(
+      title: appLocalizations.controlSecret,
+      actions: [
+        TextButton(onPressed: _handleSave, child: Text(appLocalizations.save)),
+      ],
+      child: Form(
+        key: _formKey,
+        child: Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: TextFormField(
+            controller: _controller,
+            decoration: InputDecoration(
+              border: const OutlineInputBorder(),
+              labelText: appLocalizations.controlSecret,
+              hintText: appLocalizations.controlSecretDesc,
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -450,15 +787,14 @@ final generalItems = <Widget>[
   if (system.isDesktop) KeepAliveIntervalItem(),
   TestUrlItem(),
   PortItem(),
-  HostsItem(),
   Ipv6Item(),
   AllowLanItem(),
   UnifiedDelayItem(),
-  AppendSystemDNSItem(),
   FindProcessItem(),
   TcpConcurrentItem(),
   GeodataLoaderItem(),
   ExternalControllerItem(),
+  ControlSecretItem(),
 ].separated(const Divider(height: 0)).toList();
 
 class _PortDialog extends ConsumerStatefulWidget {
@@ -472,11 +808,11 @@ class _PortDialogState extends ConsumerState<_PortDialog> {
   final _formKey = GlobalKey<FormState>();
   bool _isMore = false;
 
-  late final TextEditingController _mixedPortController;
-  late final TextEditingController _portController;
-  late final TextEditingController _socksPortController;
-  late final TextEditingController _redirPortController;
-  late final TextEditingController _tProxyPortController;
+  late TextEditingController _mixedPortController;
+  late TextEditingController _portController;
+  late TextEditingController _socksPortController;
+  late TextEditingController _redirPortController;
+  late TextEditingController _tProxyPortController;
 
   @override
   void initState() {
@@ -484,11 +820,11 @@ class _PortDialogState extends ConsumerState<_PortDialog> {
     final vm5 = ref.read(
       patchClashConfigProvider.select((state) {
         return VM5(
-          state.mixedPort,
-          state.port,
-          state.socksPort,
-          state.redirPort,
-          state.tproxyPort,
+          a: state.mixedPort,
+          b: state.port,
+          c: state.socksPort,
+          d: state.redirPort,
+          e: state.tproxyPort,
         );
       }),
     );
@@ -508,7 +844,7 @@ class _PortDialogState extends ConsumerState<_PortDialog> {
     }
     ref
         .read(patchClashConfigProvider.notifier)
-        .update(
+        .updateState(
           (state) => state.copyWith(
             mixedPort: 7890,
             port: 0,
@@ -526,7 +862,7 @@ class _PortDialogState extends ConsumerState<_PortDialog> {
     if (_formKey.currentState?.validate() == false) return;
     ref
         .read(patchClashConfigProvider.notifier)
-        .update(
+        .updateState(
           (state) => state.copyWith(
             mixedPort: int.parse(_mixedPortController.text),
             port: int.parse(_portController.text),
@@ -542,16 +878,6 @@ class _PortDialogState extends ConsumerState<_PortDialog> {
     setState(() {
       _isMore = !_isMore;
     });
-  }
-
-  @override
-  void dispose() {
-    _mixedPortController.dispose();
-    _portController.dispose();
-    _socksPortController.dispose();
-    _redirPortController.dispose();
-    _tProxyPortController.dispose();
-    super.dispose();
   }
 
   @override

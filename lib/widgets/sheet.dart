@@ -1,5 +1,7 @@
 import 'package:meow_clash/common/common.dart';
-import 'package:meow_clash/controller.dart';
+import 'package:meow_clash/enum/enum.dart';
+import 'package:meow_clash/models/models.dart';
+import 'package:meow_clash/state.dart';
 import 'package:flutter/material.dart';
 
 import 'scaffold.dart';
@@ -18,7 +20,7 @@ class SheetProps {
     this.maxHeight,
     this.useSafeArea = true,
     this.isScrollControlled = false,
-    this.blur = true,
+    this.blur = false,
   });
 }
 
@@ -32,7 +34,7 @@ class ExtendProps {
   const ExtendProps({
     this.maxWidth,
     this.useSafeArea = true,
-    this.blur = true,
+    this.blur = false,
     this.forceFull = false,
   });
 }
@@ -46,13 +48,13 @@ Future<T?> showSheet<T>({
   required SheetBuilder builder,
   SheetProps props = const SheetProps(),
 }) {
-  final isMobile = appController.isMobile;
+  final isMobile = globalState.appState.viewMode == ViewMode.mobile;
   return switch (isMobile) {
     true => showModalBottomSheet<T>(
       context: context,
       isScrollControlled: props.isScrollControlled,
       builder: (_) {
-        return builder(context, SheetType.bottomSheet);
+        return SafeArea(child: builder(context, SheetType.bottomSheet));
       },
       showDragHandle: false,
       useSafeArea: props.useSafeArea,
@@ -75,7 +77,7 @@ Future<T?> showExtend<T>(
   required SheetBuilder builder,
   ExtendProps props = const ExtendProps(),
 }) {
-  final isMobile = appController.isMobile;
+  final isMobile = globalState.appState.viewMode == ViewMode.mobile;
   return switch (isMobile || props.forceFull) {
     true => BaseNavigator.push(context, builder(context, SheetType.page)),
     false => showModalSideSheet<T>(
@@ -94,7 +96,6 @@ class AdaptiveSheetScaffold extends StatefulWidget {
   final SheetType type;
   final Widget body;
   final String title;
-  final bool? centerTitle;
   final List<Widget> actions;
 
   const AdaptiveSheetScaffold({
@@ -102,7 +103,6 @@ class AdaptiveSheetScaffold extends StatefulWidget {
     required this.type,
     required this.body,
     required this.title,
-    this.centerTitle,
     this.actions = const [],
   });
 
@@ -123,8 +123,7 @@ class _AdaptiveSheetScaffoldState extends State<AdaptiveSheetScaffold> {
           : widget.actions.isEmpty && sideSheet
           ? false
           : true,
-      centerTitle:
-          widget.centerTitle ?? (bottomSheet && widget.actions.isEmpty),
+      centerTitle: bottomSheet,
       backgroundColor: backgroundColor,
       title: Text(widget.title),
       actions: genActions([
@@ -134,27 +133,31 @@ class _AdaptiveSheetScaffoldState extends State<AdaptiveSheetScaffold> {
     );
     if (bottomSheet) {
       final handleSize = Size(32, 4);
-      return Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: EdgeInsets.only(top: 16),
-            child: Container(
-              alignment: Alignment.center,
-              height: handleSize.height,
-              width: handleSize.width,
-              decoration: ShapeDecoration(
-                color: context.colorScheme.onSurfaceVariant,
-                shape: RoundedSuperellipseBorder(
+      return Container(
+        clipBehavior: Clip.hardEdge,
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28.0)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: EdgeInsets.only(top: 16),
+              child: Container(
+                alignment: Alignment.center,
+                height: handleSize.height,
+                width: handleSize.width,
+                decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(handleSize.height / 2),
+                  color: context.colorScheme.onSurfaceVariant,
                 ),
               ),
             ),
-          ),
-          Padding(padding: EdgeInsets.symmetric(horizontal: 8), child: appBar),
-          Flexible(flex: 1, child: widget.body),
-          SizedBox(height: MediaQuery.of(context).viewPadding.bottom),
-        ],
+            appBar,
+            Flexible(flex: 1, child: widget.body),
+          ],
+        ),
       );
     }
     return CommonScaffold(

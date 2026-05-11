@@ -37,7 +37,7 @@ class ColorSchemeBox extends StatelessWidget {
                   ),
                   child: Container(
                     padding: const EdgeInsets.all(8),
-                    child: ClipRSuperellipse(
+                    child: ClipRRect(
                       borderRadius: BorderRadius.circular(36),
                       child: SizedBox(
                         width: 72,

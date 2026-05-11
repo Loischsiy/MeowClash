@@ -19,7 +19,6 @@ abstract class AppState with _$AppState {
     @Default([]) List<Package> packages,
     @Default(0) int sortNum,
     required Size viewSize,
-    @Default(0) double sideWidth,
     @Default({}) DelayMap delayMap,
     @Default([]) List<Group> groups,
     @Default(0) int checkIpNum,
@@ -35,7 +34,6 @@ abstract class AppState with _$AppState {
     @Default(false) bool realTunEnable,
     @Default(false) bool loading,
     required SystemUiOverlayStyle systemUiOverlayStyle,
-    @Default(CoreStatus.connecting) CoreStatus coreStatus,
   }) = _AppState;
 }
 

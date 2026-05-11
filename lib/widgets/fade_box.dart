@@ -4,30 +4,19 @@ import 'package:flutter/material.dart';
 
 class FadeBox extends StatelessWidget {
   final Widget child;
-  final AlignmentGeometry? alignment;
+  final Alignment? alignment;
 
   const FadeBox({super.key, required this.child, this.alignment});
 
   @override
   Widget build(BuildContext context) {
-    final realAlignment = alignment ?? Alignment.center;
-    return AnimatedSwitcher(
-      switchInCurve: Curves.easeOut,
-      switchOutCurve: Curves.easeIn,
-      layoutBuilder: (currentChild, previousChildren) => Align(
-        alignment: realAlignment,
-        child: Stack(
-          alignment: realAlignment,
-          children: <Widget>[
-            ...previousChildren,
-            if (currentChild != null) currentChild,
-          ],
-        ),
-      ),
-      transitionBuilder: (child, animation) {
-        return FadeTransition(opacity: animation, child: child);
+    return PageTransitionSwitcher(
+      transitionBuilder: (child, animation, secondaryAnimation) {
+        return Container(
+          alignment: alignment ?? Alignment.centerLeft,
+          child: FadeTransition(opacity: animation, child: child),
+        );
       },
-      duration: commonDuration,
       child: child,
     );
   }
@@ -35,7 +24,7 @@ class FadeBox extends StatelessWidget {
 
 class FadeThroughBox extends StatelessWidget {
   final Widget child;
-  final AlignmentGeometry? alignment;
+  final Alignment? alignment;
   final EdgeInsets? margin;
 
   const FadeThroughBox({
@@ -47,55 +36,19 @@ class FadeThroughBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final realAlignment = alignment ?? Alignment.centerLeft;
     return PageTransitionSwitcher(
       transitionBuilder: (child, animation, secondaryAnimation) {
-        return FadeThroughTransition(
-          animation: animation,
-          fillColor: Colors.transparent,
-          secondaryAnimation: secondaryAnimation,
-          child: child,
-        );
-      },
-      layoutBuilder: (entries) => Container(
-        alignment: realAlignment,
-        margin: margin,
-        child: Stack(alignment: realAlignment, children: entries),
-      ),
-      child: child,
-    );
-  }
-}
-
-class FadeRotationScaleBox extends StatelessWidget {
-  final Widget child;
-  final AlignmentGeometry? alignment;
-
-  const FadeRotationScaleBox({super.key, required this.child, this.alignment});
-
-  @override
-  Widget build(BuildContext context) {
-    final realAlignment = alignment ?? Alignment.center;
-    return AnimatedSwitcher(
-      duration: commonDuration,
-      switchInCurve: Curves.easeOutBack,
-      switchOutCurve: Curves.easeInBack,
-      transitionBuilder: (child, animation) {
-        return RotationTransition(
-          turns: animation.drive(Tween(begin: 0.8, end: 1.0)),
-          child: FadeTransition(
-            opacity: animation.drive(Tween(begin: 0.6, end: 1.0)),
-            child: ScaleTransition(scale: animation, child: child),
+        return Container(
+          margin: margin,
+          alignment: alignment ?? Alignment.centerLeft,
+          child: FadeThroughTransition(
+            animation: animation,
+            fillColor: Colors.transparent,
+            secondaryAnimation: secondaryAnimation,
+            child: child,
           ),
         );
       },
-      layoutBuilder: (currentChild, previousChildren) => Stack(
-        alignment: realAlignment,
-        children: <Widget>[
-          ...previousChildren,
-          if (currentChild != null) currentChild,
-        ],
-      ),
       child: child,
     );
   }
@@ -103,36 +56,19 @@ class FadeRotationScaleBox extends StatelessWidget {
 
 class FadeScaleBox extends StatelessWidget {
   final Widget child;
-  final AlignmentGeometry? alignment;
 
-  const FadeScaleBox({super.key, required this.child, this.alignment});
+  const FadeScaleBox({super.key, required this.child});
 
   @override
   Widget build(BuildContext context) {
-    final realAlignment = alignment ?? Alignment.center;
     return AnimatedSwitcher(
-      duration: commonDuration,
-      switchOutCurve: Curves.easeOutBack,
-      switchInCurve: Curves.easeInBack,
       transitionBuilder: (child, animation) {
-        return FadeTransition(
-          opacity: animation,
-          child: ScaleTransition(
-            scale: animation.drive(Tween(begin: 0.4, end: 1.0)),
-            child: child,
-          ),
+        return Container(
+          alignment: Alignment.bottomRight,
+          child: FadeScaleTransition(animation: animation, child: child),
         );
       },
-      layoutBuilder: (currentChild, previousChildren) => Align(
-        alignment: realAlignment,
-        child: Stack(
-          alignment: realAlignment,
-          children: <Widget>[
-            ...previousChildren,
-            if (currentChild != null) currentChild,
-          ],
-        ),
-      ),
+      duration: Duration(milliseconds: 300),
       child: child,
     );
   }

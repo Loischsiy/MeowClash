@@ -1,11 +1,9 @@
 import 'dart:async';
 
 import 'package:meow_clash/common/common.dart';
-import 'package:meow_clash/controller.dart';
 import 'package:meow_clash/providers/config.dart';
 import 'package:meow_clash/state.dart';
 import 'package:meow_clash/widgets/list.dart';
-import 'package:meow_clash/widgets/scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -13,24 +11,25 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class Contributor {
   final String avatar;
   final String name;
-  final String link;
 
-  const Contributor({
-    required this.avatar,
-    required this.name,
-    required this.link,
-  });
+  const Contributor({required this.avatar, required this.name});
 }
 
 class AboutView extends StatelessWidget {
   const AboutView({super.key});
 
   Future<void> _checkUpdate(BuildContext context) async {
-    final data = await appController.safeRun<Map<String, dynamic>?>(
+    final commonScaffoldState = context.commonScaffoldState;
+    if (commonScaffoldState?.mounted != true) return;
+    final data = await globalState.appController.safeRun<Map<String, dynamic>?>(
       request.checkForUpdate,
       title: appLocalizations.checkUpdate,
+      needLoading: true,
     );
-    appController.checkUpdateResultHandle(data: data, isUser: true);
+    globalState.appController.checkUpdateResultHandle(
+      data: data,
+      handleError: true,
+    );
   }
 
   List<Widget> _buildMoreSection(BuildContext context) {
@@ -45,25 +44,37 @@ class AboutView extends StatelessWidget {
           },
         ),
         ListItem(
-          title: const Text('Telegram'),
+          title: const Text('Github Releases'),
           onTap: () {
-            globalState.openUrl('https://t.me/FlClash');
+            globalState.openUrl('https://github.com/appshubcc/MeowClash');
+          },
+          trailing: const Icon(Icons.star),
+        ),
+        ListItem(
+          title: const Text('Telegram Group'),
+          onTap: () {
+            globalState.openUrl('https://t.me/appshub_chat');
           },
           trailing: const Icon(Icons.launch),
         ),
         ListItem(
-          title: Text(appLocalizations.project),
+          title: const Text('Telegram Channel'),
           onTap: () {
-            globalState.openUrl('https://github.com/$repository');
+            globalState.openUrl('https://t.me/appshub_channel');
           },
           trailing: const Icon(Icons.launch),
         ),
         ListItem(
-          title: Text(appLocalizations.core),
+          title: const Text('FlClash'),
           onTap: () {
-            globalState.openUrl(
-              'https://github.com/chen08209/Clash.Meta/tree/FlClash',
-            );
+            globalState.openUrl('https://github.com/chen08209/FlClash');
+          },
+          trailing: const Icon(Icons.launch),
+        ),
+        ListItem(
+          title: const Text('Mihomo'),
+          onTap: () {
+            globalState.openUrl('https://github.com/MetaCubeX/mihomo');
           },
           trailing: const Icon(Icons.launch),
         ),
@@ -73,16 +84,14 @@ class AboutView extends StatelessWidget {
 
   List<Widget> _buildContributorsSection() {
     const contributors = [
-      Contributor(
-        avatar: 'assets/images/avatar/june2.jpg',
-        name: 'June2',
-        link: 'https://t.me/Jibadong',
-      ),
-      Contributor(
-        avatar: 'assets/images/avatar/arue.jpg',
-        name: 'Arue',
-        link: 'https://t.me/xrcm6868',
-      ),
+      Contributor(avatar: 'assets/images/avatars/june2.jpg', name: 'June2'),
+      Contributor(avatar: 'assets/images/avatars/arue.jpg', name: 'Arue'),
+      Contributor(avatar: 'assets/images/avatars/dabaozi.jpg', name: '大包子'),
+      Contributor(avatar: 'assets/images/avatars/xiaolou.jpg', name: '小楼'),
+      Contributor(avatar: 'assets/images/avatars/www.jpg', name: 'Www'),
+      Contributor(avatar: 'assets/images/avatars/AIsouler.jpg', name: 'AIsouler'),
+      Contributor(avatar: 'assets/images/avatars/songchenwen.jpg', name: 'songchenwen'),
+      Contributor(avatar: 'assets/images/avatars/EriDeLee.jpg', name: 'EriDeLee'),
     ];
     return generateSection(
       separated: false,
@@ -134,7 +143,7 @@ class AboutView extends StatelessWidget {
                             style: Theme.of(context).textTheme.headlineSmall,
                           ),
                           Text(
-                            globalState.packageInfo.version,
+                            '${globalState.packageInfo.version}+${globalState.packageInfo.buildNumber}',
                             style: Theme.of(context).textTheme.labelLarge,
                           ),
                         ],
@@ -144,7 +153,9 @@ class AboutView extends StatelessWidget {
                   onEnterDeveloperMode: () {
                     ref
                         .read(appSettingProvider.notifier)
-                        .update((state) => state.copyWith(developerMode: true));
+                        .updateState(
+                          (state) => state.copyWith(developerMode: true),
+                        );
                     context.showNotifier(
                       appLocalizations.developerModeEnableTip,
                     );
@@ -164,12 +175,9 @@ class AboutView extends StatelessWidget {
       ..._buildContributorsSection(),
       ..._buildMoreSection(context),
     ];
-    return BaseScaffold(
-      title: appLocalizations.about,
-      body: Padding(
-        padding: kMaterialListPadding.copyWith(top: 16, bottom: 16),
-        child: generateListView(items),
-      ),
+    return Padding(
+      padding: kMaterialListPadding.copyWith(top: 16, bottom: 16),
+      child: generateListView(items),
     );
   }
 }
@@ -181,23 +189,16 @@ class Avatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      child: Column(
-        children: [
-          SizedBox(
-            width: 36,
-            height: 36,
-            child: CircleAvatar(
-              foregroundImage: AssetImage(contributor.avatar),
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(contributor.name, style: context.textTheme.bodySmall),
-        ],
-      ),
-      onTap: () {
-        globalState.openUrl(contributor.link);
-      },
+    return Column(
+      children: [
+        SizedBox(
+          width: 36,
+          height: 36,
+          child: CircleAvatar(foregroundImage: AssetImage(contributor.avatar)),
+        ),
+        const SizedBox(height: 4),
+        Text(contributor.name, style: context.textTheme.bodySmall),
+      ],
     );
   }
 }

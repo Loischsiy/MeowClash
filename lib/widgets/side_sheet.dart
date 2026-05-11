@@ -84,7 +84,7 @@ class _SideSheetState extends State<SideSheet> {
     final double elevation = widget.elevation ?? 0;
     final ShapeBorder shape =
         widget.shape ??
-        RoundedSuperellipseBorder(borderRadius: BorderRadius.circular(0));
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(0));
 
     final BoxConstraints constraints =
         widget.constraints ??

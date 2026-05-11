@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:ffi/ffi.dart';
 import 'package:meow_clash/common/common.dart';
+import 'package:meow_clash/common/helper_auth.dart';
 import 'package:meow_clash/enum/enum.dart';
 import 'package:meow_clash/plugins/app.dart';
 import 'package:meow_clash/state.dart';
@@ -46,54 +47,44 @@ class System {
     if (system.isWindows) {
       final result = await windows?.checkService();
       return result == WindowsHelperServiceStatus.running;
-    } else if (system.isMacOS) {
+    }
+
+    if (system.isMacOS) {
       final result = await Process.run('stat', ['-f', '%Su:%Sg %Sp', corePath]);
       final output = result.stdout.trim();
-      if (output.startsWith('root:admin') && output.contains('rws')) {
-        return true;
-      }
-      return false;
-    } else if (Platform.isLinux) {
+      return output.startsWith('root:admin') && output.contains('rws');
+    }
+
+    if (Platform.isLinux) {
       final result = await Process.run('stat', ['-c', '%U:%G %A', corePath]);
       final output = result.stdout.trim();
-      if (output.startsWith('root:') && output.contains('rws')) {
-        return true;
-      }
-      return false;
+      return output.startsWith('root:') && output.contains('rws');
     }
+
     return true;
   }
 
   Future<AuthorizeCode> authorizeCore() async {
-    if (system.isAndroid) {
-      return AuthorizeCode.error;
-    }
+    if (system.isAndroid) return AuthorizeCode.error;
+
     final corePath = appPath.corePath.replaceAll(' ', '\\\\ ');
-    final isAdmin = await checkIsAdmin();
-    if (isAdmin) {
-      return AuthorizeCode.none;
-    }
+    if (await checkIsAdmin()) return AuthorizeCode.none;
 
     if (system.isWindows) {
       final result = await windows?.registerService();
-      if (result == true) {
-        return AuthorizeCode.success;
-      }
-      return AuthorizeCode.error;
+      return result == true ? AuthorizeCode.success : AuthorizeCode.error;
     }
 
     if (system.isMacOS) {
       final shell = 'chown root:admin $corePath; chmod +sx $corePath';
-      final arguments = [
+      final result = await Process.run('osascript', [
         '-e',
         'do shell script "$shell" with administrator privileges',
-      ];
-      final result = await Process.run('osascript', arguments);
-      if (result.exitCode != 0) {
-        return AuthorizeCode.error;
-      }
-      return AuthorizeCode.success;
-    } else if (Platform.isLinux) {
+      ]);
+      return result.exitCode == 0 ? AuthorizeCode.success : AuthorizeCode.error;
+    }
+
+    if (Platform.isLinux) {
       final shell = Platform.environment['SHELL'] ?? 'bash';
       final password = await globalState.showCommonDialog<String>(
         child: InputDialog(
@@ -102,28 +93,23 @@ class System {
           value: '',
         ),
       );
-      final arguments = [
+      final result = await Process.run(shell, [
         '-c',
         'echo "$password" | sudo -S chown root:root "$corePath" && echo "$password" | sudo -S chmod +sx "$corePath"',
-      ];
-      final result = await Process.run(shell, arguments);
-      if (result.exitCode != 0) {
-        return AuthorizeCode.error;
-      }
-      return AuthorizeCode.success;
+      ]);
+      return result.exitCode == 0 ? AuthorizeCode.success : AuthorizeCode.error;
     }
+
     return AuthorizeCode.error;
   }
 
   Future<void> back() async {
-    await app?.moveTaskToBack();
+    if (system.isAndroid) await app.moveTaskToBack();
     await window?.hide();
   }
 
   Future<void> exit() async {
-    if (system.isAndroid) {
-      await SystemNavigator.pop();
-    }
+    if (system.isAndroid) await SystemNavigator.pop();
     await window?.close();
   }
 }
@@ -143,7 +129,7 @@ class Windows {
     return _instance!;
   }
 
-  bool runas(String command, String arguments) {
+  bool runas(String command, String arguments, {bool showWindow = false}) {
     final commandPtr = command.toNativeUtf16();
     final argumentsPtr = arguments.toNativeUtf16();
     final operationPtr = 'runas'.toNativeUtf16();
@@ -168,81 +154,85 @@ class Windows {
           )
         >('ShellExecuteW');
 
+    // 0 = hide, 1 = show
     final result = shellExecute(
       nullptr,
       operationPtr,
       commandPtr,
       argumentsPtr,
       nullptr,
-      1,
+      showWindow ? 1 : 0,
     );
 
     calloc.free(commandPtr);
     calloc.free(argumentsPtr);
     calloc.free(operationPtr);
 
-    commonPrint.log(
-      'windows runas: $command $arguments resultCode:$result',
-      logLevel: LogLevel.warning,
-    );
+    commonPrint.log('windows runas: [command masked] resultCode:$result');
 
-    if (result <= 32) {
-      return false;
-    }
-    return true;
+    return result > 32;
   }
 
-  // Future<void> _killProcess(int port) async {
-  //   final result = await Process.run('netstat', ['-ano']);
-  //   final lines = result.stdout.toString().trim().split('\n');
-  //   for (final line in lines) {
-  //     if (!line.contains(':$port') || !line.contains('LISTENING')) {
-  //       continue;
-  //     }
-  //     final parts = line.trim().split(RegExp(r'\s+'));
-  //     final pid = int.tryParse(parts.last);
-  //     if (pid != null) {
-  //      await Process.run('taskkill', ['/PID', pid.toString(), '/F']);
-  //     }
-  //   }
-  // }
+  Future<void> _killProcess(int port) async {
+    final result = await Process.run('netstat', ['-ano']);
+    final lines = result.stdout.toString().trim().split('\n');
+    for (final line in lines) {
+      if (!line.contains(':$port') || !line.contains('LISTENING')) continue;
+      final parts = line.trim().split(RegExp(r'\s+'));
+      final pid = int.tryParse(parts.last);
+      if (pid != null) {
+        await Process.run('taskkill', ['/PID', pid.toString(), '/F']);
+      }
+    }
+  }
 
   Future<WindowsHelperServiceStatus> checkService() async {
-    // final qcResult = await Process.run('sc', ['qc', appHelperService]);
-    // final qcOutput = qcResult.stdout.toString();
-    // if (qcResult.exitCode != 0 || !qcOutput.contains(appPath.helperPath)) {
-    //   return WindowsHelperServiceStatus.none;
-    // }
     final result = await Process.run('sc', ['query', appHelperService]);
-    if (result.exitCode != 0) {
-      return WindowsHelperServiceStatus.none;
-    }
+    if (result.exitCode != 0) return WindowsHelperServiceStatus.none;
+
     final output = result.stdout.toString();
-    if (output.contains('RUNNING') && await request.pingHelper()) {
-      return WindowsHelperServiceStatus.running;
-    }
-    return WindowsHelperServiceStatus.presence;
+    if (!output.contains('RUNNING')) return WindowsHelperServiceStatus.presence;
+
+    final isReachable = await request.quickPingHelper();
+    return isReachable
+        ? WindowsHelperServiceStatus.running
+        : WindowsHelperServiceStatus.presence;
   }
 
   Future<bool> registerService() async {
-    final status = await checkService();
+    final createdNewKey = await HelperAuthManager.ensureAuthKey();
+    final authKey = HelperAuthManager.getAuthKey();
 
+    final quickCheck = await Process.run('sc', ['query', appHelperService]);
+    if (quickCheck.exitCode == 0 &&
+        quickCheck.stdout.toString().contains('RUNNING')) {
+      final isReachable = await request.quickPingHelper();
+      if (isReachable) {
+        if (createdNewKey && authKey != null) {
+          await _restartServiceWithAuthKey(authKey);
+        }
+        return true;
+      }
+    }
+
+    final status = await checkService();
     if (status == WindowsHelperServiceStatus.running) {
+      if (createdNewKey && authKey != null) {
+        await _restartServiceWithAuthKey(authKey);
+      }
       return true;
     }
+
+    await _killProcess(helperPort);
 
     final command = [
       '/c',
       if (status == WindowsHelperServiceStatus.presence) ...[
-        'taskkill',
-        '/F',
-        '/IM',
-        '$appHelperService.exe'
-            ' & '
-            'sc',
+        'sc',
         'delete',
         appHelperService,
-        '&',
+        '/force',
+        '&&',
       ],
       'sc',
       'create',
@@ -250,6 +240,13 @@ class Windows {
       'binPath= "${appPath.helperPath}"',
       'start= auto',
       '&&',
+      if (authKey != null) ...[
+        'sc',
+        'config',
+        appHelperService,
+        'Environment= HELPER_AUTH_KEY=$authKey',
+        '&&',
+      ],
       'sc',
       'start',
       appHelperService,
@@ -257,21 +254,52 @@ class Windows {
 
     final res = runas('cmd.exe', command);
 
-    await Future.delayed(Duration(milliseconds: 300));
-    final retryStatus = await retry(
-      task: checkService,
-      maxAttempts: 5,
-      retryIf: (status) => status != WindowsHelperServiceStatus.running,
-      delay: Duration(seconds: 1),
-    );
-    return res && retryStatus == WindowsHelperServiceStatus.running;
+    for (int i = 0; i < 10; i++) {
+      await Future.delayed(const Duration(milliseconds: 200));
+      if (await request.quickPingHelper()) return true;
+      if (i > 0 && i % 4 == 0) {
+        final check = await Process.run('sc', ['query', appHelperService]);
+        final out = check.stdout.toString();
+        if (out.contains('STOPPED') || out.contains('FAILED')) {
+          commonPrint.log('Helper service stopped/failed, skipping wait');
+          break;
+        }
+      }
+    }
+
+    return res;
   }
 
-  Future<bool> registerTask(String appName) async {
-    final taskXml =
-        '''
+  Future<void> _restartServiceWithAuthKey(String authKey) async {
+    try {
+      await Process.run('sc', ['stop', appHelperService]);
+      await Future.delayed(Duration(milliseconds: 500));
+      await Process.run('sc', [
+        'config',
+        appHelperService,
+        'Environment= HELPER_AUTH_KEY=$authKey',
+      ]);
+      await Process.run('sc', ['start', appHelperService]);
+      await Future.delayed(Duration(milliseconds: 500));
+    } catch (e) {
+      commonPrint.log('Failed to restart service with auth key: $e');
+    }
+  }
+
+  Future<bool> registerTask(
+    String appName, {
+    bool requireNetwork = true,
+  }) async {
+    final executablePath = Platform.resolvedExecutable;
+    final workingDirectory = dirname(executablePath);
+
+    final taskXml = '''
 <?xml version="1.0" encoding="UTF-16"?>
 <Task version="1.3" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
+  <RegistrationInfo>
+    <Description>开机自动启动代理服务</Description>
+    <URI>\\$appName</URI>
+  </RegistrationInfo>
   <Principals>
     <Principal id="Author">
       <LogonType>InteractiveToken</LogonType>
@@ -279,15 +307,17 @@ class Windows {
     </Principal>
   </Principals>
   <Triggers>
-    <LogonTrigger/>
+    <LogonTrigger>
+      <Enabled>true</Enabled>
+    </LogonTrigger>
   </Triggers>
   <Settings>
-    <MultipleInstancesPolicy>Parallel</MultipleInstancesPolicy>
+    <MultipleInstancesPolicy>IgnoreNew</MultipleInstancesPolicy>
     <DisallowStartIfOnBatteries>false</DisallowStartIfOnBatteries>
     <StopIfGoingOnBatteries>false</StopIfGoingOnBatteries>
     <AllowHardTerminate>false</AllowHardTerminate>
-    <StartWhenAvailable>false</StartWhenAvailable>
-    <RunOnlyIfNetworkAvailable>false</RunOnlyIfNetworkAvailable>
+    <StartWhenAvailable>true</StartWhenAvailable>
+    <RunOnlyIfNetworkAvailable>$requireNetwork</RunOnlyIfNetworkAvailable>
     <IdleSettings>
       <StopOnIdleEnd>false</StopOnIdleEnd>
       <RestartOnIdle>false</RestartOnIdle>
@@ -297,12 +327,13 @@ class Windows {
     <Hidden>false</Hidden>
     <RunOnlyIfIdle>false</RunOnlyIfIdle>
     <WakeToRun>false</WakeToRun>
-    <ExecutionTimeLimit>PT72H</ExecutionTimeLimit>
-    <Priority>7</Priority>
+    <ExecutionTimeLimit>PT0S</ExecutionTimeLimit>
+    <Priority>6</Priority>
   </Settings>
   <Actions Context="Author">
     <Exec>
-      <Command>"${Platform.resolvedExecutable}"</Command>
+      <Command>"$executablePath"</Command>
+      <WorkingDirectory>$workingDirectory</WorkingDirectory>
     </Exec>
   </Actions>
 </Task>''';
@@ -320,6 +351,11 @@ class Windows {
       '/F',
     ].join(' ');
     return runas('schtasks', commandLine.replaceFirst('%s', taskPath));
+  }
+
+  Future<bool> unregisterTask(String appName) async {
+    final commandLine = ['/Delete', '/TN', appName, '/F'].join(' ');
+    return runas('schtasks', commandLine);
   }
 }
 
@@ -343,76 +379,61 @@ class MacOS {
     final deviceLine = output
         .split('\n')
         .firstWhere((s) => s.contains('interface:'), orElse: () => '');
-    final lineSplits = deviceLine.trim().split(' ');
-    if (lineSplits.length != 2) {
-      return null;
-    }
-    final device = lineSplits[1];
+    final parts = deviceLine.trim().split(' ');
+    if (parts.length != 2) return null;
+
+    final device = parts[1];
     final serviceResult = await Process.run('networksetup', [
       '-listnetworkserviceorder',
     ]);
-    final serviceResultOutput = serviceResult.stdout.toString();
-    final currentService = serviceResultOutput
+    final serviceOutput = serviceResult.stdout.toString();
+    final currentService = serviceOutput
         .split('\n\n')
         .firstWhere((s) => s.contains('Device: $device'), orElse: () => '');
-    if (currentService.isEmpty) {
-      return null;
-    }
-    final currentServiceNameLine = currentService
+    if (currentService.isEmpty) return null;
+
+    final serviceNameLine = currentService
         .split('\n')
         .firstWhere(
           (line) => RegExp(r'^\(\d+\).*').hasMatch(line),
           orElse: () => '',
         );
-    final currentServiceNameLineSplits = currentServiceNameLine.trim().split(
-      ' ',
-    );
-    if (currentServiceNameLineSplits.length < 2) {
-      return null;
-    }
-    return currentServiceNameLineSplits[1];
+    final nameParts = serviceNameLine.trim().split(' ');
+    if (nameParts.length < 2) return null;
+    return nameParts[1];
   }
 
   Future<List<String>?> get systemDns async {
     final deviceServiceName = await defaultServiceName;
-    if (deviceServiceName == null) {
-      return null;
-    }
+    if (deviceServiceName == null) return null;
+
     final result = await Process.run('networksetup', [
       '-getdnsservers',
       deviceServiceName,
     ]);
     final output = result.stdout.toString().trim();
-    if (output.startsWith("There aren't any DNS Servers set on")) {
-      originDns = [];
-    } else {
-      originDns = output.split('\n');
-    }
+    originDns = output.startsWith("There aren't any DNS Servers set on")
+        ? []
+        : output.split('\n');
     return originDns;
   }
 
   Future<void> updateDns(bool restore) async {
     final serviceName = await defaultServiceName;
-    if (serviceName == null) {
-      return;
-    }
+    if (serviceName == null) return;
+
     List<String>? nextDns;
     if (restore) {
       nextDns = originDns;
     } else {
-      final originDns = await systemDns;
-      if (originDns == null) {
-        return;
-      }
-      final needAddDns = '223.5.5.5';
-      if (originDns.contains(needAddDns)) {
-        return;
-      }
-      nextDns = List.from(originDns)..add(needAddDns);
+      final currentDns = await systemDns;
+      if (currentDns == null) return;
+      const needAddDns = '223.5.5.5';
+      if (currentDns.contains(needAddDns)) return;
+      nextDns = List.from(currentDns)..add(needAddDns);
     }
-    if (nextDns == null) {
-      return;
-    }
+    if (nextDns == null) return;
+
     await Process.run('networksetup', [
       '-setdnsservers',
       serviceName,

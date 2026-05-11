@@ -1,3 +1,5 @@
+// ignore_for_file: invalid_annotation_target
+
 import 'package:meow_clash/common/common.dart';
 import 'package:meow_clash/enum/enum.dart';
 import 'package:flutter/material.dart';
@@ -9,10 +11,9 @@ part 'generated/config.freezed.dart';
 part 'generated/config.g.dart';
 
 const defaultBypassDomain = [
+  '*jd.com',
   '*zhihu.com',
   '*zhimg.com',
-  '*jd.com',
-  '100ime-iat-api.xfyun.cn',
   '*360buyimg.com',
   'localhost',
   '*.local',
@@ -31,9 +32,9 @@ const defaultBypassDomain = [
 const defaultAppSettingProps = AppSettingProps();
 const defaultVpnProps = VpnProps();
 const defaultNetworkProps = NetworkProps();
-const defaultProxiesStyleProps = ProxiesStyleProps();
+const defaultProxiesStyle = ProxiesStyle();
 const defaultWindowProps = WindowProps();
-const defaultAccessControlProps = AccessControlProps();
+const defaultAccessControl = AccessControl();
 final defaultThemeProps = ThemeProps(primaryColor: defaultPrimaryColor);
 
 const List<DashboardWidget> defaultDashboardWidgets = [
@@ -44,6 +45,8 @@ const List<DashboardWidget> defaultDashboardWidgets = [
   DashboardWidget.networkDetection,
   DashboardWidget.trafficUsage,
   DashboardWidget.intranetIp,
+  DashboardWidget.memoryInfo,
+  DashboardWidget.startButton,
 ];
 
 List<DashboardWidget> dashboardWidgetsSafeFormJson(
@@ -69,36 +72,41 @@ abstract class AppSettingProps with _$AppSettingProps {
     @Default(false) bool onlyStatisticsProxy,
     @Default(false) bool autoLaunch,
     @Default(false) bool silentLaunch,
+    @Default(true) bool smartDelayLaunch,
     @Default(false) bool autoRun,
-    @Default(false) bool openLogs,
+    @Default(true) bool openLogs,
     @Default(true) bool closeConnections,
     @Default(defaultTestUrl) String testUrl,
     @Default(true) bool isAnimateToPage,
+    @Default(false) bool enableNavBarHapticFeedback,
     @Default(true) bool autoCheckUpdate,
     @Default(false) bool showLabel,
     @Default(false) bool disclaimerAccepted,
-    @Default(false) bool crashlyticsTip,
-    @Default(false) bool crashlytics,
     @Default(true) bool minimizeOnExit,
     @Default(false) bool hidden,
     @Default(false) bool developerMode,
-    @Default(RestoreStrategy.compatible) RestoreStrategy restoreStrategy,
-    @Default(true) bool showTrayTitle,
+    @Default(false) bool enableHighRefreshRate,
+    @Default(RecoveryStrategy.compatible) RecoveryStrategy recoveryStrategy,
   }) = _AppSettingProps;
 
   factory AppSettingProps.fromJson(Map<String, Object?> json) =>
       _$AppSettingPropsFromJson(json);
 
   factory AppSettingProps.safeFromJson(Map<String, Object?>? json) {
-    return json == null
+    final props = json == null
         ? defaultAppSettingProps
         : AppSettingProps.fromJson(json);
+
+    return props.copyWith(
+      minimizeOnExit: true,
+      openLogs: true,
+    );
   }
 }
 
 @freezed
-abstract class AccessControlProps with _$AccessControlProps {
-  const factory AccessControlProps({
+abstract class AccessControl with _$AccessControl {
+  const factory AccessControl({
     @Default(false) bool enable,
     @Default(AccessControlMode.rejectSelected) AccessControlMode mode,
     @Default([]) List<String> acceptList,
@@ -106,66 +114,82 @@ abstract class AccessControlProps with _$AccessControlProps {
     @Default(AccessSortType.none) AccessSortType sort,
     @Default(true) bool isFilterSystemApp,
     @Default(true) bool isFilterNonInternetApp,
-  }) = _AccessControlProps;
+  }) = _AccessControl;
 
-  factory AccessControlProps.fromJson(Map<String, Object?> json) =>
-      _$AccessControlPropsFromJson(json);
+  factory AccessControl.fromJson(Map<String, Object?> json) =>
+      _$AccessControlFromJson(json);
 }
 
-extension AccessControlPropsExt on AccessControlProps {
+extension AccessControlExt on AccessControl {
   List<String> get currentList => switch (mode) {
     AccessControlMode.acceptSelected => acceptList,
     AccessControlMode.rejectSelected => rejectList,
-  };
-
-  AccessControlProps copyWithNewList(List<String> value) => switch (mode) {
-    AccessControlMode.acceptSelected => copyWith(acceptList: value),
-    AccessControlMode.rejectSelected => copyWith(rejectList: value),
   };
 }
 
 @freezed
 abstract class WindowProps with _$WindowProps {
   const factory WindowProps({
-    @Default(0) double width,
-    @Default(0) double height,
+    @Default(750) double width,
+    @Default(600) double height,
     double? top,
     double? left,
+    @Default(false) bool isLocked,
   }) = _WindowProps;
 
   factory WindowProps.fromJson(Map<String, Object?>? json) =>
       json == null ? const WindowProps() : _$WindowPropsFromJson(json);
 }
 
-extension WindowPropsExt on WindowProps {
-  Size get _size => Size(width, height);
-
-  Size get size => _size.isEmpty ? Size(680, 580) : _size;
-}
-
 @freezed
 abstract class VpnProps with _$VpnProps {
   const factory VpnProps({
     @Default(true) bool enable,
-    @Default(true) bool systemProxy,
-    @Default(false) bool ipv6,
-    @Default(true) bool allowBypass,
-    @Default(false) bool dnsHijacking,
-    @Default(defaultAccessControlProps) AccessControlProps accessControlProps,
+    @Default(false) bool systemProxy,
+    @Default(false) bool allowBypass,
+    @Default(true) bool bypassPrivateRoute,
+    @Default(true) bool dozeSuspend,
+    @Default(false) bool smartAutoStop,
+    @Default('') String smartAutoStopNetworks,
+    @Default(false) bool storeFix,
+    @Default(false) bool networkFix,
+    @Default(false) bool disableQuic,
+    @Default(false) bool excludeChina,
+    @Default(false) bool fcmOptimization,
+    @Default(false) bool quickResponse,
+    @Default(defaultAccessControl) AccessControl accessControl,
   }) = _VpnProps;
 
-  factory VpnProps.fromJson(Map<String, Object?>? json) =>
-      json == null ? defaultVpnProps : _$VpnPropsFromJson(json);
+  factory VpnProps.fromJson(Map<String, Object?> json) =>
+      _$VpnPropsFromJson(json);
+
+  factory VpnProps.safeFromJson(Map<String, Object?>? json) {
+    final props = json == null ? defaultVpnProps : VpnProps.fromJson(json);
+    var safeProps = props;
+
+    if (system.isAndroid) {
+      safeProps = safeProps.copyWith(systemProxy: false);
+    }
+
+    if (safeProps.fcmOptimization && system.isAndroid) {
+      safeProps = safeProps.copyWith(allowBypass: false);
+    }
+
+    if (safeProps.smartAutoStop && safeProps.quickResponse) {
+      safeProps = safeProps.copyWith(quickResponse: false);
+    }
+
+    return safeProps;
+  }
 }
 
 @freezed
 abstract class NetworkProps with _$NetworkProps {
   const factory NetworkProps({
-    @Default(true) bool systemProxy,
+    @Default(false) bool systemProxy,
     @Default(defaultBypassDomain) List<String> bypassDomain,
-    @Default(RouteMode.config) RouteMode routeMode,
+    @Default(true) bool bypassPrivateRoute,
     @Default(true) bool autoSetSystemDns,
-    @Default(false) bool appendSystemDns,
   }) = _NetworkProps;
 
   factory NetworkProps.fromJson(Map<String, Object?>? json) =>
@@ -173,18 +197,20 @@ abstract class NetworkProps with _$NetworkProps {
 }
 
 @freezed
-abstract class ProxiesStyleProps with _$ProxiesStyleProps {
-  const factory ProxiesStyleProps({
+abstract class ProxiesStyle with _$ProxiesStyle {
+  const factory ProxiesStyle({
     @Default(ProxiesType.tab) ProxiesType type,
     @Default(ProxiesSortType.none) ProxiesSortType sortType,
     @Default(ProxiesLayout.standard) ProxiesLayout layout,
-    @Default(ProxiesIconStyle.standard) ProxiesIconStyle iconStyle,
-    @Default(ProxyCardType.expand) ProxyCardType cardType,
-  }) = _ProxiesStyleProps;
+    @Default(ProxiesIconStyle.none) ProxiesIconStyle iconStyle,
+    @Default(ProxyCardType.shrink) ProxyCardType cardType,
+    @Default(DelayAnimationType.none) DelayAnimationType delayAnimation,
+    @Default({}) Map<String, String> iconMap,
+    @Default(16) int concurrencyLimit,
+  }) = _ProxiesStyle;
 
-  factory ProxiesStyleProps.fromJson(Map<String, Object?>? json) => json == null
-      ? defaultProxiesStyleProps
-      : _$ProxiesStylePropsFromJson(json);
+  factory ProxiesStyle.fromJson(Map<String, Object?>? json) =>
+      json == null ? defaultProxiesStyle : _$ProxiesStyleFromJson(json);
 }
 
 @freezed
@@ -203,10 +229,12 @@ abstract class ThemeProps with _$ThemeProps {
   const factory ThemeProps({
     int? primaryColor,
     @Default(defaultPrimaryColors) List<int> primaryColors,
-    @Default(ThemeMode.dark) ThemeMode themeMode,
+    @Default(ThemeMode.system) ThemeMode themeMode,
     @Default(DynamicSchemeVariant.content) DynamicSchemeVariant schemeVariant,
     @Default(false) bool pureBlack,
     @Default(TextScale()) TextScale textScale,
+    @Default(false) bool useLightIcon,
+    @Default(false) bool useHarmonyFont,
   }) = _ThemeProps;
 
   factory ThemeProps.fromJson(Map<String, Object?> json) =>
@@ -225,29 +253,106 @@ abstract class ThemeProps with _$ThemeProps {
 }
 
 @freezed
+abstract class ScriptProps with _$ScriptProps {
+  const factory ScriptProps({
+    String? currentId,
+    @Default([]) List<Script> scripts,
+  }) = _ScriptProps;
+
+  factory ScriptProps.fromJson(Map<String, Object?> json) =>
+      _$ScriptPropsFromJson(json);
+}
+
+extension ScriptPropsExt on ScriptProps {
+  String? get realId {
+    final index = scripts.indexWhere((script) => script.id == currentId);
+    if (index != -1) {
+      return currentId;
+    }
+    return null;
+  }
+
+  Script? get currentScript {
+    final index = scripts.indexWhere((script) => script.id == currentId);
+    if (index != -1) {
+      return scripts[index];
+    }
+    return null;
+  }
+}
+
+@freezed
 abstract class Config with _$Config {
   const factory Config({
-    int? currentProfileId,
-    @Default(false) bool overrideDns,
-    @Default([]) List<HotKeyAction> hotKeyActions,
     @JsonKey(fromJson: AppSettingProps.safeFromJson)
     @Default(defaultAppSettingProps)
-    AppSettingProps appSettingProps,
-    DAVProps? davProps,
+    AppSettingProps appSetting,
+    @Default([]) List<Profile> profiles,
+    @Default([]) List<HotKeyAction> hotKeyActions,
+    String? currentProfileId,
+    @Default(false) bool overrideDns,
+    @Default(false) bool overrideNtp,
+    @Default(false) bool overrideSniffer,
+    @Default(false) bool overrideTunnel,
+    @Default(false) bool overrideExperimental,
+    @Default(true) bool overrideTestUrl,
+    DAV? dav,
     @Default(defaultNetworkProps) NetworkProps networkProps,
-    @Default(defaultVpnProps) VpnProps vpnProps,
+    @JsonKey(fromJson: VpnProps.safeFromJson)
+    @Default(defaultVpnProps)
+    VpnProps vpnProps,
     @JsonKey(fromJson: ThemeProps.safeFromJson) required ThemeProps themeProps,
-    @Default(defaultProxiesStyleProps) ProxiesStyleProps proxiesStyleProps,
+    @Default(defaultProxiesStyle) ProxiesStyle proxiesStyle,
     @Default(defaultWindowProps) WindowProps windowProps,
     @Default(defaultClashConfig) ClashConfig patchClashConfig,
+    @Default(ScriptProps()) ScriptProps scriptProps,
+    @Default('') String nodeExcludeFilter,
+    @Default(5000) int healthCheckTimeout,
   }) = _Config;
 
   factory Config.fromJson(Map<String, Object?> json) => _$ConfigFromJson(json);
 
-  factory Config.realFromJson(Map<String, Object?>? json) {
-    if (json == null) {
-      return Config(themeProps: defaultThemeProps);
-    }
-    return _$ConfigFromJson(json);
+  factory Config.compatibleFromJson(Map<String, Object?> json) {
+    try {
+      final accessControlMap = json['accessControl'];
+      final isAccessControl = json['isAccessControl'];
+      if (accessControlMap != null) {
+        (accessControlMap as Map)['enable'] = isAccessControl;
+        if (json['vpnProps'] != null) {
+          (json['vpnProps'] as Map)['accessControl'] = accessControlMap;
+        }
+      }
+    } catch (_) {}
+
+    // 兼容 FlClash：currentProfileId 可能是 int 类型，需要转换为 String
+    try {
+      final currentProfileId = json['currentProfileId'];
+      if (currentProfileId != null && currentProfileId is int) {
+        json['currentProfileId'] = currentProfileId.toString();
+      }
+    } catch (_) {}
+
+    // 兼容 FlClash：profiles 中的 id 可能是 int 类型，需要转换为 String
+    try {
+      final profiles = json['profiles'];
+      if (profiles != null && profiles is List) {
+        for (final profile in profiles) {
+          if (profile is Map) {
+            final id = profile['id'];
+            if (id != null && id is int) {
+              profile['id'] = id.toString();
+            }
+          }
+        }
+      }
+    } catch (_) {}
+
+    return Config.fromJson(json);
+  }
+}
+
+extension ConfigExt on Config {
+  Profile? get currentProfile {
+    return profiles.getProfile(currentProfileId);
   }
 }

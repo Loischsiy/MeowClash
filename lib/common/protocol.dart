@@ -14,10 +14,7 @@ class Protocol {
 
   void register(String scheme) {
     String protocolRegKey = 'Software\\Classes\\$scheme';
-    RegistryValue protocolRegValue = RegistryValue.string(
-      'URL Protocol',
-      '',
-    );
+    RegistryValue protocolRegValue = RegistryValue.string('URL Protocol', '');
     String protocolCmdRegKey = 'shell\\open\\command';
     RegistryValue protocolCmdRegValue = RegistryValue.string(
       '',

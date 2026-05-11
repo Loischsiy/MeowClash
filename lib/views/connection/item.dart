@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:meow_clash/common/common.dart';
 import 'package:meow_clash/enum/enum.dart';
 import 'package:meow_clash/models/models.dart';
@@ -7,6 +9,29 @@ import 'package:meow_clash/state.dart';
 import 'package:meow_clash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+final _iconCache = <String, Uint8List?>{};
+final _iconCacheKeys = <String>[];
+const _maxIconCacheSize = 50;
+Uint8List? _defaultIconCache;
+Future<Uint8List?>? _defaultIconFuture;
+
+void _addToIconCache(String key, Uint8List? value) {
+  if (_iconCache.containsKey(key)) {
+    _iconCacheKeys.remove(key);
+    _iconCacheKeys.add(key);
+    _iconCache[key] = value;
+    return;
+  }
+
+  while (_iconCacheKeys.length >= _maxIconCacheSize) {
+    final oldestKey = _iconCacheKeys.removeAt(0);
+    _iconCache.remove(oldestKey);
+  }
+
+  _iconCacheKeys.add(key);
+  _iconCache[key] = value;
+}
 
 class TrackerInfoItem extends ConsumerWidget {
   final TrackerInfo trackerInfo;
@@ -26,8 +51,14 @@ class TrackerInfoItem extends ConsumerWidget {
     return globalState.measure.bodySmallHeight + 20;
   }
 
-  Future<ImageProvider?> _getPackageIcon(TrackerInfo connection) async {
-    return await app?.getPackageIcon(connection.metadata.process);
+  static double get height {
+    final measure = globalState.measure;
+    return measure.bodyMediumHeight +
+        8 +
+        8 +
+        measure.bodyLargeHeight +
+        subTitleHeight +
+        16 * 2;
   }
 
   String _getSourceText(TrackerInfo trackerInfo) {
@@ -35,7 +66,7 @@ class TrackerInfoItem extends ConsumerWidget {
         ? '${trackerInfo.progressText} · '
         : '';
     final traffic = Traffic(up: trackerInfo.upload, down: trackerInfo.download);
-    return '${trackerInfo.start.lastUpdateTimeDesc} · $progress${traffic.desc}';
+    return '$progress${traffic.toString()}';
   }
 
   @override
@@ -49,23 +80,27 @@ class TrackerInfoItem extends ConsumerWidget {
     final title = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(trackerInfo.desc, style: context.textTheme.bodyLarge),
-        // Row(
-        //   mainAxisSize: MainAxisSize.max,
-        //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        //   spacing: 8,
-        //   children: [
-        //     Flexible(
-        //       child: Text(trackerInfo.desc, style: context.textTheme.bodyLarge),
-        //     ),
-        //     Text(
-        //       trackerInfo.start.lastUpdateTimeDesc,
-        //       style: context.textTheme.bodySmall?.copyWith(
-        //         color: context.colorScheme.onSurface.opacity60,
-        //       ),
-        //     ),
-        //   ],
-        // ),
+        Row(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          spacing: 8,
+          children: [
+            Flexible(
+              child: Text(
+                trackerInfo.desc,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: context.textTheme.bodyLarge,
+              ),
+            ),
+            Text(
+              trackerInfo.start.lastUpdateTimeDesc,
+              style: context.textTheme.bodySmall?.copyWith(
+                color: context.colorScheme.onSurface.opacity60,
+              ),
+            ),
+          ],
+        ),
         const SizedBox(height: 6),
         Text(
           _getSourceText(trackerInfo),
@@ -105,43 +140,20 @@ class TrackerInfoItem extends ConsumerWidget {
               },
             ),
           ),
-          if (trailing != null) trailing!,
+          ?trailing,
         ],
       ),
     );
     final icon = value
-        ? GestureDetector(
-            onTap: () {
-              if (onClickKeyword == null) return;
-              final process = trackerInfo.metadata.process;
-              if (process.isEmpty) return;
-              onClickKeyword!(process);
-            },
-            child: Container(
-              margin: const EdgeInsets.only(top: 4),
-              width: 42,
-              height: 42,
-              child: FutureBuilder<ImageProvider?>(
-                future: _getPackageIcon(trackerInfo),
-                builder: (_, snapshot) {
-                  if (!snapshot.hasData && snapshot.data == null) {
-                    return Container();
-                  } else {
-                    return Image(
-                      image: snapshot.data!,
-                      gaplessPlayback: true,
-                      width: 42,
-                      height: 42,
-                    );
-                  }
-                },
-              ),
-            ),
+        ? _ProcessIcon(
+            process: trackerInfo.metadata.process,
+            onClick: onClickKeyword,
           )
         : null;
-    return ListItem(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      onTap: () {
+    return RepaintBoundary(
+      child: ListItem(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        onTap: () {
         showExtend(
           context,
           builder: (_, type) {
@@ -162,13 +174,113 @@ class TrackerInfoItem extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             spacing: 12,
             children: [
-              if (icon != null) icon,
+              ?icon,
               Flexible(child: title),
             ],
           ),
           const SizedBox(height: 8),
           subTitle,
         ],
+      ),
+      ),
+    );
+  }
+}
+
+Future<Uint8List?> _getPackageIcon(String process) async {
+  if (process.isEmpty) {
+    return _getDefaultPackageIcon();
+  }
+  final cachedIcon = _iconCache[process];
+  if (cachedIcon != null) {
+    return cachedIcon;
+  }
+  final icon = await app.getPackageIcon(process);
+  if (icon != null) {
+    _addToIconCache(process, icon);
+    return icon;
+  }
+  return _getDefaultPackageIcon();
+}
+
+Future<Uint8List?> _getDefaultPackageIcon() {
+  final cachedIcon = _defaultIconCache;
+  if (cachedIcon != null) {
+    return Future.value(cachedIcon);
+  }
+  return _defaultIconFuture ??= app.getPackageIcon('').then((icon) {
+    if (icon != null) {
+      _defaultIconCache = icon;
+    }
+    _defaultIconFuture = null;
+    return icon;
+  });
+}
+
+class _ProcessIcon extends StatefulWidget {
+  final String process;
+  final Function(String)? onClick;
+
+  const _ProcessIcon({required this.process, this.onClick});
+
+  @override
+  State<_ProcessIcon> createState() => _ProcessIconState();
+}
+
+class _ProcessIconState extends State<_ProcessIcon> {
+  late Future<Uint8List?> _iconFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _iconFuture = _getPackageIcon(widget.process);
+  }
+
+  @override
+  void didUpdateWidget(_ProcessIcon oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.process != widget.process) {
+      _iconFuture = _getPackageIcon(widget.process);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
+    final cacheSize = (42 * devicePixelRatio).ceil();
+
+    return RepaintBoundary(
+      child: GestureDetector(
+        onTap: () {
+          if (widget.process.isEmpty) return;
+          widget.onClick?.call(widget.process);
+        },
+        child: Container(
+          margin: const EdgeInsets.only(top: 4),
+          width: 42,
+          height: 42,
+          alignment: Alignment.center,
+          child: FutureBuilder<Uint8List?>(
+            future: _iconFuture,
+            builder: (context, snapshot) {
+              final iconBytes = snapshot.data;
+              if (iconBytes == null) {
+                return const SizedBox(width: 42, height: 42);
+              }
+              return Image(
+                image: ResizeImage(
+                  MemoryImage(iconBytes),
+                  width: cacheSize,
+                  height: cacheSize,
+                  allowUpscaling: false,
+                ),
+                width: 42,
+                height: 42,
+                gaplessPlayback: true,
+              );
+            },
+          ),
+        ),
       ),
     );
   }
@@ -188,7 +300,7 @@ class TrackerInfoDetailView extends StatelessWidget {
     return rule;
   }
 
-  String _getProcessText() {
+  String _getProgressText() {
     final process = trackerInfo.metadata.process;
     final uid = trackerInfo.metadata.uid;
     if (uid != 0) {
@@ -235,7 +347,6 @@ class TrackerInfoDetailView extends StatelessWidget {
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.start,
-        spacing: 20,
         children: [
           Text(appLocalizations.proxyChains),
           Flexible(child: chains),
@@ -284,8 +395,8 @@ class TrackerInfoDetailView extends StatelessWidget {
         title: appLocalizations.creationTime,
         desc: trackerInfo.start.showFull,
       ),
-      if (_getProcessText().isNotEmpty)
-        _buildItem(title: appLocalizations.process, desc: _getProcessText()),
+      if (_getProgressText().isNotEmpty)
+        _buildItem(title: appLocalizations.progress, desc: _getProgressText()),
       _buildItem(
         title: appLocalizations.networkType,
         desc: trackerInfo.metadata.network,
@@ -305,11 +416,11 @@ class TrackerInfoDetailView extends StatelessWidget {
         ),
       _buildItem(
         title: appLocalizations.upload,
-        desc: trackerInfo.upload.traffic.show,
+        desc: TrafficValue(value: trackerInfo.upload).show,
       ),
       _buildItem(
         title: appLocalizations.download,
-        desc: trackerInfo.download.traffic.show,
+        desc: TrafficValue(value: trackerInfo.download).show,
       ),
       if (trackerInfo.metadata.destinationGeoIP.isNotEmpty)
         _buildItem(

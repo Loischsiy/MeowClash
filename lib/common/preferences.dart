@@ -10,8 +10,7 @@ class Preferences {
   static Preferences? _instance;
   Completer<SharedPreferences?> sharedPreferencesCompleter = Completer();
 
-  Future<bool> get isInit async =>
-      await sharedPreferencesCompleter.future != null;
+  Future<bool> get isInit async => await sharedPreferencesCompleter.future != null;
 
   Preferences._internal() {
     SharedPreferences.getInstance()
@@ -24,70 +23,36 @@ class Preferences {
     return _instance!;
   }
 
-  Future<int> getVersion() async {
+  Future<ClashConfig?> getClashConfig() async {
     final preferences = await sharedPreferencesCompleter.future;
-    return preferences?.getInt('version') ?? 0;
-  }
-
-  Future<void> setVersion(int version) async {
-    final preferences = await sharedPreferencesCompleter.future;
-    await preferences?.setInt('version', version);
-  }
-
-  Future<void> saveShareState(SharedState shareState) async {
-    final preferences = await sharedPreferencesCompleter.future;
-    await preferences?.setString('sharedState', json.encode(shareState));
-  }
-
-  Future<Map<String, Object?>?> getConfigMap() async {
-    try {
-      final preferences = await sharedPreferencesCompleter.future;
-      final configString = preferences?.getString(configKey);
-      if (configString == null) return null;
-      final Map<String, Object?>? configMap = json.decode(configString);
-      return configMap;
-    } catch (_) {
-      return null;
-    }
-  }
-
-  Future<Map<String, Object?>?> getClashConfigMap() async {
-    try {
-      final preferences = await sharedPreferencesCompleter.future;
-      final clashConfigString = preferences?.getString(clashConfigKey);
-      if (clashConfigString == null) return null;
-      return json.decode(clashConfigString);
-    } catch (_) {
-      return null;
-    }
-  }
-
-  Future<void> clearClashConfig() async {
-    try {
-      final preferences = await sharedPreferencesCompleter.future;
-      await preferences?.remove(clashConfigKey);
-      return;
-    } catch (_) {
-      return;
-    }
+    final clashConfigString = preferences?.getString(clashConfigKey);
+    if (clashConfigString == null) return null;
+    final clashConfigMap = json.decode(clashConfigString);
+    return ClashConfig.fromJson(clashConfigMap);
   }
 
   Future<Config?> getConfig() async {
-    final configMap = await getConfigMap();
-    if (configMap == null) {
-      return null;
-    }
-    return Config.fromJson(configMap);
+    final preferences = await sharedPreferencesCompleter.future;
+    final configString = preferences?.getString(configKey);
+    if (configString == null) return null;
+    final configMap = json.decode(configString);
+    return Config.compatibleFromJson(configMap);
   }
 
   Future<bool> saveConfig(Config config) async {
     final preferences = await sharedPreferencesCompleter.future;
-    return preferences?.setString(configKey, json.encode(config)) ?? false;
+    return await preferences?.setString(configKey, json.encode(config)) ??
+        false;
+  }
+
+  Future<void> clearClashConfig() async {
+    final preferences = await sharedPreferencesCompleter.future;
+    preferences?.remove(clashConfigKey);
   }
 
   Future<void> clearPreferences() async {
     final sharedPreferencesIns = await sharedPreferencesCompleter.future;
-    await sharedPreferencesIns?.clear();
+    sharedPreferencesIns?.clear();
   }
 }
 

@@ -1,8 +1,7 @@
 import 'dart:io';
 
+import 'package:meow_clash/clash/clash.dart';
 import 'package:meow_clash/common/common.dart';
-import 'package:meow_clash/controller.dart';
-import 'package:meow_clash/core/core.dart';
 import 'package:meow_clash/models/models.dart';
 import 'package:meow_clash/providers/config.dart';
 import 'package:meow_clash/state.dart';
@@ -24,20 +23,80 @@ class GeoItem {
   });
 }
 
-class ResourcesView extends StatelessWidget {
+class ResourcesView extends StatefulWidget {
   const ResourcesView({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    const geoItems = <GeoItem>[
-      GeoItem(label: 'GEOIP', fileName: GEOIP, key: 'geoip'),
-      GeoItem(label: 'GEOSITE', fileName: GEOSITE, key: 'geosite'),
-      GeoItem(label: 'MMDB', fileName: MMDB, key: 'mmdb'),
-      GeoItem(label: 'ASN', fileName: ASN, key: 'asn'),
-    ];
+  State<ResourcesView> createState() => _ResourcesViewState();
+}
 
+class _ResourcesViewState extends State<ResourcesView> {
+  final isUpdatingAll = ValueNotifier<bool>(false);
+
+  static const geoItems = <GeoItem>[
+    GeoItem(label: 'GeoSite', fileName: geoSiteFileName, key: 'geosite'),
+    GeoItem(label: 'MMDB', fileName: mmdbFileName, key: 'mmdb'),
+    GeoItem(label: 'ASN', fileName: asnFileName, key: 'asn'),
+  ];
+
+  Future<void> _handleSyncAll() async {
+    if (isUpdatingAll.value) return;
+
+    isUpdatingAll.value = true;
+    try {
+      await Future.wait(
+        geoItems.map(
+          (geoItem) => clashCore.updateGeoData(
+            UpdateGeoDataParams(
+              geoName: geoItem.fileName,
+              geoType: geoItem.label,
+            ),
+          ),
+        ),
+      );
+      if (mounted) {
+        setState(() {});
+      }
+    } catch (e) {
+      if (mounted) {
+        globalState.showMessage(
+          title: appLocalizations.syncFailed,
+          message: TextSpan(text: e.toString()),
+        );
+      }
+    } finally {
+      isUpdatingAll.value = false;
+    }
+  }
+
+  @override
+  void dispose() {
+    isUpdatingAll.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return CommonScaffold(
       title: appLocalizations.resources,
+      actions: [
+        ValueListenableBuilder(
+          valueListenable: isUpdatingAll,
+          builder: (_, isUpdating, _) {
+            return IconButton(
+              icon: isUpdating
+                  ? const SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.sync),
+              onPressed: isUpdating ? null : _handleSyncAll,
+              tooltip: appLocalizations.syncAll,
+            );
+          },
+        ),
+      ],
       body: ListView.separated(
         itemBuilder: (_, index) {
           final geoItem = geoItems[index];
@@ -80,11 +139,12 @@ class _GeoDataListItemState extends State<GeoDataListItem> {
         if (!newUrl.isUrl) {
           throw 'Invalid url';
         }
-        ref.read(patchClashConfigProvider.notifier).update((state) {
+        ref.read(patchClashConfigProvider.notifier).updateState((state) {
           final map = state.geoXUrl.toJson();
           map[geoItem.key] = newUrl;
           return state.copyWith(geoXUrl: GeoXUrl.fromJson(map));
         });
+        await globalState.appController.setupClashConfig();
       } catch (e) {
         globalState.showMessage(
           title: geoItem.label,
@@ -177,7 +237,6 @@ class _GeoDataListItemState extends State<GeoDataListItem> {
                 ),
               ],
             ),
-            const SizedBox(height: 6),
           ],
         );
       },
@@ -185,9 +244,13 @@ class _GeoDataListItemState extends State<GeoDataListItem> {
   }
 
   Future<void> _handleUpdateGeoDataItem() async {
-    await appController.safeRun<void>(() async {
-      await updateGeoDateItem();
-    }, silence: false);
+    await globalState.appController.safeRun<void>(
+      () async {
+        await updateGeoDateItem();
+      },
+      silence: false,
+      needLoading: false,
+    );
     if (mounted) {
       setState(() {});
     }
@@ -196,7 +259,7 @@ class _GeoDataListItemState extends State<GeoDataListItem> {
   Future<void> updateGeoDateItem() async {
     isUpdating.value = true;
     try {
-      final message = await coreController.updateGeoData(
+      final message = await clashCore.updateGeoData(
         UpdateGeoDataParams(geoName: geoItem.fileName, geoType: geoItem.label),
       );
       if (message.isNotEmpty) throw message;
@@ -241,12 +304,12 @@ class UpdateGeoUrlFormDialog extends StatefulWidget {
 }
 
 class _UpdateGeoUrlFormDialogState extends State<UpdateGeoUrlFormDialog> {
-  late final TextEditingController _urlController;
+  late TextEditingController urlController;
 
   @override
   void initState() {
     super.initState();
-    _urlController = TextEditingController(text: widget.url);
+    urlController = TextEditingController(text: widget.url);
   }
 
   Future<void> _handleReset() async {
@@ -257,15 +320,9 @@ class _UpdateGeoUrlFormDialogState extends State<UpdateGeoUrlFormDialog> {
   }
 
   Future<void> _handleUpdate() async {
-    final url = _urlController.value.text;
+    final url = urlController.value.text;
     if (url.isEmpty) return;
     Navigator.of(context).pop<String>(url);
-  }
-
-  @override
-  void dispose() {
-    _urlController.dispose();
-    super.dispose();
   }
 
   @override
@@ -274,7 +331,7 @@ class _UpdateGeoUrlFormDialogState extends State<UpdateGeoUrlFormDialog> {
       title: widget.title,
       actions: [
         if (widget.defaultValue != null &&
-            _urlController.value.text != widget.defaultValue) ...[
+            urlController.value.text != widget.defaultValue) ...[
           TextButton(
             onPressed: _handleReset,
             child: Text(appLocalizations.reset),
@@ -292,7 +349,7 @@ class _UpdateGeoUrlFormDialogState extends State<UpdateGeoUrlFormDialog> {
           TextField(
             maxLines: 5,
             minLines: 1,
-            controller: _urlController,
+            controller: urlController,
             decoration: const InputDecoration(border: OutlineInputBorder()),
           ),
         ],

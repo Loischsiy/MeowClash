@@ -17,36 +17,34 @@ extension DateTimeExtension on DateTime {
     final difference = currentDateTime.difference(this);
     final days = difference.inDays;
     if (days >= 365) {
-      final years = (days / 365).floor();
-      return appLocalizations.yearsAgo(years);
+      return '${(days / 365).floor()} ${appLocalizations.years}${appLocalizations.ago}';
     }
     if (days >= 30) {
-      final months = (days / 30).floor();
-      return appLocalizations.monthsAgo(months);
+      return '${(days / 30).floor()} ${appLocalizations.months}${appLocalizations.ago}';
     }
     if (days >= 1) {
-      return appLocalizations.daysAgo(days);
+      return '$days ${appLocalizations.days}${appLocalizations.ago}';
     }
     final hours = difference.inHours;
     if (hours >= 1) {
-      return appLocalizations.hoursAgo(hours);
+      return '$hours ${appLocalizations.hours}${appLocalizations.ago}';
     }
     final minutes = difference.inMinutes;
     if (minutes >= 1) {
-      return appLocalizations.minutesAgo(minutes);
+      return '$minutes ${appLocalizations.minutes}${appLocalizations.ago}';
     }
-    return appLocalizations.justNow;
+    return appLocalizations.just;
   }
 
   String get show {
-    return toString().substring(0, 10);
+    return toLocal().toString().substring(0, 10);
   }
 
   String get showFull {
-    return toString().substring(0, 19);
+    return toLocal().toString().substring(0, 19);
   }
 
   String get showTime {
-    return toString().substring(10, 19);
+    return toLocal().toString().substring(10, 19);
   }
 }

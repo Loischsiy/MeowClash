@@ -1,5 +1,4 @@
 import 'package:meow_clash/common/common.dart';
-import 'package:meow_clash/enum/enum.dart';
 import 'package:flutter/scheduler.dart';
 
 class Render {
@@ -16,32 +15,22 @@ class Render {
     return _instance!;
   }
 
-  void active() {
-    resume();
-    pause();
-  }
-
   void pause() {
-    throttler.call(
-      FunctionTag.renderPause,
-      _pause,
-      duration: Duration(seconds: 5),
-    );
+    _pause();
   }
 
   void resume() {
-    throttler.cancel(FunctionTag.renderPause);
     _resume();
   }
 
   void _pause() async {
+    if (!system.isWindows) return;
     if (_isPaused) return;
     _isPaused = true;
     _beginFrame = _dispatcher.onBeginFrame;
     _drawFrame = _dispatcher.onDrawFrame;
     _dispatcher.onBeginFrame = null;
     _dispatcher.onDrawFrame = null;
-    commonPrint.log('pause');
   }
 
   void _resume() {
@@ -50,7 +39,6 @@ class Render {
     _dispatcher.onBeginFrame = _beginFrame;
     _dispatcher.onDrawFrame = _drawFrame;
     _dispatcher.scheduleFrame();
-    commonPrint.log('resume');
   }
 }
 

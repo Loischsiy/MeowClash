@@ -1,7 +1,6 @@
 import 'package:meow_clash/common/common.dart';
-import 'package:meow_clash/controller.dart';
 import 'package:meow_clash/enum/enum.dart';
-import 'package:meow_clash/models/models.dart';
+import 'package:meow_clash/providers/app.dart';
 import 'package:meow_clash/providers/state.dart';
 import 'package:meow_clash/state.dart';
 import 'package:flutter/material.dart';
@@ -21,33 +20,45 @@ class _VpnContainerState extends ConsumerState<VpnManager> {
   void initState() {
     super.initState();
     ref.listenManual(vpnStateProvider, (prev, next) {
-      if (prev != next) {
-        showTip(next);
+      // Skip tip
+      if (prev == null || prev == next) return;
+      
+      final prevProps = prev.vpnProps;
+      final nextProps = next.vpnProps;
+      
+      // Check
+      final onlySmartAutoStopChanged = prevProps.copyWith(
+        smartAutoStop: nextProps.smartAutoStop,
+        smartAutoStopNetworks: nextProps.smartAutoStopNetworks,
+      ) == nextProps;
+      
+      final onlyQuickResponseChanged = prevProps.copyWith(
+        quickResponse: nextProps.quickResponse,
+      ) == nextProps;
+      
+      if (onlySmartAutoStopChanged || onlyQuickResponseChanged) {
+        return; // No tip needed
       }
+      
+      showTip();
     });
   }
 
-  void showTip(VpnState state) {
-    throttler.call(
-      FunctionTag.vpnTip,
-      () {
-        if (!ref.read(isStartProvider) || state == globalState.lastVpnState) {
-          return;
-        }
+  void showTip() {
+    debouncer.call(FunctionTag.vpnTip, () {
+      if (ref.read(runTimeProvider.notifier).isStart) {
         globalState.showNotifier(
-          appLocalizations.vpnConfigChangeDetected,
-          actionState: MessageActionState(
-            actionText: appLocalizations.restart,
-            action: () async {
-              await globalState.handleStop();
-              await appController.updateStatus(true);
-            },
-          ),
+          appLocalizations.vpnTip,
+          onAction: () async {
+            await globalState.appController.updateStatus(false);
+            await Future.delayed(const Duration(milliseconds: 500));
+            await globalState.appController.updateStatus(true);
+          },
+          actionLabel: appLocalizations.restart,
+          showCountdown: true,
         );
-      },
-      duration: const Duration(seconds: 6),
-      fire: true,
-    );
+      }
+    });
   }
 
   @override

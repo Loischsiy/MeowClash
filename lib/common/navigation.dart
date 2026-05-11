@@ -1,7 +1,9 @@
 import 'package:meow_clash/enum/enum.dart';
 import 'package:meow_clash/models/models.dart';
+import 'package:meow_clash/providers/providers.dart';
 import 'package:meow_clash/views/views.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class Navigation {
   static Navigation? _instance;
@@ -21,8 +23,10 @@ class Navigation {
       NavigationItem(
         icon: const Icon(Icons.article),
         label: PageLabel.proxies,
-        builder: (_) =>
-            const ProxiesView(key: GlobalObjectKey(PageLabel.proxies)),
+        builder: (_) => ProviderScope(
+          overrides: [queryProvider.overrideWith(() => Query())],
+          child: const ProxiesView(key: GlobalObjectKey(PageLabel.proxies)),
+        ),
         modes: hasProxies
             ? [NavigationItemMode.mobile, NavigationItemMode.desktop]
             : [],
@@ -58,13 +62,19 @@ class Navigation {
         modes: [NavigationItemMode.more],
       ),
       NavigationItem(
+        icon: Icon(Icons.functions),
+        label: PageLabel.script,
+        description: 'scriptDesc',
+        builder: (_) =>
+            const ScriptsView(key: GlobalObjectKey(PageLabel.script)),
+        modes: [NavigationItemMode.more],
+      ),
+      NavigationItem(
         icon: const Icon(Icons.adb),
         label: PageLabel.logs,
         builder: (_) => const LogsView(key: GlobalObjectKey(PageLabel.logs)),
         description: 'logsDesc',
-        modes: openLogs
-            ? [NavigationItemMode.desktop, NavigationItemMode.more]
-            : [],
+        modes: [NavigationItemMode.desktop, NavigationItemMode.more],
       ),
       NavigationItem(
         icon: Icon(Icons.construction),

@@ -513,18 +513,22 @@ class _OpenContainerRoute<T> extends ModalRoute<T> {
                                   ),
                           ),
                         ),
+
                         // Open child fading in.
-                        OverflowBox(
-                          maxWidth: _rectTween.end!.width,
-                          maxHeight: _rectTween.end!.height,
+                        FittedBox(
+                          fit: BoxFit.fitWidth,
                           alignment: Alignment.topLeft,
-                          child: FadeTransition(
-                            opacity: openOpacityTween!.animate(animation),
-                            child: Builder(
-                              key: _openBuilderKey,
-                              builder: (BuildContext context) {
-                                return openBuilder(context, closeContainer);
-                              },
+                          child: SizedBox(
+                            width: _rectTween.end!.width,
+                            height: _rectTween.end!.height,
+                            child: FadeTransition(
+                              opacity: openOpacityTween!.animate(animation),
+                              child: Builder(
+                                key: _openBuilderKey,
+                                builder: (BuildContext context) {
+                                  return openBuilder(context, closeContainer);
+                                },
+                              ),
                             ),
                           ),
                         ),

@@ -1,5 +1,6 @@
 import 'package:meow_clash/common/common.dart';
 import 'package:meow_clash/providers/config.dart';
+import 'package:meow_clash/state.dart';
 import 'package:meow_clash/views/config/network.dart';
 import 'package:meow_clash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
@@ -24,6 +25,8 @@ class TUNButton extends StatelessWidget {
                     items: [
                       if (system.isDesktop) const TUNItem(),
                       if (system.isMacOS) const AutoSetSystemDnsItem(),
+                      const StrictRouteItem(),
+                      const IcmpForwardingItem(),
                       const TunStackItem(),
                     ],
                   ),
@@ -63,13 +66,35 @@ class TUNButton extends StatelessWidget {
                       (state) => state.tun.enable,
                     ),
                   );
+
+                  // Windows 桌面端：检查系统代理是否开启
+                  final systemProxyEnabled = system.isWindows
+                      ? ref.watch(
+                          networkSettingProvider.select(
+                            (state) => state.systemProxy,
+                          ),
+                        )
+                      : false;
+
                   return Switch(
                     value: enable,
-                    onChanged: (value) {
-                      ref
-                          .read(patchClashConfigProvider.notifier)
-                          .update((state) => state.copyWith.tun(enable: value));
-                    },
+                    onChanged: systemProxyEnabled && system.isWindows
+                        ? null // Disable when system proxy is on
+                        : (value) {
+                            // Windows: prompt to close system proxy first
+                            if (system.isWindows && systemProxyEnabled) {
+                              globalState.showNotifier(
+                                appLocalizations.pleaseCloseSystemProxyFirst,
+                              );
+                              return;
+                            }
+
+                            ref
+                                .read(patchClashConfigProvider.notifier)
+                                .updateState(
+                                  (state) => state.copyWith.tun(enable: value),
+                                );
+                          },
                   );
                 },
               ),
@@ -133,16 +158,36 @@ class SystemProxyButton extends StatelessWidget {
                   final systemProxy = ref.watch(
                     networkSettingProvider.select((state) => state.systemProxy),
                   );
+
+                  // Windows 桌面端：检查 TUN 是否开启
+                  final tunEnabled = system.isWindows
+                      ? ref.watch(
+                          patchClashConfigProvider.select(
+                            (state) => state.tun.enable,
+                          ),
+                        )
+                      : false;
+
                   return Switch(
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     value: systemProxy,
-                    onChanged: (value) {
-                      ref
-                          .read(networkSettingProvider.notifier)
-                          .update(
-                            (state) => state.copyWith(systemProxy: value),
-                          );
-                    },
+                    onChanged: tunEnabled && system.isWindows
+                        ? null // TUN 开启时禁用开关
+                        : (value) {
+                            // Windows 桌面端：如果 TUN 开启，提示用户先关闭
+                            if (system.isWindows && tunEnabled) {
+                              globalState.showNotifier(
+                                appLocalizations.pleaseCloseTunFirst,
+                              );
+                              return;
+                            }
+
+                            ref
+                                .read(networkSettingProvider.notifier)
+                                .updateState(
+                                  (state) => state.copyWith(systemProxy: value),
+                                );
+                          },
                   );
                 },
               ),
@@ -172,7 +217,8 @@ class VpnButton extends StatelessWidget {
                   generateSection(
                     items: [
                       const VPNItem(),
-                      const VpnSystemProxyItem(),
+                      const StrictRouteItem(),
+                      const IcmpForwardingItem(),
                       const TunStackItem(),
                     ],
                   ),
@@ -212,7 +258,9 @@ class VpnButton extends StatelessWidget {
                     onChanged: (value) {
                       ref
                           .read(vpnSettingProvider.notifier)
-                          .update((state) => state.copyWith(enable: value));
+                          .updateState(
+                            (state) => state.copyWith(enable: value),
+                          );
                     },
                   );
                 },

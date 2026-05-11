@@ -1,87 +1,91 @@
 import 'package:meow_clash/common/common.dart';
 import 'package:meow_clash/models/models.dart';
 import 'package:meow_clash/providers/app.dart';
+import 'package:meow_clash/state.dart';
 import 'package:meow_clash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class NetworkSpeed extends StatefulWidget {
+class NetworkSpeed extends ConsumerWidget {
   const NetworkSpeed({super.key});
 
-  @override
-  State<NetworkSpeed> createState() => _NetworkSpeedState();
-}
+  // Cache as const
+  static const _initPoints = [Point(0, 0), Point(1, 0)];
 
-class _NetworkSpeedState extends State<NetworkSpeed> {
-  List<Point> initPoints = const [Point(0, 0), Point(1, 0)];
+  static List<Point> _getPoints(List<Traffic> traffics) {
+    if (traffics.isEmpty) return _initPoints;
 
-  List<Point> _getPoints(List<Traffic> traffics) {
-    List<Point> trafficPoints = traffics
-        .toList()
-        .asMap()
-        .map(
-          (index, e) => MapEntry(
-            index,
-            Point((index + initPoints.length).toDouble(), e.speed.toDouble()),
-          ),
-        )
-        .values
-        .toList();
+    // Pre-allocate array capacity
+    final totalLength = traffics.length + _initPoints.length;
+    final result = List<Point>.filled(totalLength, Point(0, 0));
 
-    return [...initPoints, ...trafficPoints];
+    // Assign init points
+    result[0] = _initPoints[0];
+    result[1] = _initPoints[1];
+
+    // Assign traffic points
+    for (int i = 0; i < traffics.length; i++) {
+      result[i + 2] = Point((i + 2).toDouble(), traffics[i].speed.toDouble());
+    }
+
+    return result;
   }
 
-  Traffic _getLastTraffic(List<Traffic> traffics) {
+  static Traffic _getLastTraffic(List<Traffic> traffics) {
     if (traffics.isEmpty) return Traffic();
     return traffics.last;
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final color = context.colorScheme.onSurfaceVariant.opacity80;
+    final primaryColor = Theme.of(context).colorScheme.primary;
     return SizedBox(
       height: getWidgetHeight(2),
-      child: RepaintBoundary(
-        child: CommonCard(
-          onPressed: () {},
-          child: Consumer(
-            builder: (_, ref, _) {
-              final traffics = ref.watch(trafficsProvider).list;
-              return Column(
+      child: CommonCard(
+        onPressed: () {
+          globalState.openUrl('https://ptclspeed.speedtestcustom.com');
+        },
+        info: Info(
+          label: appLocalizations.networkSpeed,
+          iconData: Icons.speed_sharp,
+        ),
+        child: RepaintBoundary(
+          child: ValueListenableBuilder<int>(
+            valueListenable: dashboardRefreshManager.tick1s,
+            builder: (_, _, _) {
+              final traffics = ref.read(trafficsProvider).list;
+              final points = _getPoints(traffics);
+              final speedText = _getLastTraffic(traffics).toSpeedText();
+              return Stack(
                 children: [
-                  Padding(
-                    padding: baseInfoEdgeInsets.copyWith(bottom: 0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Flexible(
-                          child: InfoHeader(
-                            padding: EdgeInsets.zero,
-                            info: Info(
-                              label: appLocalizations.networkSpeed,
-                              iconData: Icons.speed_sharp,
-                            ),
-                          ),
+                  Positioned.fill(
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                        top: 16,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                      ),
+                      child: RepaintBoundary(
+                        child: LineChart(
+                          gradient: true,
+                          color: primaryColor,
+                          points: points,
                         ),
-                        SizedBox(width: 8),
-                        Text(
-                          _getLastTraffic(traffics).speedText,
-                          style: context.textTheme.bodySmall?.copyWith(
-                            color: color,
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
-                  Flexible(
-                    child: Padding(
-                      padding: EdgeInsets.all(
-                        16,
-                      ).copyWith(bottom: 0, left: 0, right: 0),
-                      child: LineChart(
-                        gradient: true,
-                        color: Theme.of(context).colorScheme.primary,
-                        points: _getPoints(traffics),
+                  Positioned(
+                    top: 0,
+                    right: 0,
+                    child: Transform.translate(
+                      offset: const Offset(-16, -20),
+                      child: Text(
+                        speedText,
+                        style: context.textTheme.bodySmall?.copyWith(
+                          color: color,
+                        ),
                       ),
                     ),
                   ),

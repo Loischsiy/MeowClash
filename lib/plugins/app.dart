@@ -1,10 +1,9 @@
 import 'dart:async';
-import 'dart:io';
 
-import 'package:meow_clash/common/common.dart';
+import 'package:meow_clash/common/app_localizations.dart';
 import 'package:meow_clash/models/models.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 
 class App {
   static App? _instance;
@@ -12,12 +11,16 @@ class App {
   Function()? onExit;
 
   App._internal() {
-    methodChannel = const MethodChannel('$packageName/app');
+    methodChannel = const MethodChannel('app');
     methodChannel.setMethodCallHandler((call) async {
       switch (call.method) {
         case 'exit':
-          if (onExit != null) {
-            await onExit!();
+          await onExit?.call();
+        case 'getText':
+          try {
+            return Intl.message(call.arguments as String);
+          } catch (_) {
+            return '';
           }
         default:
           throw MissingPluginException();
@@ -34,28 +37,43 @@ class App {
     return await methodChannel.invokeMethod<bool>('moveTaskToBack');
   }
 
-  Future<List<Package>> getPackages() async {
-    final packagesString = await methodChannel.invokeMethod<String>(
+  Future<List<Package>> getPackages({bool forceRefresh = false}) async {
+    final packagesRaw = await methodChannel.invokeListMethod<Map<dynamic, dynamic>>(
       'getPackages',
+      {'forceRefresh': forceRefresh},
+    ) ?? const [];
+    return packagesRaw
+        .map((e) => Package.fromJson(Map<String, Object?>.from(e)))
+        .toList();
+  }
+
+  Future<bool> hasPackageListPermission() async {
+    final result = await methodChannel.invokeMethod<bool>(
+      'hasPackageListPermission',
     );
-    List<dynamic> packagesRaw =
-        (await packagesString?.commonToJSON<List<dynamic>>()) ?? [];
-    return packagesRaw.map((e) => Package.fromJson(e)).toSet().toList();
+    return result ?? true;
+  }
+
+  Future<bool> hasCameraPermission() async {
+    final result = await methodChannel.invokeMethod<bool>(
+      'hasCameraPermission',
+    );
+    return result ?? true;
+  }
+
+  Future<void> requestPackageListPermission() async {
+    await methodChannel.invokeMethod<void>('requestPackageListPermission');
+  }
+
+  Future<void> openAppSettings() async {
+    await methodChannel.invokeMethod<void>('openAppSettings');
   }
 
   Future<List<String>> getChinaPackageNames() async {
-    final packageNamesString = await methodChannel.invokeMethod<String>(
-      'getChinaPackageNames',
-    );
-    List<dynamic> packageNamesRaw =
-        await packageNamesString?.commonToJSON<List<dynamic>>() ?? [];
+    final packageNamesRaw =
+        await methodChannel.invokeListMethod<String>('getChinaPackageNames') ??
+        const [];
     return packageNamesRaw.map((e) => e.toString()).toList();
-  }
-
-  Future<bool?> requestNotificationsPermission() async {
-    return await methodChannel.invokeMethod<bool>(
-      'requestNotificationsPermission',
-    );
   }
 
   Future<bool> openFile(String path) async {
@@ -63,19 +81,20 @@ class App {
         false;
   }
 
-  Future<ImageProvider?> getPackageIcon(String packageName) async {
-    final path = await methodChannel.invokeMethod<String>('getPackageIcon', {
+  Future<Uint8List?> getPackageIcon(
+    String packageName, {
+    bool forceRefresh = false,
+  }) async {
+    return await methodChannel.invokeMethod<Uint8List>('getPackageIcon', {
       'packageName': packageName,
+      'forceRefresh': forceRefresh,
     });
-    if (path == null) {
-      return null;
-    }
-    return FileImage(File(path));
   }
 
   Future<bool?> tip(String? message) async {
+    if (message == null || message.isEmpty) return false;
     return await methodChannel.invokeMethod<bool>('tip', {
-      'message': '$message',
+      'message': message,
     });
   }
 
@@ -91,6 +110,36 @@ class App {
       'value': value,
     });
   }
+
+  Future<int> getSelfLastUpdateTime() async {
+    final result = await methodChannel.invokeMethod<int>(
+      'getSelfLastUpdateTime',
+    );
+    return result ?? 0;
+  }
+
+  Future<bool> isIgnoringBatteryOptimizations() async {
+    final result = await methodChannel.invokeMethod<bool>(
+      'isIgnoringBatteryOptimizations',
+    );
+    return result ?? false;
+  }
+
+  Future<void> requestIgnoreBatteryOptimizations() async {
+    await methodChannel.invokeMethod<void>('requestIgnoreBatteryOptimizations');
+  }
+
+  Future<bool> setLauncherIcon(bool useLightIcon) async {
+    final result = await methodChannel.invokeMethod<bool>('setLauncherIcon', {
+      'useLightIcon': useLightIcon,
+    });
+    return result ?? false;
+  }
+
+  Future<bool> isAndroidTV() async {
+    final result = await methodChannel.invokeMethod<bool>('isAndroidTV');
+    return result ?? false;
+  }
 }
 
-final app = system.isAndroid ? App() : null;
+final app = App();

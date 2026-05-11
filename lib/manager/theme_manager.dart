@@ -2,8 +2,6 @@ import 'dart:math';
 
 import 'package:meow_clash/common/common.dart';
 import 'package:meow_clash/common/theme.dart';
-import 'package:meow_clash/controller.dart';
-import 'package:meow_clash/providers/app.dart';
 import 'package:meow_clash/providers/config.dart';
 import 'package:meow_clash/state.dart';
 import 'package:flutter/material.dart';
@@ -30,27 +28,17 @@ class ThemeManager extends ConsumerWidget {
           final iconBrightness = brightness == Brightness.light
               ? Brightness.dark
               : Brightness.light;
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            ref
-                .read(systemUiOverlayStyleStateProvider.notifier)
-                .update(
-                  (state) => state.copyWith(
-                    statusBarColor: Colors.transparent,
-                    statusBarIconBrightness: iconBrightness,
-                    systemNavigationBarIconBrightness: iconBrightness,
-                    systemNavigationBarColor: context.colorScheme.surface,
-                    systemNavigationBarDividerColor: Colors.transparent,
-                  ),
-                );
-          });
-          return AnnotatedRegion<SystemUiOverlayStyle>(
-            value: SystemUiOverlayStyle(
+          globalState.appState = globalState.appState.copyWith(
+            systemUiOverlayStyle: SystemUiOverlayStyle(
               statusBarColor: Colors.transparent,
               statusBarIconBrightness: iconBrightness,
               systemNavigationBarIconBrightness: iconBrightness,
               systemNavigationBarColor: context.colorScheme.surface,
               systemNavigationBarDividerColor: Colors.transparent,
             ),
+          );
+          return AnnotatedRegion<SystemUiOverlayStyle>(
+            value: globalState.appState.systemUiOverlayStyle,
             sized: false,
             child: child,
           );
@@ -99,23 +87,13 @@ class ThemeManager extends ConsumerWidget {
           top: padding.top > height * 0.3 ? 20.0 : padding.top,
         ),
       ),
-      child: Theme(
-        data: Theme.of(context).copyWith(
-          floatingActionButtonTheme: Theme.of(context).floatingActionButtonTheme
-              .copyWith(
-                shape: const RoundedSuperellipseBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(16.0)),
-                ),
-              ),
-        ),
-        child: LayoutBuilder(
-          builder: (_, container) {
-            appController.updateViewSize(
-              Size(container.maxWidth, container.maxHeight),
-            );
-            return _buildSystemUi(child);
-          },
-        ),
+      child: LayoutBuilder(
+        builder: (_, container) {
+          globalState.appController.updateViewSize(
+            Size(container.maxWidth, container.maxHeight),
+          );
+          return _buildSystemUi(child);
+        },
       ),
     );
   }

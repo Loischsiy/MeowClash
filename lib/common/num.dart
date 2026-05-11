@@ -1,57 +1,14 @@
-import 'dart:math';
-
-import 'package:meow_clash/enum/enum.dart';
-import 'package:meow_clash/models/common.dart';
 import 'package:meow_clash/state.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 extension NumExt on num {
   String fixed({int decimals = 2}) {
-    String formatted = toStringAsFixed(decimals);
-    if (formatted.contains('.')) {
-      formatted = formatted.replaceAll(RegExp(r'0*$'), '');
-      if (formatted.endsWith('.')) {
-        formatted = formatted.substring(0, formatted.length - 1);
-      }
-    }
-    return formatted;
+    return toStringAsFixed(decimals);
   }
 
   double get ap {
     return this * (1 + (globalState.theme.textScaleFactor - 1) * 0.5);
-  }
-
-  double get mAp {
-    return this * min((1 + (globalState.theme.textScaleFactor - 1) * 0.5), 1);
-  }
-
-  TrafficShow get traffic {
-    final units = TrafficUnit.values;
-    var size = toDouble();
-    var unitIndex = 0;
-    while (size >= 1024 && unitIndex < units.length - 1) {
-      size /= 1024;
-      unitIndex++;
-    }
-    return TrafficShow(
-      value: size.fixed(decimals: 1),
-      unit: units[unitIndex].name,
-    );
-  }
-
-  TrafficShow get shortTraffic {
-    final units = TrafficUnit.values;
-    var size = toDouble();
-    var unitIndex = 0;
-    while (size >= 1024 && unitIndex < units.length - 1) {
-      size /= 1024;
-      unitIndex++;
-    }
-    return TrafficShow(
-      value: size.toStringAsFixed(0),
-      unit: ' ${units[unitIndex].name}',
-    );
   }
 }
 

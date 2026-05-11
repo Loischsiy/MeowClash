@@ -23,8 +23,8 @@ Map<String, dynamic> _$SubscriptionInfoToJson(_SubscriptionInfo instance) =>
     };
 
 _Profile _$ProfileFromJson(Map<String, dynamic> json) => _Profile(
-  id: (json['id'] as num).toInt(),
-  label: json['label'] as String? ?? '',
+  id: json['id'] as String,
+  label: json['label'] as String?,
   currentGroupName: json['currentGroupName'] as String?,
   url: json['url'] as String? ?? '',
   lastUpdateDate: json['lastUpdateDate'] == null
@@ -47,11 +47,9 @@ _Profile _$ProfileFromJson(Map<String, dynamic> json) => _Profile(
   unfoldSet:
       (json['unfoldSet'] as List<dynamic>?)?.map((e) => e as String).toSet() ??
       const {},
-  overwriteType:
-      $enumDecodeNullable(_$OverwriteTypeEnumMap, json['overwriteType']) ??
-      OverwriteType.standard,
-  scriptId: (json['scriptId'] as num?)?.toInt(),
-  order: (json['order'] as num?)?.toInt(),
+  overrideData: json['overrideData'] == null
+      ? const OverrideData()
+      : OverrideData.fromJson(json['overrideData'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$ProfileToJson(_Profile instance) => <String, dynamic>{
@@ -65,38 +63,45 @@ Map<String, dynamic> _$ProfileToJson(_Profile instance) => <String, dynamic>{
   'autoUpdate': instance.autoUpdate,
   'selectedMap': instance.selectedMap,
   'unfoldSet': instance.unfoldSet.toList(),
-  'overwriteType': _$OverwriteTypeEnumMap[instance.overwriteType]!,
-  'scriptId': instance.scriptId,
-  'order': instance.order,
+  'overrideData': instance.overrideData,
 };
 
-const _$OverwriteTypeEnumMap = {
-  OverwriteType.standard: 'standard',
-  OverwriteType.script: 'script',
-};
+_OverrideData _$OverrideDataFromJson(Map<String, dynamic> json) =>
+    _OverrideData(
+      enable: json['enable'] as bool? ?? false,
+      rule: json['rule'] == null
+          ? const OverrideRule()
+          : OverrideRule.fromJson(json['rule'] as Map<String, dynamic>),
+    );
 
-_StandardOverwrite _$StandardOverwriteFromJson(Map<String, dynamic> json) =>
-    _StandardOverwrite(
+Map<String, dynamic> _$OverrideDataToJson(_OverrideData instance) =>
+    <String, dynamic>{'enable': instance.enable, 'rule': instance.rule};
+
+_OverrideRule _$OverrideRuleFromJson(Map<String, dynamic> json) =>
+    _OverrideRule(
+      type:
+          $enumDecodeNullable(_$OverrideRuleTypeEnumMap, json['type']) ??
+          OverrideRuleType.override,
+      overrideRules:
+          (json['overrideRules'] as List<dynamic>?)
+              ?.map((e) => Rule.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
       addedRules:
           (json['addedRules'] as List<dynamic>?)
               ?.map((e) => Rule.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],
-      disabledRuleIds:
-          (json['disabledRuleIds'] as List<dynamic>?)
-              ?.map((e) => (e as num).toInt())
-              .toList() ??
-          const [],
     );
 
-Map<String, dynamic> _$StandardOverwriteToJson(_StandardOverwrite instance) =>
+Map<String, dynamic> _$OverrideRuleToJson(_OverrideRule instance) =>
     <String, dynamic>{
+      'type': _$OverrideRuleTypeEnumMap[instance.type]!,
+      'overrideRules': instance.overrideRules,
       'addedRules': instance.addedRules,
-      'disabledRuleIds': instance.disabledRuleIds,
     };
 
-_ScriptOverwrite _$ScriptOverwriteFromJson(Map<String, dynamic> json) =>
-    _ScriptOverwrite(scriptId: (json['scriptId'] as num?)?.toInt());
-
-Map<String, dynamic> _$ScriptOverwriteToJson(_ScriptOverwrite instance) =>
-    <String, dynamic>{'scriptId': instance.scriptId};
+const _$OverrideRuleTypeEnumMap = {
+  OverrideRuleType.override: 'override',
+  OverrideRuleType.added: 'added',
+};

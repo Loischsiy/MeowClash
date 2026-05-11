@@ -1,7 +1,6 @@
-import 'package:meow_clash/controller.dart';
-import 'package:meow_clash/enum/enum.dart';
 import 'package:meow_clash/models/models.dart';
-import 'package:flutter/material.dart';
+import 'package:meow_clash/state.dart';
+import 'package:flutter/cupertino.dart';
 
 class CommonPrint {
   static CommonPrint? _instance;
@@ -13,13 +12,13 @@ class CommonPrint {
     return _instance!;
   }
 
-  void log(String? text, {LogLevel logLevel = LogLevel.info}) {
+  void log(String? text) {
     final payload = '[APP] $text';
     debugPrint(payload);
-    if (!appController.isAttach) {
+    if (!globalState.isInit) {
       return;
     }
-    appController.addLog(Log.app(payload).copyWith(logLevel: logLevel));
+    globalState.appController.addLog(Log.app(payload));
   }
 }
 

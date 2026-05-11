@@ -55,15 +55,6 @@ class Measure {
     );
   }
 
-  double get titleSmallHeight {
-    return _measureMap.updateCacheValue(
-      'titleSmallHeight',
-      () => computeTextSize(
-        Text('X', style: context.textTheme.titleSmall),
-      ).height,
-    );
-  }
-
   double get labelMediumHeight {
     return _measureMap.updateCacheValue(
       'labelMediumHeight',

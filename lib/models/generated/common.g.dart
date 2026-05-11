@@ -106,7 +106,8 @@ Map<String, dynamic> _$TrackerInfoToJson(_TrackerInfo instance) =>
 
 _Log _$LogFromJson(Map<String, dynamic> json) => _Log(
   logLevel:
-      $enumDecodeNullable(_$LogLevelEnumMap, json['LogLevel']) ?? LogLevel.info,
+      $enumDecodeNullable(_$LogLevelEnumMap, json['LogLevel']) ??
+      LogLevel.error,
   payload: json['Payload'] as String? ?? '',
   dateTime: _logDateTime(json['dateTime']),
 );
@@ -125,14 +126,14 @@ const _$LogLevelEnumMap = {
   LogLevel.silent: 'silent',
 };
 
-_DAVProps _$DAVPropsFromJson(Map<String, dynamic> json) => _DAVProps(
+_DAV _$DAVFromJson(Map<String, dynamic> json) => _DAV(
   uri: json['uri'] as String,
   user: json['user'] as String,
   password: json['password'] as String,
   fileName: json['fileName'] as String? ?? defaultDavFileName,
 );
 
-Map<String, dynamic> _$DAVPropsToJson(_DAVProps instance) => <String, dynamic>{
+Map<String, dynamic> _$DAVToJson(_DAV instance) => <String, dynamic>{
   'uri': instance.uri,
   'user': instance.user,
   'password': instance.password,
@@ -149,14 +150,6 @@ Map<String, dynamic> _$VersionInfoToJson(_VersionInfo instance) =>
       'clashName': instance.clashName,
       'version': instance.version,
     };
-
-_Traffic _$TrafficFromJson(Map<String, dynamic> json) =>
-    _Traffic(up: json['up'] as num? ?? 0, down: json['down'] as num? ?? 0);
-
-Map<String, dynamic> _$TrafficToJson(_Traffic instance) => <String, dynamic>{
-  'up': instance.up,
-  'down': instance.down,
-};
 
 _Proxy _$ProxyFromJson(Map<String, dynamic> json) => _Proxy(
   name: json['name'] as String,
@@ -199,7 +192,6 @@ const _$GroupTypeEnumMap = {
   GroupType.URLTest: 'URLTest',
   GroupType.Fallback: 'Fallback',
   GroupType.LoadBalance: 'LoadBalance',
-  GroupType.Relay: 'Relay',
 };
 
 _HotKeyAction _$HotKeyActionFromJson(Map<String, dynamic> json) =>
@@ -239,14 +231,34 @@ const _$KeyboardModifierEnumMap = {
   KeyboardModifier.shift: 'shift',
 };
 
+_TextPainterParams _$TextPainterParamsFromJson(Map<String, dynamic> json) =>
+    _TextPainterParams(
+      text: json['text'] as String?,
+      fontSize: (json['fontSize'] as num?)?.toDouble(),
+      textScaleFactor: (json['textScaleFactor'] as num).toDouble(),
+      maxWidth: (json['maxWidth'] as num?)?.toDouble() ?? double.infinity,
+      maxLines: (json['maxLines'] as num?)?.toInt(),
+    );
+
+Map<String, dynamic> _$TextPainterParamsToJson(_TextPainterParams instance) =>
+    <String, dynamic>{
+      'text': instance.text,
+      'fontSize': instance.fontSize,
+      'textScaleFactor': instance.textScaleFactor,
+      'maxWidth': instance.maxWidth,
+      'maxLines': instance.maxLines,
+    };
+
 _Script _$ScriptFromJson(Map<String, dynamic> json) => _Script(
-  id: (json['id'] as num).toInt(),
+  id: json['id'] as String,
   label: json['label'] as String,
-  lastUpdateTime: DateTime.parse(json['lastUpdateTime'] as String),
+  content: json['content'] as String,
+  url: json['url'] as String?,
 );
 
 Map<String, dynamic> _$ScriptToJson(_Script instance) => <String, dynamic>{
   'id': instance.id,
   'label': instance.label,
-  'lastUpdateTime': instance.lastUpdateTime.toIso8601String(),
+  'content': instance.content,
+  'url': instance.url,
 };

@@ -43,7 +43,9 @@ class IntranetIP extends StatelessWidget {
                               padding: EdgeInsets.all(2),
                               child: AspectRatio(
                                 aspectRatio: 1,
-                                child: CommonCircleLoading(),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
                               ),
                             ),
                     );

@@ -6,63 +6,63 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 import 'package:meow_clash/common/common.dart';
-import 'package:meow_clash/controller.dart';
-import 'package:meow_clash/enum/enum.dart';
+import 'package:meow_clash/common/helper_auth.dart';
 import 'package:meow_clash/models/models.dart';
 import 'package:meow_clash/state.dart';
 import 'package:flutter/cupertino.dart';
 
 class Request {
-  late final Dio dio;
+  late final Dio _dio;
   late final Dio _clashDio;
   String? userAgent;
 
   Request() {
-    dio = Dio(BaseOptions(headers: {'User-Agent': browserUa}));
+    _dio = Dio(BaseOptions(headers: {'User-Agent': browserUa}));
     _clashDio = Dio();
     _clashDio.httpClientAdapter = IOHttpClientAdapter(
       createHttpClient: () {
         final client = HttpClient();
         client.findProxy = (Uri uri) {
-          client.userAgent = appController.ua;
-          return FlClashHttpOverrides.handleFindProxy(uri);
+          client.userAgent = globalState.ua;
+          return MeowClashHttpOverrides.handleFindProxy(uri);
         };
         return client;
       },
     );
   }
 
-  Future<Response<Uint8List>> getFileResponseForUrl(String url) async {
-    try {
-      return await _clashDio.get<Uint8List>(
-        url,
-        options: Options(responseType: ResponseType.bytes),
-      );
-    } catch (e) {
-      commonPrint.log('getFileResponseForUrl error ${e.toString()}');
-      if (e is DioException) {
-        if (e.type == DioExceptionType.unknown) {
-          throw appLocalizations.unknownNetworkError;
-        } else if (e.type == DioExceptionType.badResponse) {
-          throw appLocalizations.networkException;
-        }
-        rethrow;
-      }
-      throw appLocalizations.unknownNetworkError;
-    }
-  }
+  Future<Response> _getResponseForUrl(String url, ResponseType responseType) async {
+    final uri = Uri.parse(url);
+    final userInfo = uri.userInfo;
 
-  Future<Response<String>> getTextResponseForUrl(String url) async {
-    final response = await _clashDio.get<String>(
+    Options? options;
+    if (userInfo.isNotEmpty) {
+      final auth = base64Encode(utf8.encode(userInfo));
+      options = Options(
+        responseType: responseType,
+        headers: {'Authorization': 'Basic $auth'},
+      );
+      url = uri.replace(userInfo: '').toString();
+    }
+
+    final response = await _clashDio.get(
       url,
-      options: Options(responseType: ResponseType.plain),
+      options: options ?? Options(responseType: responseType),
     );
     return response;
   }
 
+  Future<Response> getFileResponseForUrl(String url) async {
+    return _getResponseForUrl(url, ResponseType.bytes);
+  }
+
+  Future<Response> getTextResponseForUrl(String url) async {
+    return _getResponseForUrl(url, ResponseType.plain);
+  }
+
   Future<MemoryImage?> getImage(String url) async {
     if (url.isEmpty) return null;
-    final response = await dio.get<Uint8List>(
+    final response = await _dio.get<Uint8List>(
       url,
       options: Options(responseType: ResponseType.bytes),
     );
@@ -73,7 +73,7 @@ class Request {
 
   Future<Map<String, dynamic>?> checkForUpdate() async {
     try {
-      final response = await dio.get(
+      final response = await _dio.get(
         'https://api.github.com/repos/$repository/releases/latest',
         options: Options(responseType: ResponseType.json),
       );
@@ -85,71 +85,110 @@ class Request {
           utils.compareVersions(remoteVersion.replaceAll('v', ''), version) > 0;
       if (!hasUpdate) return null;
       return data;
+    } on DioException catch (e) {
+      commonPrint.log('Check update failed: ${e.message}');
+      return null;
     } catch (e) {
-      commonPrint.log('checkForUpdate failed', logLevel: LogLevel.warning);
+      commonPrint.log('Check update error: $e');
       return null;
     }
   }
 
-  final Map<String, IpInfo Function(Map<String, dynamic>)> _ipInfoSources = {
-    'https://ipwho.is': IpInfo.fromIpWhoIsJson,
-    'https://api.myip.com': IpInfo.fromMyIpJson,
-    'https://ipapi.co/json': IpInfo.fromIpApiCoJson,
-    'https://ident.me/json': IpInfo.fromIdentMeJson,
-    'http://ip-api.com/json': IpInfo.fromIpAPIJson,
-    'https://api.ip.sb/geoip': IpInfo.fromIpSbJson,
-    'https://ipinfo.io/json': IpInfo.fromIpInfoIoJson,
-  };
+  final List<String> _ipInfoSources = [
+    'https://api.cloudflare.com/cdn-cgi/trace',
+    'https://cp.cloudflare.com/cdn-cgi/trace',
+  ];
 
-  Future<Result<IpInfo?>> checkIp({CancelToken? cancelToken}) async {
-    var failureCount = 0;
-    final token = cancelToken ?? CancelToken();
-    final futures = _ipInfoSources.entries.map((source) async {
-      final Completer<Result<IpInfo?>> completer = Completer();
-      handleFailRes() {
-        if (!completer.isCompleted && failureCount == _ipInfoSources.length) {
-          completer.complete(Result.success(null));
-        }
+  final List<String> _domesticIpSources = [
+    'https://www.teamviewer.cn/cdn-cgi/trace',
+    'https://www.cloudflare-cn.com/cdn-cgi/trace',
+  ];
+
+  Future<Result<IpInfo?>> _checkIpFromSources(
+    List<String> sources,
+    CancelToken? cancelToken,
+    Duration? timeout,
+  ) async {
+    final effectiveTimeout = timeout ?? const Duration(seconds: 5);
+
+    final dio = Dio(
+      BaseOptions(
+        receiveTimeout: effectiveTimeout,
+        connectTimeout: effectiveTimeout,
+      ),
+    );
+
+    final Completer<Result<IpInfo?>> resultCompleter = Completer();
+    int failureCount = 0;
+
+    void handleFailure() {
+      if (resultCompleter.isCompleted) return;
+      failureCount++;
+      if (failureCount == sources.length) {
+        resultCompleter.complete(Result.success(null));
       }
+    }
 
-      final future = dio
-          .get<Map<String, dynamic>>(
-            source.key,
-            cancelToken: token,
-            options: Options(responseType: ResponseType.json),
-          )
-          .timeout(const Duration(seconds: 10));
-      future
-          .then((res) {
-            if (res.statusCode == HttpStatus.ok && res.data != null) {
-              completer.complete(Result.success(source.value(res.data!)));
-              return;
-            }
-            failureCount++;
-            handleFailRes();
-          })
-          .catchError((e) {
-            failureCount++;
-            if (e is DioException && e.type == DioExceptionType.cancel) {
-              completer.complete(Result.error('cancelled'));
-            }
-            handleFailRes();
-          });
-      return completer.future;
-    });
-    final res = await Future.any(futures);
-    token.cancel();
-    return res;
+    for (final url in sources) {
+      dio.get<String>(
+        url,
+        cancelToken: cancelToken,
+        options: Options(responseType: ResponseType.plain),
+      ).then((res) {
+        if (resultCompleter.isCompleted) return;
+        if (res.statusCode == HttpStatus.ok && res.data != null) {
+          try {
+            resultCompleter.complete(
+              Result.success(IpInfo.fromCloudflareTrace(res.data!)),
+            );
+          } catch (_) {
+            handleFailure();
+          }
+        } else {
+          handleFailure();
+        }
+      }).catchError((e) {
+        if (resultCompleter.isCompleted) return;
+        if (e is DioException && e.type == DioExceptionType.cancel) {
+          resultCompleter.complete(Result.error('cancelled'));
+          return;
+        }
+        handleFailure();
+      });
+    }
+
+    try {
+      return await resultCompleter.future.timeout(
+        effectiveTimeout,
+        onTimeout: () => Result.success(null),
+      );
+    } finally {
+      dio.close(force: true);
+    }
   }
 
-  Future<bool> pingHelper() async {
+  Future<Result<IpInfo?>> checkIp({
+    CancelToken? cancelToken,
+    Duration? timeout,
+  }) async {
+    return _checkIpFromSources(_ipInfoSources, cancelToken, timeout);
+  }
+
+  Future<Result<IpInfo?>> checkIpDomestic({
+    CancelToken? cancelToken,
+    Duration? timeout,
+  }) async {
+    return _checkIpFromSources(_domesticIpSources, cancelToken, timeout);
+  }
+
+  Future<bool> quickPingHelper() async {
     try {
-      final response = await dio
+      final response = await _dio
           .get(
             'http://$localhost:$helperPort/ping',
             options: Options(responseType: ResponseType.plain),
           )
-          .timeout(const Duration(milliseconds: 2000));
+          .timeout(const Duration(milliseconds: 500));
       if (response.statusCode != HttpStatus.ok) {
         return false;
       }
@@ -160,38 +199,70 @@ class Request {
   }
 
   Future<bool> startCoreByHelper(String arg) async {
-    try {
-      final response = await dio
-          .post(
-            'http://$localhost:$helperPort/start',
-            data: json.encode({'path': appPath.corePath, 'arg': arg}),
-            options: Options(responseType: ResponseType.plain),
-          )
-          .timeout(const Duration(milliseconds: 2000));
-      if (response.statusCode != HttpStatus.ok) {
-        return false;
-      }
-      final data = response.data as String;
-      return data.isEmpty;
-    } catch (_) {
+    final helperAlive = await quickPingHelper();
+    if (!helperAlive) {
+      commonPrint.log('Helper service is not reachable, skipping startCoreByHelper');
       return false;
     }
+
+    final homeDirPath = await appPath.homeDirPath;
+    final body = json.encode({
+      'path': appPath.corePath,
+      'arg': arg,
+      'home_dir': homeDirPath,
+    });
+    final authHeaders = HelperAuthManager.generateAuthHeaders(body);
+
+    const maxAttempts = 4;
+    const interval = Duration(milliseconds: 500);
+    const requestTimeout = Duration(seconds: 5);
+
+    for (var attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        final response = await _dio
+            .post(
+              'http://$localhost:$helperPort/start',
+              data: body,
+              options: Options(
+                responseType: ResponseType.plain,
+                headers: authHeaders,
+              ),
+            )
+            .timeout(requestTimeout);
+        if (response.statusCode == HttpStatus.ok) {
+          final data = response.data as String;
+          if (data.isEmpty) return true;
+        }
+      } catch (e) {
+        if (attempt == maxAttempts) {
+          commonPrint.log('Failed to start core by helper after $maxAttempts attempts: $e');
+          return false;
+        }
+      }
+      await Future.delayed(interval);
+    }
+    return false;
   }
 
   Future<bool> stopCoreByHelper() async {
     try {
-      final response = await dio
+      final authHeaders = HelperAuthManager.generateAuthHeaders('');
+
+      final response = await _dio
           .post(
             'http://$localhost:$helperPort/stop',
-            options: Options(responseType: ResponseType.plain),
+            options: Options(
+              responseType: ResponseType.plain,
+              headers: authHeaders,
+            ),
           )
           .timeout(const Duration(milliseconds: 2000));
       if (response.statusCode != HttpStatus.ok) {
         return false;
       }
-      final data = response.data as String;
-      return data.isEmpty;
-    } catch (_) {
+      return true;
+    } catch (e) {
+      commonPrint.log('Failed to stop core by helper: $e');
       return false;
     }
   }

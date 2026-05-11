@@ -28,15 +28,11 @@ class _ProxyManagerState extends ConsumerState<ProxyManager> {
   @override
   void initState() {
     super.initState();
-    ref.listenManual(
-      proxyStateProvider,
-      (prev, next) {
-        if (prev != next) {
-          _updateProxy(next);
-        }
-      },
-      fireImmediately: true,
-    );
+    ref.listenManual(proxyStateProvider, (prev, next) {
+      if (prev != next) {
+        _updateProxy(next);
+      }
+    }, fireImmediately: true);
   }
 
   @override

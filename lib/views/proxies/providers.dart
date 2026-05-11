@@ -1,11 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:meow_clash/clash/clash.dart';
 import 'package:meow_clash/common/common.dart';
-import 'package:meow_clash/controller.dart';
-import 'package:meow_clash/core/core.dart';
 import 'package:meow_clash/models/common.dart';
 import 'package:meow_clash/models/core.dart';
+import 'package:meow_clash/models/profile.dart';
 import 'package:meow_clash/providers/app.dart';
 import 'package:meow_clash/state.dart';
 import 'package:meow_clash/widgets/widgets.dart';
@@ -24,19 +24,47 @@ class ProvidersView extends ConsumerStatefulWidget {
 }
 
 class _ProvidersViewState extends ConsumerState<ProvidersView> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      globalState.appController.updateProviders();
+    });
+  }
+
   Future<void> _updateProviders() async {
     final providers = ref.read(providersProvider);
-    final List<UpdatingMessage> messages = [];
+    final providersNotifier = ref.read(providersProvider.notifier);
+    final messages = [];
     final updateProviders = providers.map<Future>((provider) async {
-      final message = await appController.updateProvider(provider);
+      providersNotifier.setProvider(provider.copyWith(isUpdating: true));
+      final message = await clashCore.updateExternalProvider(
+        providerName: provider.name,
+      );
       if (message.isNotEmpty) {
-        messages.add(UpdatingMessage(label: provider.name, message: message));
+        messages.add('${provider.name}: $message \n');
       }
+      providersNotifier.setProvider(
+        await clashCore.getExternalProvider(provider.name),
+      );
     });
+    final titleMedium = context.textTheme.titleMedium;
     await Future.wait(updateProviders);
-    appController.updateGroupsDebounce();
+    globalState.appController.updateGroupsDebounce();
+    final hasRuleProvider = providers.any((p) => p.type == 'Rule');
+    if (hasRuleProvider) {
+      globalState.appController.applyProfileDebounce(silence: true);
+    }
     if (messages.isNotEmpty) {
-      globalState.showAllUpdatingMessagesDialog(messages);
+      globalState.showMessage(
+        title: appLocalizations.tip,
+        message: TextSpan(
+          children: [
+            for (final message in messages)
+              TextSpan(text: message, style: titleMedium),
+          ],
+        ),
+      );
     }
   }
 
@@ -79,41 +107,77 @@ class ProviderItem extends StatelessWidget {
   const ProviderItem({super.key, required this.provider});
 
   Future<void> _handleUpdateProvider() async {
+    final appController = globalState.appController;
     if (provider.vehicleType != 'HTTP') return;
-    await appController.safeRun(() async {
-      final message = await appController.updateProvider(provider);
+    await globalState.appController.safeRun(() async {
+      appController.setProvider(provider.copyWith(isUpdating: true));
+      final message = await clashCore.updateExternalProvider(
+        providerName: provider.name,
+      );
       if (message.isNotEmpty) throw message;
     }, silence: false);
-    appController.updateGroupsDebounce();
+    appController.setProvider(
+      await clashCore.getExternalProvider(provider.name),
+    );
+    globalState.appController.updateGroupsDebounce();
+    if (provider.type == 'Rule') {
+      globalState.appController.applyProfileDebounce(silence: true);
+    }
   }
 
   Future<void> _handleSideLoadProvider() async {
-    await appController.safeRun<void>(() async {
+    await globalState.appController.safeRun<void>(() async {
       final platformFile = await picker.pickerFile();
       final bytes = platformFile?.bytes;
       if (bytes == null || provider.path == null) return;
-      await File(provider.path!).safeWriteAsBytes(bytes);
+      final file = await File(provider.path!).create(recursive: true);
+      await file.writeAsBytes(bytes);
       final providerName = provider.name;
-      var message = await coreController.sideLoadExternalProvider(
+      var message = await clashCore.sideLoadExternalProvider(
         providerName: providerName,
         data: utf8.decode(bytes),
       );
       if (message.isNotEmpty) throw message;
-      appController.setProvider(
-        await coreController.getExternalProvider(provider.name),
+      globalState.appController.setProvider(
+        await clashCore.getExternalProvider(provider.name),
       );
       if (message.isNotEmpty) throw message;
     });
-    appController.updateGroupsDebounce();
+    globalState.appController.updateGroupsDebounce();
+    if (provider.type == 'Rule') {
+      globalState.appController.applyProfileDebounce(silence: true);
+    }
   }
 
   String _buildProviderDesc() {
     final baseInfo = provider.updateAt.lastUpdateTimeDesc;
+    final trafficInfo = _buildTrafficInfoText(provider.subscriptionInfo);
+    final infoText = trafficInfo == null
+        ? baseInfo
+        : '$trafficInfo  ·  $baseInfo';
     final count = provider.count;
     return switch (count == 0) {
-      true => baseInfo,
-      false => '$baseInfo  ·  $count${appLocalizations.entries}',
+      true => infoText,
+      false => '$infoText  ·  $count${appLocalizations.entries}',
     };
+  }
+
+  String? _buildTrafficInfoText(SubscriptionInfo? subscriptionInfo) {
+    if (subscriptionInfo == null) {
+      return null;
+    }
+    final use = subscriptionInfo.upload + subscriptionInfo.download;
+    final total = subscriptionInfo.total;
+    if (use == 0 && total == 0) {
+      return null;
+    }
+    if (total == 0) {
+      final useShow = TrafficValue(value: use).show;
+      return '$useShow / Unlimited';
+    }
+    final useShow = TrafficValue(value: use).show;
+    final totalShow = TrafficValue(value: total).show;
+    return '$useShow / $totalShow';
   }
 
   @override
@@ -125,8 +189,7 @@ class ProviderItem extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 4),
-          if (provider.updateAt.microsecondsSinceEpoch > 0)
-            Text(_buildProviderDesc()),
+          Text(_buildProviderDesc()),
           const SizedBox(height: 4),
           if (provider.subscriptionInfo != null)
             SubscriptionInfoView(subscriptionInfo: provider.subscriptionInfo),
@@ -142,27 +205,20 @@ class ProviderItem extends StatelessWidget {
                 onPressed: _handleSideLoadProvider,
               ),
               if (provider.vehicleType == 'HTTP')
-                Consumer(
-                  builder: (_, ref, _) {
-                    final isUpdating = ref.watch(
-                      isUpdatingProvider(provider.updatingKey),
-                    );
-                    return isUpdating
-                        ? SizedBox(
-                            height: 30,
-                            width: 30,
-                            child: const Padding(
-                              padding: EdgeInsets.all(2),
-                              child: CircularProgressIndicator(),
-                            ),
-                          )
-                        : CommonChip(
-                            avatar: const Icon(Icons.sync),
-                            label: appLocalizations.sync,
-                            onPressed: _handleUpdateProvider,
-                          );
-                  },
-                ),
+                provider.isUpdating
+                    ? SizedBox(
+                        height: 30,
+                        width: 30,
+                        child: const Padding(
+                          padding: EdgeInsets.all(2),
+                          child: CircularProgressIndicator(),
+                        ),
+                      )
+                    : CommonChip(
+                        avatar: const Icon(Icons.sync),
+                        label: appLocalizations.sync,
+                        onPressed: _handleUpdateProvider,
+                      ),
             ],
           ),
           const SizedBox(height: 4),

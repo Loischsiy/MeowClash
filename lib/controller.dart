@@ -809,7 +809,9 @@ class AppController {
   }
 
   Future<void> init() async {
+    debugPrint('=== init: start ===');
     FlutterError.onError = (details) {
+      debugPrint('=== FlutterError: ${details.exception} ===');
       if (kDebugMode) {
         commonPrint.log(details.stack.toString());
       }
@@ -823,11 +825,14 @@ class AppController {
     });
 
     if (system.isAndroid) {
+      debugPrint('=== init: _initHighRefreshRateDefault ===');
       await _initHighRefreshRateDefault();
     }
 
     try {
+      debugPrint('=== init: WakelockPlus.enabled ===');
       final wakelockEnabled = await WakelockPlus.enabled;
+      debugPrint('=== init: wakelock = $wakelockEnabled ===');
       _ref.read(wakelockStateProvider.notifier).state = wakelockEnabled;
 
       if (wakelockEnabled) {
@@ -837,11 +842,17 @@ class AppController {
       commonPrint.log('Failed to check wake lock status: $e');
     }
 
+    debugPrint('=== init: updateTray ===');
     await updateTray(true);
+    debugPrint('=== init: updateTray done ===');
 
+    debugPrint('=== init: _initCore ===');
     await _initCore();
+    debugPrint('=== init: _initCore done ===');
     try {
+      debugPrint('=== init: _initStatus ===');
       await _initStatus();
+      debugPrint('=== init: _initStatus done ===');
     } catch (e) {
       commonPrint.log('_initStatus failed, falling back to basic startup: $e');
       try {
@@ -850,26 +861,7 @@ class AppController {
         commonPrint.log('Fallback applyProfile also failed: $e2');
       }
     }
-    autoLaunch?.updateStatus(_ref.read(appSettingProvider).autoLaunch);
-    autoUpdateProfiles();
-    autoCheckUpdate();
-
-    final isWindowVisible = await window?.isVisible ?? false;
-    if (isWindowVisible) {
-      window?.show();
-    } else {
-      if (!_ref.read(appSettingProvider).silentLaunch) {
-        window?.show();
-      } else {
-        window?.hide();
-      }
-    }
-    await syncDesktopRuntimeState(preferCurrentState: true);
-    await updateTray(true);
-
-    await _handlePreference();
-    await _handlerDisclaimer();
-    _ref.read(initProvider.notifier).value = true;
+    debugPrint('=== init: done ===');
   }
 
   Future<void> _initStatus() async {

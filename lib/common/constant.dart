@@ -13,7 +13,7 @@ const coreName = 'clash.meta';
 const tunDeviceName = 'MeowClash';
 const browserUa =
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36';
-const packageName = 'com.appshub.bettbox';
+const packageName = 'com.follow.clash';
 final unixSocketPath = '/tmp/MeowClashSocket_${Random().nextInt(10000)}.sock';
 const helperPort = 45678;
 const maxTextScale = 1.4;

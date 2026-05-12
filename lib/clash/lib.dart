@@ -34,9 +34,9 @@ class ClashLib extends ClashHandlerInterface with AndroidClashInterface {
     _registerMainPort(receiverPort.sendPort);
     debugPrint('=== ClashLib._initService: main port registered ===');
     receiverPort.listen((message) {
-      debugPrint('=== ClashLib: received message type=${message.runtimeType} ===');
+      commonPrint.log('[ClashLib]  received message type=${message.runtimeType} ===');
       if (message is SendPort) {
-        debugPrint('=== ClashLib: received SendPort! ===');
+        commonPrint.log('[ClashLib]  received SendPort! ===');
         if (_canSendCompleter.isCompleted) {
           sendPort = null;
           _canSendCompleter = Completer();

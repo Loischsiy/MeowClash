@@ -110,6 +110,8 @@ Future<void> _service(List<String> flags) async {
       return;
     }
 
+    _handleMainIpc(clashLibHandler);
+
     if (bootStart && !globalState.config.appSetting.autoRun) {
       commonPrint.log('Silent boot detected, but autoRun is disabled. Staying idle.');
       _handleMainIpc(clashLibHandler);

@@ -825,21 +825,20 @@ class AppController {
     });
 
     if (system.isAndroid) {
-      debugPrint('=== init: _initHighRefreshRateDefault ===');
-      await _initHighRefreshRateDefault();
+      try {
+        await _initHighRefreshRateDefault().timeout(const Duration(seconds: 2));
+      } catch (_) {}
     }
 
     try {
-      debugPrint('=== init: WakelockPlus.enabled ===');
-      final wakelockEnabled = await WakelockPlus.enabled;
+      final wakelockEnabled = await WakelockPlus.enabled.timeout(const Duration(seconds: 2));
       debugPrint('=== init: wakelock = $wakelockEnabled ===');
       _ref.read(wakelockStateProvider.notifier).state = wakelockEnabled;
-
       if (wakelockEnabled) {
         startWakelockAutoRecovery();
       }
     } catch (e) {
-      commonPrint.log('Failed to check wake lock status: $e');
+      debugPrint('=== init: wakelock error=$e ===');
     }
 
     debugPrint('=== init: updateTray ===');

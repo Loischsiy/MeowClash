@@ -102,7 +102,7 @@ class GlobalState {
     } catch (_) {}
     _initDynamicColor();
     try {
-      await init();
+      await init().timeout(const Duration(seconds: 5));
     } catch (e) {
       debugPrint('=== initApp: init error=$e ===');
     }

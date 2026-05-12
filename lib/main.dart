@@ -34,6 +34,20 @@ Future<void> main() async {
   await clashCore.preload();
   debugPrint('=== preload done ===');
 
+  // Set defaults so _runApp doesn't crash on late fields
+  globalState.config = Config(themeProps: defaultThemeProps);
+  globalState.accentColor = const Color(defaultPrimaryColor);
+  globalState.appState = AppState(
+    brightness: WidgetsBinding.instance.platformDispatcher.platformBrightness,
+    version: version,
+    viewSize: Size.zero,
+    requests: FixedList(maxLength),
+    logs: FixedList(maxLength),
+    traffics: FixedList(30),
+    totalTraffic: Traffic(),
+    systemUiOverlayStyle: const SystemUiOverlayStyle(),
+  );
+
   // Init in background, don't block UI
   unawaited(Future(() async {
     await globalState.initApp(version);

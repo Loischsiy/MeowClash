@@ -108,8 +108,10 @@ class GlobalState {
       corePalette = await DynamicColorPlugin.getCorePalette().timeout(const Duration(seconds: 1));
     } catch (_) {}
     try {
-      accentColor = await DynamicColorPlugin.getAccentColor().timeout(const Duration(seconds: 1));
-    } catch (_) {}
+      accentColor = await DynamicColorPlugin.getAccentColor().timeout(const Duration(seconds: 1)) ?? const Color(defaultPrimaryColor);
+    } catch (_) {
+      accentColor = const Color(defaultPrimaryColor);
+    }
   }
 
   Future<void> init() async {

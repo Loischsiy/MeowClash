@@ -105,25 +105,38 @@ class GlobalState {
 
   Future<void> _initDynamicColor() async {
     try {
-      corePalette = await DynamicColorPlugin.getCorePalette();
+      debugPrint('=== _initDynamicColor: getCorePalette ===');
+      corePalette = await DynamicColorPlugin.getCorePalette().timeout(const Duration(seconds: 3));
+      debugPrint('=== _initDynamicColor: corePalette=$corePalette ===');
       accentColor =
-          await DynamicColorPlugin.getAccentColor() ??
+          await DynamicColorPlugin.getAccentColor().timeout(const Duration(seconds: 3)) ??
           Color(defaultPrimaryColor);
-    } catch (_) {}
+      debugPrint('=== _initDynamicColor: accentColor=$accentColor ===');
+    } catch (e) {
+      debugPrint('=== _initDynamicColor: error=$e ===');
+    }
   }
 
   Future<void> init() async {
+    debugPrint('=== GlobalState.init: start ===');
     packageInfo = await PackageInfo.fromPlatform();
+    debugPrint('=== GlobalState.init: packageInfo done ===');
     config =
         await preferences.getConfig() ?? Config(themeProps: defaultThemeProps);
+    debugPrint('=== GlobalState.init: config done ===');
     await globalState.migrateOldData(config);
+    debugPrint('=== GlobalState.init: migrate done ===');
     final locale =
         utils.getLocaleForString(config.appSetting.locale) ??
         utils.getSystemLocale();
+    debugPrint('=== GlobalState.init: loading locale=$locale ===');
     await AppLocalizations.load(locale);
+    debugPrint('=== GlobalState.init: locale loaded ===');
     if (system.isAndroid) {
       _isAndroidTV = await app.isAndroidTV();
+      debugPrint('=== GlobalState.init: isAndroidTV=$_isAndroidTV ===');
     }
+    debugPrint('=== GlobalState.init: done ===');
   }
 
   bool get isAndroidTV => _isAndroidTV ?? false;

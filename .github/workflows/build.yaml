@@ -83,6 +83,7 @@ jobs:
         run: |
           set -o pipefail
           ENV_FLAG=""
+          ARCH_FLAG=""
           if [[ "${{ github.event.inputs.env }}" == "stable" ]]; then
             ENV_FLAG="--env stable"
           elif [[ "${{ github.event.inputs.env }}" == "beta" ]]; then
@@ -90,7 +91,10 @@ jobs:
           elif [[ "${{ env.IS_STABLE }}" == "true" ]]; then
             ENV_FLAG="--env stable"
           fi
-          dart setup.dart android $ENV_FLAG 2>&1 | tee setup.log
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ github.event.inputs.arch }}" != "all" && "${{ github.event.inputs.arch }}" != "" ]]; then
+            ARCH_FLAG="--arch ${{ github.event.inputs.arch }}"
+          fi
+          dart setup.dart android $ARCH_FLAG $ENV_FLAG 2>&1 | tee setup.log
 
       - name: Upload setup log
         if: failure()

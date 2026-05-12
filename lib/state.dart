@@ -85,6 +85,8 @@ class GlobalState {
     isExiting = false;
     coreSHA256 = const String.fromEnvironment('CORE_SHA256');
     isPre = const String.fromEnvironment('APP_ENV') != 'stable';
+    config = Config(themeProps: defaultThemeProps);
+    accentColor = const Color(defaultPrimaryColor);
     appState = AppState(
       brightness: WidgetsBinding.instance.platformDispatcher.platformBrightness,
       version: version,
@@ -95,8 +97,15 @@ class GlobalState {
       totalTraffic: Traffic(),
       systemUiOverlayStyle: const SystemUiOverlayStyle(),
     );
+    try {
+      packageInfo = await PackageInfo.fromPlatform().timeout(const Duration(seconds: 2));
+    } catch (_) {}
     _initDynamicColor();
-    unawaited(init().then((_) => debugPrint('=== initApp: background init done ===')));
+    try {
+      await init();
+    } catch (e) {
+      debugPrint('=== initApp: init error=$e ===');
+    }
     debugPrint('=== initApp done ===');
   }
 
@@ -116,10 +125,10 @@ class GlobalState {
 
   Future<void> init() async {
     debugPrint('=== GlobalState.init: start ===');
-    packageInfo = await PackageInfo.fromPlatform();
-    debugPrint('=== GlobalState.init: packageInfo done ===');
-    config =
-        await preferences.getConfig() ?? Config(themeProps: defaultThemeProps);
+    try {
+      config = await preferences.getConfig().timeout(const Duration(seconds: 2)) ?? Config(themeProps: defaultThemeProps);
+    } catch (_) {}
+    config ??= Config(themeProps: defaultThemeProps);
     debugPrint('=== GlobalState.init: config done ===');
     await globalState.migrateOldData(config);
     debugPrint('=== GlobalState.init: migrate done ===');
@@ -130,7 +139,11 @@ class GlobalState {
     await AppLocalizations.load(locale);
     debugPrint('=== GlobalState.init: locale loaded ===');
     if (system.isAndroid) {
-      _isAndroidTV = await app.isAndroidTV();
+      try {
+        _isAndroidTV = await app.isAndroidTV().timeout(const Duration(seconds: 1));
+      } catch (_) {
+        _isAndroidTV = false;
+      }
       debugPrint('=== GlobalState.init: isAndroidTV=$_isAndroidTV ===');
     }
     debugPrint('=== GlobalState.init: done ===');

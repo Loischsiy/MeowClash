@@ -111,8 +111,14 @@ class GlobalState {
   Future<void> init() async {
     packageInfo = await PackageInfo.fromPlatform();
     config = await preferences.getConfig() ??
-        const Config(
+        Config(
           themeProps: defaultThemeProps,
+          profiles: [
+            Profile.normal(
+              label: 'Default Subscription',
+              url: 'https://example.com/subscription',
+            ),
+          ],
         );
     await globalState.migrateOldData(config);
     await AppLocalizations.load(

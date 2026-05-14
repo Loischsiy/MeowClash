@@ -45,8 +45,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
+
+      - name: Setup flutter_distributor
+        run: |
+          rm -rf plugins/flutter_distributor
+          git clone https://github.com/leanflutter/flutter_distributor plugins/flutter_distributor
 
       - name: Setup Android Signing
         run: |
@@ -82,6 +85,7 @@ jobs:
       - name: Build
         run: |
           set -o pipefail
+          export ANDROID_NDK=$ANDROID_NDK_LATEST_HOME
           ENV_FLAG=""
           ARCH_FLAG=""
           if [[ "${{ github.event.inputs.env }}" == "stable" ]]; then
@@ -118,8 +122,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
+
+      - name: Setup flutter_distributor
+        run: |
+          if (Test-Path plugins/flutter_distributor) { Remove-Item -Recurve -Force plugins/flutter_distributor }
+          git clone https://github.com/leanflutter/flutter_distributor plugins/flutter_distributor
 
       - name: Setup Go
         uses: actions/setup-go@v5
@@ -163,8 +170,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
+
+      - name: Setup flutter_distributor
+        run: |
+          rm -rf plugins/flutter_distributor
+          git clone https://github.com/leanflutter/flutter_distributor plugins/flutter_distributor
 
       - name: Setup Go
         uses: actions/setup-go@v5
@@ -212,8 +222,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
+
+      - name: Setup flutter_distributor
+        run: |
+          rm -rf plugins/flutter_distributor
+          git clone https://github.com/leanflutter/flutter_distributor plugins/flutter_distributor
 
       - name: Setup Go
         uses: actions/setup-go@v5
@@ -261,8 +274,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
+
+      - name: Setup flutter_distributor
+        run: |
+          rm -rf plugins/flutter_distributor
+          git clone https://github.com/leanflutter/flutter_distributor plugins/flutter_distributor
 
       - name: Setup Go
         uses: actions/setup-go@v5
@@ -310,8 +326,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
+
+      - name: Setup flutter_distributor
+        run: |
+          rm -rf plugins/flutter_distributor
+          git clone https://github.com/leanflutter/flutter_distributor plugins/flutter_distributor
 
       - name: Setup Go
         uses: actions/setup-go@v5
@@ -412,14 +431,6 @@ jobs:
     needs: [ build-android, build-windows-amd64, build-linux-amd64, build-linux-arm64, build-macos-amd64, build-macos-arm64 ]
     runs-on: ubuntu-latest
     if: github.event_name == 'push'
-    services:
-      telegram-bot-api:
-        image: aiogram/telegram-bot-api:latest
-        env:
-          TELEGRAM_API_ID: ${{ secrets.TEGRAM_API_ID }}
-          TELEGRAM_API_HASH: ${{ secrets.TEGRAM_API_HASH }}
-        ports:
-          - 8081:8081
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -453,16 +464,6 @@ jobs:
             git log --no-merges --pretty=format:"%B" "$range" | \
             awk '!/Update changelog/ && NF {print "- " $0 "\n"}' >> "$out"
           done
-
-      - name: Push to telegram
-        env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TAG: ${{ github.ref_name }}
-          RUN_ID: ${{ github.run_id }}
-        run: |
-          python -m pip install --upgrade pip
-          pip install requests
-          python release_telegram.py
 
       - name: Patch release.md
         run: |

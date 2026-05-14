@@ -1,5 +1,12 @@
 # GEMINI.md
 
+## AI Instructions for this Repo
+
+1. **Context Awareness:** Перед выполнением любой задачи всегда проверяй структуру проекта. Если ты видишь новые технологии, не описанные здесь, предложи обновить этот файл.
+2. **Analysis Mode:** По запросу "Analyze and Update GEMINI.md" ты должен заново просканировать весь проект, выявить изменения в архитектуре и актуализировать разделы Tech Stack и Project Structure.
+3. **Consistency:** Всегда следуй паттернам, которые уже реализованы в папке `/src` (или аналогичной). Не предлагай сторонние библиотеки, если в проекте уже есть встроенное решение.
+4. **Recursive Improvement:** Ты имеешь право редактировать этот файл, если считаешь, что добавление нового правила улучшит качество твоей работы с текущим кодом.
+
 ## Project Context
 
 **MeowClash** is a fork of [FlClash](https://github.com/chen08209/FlClash) — a multi-platform proxy client based on **ClashMeta** (mihomo). It provides a Material You-based UI for configuring and managing proxy connections on Android, Windows, macOS, and Linux. The app supports subscription links, WebDAV sync, TUN mode, multiple color themes, and adaptive screen sizes.

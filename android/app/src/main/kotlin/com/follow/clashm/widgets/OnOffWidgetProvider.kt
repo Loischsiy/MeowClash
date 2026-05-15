@@ -1,4 +1,4 @@
-package com.follow.clashx.widgets
+package com.follow.clashm.widgets
 
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
@@ -9,9 +9,9 @@ import android.content.Intent
 import android.util.Log
 import android.widget.RemoteViews
 import androidx.lifecycle.Observer
-import com.follow.clashx.GlobalState
-import com.follow.clashx.R
-import com.follow.clashx.RunState
+import com.follow.clashm.GlobalState
+import com.follow.clashm.R
+import com.follow.clashm.RunState
 
 /**
  * Minimal 1x1 home-screen widget: a single tap target showing the app
@@ -24,7 +24,7 @@ class OnOffWidgetProvider : AppWidgetProvider() {
     companion object {
         private const val TAG = "OnOffWidgetProvider"
 
-        const val ACTION_TOGGLE = "com.follow.clashx.widget.ACTION_ONOFF_TOGGLE"
+        const val ACTION_TOGGLE = "com.follow.clashm.widget.ACTION_ONOFF_TOGGLE"
 
         @Volatile
         private var observersAttached = false
@@ -41,7 +41,7 @@ class OnOffWidgetProvider : AppWidgetProvider() {
         }
 
         private fun refreshAll() {
-            val ctx = com.follow.clashx.MeowClashApplication.getAppContext() ?: return
+            val ctx = com.follow.clashm.MeowClashApplication.getAppContext() ?: return
             val mgr = AppWidgetManager.getInstance(ctx) ?: return
             val component = ComponentName(ctx, OnOffWidgetProvider::class.java)
             val ids = mgr.getAppWidgetIds(component)

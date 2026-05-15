@@ -1,10 +1,10 @@
-package com.follow.clashx
+package com.follow.clashm
 
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
-import com.follow.clashx.plugins.AppPlugin
-import com.follow.clashx.plugins.TilePlugin
-import com.follow.clashx.plugins.VpnPlugin
+import com.follow.clashm.plugins.AppPlugin
+import com.follow.clashm.plugins.TilePlugin
+import com.follow.clashm.plugins.VpnPlugin
 import io.flutter.FlutterInjector
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.engine.dart.DartExecutor

@@ -1,4 +1,4 @@
-package com.follow.clashx.core
+package com.follow.clashm.core
 
 import androidx.annotation.Keep
 

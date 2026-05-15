@@ -1,4 +1,4 @@
-package com.follow.clashx.services
+package com.follow.clashm.services
 
 import android.os.Build
 import android.service.quicksettings.Tile
@@ -6,8 +6,8 @@ import android.service.quicksettings.TileService
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.Observer
-import com.follow.clashx.GlobalState
-import com.follow.clashx.RunState
+import com.follow.clashm.GlobalState
+import com.follow.clashm.RunState
 
 
 @RequiresApi(Build.VERSION_CODES.N)

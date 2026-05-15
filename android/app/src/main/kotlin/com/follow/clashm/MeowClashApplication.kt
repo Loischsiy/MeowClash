@@ -1,4 +1,4 @@
-package com.follow.clashx;
+package com.follow.clashm;
 
 import android.app.Application
 import android.content.Context

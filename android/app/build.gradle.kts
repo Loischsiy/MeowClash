@@ -23,7 +23,7 @@ val isRelease = mStoreFile.exists()
         && mKeyPassword != null
 
 android {
-    namespace = "com.follow.clashx"
+    namespace = "com.follow.clashm"
     compileSdk = 36
     ndkVersion = "28.0.13004108"
 
@@ -38,7 +38,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.follow.clashx"
+        applicationId = "com.follow.clashm"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

@@ -1,4 +1,4 @@
-package com.follow.clashx.services
+package com.follow.clashm.services
 
 import android.annotation.SuppressLint
 import android.app.Notification
@@ -11,11 +11,11 @@ import android.content.Intent
 import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
 import android.os.Build
 import androidx.core.app.NotificationCompat
-import com.follow.clashx.GlobalState
-import com.follow.clashx.MainActivity
-import com.follow.clashx.R
-import com.follow.clashx.extensions.getActionPendingIntent
-import com.follow.clashx.models.VpnOptions
+import com.follow.clashm.GlobalState
+import com.follow.clashm.MainActivity
+import com.follow.clashm.R
+import com.follow.clashm.extensions.getActionPendingIntent
+import com.follow.clashm.models.VpnOptions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers

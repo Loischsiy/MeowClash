@@ -1,4 +1,4 @@
-package com.follow.clashx.models
+package com.follow.clashm.models
 
 import java.net.InetAddress
 

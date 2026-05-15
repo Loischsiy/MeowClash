@@ -22,7 +22,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 
-class FlClashXVpnService : VpnService(), BaseServiceInterface {
+class MeowClashVpnService : VpnService(), BaseServiceInterface {
     override fun onCreate() {
         super.onCreate()
         GlobalState.initServiceEngine()
@@ -141,7 +141,7 @@ class FlClashXVpnService : VpnService(), BaseServiceInterface {
                     }
                 }
             }
-            setSession("FlClashX")
+            setSession("MeowClash")
             setBlocking(false)
             if (Build.VERSION.SDK_INT >= 29) {
                 setMetered(false)
@@ -174,7 +174,7 @@ class FlClashXVpnService : VpnService(), BaseServiceInterface {
 
     private suspend fun notificationBuilder(): NotificationCompat.Builder {
         if (cachedBuilder == null) {
-            cachedBuilder = createFlClashXNotificationBuilder().await()
+            cachedBuilder = createMeowClashNotificationBuilder().await()
         }
         return cachedBuilder!!
     }
@@ -198,7 +198,7 @@ class FlClashXVpnService : VpnService(), BaseServiceInterface {
     private val binder = LocalBinder()
 
     inner class LocalBinder : Binder() {
-        fun getService(): FlClashXVpnService = this@FlClashXVpnService
+        fun getService(): MeowClashVpnService = this@MeowClashVpnService
 
         override fun onTransact(code: Int, data: Parcel, reply: Parcel?, flags: Int): Boolean {
             try {

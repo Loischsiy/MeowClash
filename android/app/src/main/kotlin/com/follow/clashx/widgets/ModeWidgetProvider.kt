@@ -18,7 +18,7 @@ import com.follow.clashx.RunState
  * Home-screen widget: three mode buttons (Rule/Global/Direct) and a
  * toggle button showing the app logo (colored when the tunnel is up,
  * monochrome otherwise). When the current subscription disables global
- * mode (`flclashx-globalmode: false`), the mode column is hidden and a
+ * mode (`meowclash-globalmode: false`), the mode column is hidden and a
  * start/stop label appears under the logo.
  *
  * Widget redraws are driven by LiveData in GlobalState; observers are
@@ -61,7 +61,7 @@ class ModeWidgetProvider : AppWidgetProvider() {
         }
 
         private fun refreshAll() {
-            val ctx = com.follow.clashx.FlClashXApplication.getAppContext() ?: return
+            val ctx = com.follow.clashx.MeowClashApplication.getAppContext() ?: return
             val mgr = AppWidgetManager.getInstance(ctx) ?: return
             val component = ComponentName(ctx, ModeWidgetProvider::class.java)
             val ids = mgr.getAppWidgetIds(component)

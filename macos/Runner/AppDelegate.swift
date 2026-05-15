@@ -72,8 +72,8 @@ class AppDelegate: FlutterAppDelegate {
         }
         
         let bundleURL = Bundle.main.bundleURL
-        let bundleCorePath = bundleURL.appendingPathComponent("Contents/MacOS/FlClashCore")
-        let appSupportCorePath = appSupportURL.appendingPathComponent("com.follow.clash/cores/FlClashCore")
+        let bundleCorePath = bundleURL.appendingPathComponent("Contents/MacOS/MeowClashCore")
+        let appSupportCorePath = appSupportURL.appendingPathComponent("com.follow.clash/cores/MeowClashCore")
         let appSupportDir = appSupportCorePath.deletingLastPathComponent()
         
         do {
@@ -89,7 +89,7 @@ class AppDelegate: FlutterAppDelegate {
                 try FileManager.default.copyItem(at: bundleCorePath, to: appSupportCorePath)
                 
                 if setCorePermissions(corePath: appSupportCorePath.path) {
-                    print("FlClashCore updated to: \(appSupportCorePath.path)")
+                    print("MeowClashCore updated to: \(appSupportCorePath.path)")
                 }
             } else {
                 let attrs = try? FileManager.default.attributesOfItem(atPath: appSupportCorePath.path)
@@ -99,7 +99,7 @@ class AppDelegate: FlutterAppDelegate {
                         print("Permissions not set, setting them now...")
                         let _ = setCorePermissions(corePath: appSupportCorePath.path)
                     } else {
-                        print("FlClashCore already up-to-date with correct permissions")
+                        print("MeowClashCore already up-to-date with correct permissions")
                     }
                 }
             }
@@ -136,7 +136,7 @@ class AppDelegate: FlutterAppDelegate {
     func showPermissionRequiredAlert() {
         let alert = NSAlert()
         alert.messageText = "Administrator Access Required"
-        alert.informativeText = "FlClashX requires administrator privileges to set up the network core. The application cannot run without these permissions.\n\nPlease restart the application and grant administrator access when prompted."
+        alert.informativeText = "MeowClash requires administrator privileges to set up the network core. The application cannot run without these permissions.\n\nPlease restart the application and grant administrator access when prompted."
         alert.alertStyle = .critical
         alert.addButton(withTitle: "Quit")
         alert.runModal()

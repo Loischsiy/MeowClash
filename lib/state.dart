@@ -6,13 +6,13 @@ import 'dart:io' show Platform;
 import 'package:animations/animations.dart';
 import 'package:dio/dio.dart';
 import 'package:dynamic_color/dynamic_color.dart';
-import 'package:flclashx/clash/clash.dart';
-import 'package:flclashx/common/theme.dart';
-import 'package:flclashx/enum/enum.dart';
-import 'package:flclashx/l10n/l10n.dart';
-import 'package:flclashx/plugins/service.dart';
-import 'package:flclashx/widgets/dialog.dart';
-import 'package:flclashx/widgets/scaffold.dart';
+import 'package:meowclash/clash/clash.dart';
+import 'package:meowclash/common/theme.dart';
+import 'package:meowclash/enum/enum.dart';
+import 'package:meowclash/l10n/l10n.dart';
+import 'package:meowclash/plugins/service.dart';
+import 'package:meowclash/widgets/dialog.dart';
+import 'package:meowclash/widgets/scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_js/flutter_js.dart';
 import 'package:material_color_utilities/palettes/core_palette.dart';
@@ -476,7 +476,7 @@ class GlobalState {
       }
     }
 
-    // flclashx-androidsecure header: when set to "true" on Android, force
+    // meowclash-androidsecure header: when set to "true" on Android, force
     // mixed-port = 0 so the HTTP/SOCKS inbound is disabled and traffic can
     // only leave through the VpnService/TUN. Applied as a final override
     // regardless of overrideNetworkSettings or UI-configured port, because
@@ -485,7 +485,7 @@ class GlobalState {
     // platforms — desktop TUN gating is handled separately.
     if (Platform.isAndroid) {
       final secureHeader =
-          profile.providerHeaders['flclashx-androidsecure']?.trim().toLowerCase();
+          profile.providerHeaders['meowclash-androidsecure']?.trim().toLowerCase();
       if (secureHeader == 'true') {
         rawConfig["mixed-port"] = 0;
       }

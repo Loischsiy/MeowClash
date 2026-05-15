@@ -11,10 +11,10 @@ import com.follow.clashx.RunState
 
 
 @RequiresApi(Build.VERSION_CODES.N)
-class FlClashXTileService : TileService() {
+class MeowClashTileService : TileService() {
 
     companion object {
-        private const val TAG = "FlClashTileService"
+        private const val TAG = "MeowClashTileService"
     }
 
     private val observer = Observer<RunState> { runState ->

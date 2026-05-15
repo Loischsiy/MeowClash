@@ -1,9 +1,9 @@
 import 'dart:ui';
 
-import 'package:flclashx/common/common.dart';
-import 'package:flclashx/enum/enum.dart';
-import 'package:flclashx/models/models.dart';
-import 'package:flclashx/state.dart';
+import 'package:meowclash/common/common.dart';
+import 'package:meowclash/enum/enum.dart';
+import 'package:meowclash/models/models.dart';
+import 'package:meowclash/state.dart';
 import 'package:flutter/material.dart';
 
 import 'scaffold.dart';

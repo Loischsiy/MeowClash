@@ -3,10 +3,10 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:flclashx/clash/core.dart';
-import 'package:flclashx/common/common.dart';
-import 'package:flclashx/enum/enum.dart';
-import 'package:flclashx/utils/device_info_service.dart';
+import 'package:meowclash/clash/core.dart';
+import 'package:meowclash/common/common.dart';
+import 'package:meowclash/enum/enum.dart';
+import 'package:meowclash/utils/device_info_service.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'clash_config.dart';
@@ -210,7 +210,7 @@ extension ProfileExtension on Profile {
     }
     
     response.headers.forEach((name, values) {
-      if (name.toLowerCase().startsWith('flclashx-') && values.isNotEmpty) {
+      if (name.toLowerCase().startsWith('meowclash-') && values.isNotEmpty) {
         providerHeaders[name.toLowerCase()] = values.first;
       }
     });

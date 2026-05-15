@@ -30,31 +30,31 @@ interface BaseServiceInterface {
     suspend fun startForeground(title: String, server: String?, content: String)
 }
 
-fun Service.createFlClashXNotificationBuilder(): Deferred<NotificationCompat.Builder> =
+fun Service.createMeowClashNotificationBuilder(): Deferred<NotificationCompat.Builder> =
     CoroutineScope(Dispatchers.Main).async {
         val stopText = GlobalState.getText("stop")
-        val intent = Intent(this@createFlClashXNotificationBuilder, MainActivity::class.java)
+        val intent = Intent(this@createMeowClashNotificationBuilder, MainActivity::class.java)
 
         val pendingIntent = if (Build.VERSION.SDK_INT >= 31) {
             PendingIntent.getActivity(
-                this@createFlClashXNotificationBuilder,
+                this@createMeowClashNotificationBuilder,
                 0,
                 intent,
                 PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
             )
         } else {
             PendingIntent.getActivity(
-                this@createFlClashXNotificationBuilder, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT
+                this@createMeowClashNotificationBuilder, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT
             )
         }
 
         with(
             NotificationCompat.Builder(
-                this@createFlClashXNotificationBuilder, GlobalState.NOTIFICATION_CHANNEL
+                this@createMeowClashNotificationBuilder, GlobalState.NOTIFICATION_CHANNEL
             )
         ) {
             setSmallIcon(R.drawable.ic)
-            setContentTitle("FlClashX")
+            setContentTitle("MeowClash")
             setContentIntent(pendingIntent)
             setCategory(NotificationCompat.CATEGORY_SERVICE)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {

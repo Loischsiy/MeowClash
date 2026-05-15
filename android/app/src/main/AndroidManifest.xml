@@ -23,11 +23,11 @@
         tools:ignore="QueryAllPackagesPermission" />
 
     <application
-        android:name=".FlClashXApplication"
+        android:name=".MeowClashApplication"
         android:banner="@mipmap/ic_banner"
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="FlClashX"
+        android:label="MeowClash"
         android:memtagMode="off">
         <activity
             android:name="com.follow.clashx.MainActivity"
@@ -56,8 +56,8 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data android:scheme="clash" />
-                <data android:scheme="flclash" />
-                <data android:scheme="flclashx" />
+                <data android:scheme="meowclash" />
+                <data android:scheme="meowclash" />
 
                 <data android:host="install-config" />
             </intent-filter>
@@ -115,10 +115,10 @@
         </receiver>
 
         <service
-            android:name=".services.FlClashXTileService"
+            android:name=".services.MeowClashTileService"
             android:exported="true"
             android:icon="@drawable/ic"
-            android:label="FlClashX"
+            android:label="MeowClash"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
             tools:targetApi="n">
             <intent-filter>
@@ -152,7 +152,7 @@
         </provider>
         
         <service
-            android:name=".services.FlClashXVpnService"
+            android:name=".services.MeowClashVpnService"
             android:exported="false"
             android:foregroundServiceType="dataSync"
             android:permission="android.permission.BIND_VPN_SERVICE">
@@ -165,7 +165,7 @@
         </service>
 
         <service
-            android:name=".services.FlClashXService"
+            android:name=".services.MeowClashService"
             android:exported="false"
             android:foregroundServiceType="dataSync">
             <property

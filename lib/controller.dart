@@ -4,14 +4,14 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:archive/archive.dart';
-import 'package:flclashx/clash/clash.dart';
-import 'package:flclashx/common/archive.dart';
-import 'package:flclashx/services/subscription_notification_service.dart';
-import 'package:flclashx/enum/enum.dart';
-import 'package:flclashx/plugins/app.dart';
-import 'package:flclashx/providers/providers.dart';
-import 'package:flclashx/state.dart';
-import 'package:flclashx/widgets/dialog.dart';
+import 'package:meowclash/clash/clash.dart';
+import 'package:meowclash/common/archive.dart';
+import 'package:meowclash/services/subscription_notification_service.dart';
+import 'package:meowclash/enum/enum.dart';
+import 'package:meowclash/plugins/app.dart';
+import 'package:meowclash/providers/providers.dart';
+import 'package:meowclash/state.dart';
+import 'package:meowclash/widgets/dialog.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -100,7 +100,7 @@ class AppController {
 
     // Decode service name from header
     String serviceName = "";
-    final svc = profile.providerHeaders['flclashx-servicename'];
+    final svc = profile.providerHeaders['meowclash-servicename'];
     if (svc != null && svc.isNotEmpty) {
       try {
         final normalized = base64.normalize(svc);
@@ -116,7 +116,7 @@ class AppController {
     );
 
     // Get current server name from selectedMap
-    String? groupName = profile.providerHeaders['flclashx-serverinfo'];
+    String? groupName = profile.providerHeaders['meowclash-serverinfo'];
     if (groupName != null && groupName.isNotEmpty) {
       String decodedGroupName;
       try {
@@ -252,7 +252,7 @@ class AppController {
     final headers = profile.providerHeaders;
     if (headers.isEmpty) return;
 
-    final customBehavior = headers['flclashx-custom'];
+    final customBehavior = headers['meowclash-custom'];
 
     final shouldApply = switch (customBehavior) {
       'add' => isNewProfile,
@@ -276,7 +276,7 @@ class AppController {
         return;
       }
 
-      final settingsHeader = headers['flclashx-settings'];
+      final settingsHeader = headers['meowclash-settings'];
       if (settingsHeader != null) {
         final settings = settingsHeader
             .split(',')
@@ -292,7 +292,7 @@ class AppController {
 
   void _applyThemeColor(Map<String, String> headers) {
     try {
-      final hexHeader = headers['flclashx-hex'];
+      final hexHeader = headers['meowclash-hex'];
       if (hexHeader != null && hexHeader.isNotEmpty) {
         _applyThemeColorFromHex(hexHeader);
       }
@@ -328,7 +328,7 @@ class AppController {
       );
 
       commonPrint
-          .log('Applying theme from flclashx-hex: #${hexString.toUpperCase()}'
+          .log('Applying theme from meowclash-hex: #${hexString.toUpperCase()}'
               '${variantName != null ? ', variant=$variantName' : ''}'
               '${enablePureBlack ? ', pureBlack=true' : ''}');
 
@@ -771,7 +771,7 @@ class AppController {
       patchConfig = syncedConfig;
     }
 
-    // flclashx-androidsecure header: on Android, when the current profile
+    // meowclash-androidsecure header: on Android, when the current profile
     // declares "androidsecure: true", force mixedPort=0 on the Dart-side
     // ClashConfig so that all downstream providers (coreStateProvider,
     // proxyStateProvider, http.handleFindProxy) observe the disabled inbound
@@ -779,7 +779,7 @@ class AppController {
     // after syncFromProvider so it overrides both user and provider values.
     if (Platform.isAndroid) {
       final profile = _ref.read(currentProfileProvider);
-      final secure = profile?.providerHeaders['flclashx-androidsecure']
+      final secure = profile?.providerHeaders['meowclash-androidsecure']
               ?.trim()
               .toLowerCase() ==
           'true';
@@ -1074,7 +1074,7 @@ class AppController {
       final filesToDelete = [
         'cache.db',
         'libCachedImageData.json',
-        'FlClashX.lock',
+        'MeowClash.lock',
       ];
 
       for (final fileName in filesToDelete) {
@@ -1466,7 +1466,7 @@ class AppController {
   void _applyCustomViewSettings(Profile profile) {
     final headers = profile.providerHeaders;
 
-    final dashboardLayout = headers['flclashx-widgets'];
+    final dashboardLayout = headers['meowclash-widgets'];
     if (dashboardLayout != null && dashboardLayout.isNotEmpty) {
       final newLayout = DashboardWidgetParser.parseLayout(dashboardLayout);
       if (newLayout.isNotEmpty) {
@@ -1476,7 +1476,7 @@ class AppController {
       }
     }
 
-    final proxiesView = headers['flclashx-view'];
+    final proxiesView = headers['meowclash-view'];
     if (proxiesView != null && proxiesView.isNotEmpty) {
       final proxiesStyleNotifier =
           _ref.read(proxiesStyleSettingProvider.notifier);

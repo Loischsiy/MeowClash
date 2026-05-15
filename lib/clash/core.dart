@@ -57,19 +57,20 @@ class ClashCore {
           continue;
         }
         commonPrint.log("ClashCore: Loading $geoFileName from assets...");
-        final data = await rootBundle.load('assets/data/$geoFileName');
-        final List<int> bytes = data.buffer.asUint8List();
-        commonPrint.log("ClashCore: Writing $geoFileName to $homePath (${bytes.length} bytes)");
-        await geoFile.writeAsBytes(bytes, flush: true);
+        try {
+          final data = await rootBundle.load('assets/data/$geoFileName');
+          final List<int> bytes = data.buffer.asUint8List();
+          commonPrint.log("ClashCore: Writing $geoFileName to $homePath (${bytes.length} bytes)");
+          await geoFile.writeAsBytes(bytes, flush: true);
+        } catch (e) {
+          commonPrint.log("ClashCore: Failed to load $geoFileName from assets: $e");
+        }
       }
-      commonPrint.log("ClashCore: initGeo completed successfully");
+      commonPrint.log("ClashCore: initGeo finished (errors may have been logged)");
     } catch (e, stackTrace) {
-      commonPrint.log("=== ClashCore: initGeo FATAL ERROR ===");
+      commonPrint.log("=== ClashCore: initGeo NON-FATAL ERROR ===");
       commonPrint.log("Error: $e");
       commonPrint.log("StackTrace: $stackTrace");
-      commonPrint.log("Exiting application due to critical initialization failure");
-      await Future.delayed(const Duration(seconds: 1)); // Give time for logs to flush
-      exit(1);
     }
   }
 

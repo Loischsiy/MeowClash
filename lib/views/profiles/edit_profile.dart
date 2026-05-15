@@ -52,9 +52,10 @@ class _EditProfileViewState extends State<EditProfileView> {
       text: widget.profile.autoUpdateDuration.inMinutes.toString(),
     );
     decryptPasswordController =
-        TextEditingController(text: widget.profile.password);
+        TextEditingController(text: widget.profile.providerHeaders['flclashx-password']);
     decryptIterationsController = TextEditingController(
-      text: widget.profile.passwordIterations.toString(),
+      text: (widget.profile.providerHeaders['flclashx-password-iterations'] ?? 
+            kDefaultPbkdf2Iterations.toString()),
     );
     appPath.getProfilePath(widget.profile.id).then((path) async {
       fileInfoNotifier.value = await _getFileInfo(path);
@@ -77,9 +78,19 @@ class _EditProfileViewState extends State<EditProfileView> {
     final appController = globalState.appController;
     final password = decryptPasswordController.text;
     final iterationsText = decryptIterationsController.text.trim();
-    final iterations = iterationsText.isEmpty
-        ? kDefaultPbkdf2Iterations
-        : int.tryParse(iterationsText) ?? kDefaultPbkdf2Iterations;
+    
+    final newProviderHeaders = Map<String, String>.from(this.profile.providerHeaders);
+    if (password.isNotEmpty) {
+      newProviderHeaders['flclashx-password'] = password;
+    } else {
+      newProviderHeaders.remove('flclashx-password');
+    }
+    
+    if (iterationsText.isNotEmpty) {
+      newProviderHeaders['flclashx-password-iterations'] = iterationsText;
+    } else {
+      newProviderHeaders.remove('flclashx-password-iterations');
+    }
 
     var profile = this.profile.copyWith(
           url: urlController.text,
@@ -90,8 +101,7 @@ class _EditProfileViewState extends State<EditProfileView> {
               autoUpdateDurationController.text,
             ),
           ),
-          password: password.isEmpty ? null : password,
-          passwordIterations: iterations,
+          providerHeaders: newProviderHeaders,
         );
     final hasUpdate = widget.profile.url != profile.url;
     if (fileData != null) {

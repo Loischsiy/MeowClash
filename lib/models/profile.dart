@@ -65,8 +65,6 @@ class Profile with _$Profile {
     @Default(false)
     bool isUpdating,
     @Default({}) Map<String, String> providerHeaders,
-    String? password,
-    @Default(kDefaultPbkdf2Iterations) int passwordIterations,
   }) = _Profile;
 
   factory Profile.fromJson(Map<String, Object?> json) =>
@@ -203,11 +201,13 @@ extension ProfileExtension on Profile {
 
     final profileData = await _maybeDecrypt(
       responseData,
-      password: decryptionPassword ?? password,
-      iterations: decryptionIterations ?? passwordIterations,
+      password: decryptionPassword ?? providerHeaders['flclashx-password'],
+      iterations: decryptionIterations ??
+          int.tryParse(providerHeaders['flclashx-password-iterations'] ?? '') ??
+          kDefaultPbkdf2Iterations,
     );
 
-    final providerHeaders = <String, String>{};
+    final newProviderHeaders = <String, String>{};
     
     final headersToCollect = [
       'announce',
@@ -219,18 +219,34 @@ extension ProfileExtension on Profile {
     for (final headerName in headersToCollect) {
       final value = response.headers.value(headerName);
       if (value != null && value.isNotEmpty) {
-        providerHeaders[headerName] = value;
+        newProviderHeaders[headerName] = value;
       }
     }
     
     response.headers.forEach((name, values) {
       if (name.toLowerCase().startsWith('flclashx-') && values.isNotEmpty) {
-        providerHeaders[name.toLowerCase()] = values.first;
+        newProviderHeaders[name.toLowerCase()] = values.first;
       }
     });
+
+    // Preserve saved credentials if not provided by server
+    if (decryptionPassword != null) {
+      newProviderHeaders['flclashx-password'] = decryptionPassword;
+    } else if (providerHeaders.containsKey('flclashx-password')) {
+      newProviderHeaders['flclashx-password'] =
+          providerHeaders['flclashx-password']!;
+    }
+
+    if (decryptionIterations != null) {
+      newProviderHeaders['flclashx-password-iterations'] =
+          decryptionIterations.toString();
+    } else if (providerHeaders.containsKey('flclashx-password-iterations')) {
+      newProviderHeaders['flclashx-password-iterations'] =
+          providerHeaders['flclashx-password-iterations']!;
+    }
     
     Duration? durationFromHeader;
-    final updateIntervalHeader = providerHeaders['profile-update-interval'];
+    final updateIntervalHeader = newProviderHeaders['profile-update-interval'];
     if (updateIntervalHeader != null) {
       final hours = int.tryParse(updateIntervalHeader);
       if (hours != null && hours > 0) {
@@ -242,7 +258,7 @@ extension ProfileExtension on Profile {
       label: label ?? utils.getFileNameForDisposition(disposition) ?? id,
       subscriptionInfo: SubscriptionInfo.formHString(userinfo),
       autoUpdateDuration: durationFromHeader ?? autoUpdateDuration,
-      providerHeaders: providerHeaders,
+      providerHeaders: newProviderHeaders,
     ).saveFile(profileData);
   }
 

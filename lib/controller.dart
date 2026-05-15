@@ -1376,13 +1376,11 @@ class AppController {
           final prefs = await SharedPreferences.getInstance();
           final shouldSend = prefs.getBool('sendDeviceHeaders') ?? true;
           return Profile.normal(url: url)
-              .copyWith(
-                password: decryptionPassword,
-                passwordIterations:
-                    decryptionIterations ?? kDefaultPbkdf2Iterations,
-              )
               .update(
                 shouldSendHeaders: shouldSend,
+                decryptionPassword: decryptionPassword,
+                decryptionIterations:
+                    decryptionIterations ?? kDefaultPbkdf2Iterations,
               );
         },
         title: "${appLocalizations.add}${appLocalizations.profile}",

@@ -226,6 +226,11 @@ func quickStart(initParamsChar *C.char, paramsChar *C.char, stateParamsChar *C.c
 	bytes := []byte(C.GoString(paramsChar))
 	stateParams := C.GoString(stateParamsChar)
 	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				bridge.SendToPort(i, fmt.Sprintf("panic: %v", r))
+			}
+		}()
 		res := handleInitClash(paramsString)
 		if res == false {
 			bridge.SendToPort(i, "init error")

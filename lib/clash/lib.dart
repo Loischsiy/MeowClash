@@ -34,16 +34,20 @@ class ClashLib extends ClashHandlerInterface with AndroidClashInterface {
   Future<bool> preload() => _canSendCompleter.future;
 
   Future<void> _initService() async {
+    commonPrint.log("[DART] ClashLib._initService: Starting service initialization...");
     await service?.destroy();
     _registerMainPort(receiverPort.sendPort);
     receiverPort.listen((message) {
       if (message is SendPort) {
+        commonPrint.log("[DART] ClashLib: Received service SendPort");
         if (_canSendCompleter.isCompleted) {
+          commonPrint.log("[DART] ClashLib: _canSendCompleter already completed, resetting");
           sendPort = null;
           _canSendCompleter = Completer();
         }
         sendPort = message;
         _canSendCompleter.complete(true);
+        commonPrint.log("[DART] ClashLib: _canSendCompleter COMPLETED");
       } else if (message is Map) {
         // Ignore IPC responses (Map type) - they don't need processing
         return;
@@ -55,12 +59,16 @@ class ClashLib extends ClashHandlerInterface with AndroidClashInterface {
         );
       }
     });
+    commonPrint.log("[DART] ClashLib: Calling service.init()...");
     await service?.init();
+    commonPrint.log("[DART] ClashLib: service.init() returned");
   }
 
   void _registerMainPort(SendPort sendPort) {
+    commonPrint.log("[DART] ClashLib: Registering mainIsolate port '$mainIsolate'");
     IsolateNameServer.removePortNameMapping(mainIsolate);
-    IsolateNameServer.registerPortWithName(sendPort, mainIsolate);
+    final success = IsolateNameServer.registerPortWithName(sendPort, mainIsolate);
+    commonPrint.log("[DART] ClashLib: Port registration success = $success");
   }
 
   @override

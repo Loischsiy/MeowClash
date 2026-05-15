@@ -262,7 +262,7 @@ data object VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
         if (!uidPageNameMap.containsKey(nextUid)) {
             uidPageNameMap[nextUid] =
                 FlClashXApplication.getAppContext().packageManager?.getPackagesForUid(nextUid)
-                    ?.first() ?: ""
+                    ?.firstOrNull() ?: ""
         }
         return uidPageNameMap[nextUid] ?: ""
     }

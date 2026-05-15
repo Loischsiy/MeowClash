@@ -23,6 +23,7 @@ import 'models/models.dart';
 Future<void> main() async {
   globalState.isService = false;
   WidgetsFlutterBinding.ensureInitialized();
+  commonPrint.log("=== [DART] main entrypoint started ===");
   
   // Enable Skia graphics for better performance on desktop
   if (Platform.isWindows || Platform.isLinux) {
@@ -30,8 +31,13 @@ Future<void> main() async {
   }
   
   final version = await system.version;
+  commonPrint.log("[DART] Calling clashCore.preload()...");
   await clashCore.preload();
+  commonPrint.log("[DART] clashCore.preload() completed");
+  
   await globalState.initApp(version);
+  commonPrint.log("[DART] globalState.initApp() completed");
+  
   await android?.init();
   await window?.init(version);
   
@@ -40,6 +46,7 @@ Future<void> main() async {
     vpn; // Accessing the getter initializes the singleton
   }
   HttpOverrides.global = FlClashHttpOverrides();
+  commonPrint.log("[DART] Running application...");
   runApp(const ProviderScope(
     child: Application(),
   ));
@@ -355,14 +362,26 @@ Future<void> _service(List<String> flags) async {
   }
 }
 
-void _handleMainIpc(ClashLibHandler clashLibHandler) {
-  final sendPort = IsolateNameServer.lookupPortByName(mainIsolate);
+void _handleMainIpc(ClashLibHandler clashLibHandler) async {
+  commonPrint.log("[DART] _handleMainIpc: Looking up mainIsolate port...");
+  
+  SendPort? sendPort;
+  for (int i = 0; i < 10; i++) {
+    sendPort = IsolateNameServer.lookupPortByName(mainIsolate);
+    if (sendPort != null) break;
+    commonPrint.log("[DART] _handleMainIpc: mainIsolate port not found, retry $i...");
+    await Future.delayed(Duration(milliseconds: 200 * (i + 1)));
+  }
+
   if (sendPort == null) {
+    commonPrint.log("[DART] _handleMainIpc: mainIsolate port NOT FOUND after retries, aborting IPC setup");
     return;
   }
+  commonPrint.log("[DART] _handleMainIpc: mainIsolate port found, setting up listeners");
+  
   void safeSend(dynamic message) {
     try {
-      sendPort.send(message);
+      sendPort?.send(message);
     } catch (_) {}
   }
   final serviceReceiverPort = ReceivePort();
@@ -390,12 +409,14 @@ void _handleMainIpc(ClashLibHandler clashLibHandler) {
     final res = await clashLibHandler.invokeAction(message);
     safeSend(res);
   });
+  commonPrint.log("[DART] _handleMainIpc: Sending service port to mainIsolate");
   safeSend(serviceReceiverPort.sendPort);
   final messageReceiverPort = ReceivePort();
   clashLibHandler.attachMessagePort(
     messageReceiverPort.sendPort.nativePort,
   );
   messageReceiverPort.listen(safeSend);
+  commonPrint.log("[DART] _handleMainIpc: IPC setup completed");
 }
 
 @immutable

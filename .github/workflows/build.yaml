@@ -49,7 +49,14 @@ jobs:
       - name: Setup flutter_distributor
         run: |
           rm -rf plugins/flutter_distributor
-          git clone https://github.com/leanflutter/flutter_distributor plugins/flutter_distributor
+          git clone --depth 1 https://github.com/leanflutter/flutter_distributor plugins/flutter_distributor
+          rm -rf plugins/flutter_distributor/.git
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
 
       - name: Setup Android Signing
         run: |

@@ -6,7 +6,7 @@
 
 ## MeowClash
 
-> MeowClash is a fork of [MeowClash](https://github.com/Loischsiy/MeowClash)
+> MeowClash is a fork of [FlClashX](https://github.com/pluralplay/FlClashX)
 
 [![Downloads](https://img.shields.io/github/downloads/Loischsiy/MeowClash/total?style=flat-square&logo=github)](https://github.com/Loischsiy/MeowClash/releases/)[![Last Version](https://img.shields.io/github/release/Loischsiy/MeowClash/all.svg?style=flat-square)](https://github.com/Loischsiy/MeowClash/releases/)[![License](https://img.shields.io/github/license/Loischsiy/MeowClash?style=flat-square)](LICENSE)
 

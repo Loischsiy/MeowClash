@@ -9,7 +9,7 @@
 
 ## Project Context
 
-**MeowClash** is a fork of [MeowClash](https://github.com/Loischsiy/MeowClash) — a multi-platform proxy client based on **ClashMeta** (mihomo). It provides a Material You-based UI for configuring and managing proxy connections on Android, Windows, macOS, and Linux. The app supports subscription links, WebDAV sync, TUN mode, multiple color themes, and adaptive screen sizes.
+**MeowClash** is a fork of [FlClashX](https://github.com/pluralplay/FlClashX) — a multi-platform proxy client based on **ClashMeta** (mihomo). It provides a Material You-based UI for configuring and managing proxy connections on Android, Windows, macOS, and Linux. The app supports subscription links, WebDAV sync, TUN mode, multiple color themes, and adaptive screen sizes.
 
 **Package name:** `meowclash` (in pubspec)
 **App display name:** MeowClash  

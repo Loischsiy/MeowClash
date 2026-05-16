@@ -1,14 +1,14 @@
-package com.follow.clashm
+package com.follow.clashx
 
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import androidx.appcompat.app.AppCompatDelegate
-import com.follow.clashm.plugins.AppPlugin
-import com.follow.clashm.plugins.ServicePlugin
-import com.follow.clashm.plugins.TilePlugin
-import com.follow.clashm.plugins.VpnPlugin
+import com.follow.clashx.plugins.AppPlugin
+import com.follow.clashx.plugins.ServicePlugin
+import com.follow.clashx.plugins.TilePlugin
+import com.follow.clashx.plugins.VpnPlugin
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -47,7 +47,7 @@ class MainActivity : FlutterActivity() {
         super.configureFlutterEngine(flutterEngine)
         
         // Platform Channel for getting Android ID
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.follow.clashm/device_id")
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.follow.clashx/device_id")
             .setMethodCallHandler { call, result ->
                 if (call.method == "getAndroidId") {
                     try {

@@ -1,4 +1,4 @@
-package com.follow.clashm.plugins
+package com.follow.clashx.plugins
 
 import android.Manifest
 import android.app.Activity
@@ -18,13 +18,13 @@ import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
 import com.android.tools.smali.dexlib2.dexbacked.DexBackedDexFile
-import com.follow.clashm.MeowClashApplication
-import com.follow.clashm.GlobalState
-import com.follow.clashm.R
-import com.follow.clashm.extensions.awaitResult
-import com.follow.clashm.extensions.getActionIntent
-import com.follow.clashm.extensions.getBase64
-import com.follow.clashm.models.Package
+import com.follow.clashx.MeowClashApplication
+import com.follow.clashx.GlobalState
+import com.follow.clashx.R
+import com.follow.clashx.extensions.awaitResult
+import com.follow.clashx.extensions.getActionIntent
+import com.follow.clashx.extensions.getBase64
+import com.follow.clashx.models.Package
 import com.google.gson.Gson
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.plugins.FlutterPlugin

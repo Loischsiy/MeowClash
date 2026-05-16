@@ -1,8 +1,8 @@
-package com.follow.clashm
+package com.follow.clashx
 
 import android.app.Activity
 import android.os.Bundle
-import com.follow.clashm.extensions.wrapAction
+import com.follow.clashx.extensions.wrapAction
 
 class TempActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {

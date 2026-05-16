@@ -1,4 +1,4 @@
-package com.follow.clashm.widgets
+package com.follow.clashx.widgets
 
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
@@ -10,9 +10,9 @@ import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
 import androidx.lifecycle.Observer
-import com.follow.clashm.GlobalState
-import com.follow.clashm.R
-import com.follow.clashm.RunState
+import com.follow.clashx.GlobalState
+import com.follow.clashx.R
+import com.follow.clashx.RunState
 
 /**
  * Home-screen widget: three mode buttons (Rule/Global/Direct) and a
@@ -29,10 +29,10 @@ class ModeWidgetProvider : AppWidgetProvider() {
     companion object {
         private const val TAG = "ModeWidgetProvider"
 
-        const val ACTION_TOGGLE = "com.follow.clashm.widget.ACTION_TOGGLE"
-        const val ACTION_MODE_RULE = "com.follow.clashm.widget.ACTION_MODE_RULE"
-        const val ACTION_MODE_GLOBAL = "com.follow.clashm.widget.ACTION_MODE_GLOBAL"
-        const val ACTION_MODE_DIRECT = "com.follow.clashm.widget.ACTION_MODE_DIRECT"
+        const val ACTION_TOGGLE = "com.follow.clashx.widget.ACTION_TOGGLE"
+        const val ACTION_MODE_RULE = "com.follow.clashx.widget.ACTION_MODE_RULE"
+        const val ACTION_MODE_GLOBAL = "com.follow.clashx.widget.ACTION_MODE_GLOBAL"
+        const val ACTION_MODE_DIRECT = "com.follow.clashx.widget.ACTION_MODE_DIRECT"
 
         @Volatile
         private var observersAttached = false
@@ -61,7 +61,7 @@ class ModeWidgetProvider : AppWidgetProvider() {
         }
 
         private fun refreshAll() {
-            val ctx = com.follow.clashm.MeowClashApplication.getAppContext() ?: return
+            val ctx = com.follow.clashx.MeowClashApplication.getAppContext() ?: return
             val mgr = AppWidgetManager.getInstance(ctx) ?: return
             val component = ComponentName(ctx, ModeWidgetProvider::class.java)
             val ids = mgr.getAppWidgetIds(component)

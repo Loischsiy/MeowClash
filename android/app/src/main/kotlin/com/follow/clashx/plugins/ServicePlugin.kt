@@ -1,7 +1,7 @@
-package com.follow.clashm.plugins
+package com.follow.clashx.plugins
 
-import com.follow.clashm.GlobalState
-import com.follow.clashm.models.VpnOptions
+import com.follow.clashx.GlobalState
+import com.follow.clashx.models.VpnOptions
 import com.google.gson.Gson
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall

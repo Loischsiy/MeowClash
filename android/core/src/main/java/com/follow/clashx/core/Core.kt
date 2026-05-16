@@ -1,4 +1,4 @@
-package com.follow.clashm.core
+package com.follow.clashx.core
 
 import java.net.InetAddress
 import java.net.InetSocketAddress

@@ -1,4 +1,4 @@
-package com.follow.clashm.services
+package com.follow.clashx.services
 
 import android.annotation.SuppressLint
 import android.app.Service
@@ -7,8 +7,8 @@ import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
-import com.follow.clashm.GlobalState
-import com.follow.clashm.models.VpnOptions
+import com.follow.clashx.GlobalState
+import com.follow.clashx.models.VpnOptions
 
 
 class MeowClashService : Service(), BaseServiceInterface {

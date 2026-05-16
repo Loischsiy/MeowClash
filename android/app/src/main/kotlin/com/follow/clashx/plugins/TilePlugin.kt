@@ -1,4 +1,4 @@
-package com.follow.clashm.plugins
+package com.follow.clashx.plugins
 
 import android.util.Log
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -120,14 +120,14 @@ class TilePlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
                 val mode = call.arguments as? String
                 if (mode != null) {
                     Log.d(TAG, "updateMode: $mode")
-                    com.follow.clashm.GlobalState.currentMode.postValue(mode)
+                    com.follow.clashx.GlobalState.currentMode.postValue(mode)
                 }
                 result.success(null)
             }
             "updateGlobalModeEnabled" -> {
                 val enabled = call.arguments as? Boolean ?: true
                 Log.d(TAG, "updateGlobalModeEnabled: $enabled")
-                com.follow.clashm.GlobalState.globalModeEnabled.postValue(enabled)
+                com.follow.clashx.GlobalState.globalModeEnabled.postValue(enabled)
                 result.success(null)
             }
             else -> result.notImplemented()
@@ -137,7 +137,7 @@ class TilePlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
     private fun updateTile() {
         Log.d(TAG, "updateTile: syncing status")
         // Force tile service to refresh its state
-        com.follow.clashm.GlobalState.syncStatus()
+        com.follow.clashx.GlobalState.syncStatus()
     }
     
     private fun handleServiceReady() {

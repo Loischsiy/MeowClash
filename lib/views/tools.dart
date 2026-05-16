@@ -1,16 +1,16 @@
 import 'dart:io';
 
-import 'package:flclashx/common/common.dart';
-import 'package:flclashx/l10n/l10n.dart';
-import 'package:flclashx/models/models.dart';
-import 'package:flclashx/providers/providers.dart';
-import 'package:flclashx/state.dart';
-import 'package:flclashx/views/about.dart';
-import 'package:flclashx/views/access.dart';
-import 'package:flclashx/views/application_setting.dart';
-import 'package:flclashx/views/config/config.dart';
-import 'package:flclashx/views/hotkey.dart';
-import 'package:flclashx/widgets/widgets.dart';
+import 'package:meowclash/common/common.dart';
+import 'package:meowclash/l10n/l10n.dart';
+import 'package:meowclash/models/models.dart';
+import 'package:meowclash/providers/providers.dart';
+import 'package:meowclash/state.dart';
+import 'package:meowclash/views/about.dart';
+import 'package:meowclash/views/access.dart';
+import 'package:meowclash/views/application_setting.dart';
+import 'package:meowclash/views/config/config.dart';
+import 'package:meowclash/views/hotkey.dart';
+import 'package:meowclash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';

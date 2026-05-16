@@ -1,9 +1,9 @@
 -keepattributes *Annotation*,SourceFile,LineNumberTable,Signature,Exceptions,InnerClasses,EnclosingMethod
 
--keep class com.follow.clashx.core.** { *; }
+-keep class com.follow.clashm.core.** { *; }
 
 -keepclassmembers class * {
     native <methods>;
 }
 
--dontwarn com.follow.clashx.**
+-dontwarn com.follow.clashm.**

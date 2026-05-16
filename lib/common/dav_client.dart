@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:flclashx/common/common.dart';
-import 'package:flclashx/models/models.dart';
+import 'package:meowclash/common/common.dart';
+import 'package:meowclash/models/models.dart';
 import 'package:webdav_client/webdav_client.dart';
 
 class DAVClient {

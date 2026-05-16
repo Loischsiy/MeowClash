@@ -2,14 +2,14 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:flclashx/clash/clash.dart';
-import 'package:flclashx/common/common.dart';
-import 'package:flclashx/enum/enum.dart';
-import 'package:flclashx/models/models.dart';
-import 'package:flclashx/pages/editor.dart';
-import 'package:flclashx/services/subscription_crypto.dart';
-import 'package:flclashx/state.dart';
-import 'package:flclashx/widgets/widgets.dart';
+import 'package:meowclash/clash/clash.dart';
+import 'package:meowclash/common/common.dart';
+import 'package:meowclash/enum/enum.dart';
+import 'package:meowclash/models/models.dart';
+import 'package:meowclash/pages/editor.dart';
+import 'package:meowclash/services/subscription_crypto.dart';
+import 'package:meowclash/state.dart';
+import 'package:meowclash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 
 class EditProfileView extends StatefulWidget {
@@ -52,9 +52,9 @@ class _EditProfileViewState extends State<EditProfileView> {
       text: widget.profile.autoUpdateDuration.inMinutes.toString(),
     );
     decryptPasswordController =
-        TextEditingController(text: widget.profile.providerHeaders['flclashx-password']);
+        TextEditingController(text: widget.profile.providerHeaders['meowclash-password']);
     decryptIterationsController = TextEditingController(
-      text: (widget.profile.providerHeaders['flclashx-password-iterations'] ?? 
+      text: (widget.profile.providerHeaders['meowclash-password-iterations'] ??
             kDefaultPbkdf2Iterations.toString()),
     );
     appPath.getProfilePath(widget.profile.id).then((path) async {
@@ -81,15 +81,15 @@ class _EditProfileViewState extends State<EditProfileView> {
     
     final newProviderHeaders = Map<String, String>.from(this.profile.providerHeaders);
     if (password.isNotEmpty) {
-      newProviderHeaders['flclashx-password'] = password;
+      newProviderHeaders['meowclash-password'] = password;
     } else {
-      newProviderHeaders.remove('flclashx-password');
+      newProviderHeaders.remove('meowclash-password');
     }
     
     if (iterationsText.isNotEmpty) {
-      newProviderHeaders['flclashx-password-iterations'] = iterationsText;
+      newProviderHeaders['meowclash-password-iterations'] = iterationsText;
     } else {
-      newProviderHeaders.remove('flclashx-password-iterations');
+      newProviderHeaders.remove('meowclash-password-iterations');
     }
 
     var profile = this.profile.copyWith(

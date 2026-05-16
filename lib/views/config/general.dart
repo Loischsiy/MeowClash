@@ -1,11 +1,11 @@
 import 'dart:io' show Platform;
 
-import 'package:flclashx/common/common.dart';
-import 'package:flclashx/enum/enum.dart';
-import 'package:flclashx/models/models.dart';
-import 'package:flclashx/providers/providers.dart';
-import 'package:flclashx/state.dart';
-import 'package:flclashx/widgets/widgets.dart';
+import 'package:meowclash/common/common.dart';
+import 'package:meowclash/enum/enum.dart';
+import 'package:meowclash/models/models.dart';
+import 'package:meowclash/providers/providers.dart';
+import 'package:meowclash/state.dart';
+import 'package:meowclash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -257,14 +257,14 @@ class PortItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // flclashx-androidsecure header forces mixed-port=0 on Android. The port
+    // meowclash-androidsecure header forces mixed-port=0 on Android. The port
     // field becomes meaningless in that case, so hide it entirely rather than
     // showing a disabled "0" row the user can't do anything about.
     if (Platform.isAndroid) {
       final secure = ref.watch(
         currentProfileProvider.select(
           (p) =>
-              p?.providerHeaders['flclashx-androidsecure']
+              p?.providerHeaders['meowclash-androidsecure']
                   ?.trim()
                   .toLowerCase() ==
               'true',

@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flclashx/clash/clash.dart';
-import 'package:flclashx/models/models.dart';
-import 'package:flclashx/state.dart';
+import 'package:meowclash/clash/clash.dart';
+import 'package:meowclash/models/models.dart';
+import 'package:meowclash/state.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
@@ -51,7 +51,7 @@ class Vpn {
   String _cachedServerName = "";
   
   /// Cached profile info for foreground notification
-  String _cachedProfileName = "FlClashX";
+  String _cachedProfileName = "MeowClash";
   String _cachedServiceName = "";
   
   /// Update cached server name (called from UI when proxy changes)
@@ -93,13 +93,13 @@ class Vpn {
     try {
       final traffic = clashCore.getTraffic();
       final profile = globalState.config.currentProfile;
-      final profileName = profile?.label ?? profile?.id ?? "FlClashX";
+      final profileName = profile?.label ?? profile?.id ?? "MeowClash";
       
       // Resolve current proxy name using appController (always up-to-date via Riverpod)
       String? proxyName;
       try {
         final serverInfoGroupName = _decodeBase64IfNeeded(
-          profile?.providerHeaders['flclashx-serverinfo'],
+          profile?.providerHeaders['meowclash-serverinfo'],
         );
         if (serverInfoGroupName != null && serverInfoGroupName.isNotEmpty) {
           proxyName = globalState.appController.getSelectedProxyName(serverInfoGroupName);
@@ -110,10 +110,10 @@ class Vpn {
       final serverDisplay = (proxyName ?? "").trim();
       final title = serverDisplay.isNotEmpty ? "$profileName / $serverDisplay" : profileName;
 
-      // Service name for subtext from header flclashx-servicename
+      // Service name for subtext from header meowclash-servicename
       String serviceName = "";
       try {
-        String? svc = profile?.providerHeaders['flclashx-servicename'];
+        String? svc = profile?.providerHeaders['meowclash-servicename'];
         if (svc != null && svc.isNotEmpty) {
           serviceName = _decodeBase64IfNeeded(svc)?.trim() ?? "";
         }
@@ -126,7 +126,7 @@ class Vpn {
       });
     } catch (e) {
       return json.encode({
-        "title": "FlClashX",
+        "title": "MeowClash",
         "server": "",
         "content": ""
       });

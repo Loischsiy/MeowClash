@@ -2,10 +2,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:isolate';
 
-import 'package:flclashx/clash/message.dart';
-import 'package:flclashx/common/common.dart';
-import 'package:flclashx/enum/enum.dart';
-import 'package:flclashx/models/models.dart';
+import 'package:meowclash/clash/message.dart';
+import 'package:meowclash/common/common.dart';
+import 'package:meowclash/enum/enum.dart';
+import 'package:meowclash/models/models.dart';
 
 mixin ClashInterface {
   Future<bool> init(InitParams params);

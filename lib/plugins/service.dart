@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
-import 'package:flclashx/state.dart';
+import 'package:meowclash/state.dart';
 import 'package:flutter/services.dart';
 
 import '../clash/lib.dart';

@@ -1,8 +1,8 @@
 import 'dart:async';
 
-import 'package:flclashx/common/common.dart';
-import 'package:flclashx/state.dart';
-import 'package:flclashx/widgets/widgets.dart';
+import 'package:meowclash/common/common.dart';
+import 'package:meowclash/state.dart';
+import 'package:meowclash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 
 @immutable
@@ -140,7 +140,7 @@ class AboutView extends StatelessWidget {
             title: Text(appLocalizations.originalRepository),
             onTap: () {
               globalState.openUrl(
-                "https://github.com/chen08209/FlClash",
+                "https://github.com/Loischsiy/MeowClash",
               );
             },
             trailing: const Icon(Icons.insert_link),

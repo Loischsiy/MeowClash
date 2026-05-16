@@ -1,5 +1,5 @@
-import 'package:flclashx/common/common.dart';
-import 'package:flclashx/models/common.dart';
+import 'package:meowclash/common/common.dart';
+import 'package:meowclash/models/common.dart';
 import 'package:flutter/material.dart';
 
 class CommonPopupRoute<T> extends PopupRoute<T> {

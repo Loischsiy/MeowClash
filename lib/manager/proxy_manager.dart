@@ -1,6 +1,6 @@
-import 'package:flclashx/common/proxy.dart';
-import 'package:flclashx/models/models.dart';
-import 'package:flclashx/providers/state.dart';
+import 'package:meowclash/common/proxy.dart';
+import 'package:meowclash/models/models.dart';
+import 'package:meowclash/providers/state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

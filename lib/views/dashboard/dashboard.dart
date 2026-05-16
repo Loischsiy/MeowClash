@@ -1,10 +1,10 @@
 import 'dart:math';
 
 import 'package:defer_pointer/defer_pointer.dart';
-import 'package:flclashx/common/common.dart';
-import 'package:flclashx/enum/enum.dart';
-import 'package:flclashx/providers/providers.dart';
-import 'package:flclashx/widgets/widgets.dart';
+import 'package:meowclash/common/common.dart';
+import 'package:meowclash/enum/enum.dart';
+import 'package:meowclash/providers/providers.dart';
+import 'package:meowclash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -73,7 +73,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> with PageMixin {
         Consumer(
           builder: (context, ref, child) {
             final denyEditing = ref.watch(currentProfileProvider
-                .select((profile) => profile?.providerHeaders['flclashx-denywidgets']));
+                .select((profile) => profile?.providerHeaders['meowclash-denywidgets']));
 
             if (denyEditing == 'true') {
               return const SizedBox.shrink();

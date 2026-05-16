@@ -1,4 +1,4 @@
-package com.follow.clashx.services
+package com.follow.clashm.services
 
 import android.annotation.SuppressLint
 import android.app.Notification
@@ -11,11 +11,11 @@ import android.content.Intent
 import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
 import android.os.Build
 import androidx.core.app.NotificationCompat
-import com.follow.clashx.GlobalState
-import com.follow.clashx.MainActivity
-import com.follow.clashx.R
-import com.follow.clashx.extensions.getActionPendingIntent
-import com.follow.clashx.models.VpnOptions
+import com.follow.clashm.GlobalState
+import com.follow.clashm.MainActivity
+import com.follow.clashm.R
+import com.follow.clashm.extensions.getActionPendingIntent
+import com.follow.clashm.models.VpnOptions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -30,31 +30,31 @@ interface BaseServiceInterface {
     suspend fun startForeground(title: String, server: String?, content: String)
 }
 
-fun Service.createFlClashXNotificationBuilder(): Deferred<NotificationCompat.Builder> =
+fun Service.createMeowClashNotificationBuilder(): Deferred<NotificationCompat.Builder> =
     CoroutineScope(Dispatchers.Main).async {
         val stopText = GlobalState.getText("stop")
-        val intent = Intent(this@createFlClashXNotificationBuilder, MainActivity::class.java)
+        val intent = Intent(this@createMeowClashNotificationBuilder, MainActivity::class.java)
 
         val pendingIntent = if (Build.VERSION.SDK_INT >= 31) {
             PendingIntent.getActivity(
-                this@createFlClashXNotificationBuilder,
+                this@createMeowClashNotificationBuilder,
                 0,
                 intent,
                 PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
             )
         } else {
             PendingIntent.getActivity(
-                this@createFlClashXNotificationBuilder, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT
+                this@createMeowClashNotificationBuilder, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT
             )
         }
 
         with(
             NotificationCompat.Builder(
-                this@createFlClashXNotificationBuilder, GlobalState.NOTIFICATION_CHANNEL
+                this@createMeowClashNotificationBuilder, GlobalState.NOTIFICATION_CHANNEL
             )
         ) {
             setSmallIcon(R.drawable.ic)
-            setContentTitle("FlClashX")
+            setContentTitle("MeowClash")
             setContentIntent(pendingIntent)
             setCategory(NotificationCompat.CATEGORY_SERVICE)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {

@@ -41,7 +41,7 @@ var
   i: Integer;
   ResultCode: Integer;
 begin
-  Processes := ['FlClashX.exe', 'FlClashCore.exe', 'FlClashHelperService.exe'];
+  Processes := ['MeowClash.exe', 'MeowClashCore.exe', 'MeowClashHelperService.exe'];
 
   // First try graceful shutdown
   for i := 0 to GetArrayLength(Processes)-1 do
@@ -100,7 +100,7 @@ begin
     PreviousVersion := GetInstalledVersion();
   
   // Stop service if running
-  Exec('sc.exe', 'stop "FlClashHelperService"', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+  Exec('sc.exe', 'stop "MeowClashHelperService"', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
   Sleep(1000);
   
   // Kill all processes
@@ -159,7 +159,7 @@ begin
     Sleep(500);
     // Ensure helper service is started after install/upgrade, independent of app
     try
-      Exec('sc.exe', 'start "FlClashHelperService"', '', SW_HIDE, ewNoWait, ResultCode);
+      Exec('sc.exe', 'start "MeowClashHelperService"', '', SW_HIDE, ewNoWait, ResultCode);
     except
     end;
   end;
@@ -173,14 +173,14 @@ begin
     usUninstall:
     begin
       // Stop service first
-      Exec('sc.exe', 'stop "FlClashHelperService"', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+      Exec('sc.exe', 'stop "MeowClashHelperService"', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
       Sleep(1000);
       
       // Kill all processes
       KillProcesses;
       
       // Delete service
-      Exec('sc.exe', 'delete "FlClashHelperService"', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+      Exec('sc.exe', 'delete "MeowClashHelperService"', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
       Sleep(500);
     end;
     

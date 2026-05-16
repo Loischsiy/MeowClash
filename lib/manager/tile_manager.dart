@@ -1,6 +1,6 @@
-import 'package:flclashx/enum/enum.dart';
-import 'package:flclashx/plugins/tile.dart';
-import 'package:flclashx/state.dart';
+import 'package:meowclash/enum/enum.dart';
+import 'package:meowclash/plugins/tile.dart';
+import 'package:meowclash/state.dart';
 import 'package:flutter/material.dart';
 
 class TileManager extends StatefulWidget {

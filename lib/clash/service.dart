@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:flclashx/clash/interface.dart';
 import 'package:flclashx/common/common.dart';
@@ -54,12 +55,13 @@ class ClashService extends ClashHandlerInterface {
             .transform(utf8.decoder)
             .transform(const LineSplitter())
             .listen(
-          (data) {
-            handleResult(
-              ActionResult.fromJson(
+          (data) async {
+            final result = await Isolate.run(
+              () => ActionResult.fromJson(
                 json.decode(data.trim()),
               ),
             );
+            handleResult(result);
           },
         );
       }

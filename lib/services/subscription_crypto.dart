@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:pointycastle/export.dart';
@@ -67,63 +68,65 @@ class SubscriptionCrypto {
   /// The optional [iterations] parameter overrides the default
   /// PBKDF2 iteration count and must match the value that was used
   /// when the file was encrypted.
-  static Uint8List decryptBase64(
+  static Future<Uint8List> decryptBase64(
     String encoded, {
     required String password,
     int iterations = kDefaultPbkdf2Iterations,
   }) {
-    final cleaned = encoded
-        .replaceAll('\r', '')
-        .replaceAll('\n', '')
-        .replaceAll(' ', '')
-        .trim();
-    if (cleaned.isEmpty) {
-      throw const FormatException('Empty encrypted payload');
-    }
+    return Isolate.run(() {
+      final cleaned = encoded
+          .replaceAll('\r', '')
+          .replaceAll('\n', '')
+          .replaceAll(' ', '')
+          .trim();
+      if (cleaned.isEmpty) {
+        throw const FormatException('Empty encrypted payload');
+      }
 
-    final Uint8List blob;
-    try {
-      blob = base64.decode(cleaned);
-    } on FormatException catch (e) {
-      throw FormatException('Invalid Base64 payload: ${e.message}');
-    }
+      final Uint8List blob;
+      try {
+        blob = base64.decode(cleaned);
+      } on FormatException catch (e) {
+        throw FormatException('Invalid Base64 payload: ${e.message}');
+      }
 
-    if (blob.length < _kSaltSize + _kIvSize + _kIvSize) {
-      throw const FormatException(
-        'Encrypted payload is too short to contain salt, IV and a block',
-      );
-    }
+      if (blob.length < _kSaltSize + _kIvSize + _kIvSize) {
+        throw const FormatException(
+          'Encrypted payload is too short to contain salt, IV and a block',
+        );
+      }
 
-    final salt = Uint8List.sublistView(blob, 0, _kSaltSize);
-    final iv = Uint8List.sublistView(blob, _kSaltSize, _kSaltSize + _kIvSize);
-    final ciphertext = Uint8List.sublistView(blob, _kSaltSize + _kIvSize);
+      final salt = Uint8List.sublistView(blob, 0, _kSaltSize);
+      final iv = Uint8List.sublistView(blob, _kSaltSize, _kSaltSize + _kIvSize);
+      final ciphertext = Uint8List.sublistView(blob, _kSaltSize + _kIvSize);
 
-    if (ciphertext.length % _kIvSize != 0) {
-      throw const FormatException(
-        'Ciphertext length is not a multiple of the AES block size',
-      );
-    }
+      if (ciphertext.length % _kIvSize != 0) {
+        throw const FormatException(
+          'Ciphertext length is not a multiple of the AES block size',
+        );
+      }
 
-    final key = deriveKey(password, salt, iterations: iterations);
+      final key = deriveKey(password, salt, iterations: iterations);
 
-    final cipher = PaddedBlockCipherImpl(
-      PKCS7Padding(),
-      CBCBlockCipher(AESEngine()),
-    )..init(
-        false,
-        PaddedBlockCipherParameters<CipherParameters, CipherParameters>(
-          ParametersWithIV<KeyParameter>(KeyParameter(key), iv),
-          null,
-        ),
-      );
+      final cipher = PaddedBlockCipherImpl(
+        PKCS7Padding(),
+        CBCBlockCipher(AESEngine()),
+      )..init(
+          false,
+          PaddedBlockCipherParameters<CipherParameters, CipherParameters>(
+            ParametersWithIV<KeyParameter>(KeyParameter(key), iv),
+            null,
+          ),
+        );
 
-    try {
-      return cipher.process(ciphertext);
-    } catch (_) {
-      throw Exception(
-        'Failed to decrypt subscription: wrong password or iteration count',
-      );
-    }
+      try {
+        return cipher.process(ciphertext);
+      } catch (_) {
+        throw Exception(
+          'Failed to decrypt subscription: wrong password or iteration count',
+        );
+      }
+    });
   }
 
   /// Heuristic check for whether [data] looks like a Base64 encoded

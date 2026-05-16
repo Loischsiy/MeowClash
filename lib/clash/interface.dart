@@ -137,15 +137,13 @@ abstract class ClashHandlerInterface with ClashInterface {
       }
     }
 
-    sendMessage(
-      json.encode(
-        Action(
-          id: id,
-          method: method,
-          data: data,
-        ),
-      ),
+    final action = Action(
+      id: id,
+      method: method,
+      data: data,
     );
+    final message = await Isolate.run(() => json.encode(action));
+    sendMessage(message);
 
     return (callbackCompleterMap[id]! as Completer<T>).safeFuture(
       timeout: timeout,

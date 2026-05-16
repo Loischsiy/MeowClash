@@ -37,7 +37,7 @@ class ClashLib extends ClashHandlerInterface with AndroidClashInterface {
     commonPrint.log("[DART] ClashLib._initService: Starting service initialization...");
     await service?.destroy();
     _registerMainPort(receiverPort.sendPort);
-    receiverPort.listen((message) {
+    receiverPort.listen((message) async {
       if (message is SendPort) {
         commonPrint.log("[DART] ClashLib: Received service SendPort");
         if (_canSendCompleter.isCompleted) {
@@ -52,11 +52,10 @@ class ClashLib extends ClashHandlerInterface with AndroidClashInterface {
         // Ignore IPC responses (Map type) - they don't need processing
         return;
       } else {
-        handleResult(
-          ActionResult.fromJson(json.decode(
-            message,
-          )),
+        final result = await Isolate.run(
+          () => ActionResult.fromJson(json.decode(message)),
         );
+        handleResult(result);
       }
     });
     commonPrint.log("[DART] ClashLib: Calling service.init()...");

@@ -1,6 +1,7 @@
 // ignore_for_file: invalid_annotation_target
 import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:flclashx/clash/core.dart';
@@ -296,7 +297,8 @@ extension ProfileExtension on Profile {
   }
 
   Future<Profile> saveFile(Uint8List bytes) async {
-    final message = await clashCore.validateConfig(utf8.decode(bytes));
+    final configText = await Isolate.run(() => utf8.decode(bytes));
+    final message = await clashCore.validateConfig(configText);
     if (message.isNotEmpty) {
       throw message;
     }

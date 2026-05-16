@@ -4,12 +4,12 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:typed_data';
 
-import 'package:flclashx/clash/core.dart';
-import 'package:flclashx/common/common.dart';
-import 'package:flclashx/enum/enum.dart';
-import 'package:flclashx/l10n/l10n.dart';
-import 'package:flclashx/services/subscription_crypto.dart';
-import 'package:flclashx/utils/device_info_service.dart';
+import 'package:meowclash/clash/core.dart';
+import 'package:meowclash/common/common.dart';
+import 'package:meowclash/enum/enum.dart';
+import 'package:meowclash/l10n/l10n.dart';
+import 'package:meowclash/services/subscription_crypto.dart';
+import 'package:meowclash/utils/device_info_service.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'clash_config.dart';
@@ -202,9 +202,9 @@ extension ProfileExtension on Profile {
 
     final profileData = await _maybeDecrypt(
       responseData,
-      password: decryptionPassword ?? providerHeaders['flclashx-password'],
+      password: decryptionPassword ?? providerHeaders['meowclash-password'],
       iterations: decryptionIterations ??
-          int.tryParse(providerHeaders['flclashx-password-iterations'] ?? '') ??
+          int.tryParse(providerHeaders['meowclash-password-iterations'] ?? '') ??
           kDefaultPbkdf2Iterations,
     );
 
@@ -225,25 +225,25 @@ extension ProfileExtension on Profile {
     }
     
     response.headers.forEach((name, values) {
-      if (name.toLowerCase().startsWith('flclashx-') && values.isNotEmpty) {
+      if (name.toLowerCase().startsWith('meowclash-') && values.isNotEmpty) {
         newProviderHeaders[name.toLowerCase()] = values.first;
       }
     });
 
     // Preserve saved credentials if not provided by server
     if (decryptionPassword != null) {
-      newProviderHeaders['flclashx-password'] = decryptionPassword;
-    } else if (providerHeaders.containsKey('flclashx-password')) {
-      newProviderHeaders['flclashx-password'] =
-          providerHeaders['flclashx-password']!;
+      newProviderHeaders['meowclash-password'] = decryptionPassword;
+    } else if (providerHeaders.containsKey('meowclash-password')) {
+      newProviderHeaders['meowclash-password'] =
+          providerHeaders['meowclash-password']!;
     }
 
     if (decryptionIterations != null) {
-      newProviderHeaders['flclashx-password-iterations'] =
+      newProviderHeaders['meowclash-password-iterations'] =
           decryptionIterations.toString();
-    } else if (providerHeaders.containsKey('flclashx-password-iterations')) {
-      newProviderHeaders['flclashx-password-iterations'] =
-          providerHeaders['flclashx-password-iterations']!;
+    } else if (providerHeaders.containsKey('meowclash-password-iterations')) {
+      newProviderHeaders['meowclash-password-iterations'] =
+          providerHeaders['meowclash-password-iterations']!;
     }
     
     Duration? durationFromHeader;

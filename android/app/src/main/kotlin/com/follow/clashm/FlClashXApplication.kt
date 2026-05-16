@@ -1,11 +1,11 @@
-package com.follow.clashx;
+package com.follow.clashm;
 
 import android.app.Application
 import android.content.Context
 
-class FlClashXApplication : Application() {
+class MeowClashApplication : Application() {
     companion object {
-        private lateinit var instance: FlClashXApplication
+        private lateinit var instance: MeowClashApplication
         fun getAppContext(): Context {
             return instance.applicationContext
         }

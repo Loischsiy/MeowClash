@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:flclashx/common/common.dart';
-import 'package:flclashx/state.dart';
+import 'package:meowclash/common/common.dart';
+import 'package:meowclash/state.dart';
 import 'package:flutter/material.dart';
 import 'package:screen_retriever/screen_retriever.dart';
 import 'package:window_manager/window_manager.dart';
@@ -15,8 +15,8 @@ class Window {
     }
     if (Platform.isWindows) {
       protocol.register("clashx");
-      protocol.register("flclash");
-      protocol.register("flclashx");
+      protocol.register("meowclash");
+      protocol.register("meowclash");
     }
 
     // On macOS, the app runs in status bar with popover - no window manager needed

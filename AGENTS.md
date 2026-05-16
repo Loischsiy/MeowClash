@@ -2,8 +2,8 @@
 
 ## Project identity
 
-MeowClash — multi-platform proxy client (Flutter/Dart), fork of FlClash.  
-Package name in `pubspec.yaml`: `flclashx`. App display name: MeowClash / FlClashX.
+MeowClash — multi-platform proxy client (Flutter/Dart), fork of MeowClash.
+Package name in `pubspec.yaml`: `meowclash`. App display name: MeowClash / MeowClash.
 
 ## Architecture (three compile units)
 
@@ -67,7 +67,7 @@ part 'generated/name.g.dart';
 
 ## Key conventions
 
-- **Imports**: always `package:flclashx/...` for cross-directory imports. Only use relative imports within the same directory (barrel files).
+- **Imports**: always `package:meowclash/...` for cross-directory imports. Only use relative imports within the same directory (barrel files).
 - **Logging**: use `commonPrint.log()`, never `print()`. `debugPrint()` for debug-only output.
 - **Fire-and-forget**: wrap with `unawaited()` (import from `dart:async`).
 - **Widget constructors**: always include `super.key`.

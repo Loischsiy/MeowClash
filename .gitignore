@@ -62,7 +62,7 @@ Example*
 /android/core/**/cmake-build-*/
 /android/core/**/jniLibs/
 
-#FlClash
+#MeowClash
 /libclash/
 /plugins/flutter_distributor/
 /android/app/src/main/jniLibs/

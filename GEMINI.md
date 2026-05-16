@@ -9,9 +9,9 @@
 
 ## Project Context
 
-**MeowClash** is a fork of [FlClash](https://github.com/chen08209/FlClash) — a multi-platform proxy client based on **ClashMeta** (mihomo). It provides a Material You-based UI for configuring and managing proxy connections on Android, Windows, macOS, and Linux. The app supports subscription links, WebDAV sync, TUN mode, multiple color themes, and adaptive screen sizes.
+**MeowClash** is a fork of [MeowClash](https://github.com/Loischsiy/MeowClash) — a multi-platform proxy client based on **ClashMeta** (mihomo). It provides a Material You-based UI for configuring and managing proxy connections on Android, Windows, macOS, and Linux. The app supports subscription links, WebDAV sync, TUN mode, multiple color themes, and adaptive screen sizes.
 
-**Package name:** `flclashx` (in pubspec)  
+**Package name:** `meowclash` (in pubspec)
 **App display name:** MeowClash  
 **Repository:** `Loischsiy/MeowClash`
 
@@ -92,7 +92,7 @@ MeowClash/
 ├── Makefile                    # Common build shortcuts
 ├── build.yaml                  # build_runner config (custom output paths for generated code)
 ├── analysis_options.yaml       # Strict linter rules
-├── distribute_options.yaml     # Distribution config (app_name: FlClashX, output: dist/)
+├── distribute_options.yaml     # Distribution config (app_name: MeowClash, output: dist/)
 ├── .github/workflows/build.yaml # CI/CD: multi-platform builds + publishing
 └── pubspec.yaml                # Flutter dependencies, assets, fonts, code-gen config
 ```
@@ -121,7 +121,7 @@ MeowClash/
 - Type aliases defined alongside models (e.g., `typedef DelayMap = Map<...>`)
 
 ### Imports
-- Use **absolute** package imports: `import 'package:flclashx/path/to/file.dart';`
+- Use **absolute** package imports: `import 'package:meowclash/path/to/file.dart';`
 - `avoid_relative_lib_imports` linter rule is enabled
 - Internally within a directory, relative `import 'common.dart';` is acceptable for barrel files
 
@@ -181,7 +181,7 @@ MeowClash/
    - Add `part 'generated/name.freezed.dart';` (+ `.g.dart` if JSON needed)
    - Never manually implement `==`, `hashCode`, `copyWith`, or `toString`
 
-6. **No relative imports outside current directory** — always use `package:flclashx/` prefix for cross-directory imports.
+6. **No relative imports outside current directory** — always use `package:meowclash/` prefix for cross-directory imports.
 
 7. **Do NOT edit `core/` Go files or `services/helper/` Rust files** unless explicitly asked. These are separate compilation units that require Go/Rust toolchains.
 

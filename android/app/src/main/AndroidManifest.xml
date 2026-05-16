@@ -23,14 +23,14 @@
         tools:ignore="QueryAllPackagesPermission" />
 
     <application
-        android:name=".FlClashXApplication"
+        android:name=".MeowClashApplication"
         android:banner="@mipmap/ic_banner"
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="FlClashX"
+        android:label="MeowClash"
         android:memtagMode="off">
         <activity
-            android:name="com.follow.clashx.MainActivity"
+            android:name="com.follow.clashm.MainActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:exported="true"
             android:hardwareAccelerated="true"
@@ -56,8 +56,8 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data android:scheme="clash" />
-                <data android:scheme="flclash" />
-                <data android:scheme="flclashx" />
+                <data android:scheme="meowclash" />
+                <data android:scheme="meowclash" />
 
                 <data android:host="install-config" />
             </intent-filter>
@@ -91,10 +91,10 @@
             android:label="@string/fl_clashx">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="com.follow.clashx.widget.ACTION_TOGGLE" />
-                <action android:name="com.follow.clashx.widget.ACTION_MODE_RULE" />
-                <action android:name="com.follow.clashx.widget.ACTION_MODE_GLOBAL" />
-                <action android:name="com.follow.clashx.widget.ACTION_MODE_DIRECT" />
+                <action android:name="com.follow.clashm.widget.ACTION_TOGGLE" />
+                <action android:name="com.follow.clashm.widget.ACTION_MODE_RULE" />
+                <action android:name="com.follow.clashm.widget.ACTION_MODE_GLOBAL" />
+                <action android:name="com.follow.clashm.widget.ACTION_MODE_DIRECT" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
@@ -107,7 +107,7 @@
             android:label="@string/fl_clashx">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="com.follow.clashx.widget.ACTION_ONOFF_TOGGLE" />
+                <action android:name="com.follow.clashm.widget.ACTION_ONOFF_TOGGLE" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
@@ -115,10 +115,10 @@
         </receiver>
 
         <service
-            android:name=".services.FlClashXTileService"
+            android:name=".services.MeowClashTileService"
             android:exported="true"
             android:icon="@drawable/ic"
-            android:label="FlClashX"
+            android:label="MeowClash"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
             tools:targetApi="n">
             <intent-filter>
@@ -152,7 +152,7 @@
         </provider>
         
         <service
-            android:name=".services.FlClashXVpnService"
+            android:name=".services.MeowClashVpnService"
             android:exported="false"
             android:foregroundServiceType="dataSync"
             android:permission="android.permission.BIND_VPN_SERVICE">
@@ -165,7 +165,7 @@
         </service>
 
         <service
-            android:name=".services.FlClashXService"
+            android:name=".services.MeowClashService"
             android:exported="false"
             android:foregroundServiceType="dataSync">
             <property

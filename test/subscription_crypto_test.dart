@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flclashx/services/subscription_crypto.dart';
+import 'package:meowclash/services/subscription_crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// Verifies that the Dart implementation in [SubscriptionCrypto] is

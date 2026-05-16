@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flclashx/common/common.dart';
+import 'package:meowclash/common/common.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -42,9 +42,9 @@ class AppPath {
       // Core is stored in Application Support/com.follow.clash/cores/ (copied by Swift code on launch)
       // Permissions are set automatically in Swift
       final home = Platform.environment['HOME'] ?? '';
-      return '$home/Library/Application Support/com.follow.clash/cores/FlClashCore';
+      return '$home/Library/Application Support/com.follow.clash/cores/MeowClashCore';
     }
-    return join(executableDirPath, "FlClashCore$executableExtension");
+    return join(executableDirPath, "MeowClashCore$executableExtension");
   }
 
   String get helperPath => join(executableDirPath, "$appHelperService$executableExtension");
@@ -61,7 +61,7 @@ class AppPath {
 
   Future<String> get lockFilePath async {
     final directory = await dataDir.future;
-    return join(directory.path, "FlClashX.lock");
+    return join(directory.path, "MeowClash.lock");
   }
 
   Future<String> get sharedPreferencesPath async {

@@ -1,4 +1,4 @@
-package com.follow.clashx.plugins
+package com.follow.clashm.plugins
 
 import android.Manifest
 import android.app.Activity
@@ -18,13 +18,13 @@ import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
 import com.android.tools.smali.dexlib2.dexbacked.DexBackedDexFile
-import com.follow.clashx.FlClashXApplication
-import com.follow.clashx.GlobalState
-import com.follow.clashx.R
-import com.follow.clashx.extensions.awaitResult
-import com.follow.clashx.extensions.getActionIntent
-import com.follow.clashx.extensions.getBase64
-import com.follow.clashx.models.Package
+import com.follow.clashm.MeowClashApplication
+import com.follow.clashm.GlobalState
+import com.follow.clashm.R
+import com.follow.clashm.extensions.awaitResult
+import com.follow.clashm.extensions.getActionIntent
+import com.follow.clashm.extensions.getBase64
+import com.follow.clashm.models.Package
 import com.google.gson.Gson
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -124,18 +124,18 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
     }
 
     private fun initShortcuts(label: String) {
-        val shortcut = ShortcutInfoCompat.Builder(FlClashXApplication.getAppContext(), "toggle")
+        val shortcut = ShortcutInfoCompat.Builder(MeowClashApplication.getAppContext(), "toggle")
             .setShortLabel(label)
             .setIcon(
                 IconCompat.createWithResource(
-                    FlClashXApplication.getAppContext(),
+                    MeowClashApplication.getAppContext(),
                     R.mipmap.ic_launcher_round
                 )
             )
-            .setIntent(FlClashXApplication.getAppContext().getActionIntent("CHANGE"))
+            .setIntent(MeowClashApplication.getAppContext().getActionIntent("CHANGE"))
             .build()
         ShortcutManagerCompat.setDynamicShortcuts(
-            FlClashXApplication.getAppContext(),
+            MeowClashApplication.getAppContext(),
             listOf(shortcut)
         )
     }
@@ -147,7 +147,7 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
 
     private fun tip(message: String?) {
         if (GlobalState.flutterEngine == null) {
-            Toast.makeText(FlClashXApplication.getAppContext(), message, Toast.LENGTH_LONG).show()
+            Toast.makeText(MeowClashApplication.getAppContext(), message, Toast.LENGTH_LONG).show()
         }
     }
 
@@ -196,7 +196,7 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
                         }
                         if (iconMap["default"] == null) {
                             iconMap["default"] =
-                                FlClashXApplication.getAppContext().packageManager?.defaultActivityIcon?.getBase64()
+                                MeowClashApplication.getAppContext().packageManager?.defaultActivityIcon?.getBase64()
                         }
                         result.success(iconMap["default"])
                         return@launch
@@ -225,8 +225,8 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
     private fun openFile(path: String) {
         val file = File(path)
         val uri = FileProvider.getUriForFile(
-            FlClashXApplication.getAppContext(),
-            "${FlClashXApplication.getAppContext().packageName}.fileProvider",
+            MeowClashApplication.getAppContext(),
+            "${MeowClashApplication.getAppContext().packageName}.fileProvider",
             file
         )
 
@@ -238,13 +238,13 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
         val flags =
             Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION
 
-        val resInfoList = FlClashXApplication.getAppContext().packageManager.queryIntentActivities(
+        val resInfoList = MeowClashApplication.getAppContext().packageManager.queryIntentActivities(
             intent, PackageManager.MATCH_DEFAULT_ONLY
         )
 
         for (resolveInfo in resInfoList) {
             val packageName = resolveInfo.activityInfo.packageName
-            FlClashXApplication.getAppContext().grantUriPermission(
+            MeowClashApplication.getAppContext().grantUriPermission(
                 packageName,
                 uri,
                 flags
@@ -259,7 +259,7 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
     }
 
     private fun updateExcludeFromRecents(value: Boolean?) {
-        val am = getSystemService(FlClashXApplication.getAppContext(), ActivityManager::class.java)
+        val am = getSystemService(MeowClashApplication.getAppContext(), ActivityManager::class.java)
         val task = am?.appTasks?.firstOrNull {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 it.taskInfo.taskId == activityRef?.get()?.taskId
@@ -276,7 +276,7 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
     }
 
     private suspend fun getPackageIcon(packageName: String): String? {
-        val packageManager = FlClashXApplication.getAppContext().packageManager
+        val packageManager = MeowClashApplication.getAppContext().packageManager
         if (iconMap[packageName] == null) {
             iconMap[packageName] = try {
                 packageManager?.getApplicationIcon(packageName)?.getBase64()
@@ -289,11 +289,11 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
     }
 
     private fun getPackages(): List<Package> {
-        val packageManager = FlClashXApplication.getAppContext().packageManager
+        val packageManager = MeowClashApplication.getAppContext().packageManager
         if (packages.isNotEmpty()) return packages
         packageManager?.getInstalledPackages(PackageManager.GET_META_DATA or PackageManager.GET_PERMISSIONS)
             ?.filter {
-                it.packageName != FlClashXApplication.getAppContext().packageName || it.packageName == "android"
+                it.packageName != MeowClashApplication.getAppContext().packageName || it.packageName == "android"
 
             }?.map {
                 Package(
@@ -323,7 +323,7 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
 
     fun requestVpnPermission(callBack: () -> Unit) {
         vpnCallBack = callBack
-        val intent = VpnService.prepare(FlClashXApplication.getAppContext())
+        val intent = VpnService.prepare(MeowClashApplication.getAppContext())
         if (intent != null) {
             activityRef?.get()?.startActivityForResult(intent, VPN_PERMISSION_REQUEST_CODE)
             return
@@ -334,7 +334,7 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
     fun requestNotificationsPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             val permission = ContextCompat.checkSelfPermission(
-                FlClashXApplication.getAppContext(),
+                MeowClashApplication.getAppContext(),
                 Manifest.permission.POST_NOTIFICATIONS
             )
             if (permission != PackageManager.PERMISSION_GRANTED) {
@@ -359,7 +359,7 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
     }
 
     private fun isChinaPackage(packageName: String): Boolean {
-        val packageManager = FlClashXApplication.getAppContext().packageManager ?: return false
+        val packageManager = MeowClashApplication.getAppContext().packageManager ?: return false
         skipPrefixList.forEach {
             if (packageName == it || packageName.startsWith("$it.")) return false
         }

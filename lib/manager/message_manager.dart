@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:flclashx/common/common.dart';
-import 'package:flclashx/models/models.dart';
-import 'package:flclashx/widgets/fade_box.dart';
+import 'package:meowclash/common/common.dart';
+import 'package:meowclash/models/models.dart';
+import 'package:meowclash/widgets/fade_box.dart';
 import 'package:flutter/material.dart';
 
 class MessageManager extends StatefulWidget {

@@ -1,4 +1,4 @@
-package com.follow.clashx.services
+package com.follow.clashm.services
 
 import android.annotation.SuppressLint
 import android.content.Intent
@@ -11,18 +11,18 @@ import android.os.Parcel
 import android.os.RemoteException
 import android.util.Log
 import androidx.core.app.NotificationCompat
-import com.follow.clashx.GlobalState
-import com.follow.clashx.extensions.getIpv4RouteAddress
-import com.follow.clashx.extensions.getIpv6RouteAddress
-import com.follow.clashx.extensions.toCIDR
-import com.follow.clashx.models.AccessControlMode
-import com.follow.clashx.models.VpnOptions
+import com.follow.clashm.GlobalState
+import com.follow.clashm.extensions.getIpv4RouteAddress
+import com.follow.clashm.extensions.getIpv6RouteAddress
+import com.follow.clashm.extensions.toCIDR
+import com.follow.clashm.models.AccessControlMode
+import com.follow.clashm.models.VpnOptions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 
-class FlClashXVpnService : VpnService(), BaseServiceInterface {
+class MeowClashVpnService : VpnService(), BaseServiceInterface {
     override fun onCreate() {
         super.onCreate()
         GlobalState.initServiceEngine()
@@ -141,7 +141,7 @@ class FlClashXVpnService : VpnService(), BaseServiceInterface {
                     }
                 }
             }
-            setSession("FlClashX")
+            setSession("MeowClash")
             setBlocking(false)
             if (Build.VERSION.SDK_INT >= 29) {
                 setMetered(false)
@@ -174,7 +174,7 @@ class FlClashXVpnService : VpnService(), BaseServiceInterface {
 
     private suspend fun notificationBuilder(): NotificationCompat.Builder {
         if (cachedBuilder == null) {
-            cachedBuilder = createFlClashXNotificationBuilder().await()
+            cachedBuilder = createMeowClashNotificationBuilder().await()
         }
         return cachedBuilder!!
     }
@@ -198,7 +198,7 @@ class FlClashXVpnService : VpnService(), BaseServiceInterface {
     private val binder = LocalBinder()
 
     inner class LocalBinder : Binder() {
-        fun getService(): FlClashXVpnService = this@FlClashXVpnService
+        fun getService(): MeowClashVpnService = this@MeowClashVpnService
 
         override fun onTransact(code: Int, data: Parcel, reply: Parcel?, flags: Int): Boolean {
             try {

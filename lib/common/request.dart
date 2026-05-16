@@ -5,9 +5,9 @@ import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
-import 'package:flclashx/common/common.dart';
-import 'package:flclashx/models/models.dart';
-import 'package:flclashx/state.dart';
+import 'package:meowclash/common/common.dart';
+import 'package:meowclash/models/models.dart';
+import 'package:meowclash/state.dart';
 import 'package:flutter/cupertino.dart';
 
 class Request {
@@ -25,7 +25,7 @@ class Request {
       final client = HttpClient();
       client.findProxy = (uri) {
         client.userAgent = globalState.ua;
-        return FlClashHttpOverrides.handleFindProxy(uri);
+        return MeowClashHttpOverrides.handleFindProxy(uri);
       };
       return client;
     });

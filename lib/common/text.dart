@@ -1,4 +1,4 @@
-import 'package:flclashx/enum/enum.dart';
+import 'package:meowclash/enum/enum.dart';
 import 'package:flutter/material.dart';
 import 'color.dart';
 

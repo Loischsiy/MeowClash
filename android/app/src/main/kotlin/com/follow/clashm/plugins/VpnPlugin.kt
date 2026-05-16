@@ -1,4 +1,4 @@
-package com.follow.clashx.plugins
+package com.follow.clashm.plugins
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -16,17 +16,17 @@ import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.content.getSystemService
-import com.follow.clashx.FlClashXApplication
-import com.follow.clashx.GlobalState
-import com.follow.clashx.RunState
-import com.follow.clashx.core.Core
-import com.follow.clashx.extensions.awaitResult
-import com.follow.clashx.extensions.resolveDns
-import com.follow.clashx.models.StartForegroundParams
-import com.follow.clashx.models.VpnOptions
-import com.follow.clashx.services.BaseServiceInterface
-import com.follow.clashx.services.FlClashXService
-import com.follow.clashx.services.FlClashXVpnService
+import com.follow.clashm.MeowClashApplication
+import com.follow.clashm.GlobalState
+import com.follow.clashm.RunState
+import com.follow.clashm.core.Core
+import com.follow.clashm.extensions.awaitResult
+import com.follow.clashm.extensions.resolveDns
+import com.follow.clashm.models.StartForegroundParams
+import com.follow.clashm.models.VpnOptions
+import com.follow.clashm.services.BaseServiceInterface
+import com.follow.clashm.services.MeowClashService
+import com.follow.clashm.services.MeowClashVpnService
 import com.google.gson.Gson
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
@@ -52,15 +52,15 @@ data object VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
     private val uidPageNameMap = mutableMapOf<Int, String>()
 
     private val connectivity by lazy {
-        FlClashXApplication.getAppContext().getSystemService<ConnectivityManager>()
+        MeowClashApplication.getAppContext().getSystemService<ConnectivityManager>()
     }
 
     private val connection = object : ServiceConnection {
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
             isBind = true
             flClashXService = when (service) {
-                is FlClashXVpnService.LocalBinder -> service.getService()
-                is FlClashXService.LocalBinder -> service.getService()
+                is MeowClashVpnService.LocalBinder -> service.getService()
+                is MeowClashService.LocalBinder -> service.getService()
                 else -> throw Exception("invalid binder")
             }
             handleStartService()
@@ -242,7 +242,7 @@ data object VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
     }
 
     private fun protect(fd: Int): Boolean {
-        return (flClashXService as? FlClashXVpnService)?.protect(fd) == true
+        return (flClashXService as? MeowClashVpnService)?.protect(fd) == true
     }
 
     private fun resolverProcess(
@@ -261,7 +261,7 @@ data object VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
         }
         if (!uidPageNameMap.containsKey(nextUid)) {
             uidPageNameMap[nextUid] =
-                FlClashXApplication.getAppContext().packageManager?.getPackagesForUid(nextUid)
+                MeowClashApplication.getAppContext().packageManager?.getPackagesForUid(nextUid)
                     ?.firstOrNull() ?: ""
         }
         return uidPageNameMap[nextUid] ?: ""
@@ -280,17 +280,17 @@ data object VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
 
     private fun bindService() {
         if (isBind) {
-            FlClashXApplication.getAppContext().unbindService(connection)
+            MeowClashApplication.getAppContext().unbindService(connection)
         }
         val intent = when (options?.enable == true) {
-            true -> Intent(FlClashXApplication.getAppContext(), FlClashXVpnService::class.java)
-            false -> Intent(FlClashXApplication.getAppContext(), FlClashXService::class.java)
+            true -> Intent(MeowClashApplication.getAppContext(), MeowClashVpnService::class.java)
+            false -> Intent(MeowClashApplication.getAppContext(), MeowClashService::class.java)
         }
-        FlClashXApplication.getAppContext().bindService(intent, connection, Context.BIND_AUTO_CREATE)
+        MeowClashApplication.getAppContext().bindService(intent, connection, Context.BIND_AUTO_CREATE)
     }
 
     private fun showSubscriptionNotification(title: String, message: String, actionLabel: String, actionUrl: String) {
-        val context = FlClashXApplication.getAppContext()
+        val context = MeowClashApplication.getAppContext()
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         // Create notification channel for subscription alerts (Android O+)

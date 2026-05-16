@@ -1,8 +1,8 @@
 import 'package:dynamic_color/dynamic_color.dart';
-import 'package:flclashx/common/common.dart';
-import 'package:flclashx/enum/enum.dart';
-import 'package:flclashx/models/models.dart';
-import 'package:flclashx/state.dart';
+import 'package:meowclash/common/common.dart';
+import 'package:meowclash/enum/enum.dart';
+import 'package:meowclash/models/models.dart';
+import 'package:meowclash/state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -98,7 +98,7 @@ CoreState coreState(Ref ref) {
     patchClashConfigProvider.select((state) => state.mixedPort),
   );
   // With mixed-port disabled there is no HTTP proxy to advertise to the OS.
-  // Force VpnProps.systemProxy off so FlClashVpnService doesn't register a
+  // Force VpnProps.systemProxy off so MeowClashVpnService doesn't register a
   // ProxyInfo pointing at 127.0.0.1:0 via setHttpProxy. Traffic is still
   // routed through the VPN/TUN, just without the HTTP-proxy hint.
   if (mixedPort == 0 && vpnProps.systemProxy) {
@@ -471,7 +471,7 @@ Profile? currentProfile(Ref ref) {
 @riverpod
 bool globalModeEnabled(Ref ref) {
   final profile = ref.watch(currentProfileProvider);
-  final value = profile?.providerHeaders['flclashx-globalmode'];
+  final value = profile?.providerHeaders['meowclash-globalmode'];
   return value?.toLowerCase() != 'false';
 }
 
@@ -485,21 +485,21 @@ bool hasAnnounceData(Ref ref) {
 @riverpod
 bool hasServiceInfoData(Ref ref) {
   final profile = ref.watch(currentProfileProvider);
-  final value = profile?.providerHeaders['flclashx-servicename'];
+  final value = profile?.providerHeaders['meowclash-servicename'];
   return value != null && value.isNotEmpty;
 }
 
 @riverpod
 bool hasServerInfoData(Ref ref) {
   final profile = ref.watch(currentProfileProvider);
-  final value = profile?.providerHeaders['flclashx-serverinfo'];
+  final value = profile?.providerHeaders['meowclash-serverinfo'];
   return value != null && value.isNotEmpty;
 }
 
 @riverpod
 String? backgroundUrl(Ref ref) {
   final profile = ref.watch(currentProfileProvider);
-  return profile?.providerHeaders['flclashx-background'];
+  return profile?.providerHeaders['meowclash-background'];
 }
 
 @riverpod

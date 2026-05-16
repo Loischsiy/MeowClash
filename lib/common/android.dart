@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:flclashx/plugins/app.dart';
-import 'package:flclashx/state.dart';
+import 'package:meowclash/plugins/app.dart';
+import 'package:meowclash/state.dart';
 
 class Android {
   Future<void> init() async {

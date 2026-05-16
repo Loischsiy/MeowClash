@@ -1,10 +1,10 @@
-package com.follow.clashx
+package com.follow.clashm
 
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
-import com.follow.clashx.plugins.AppPlugin
-import com.follow.clashx.plugins.TilePlugin
-import com.follow.clashx.plugins.VpnPlugin
+import com.follow.clashm.plugins.AppPlugin
+import com.follow.clashm.plugins.TilePlugin
+import com.follow.clashm.plugins.VpnPlugin
 import io.flutter.FlutterInjector
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.engine.dart.DartExecutor
@@ -25,8 +25,8 @@ enum class RunState {
 object GlobalState {
     val runLock = ReentrantLock()
 
-    const val NOTIFICATION_CHANNEL = "FlClashX"
-    const val SUBSCRIPTION_NOTIFICATION_CHANNEL = "FlClashX_Subscription"
+    const val NOTIFICATION_CHANNEL = "MeowClash"
+    const val SUBSCRIPTION_NOTIFICATION_CHANNEL = "MeowClash_Subscription"
 
     const val NOTIFICATION_ID = 1
     const val SUBSCRIPTION_NOTIFICATION_ID = 2
@@ -37,7 +37,7 @@ object GlobalState {
     // active button without duplicating state.
     val currentMode: MutableLiveData<String> = MutableLiveData<String>("rule")
     // Whether the Global mode button should be shown in the widget.
-    // Reflects the `flclashx-globalmode` subscription header — pushed from Dart.
+    // Reflects the `meowclash-globalmode` subscription header — pushed from Dart.
     val globalModeEnabled: MutableLiveData<Boolean> = MutableLiveData<Boolean>(true)
     var flutterEngine: FlutterEngine? = null
     private var serviceEngine: FlutterEngine? = null
@@ -57,7 +57,7 @@ object GlobalState {
     }
     
     fun hasActiveProfile(): Boolean {
-        val prefs = FlClashXApplication.getAppContext()
+        val prefs = MeowClashApplication.getAppContext()
             .getSharedPreferences("FlutterSharedPreferences", android.content.Context.MODE_PRIVATE)
         val configJson = prefs.getString("flutter.config", null)
         
@@ -182,7 +182,7 @@ object GlobalState {
         destroyServiceEngine()
         runLock.withLock {
             Log.d("GlobalState", "Creating new serviceEngine")
-            serviceEngine = FlutterEngine(FlClashXApplication.getAppContext())
+            serviceEngine = FlutterEngine(MeowClashApplication.getAppContext())
             Log.d("GlobalState", "Registering plugins")
             serviceEngine?.plugins?.add(VpnPlugin)
             serviceEngine?.plugins?.add(AppPlugin())

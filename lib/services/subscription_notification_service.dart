@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flclashx/common/app_localizations.dart';
-import 'package:flclashx/common/print.dart';
-import 'package:flclashx/models/models.dart';
-import 'package:flclashx/plugins/vpn.dart';
+import 'package:meowclash/common/app_localizations.dart';
+import 'package:meowclash/common/print.dart';
+import 'package:meowclash/models/models.dart';
+import 'package:meowclash/plugins/vpn.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Service for showing subscription expiration notifications.
@@ -93,9 +93,9 @@ class SubscriptionNotificationService {
     final supportUrl = profile.providerHeaders['support-url'] ?? '';
     commonPrint.log('[SubscriptionNotification] supportUrl: $supportUrl');
     
-    // Get title from flclashx-servicename header or fallback to profile label
+    // Get title from meowclash-servicename header or fallback to profile label
     String title = profile.label ?? profile.id;
-    final svc = profile.providerHeaders['flclashx-servicename'];
+    final svc = profile.providerHeaders['meowclash-servicename'];
     if (svc != null && svc.isNotEmpty) {
       try {
         final normalized = base64.normalize(svc);

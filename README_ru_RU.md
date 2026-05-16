@@ -6,7 +6,7 @@
 
 ## MeowClash
 
-> MeowClash - это форк [FlClash](https://github.com/chen08209/FlClash)
+> MeowClash - это форк [MeowClash](https://github.com/Loischsiy/MeowClash)
 
 [![Downloads](https://img.shields.io/github/downloads/Loischsiy/MeowClash/total?style=flat-square&logo=github)](https://github.com/Loischsiy/MeowClash/releases/)[![Last Version](https://img.shields.io/github/release/Loischsiy/MeowClash/all.svg?style=flat-square)](https://github.com/Loischsiy/MeowClash/releases/)[![License](https://img.shields.io/github/license/Loischsiy/MeowClash?style=flat-square)](LICENSE)
 
@@ -59,7 +59,7 @@
 
 ## Скачать
 
-<a href="https://chen08209.github.io/FlClash-fdroid-repo/repo?fingerprint=789D6D32668712EF7672F9E58DEEB15FBD6DCEEC5AE7A4371EA72F2AAE8A12FD"><img alt="Get it on F-Droid" src="snapshots/get-it-on-fdroid.svg" width="200px"/></a> <a href="https://github.com/Loischsiy/MeowClash/releases"><img alt="Get it on GitHub" src="snapshots/get-it-on-github.svg" width="200px"/></a>
+<a href="https://Loischsiy.github.io/MeowClash-fdroid-repo/repo?fingerprint=789D6D32668712EF7672F9E58DEEB15FBD6DCEEC5AE7A4371EA72F2AAE8A12FD"><img alt="Get it on F-Droid" src="snapshots/get-it-on-fdroid.svg" width="200px"/></a> <a href="https://github.com/Loischsiy/MeowClash/releases"><img alt="Get it on GitHub" src="snapshots/get-it-on-github.svg" width="200px"/></a>
 
 ## Сборка
 

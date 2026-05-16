@@ -1,16 +1,16 @@
 import 'dart:typed_data';
 
-import 'package:flclashx/common/common.dart';
-import 'package:flclashx/common/dav_client.dart';
-import 'package:flclashx/enum/enum.dart';
-import 'package:flclashx/models/models.dart';
-import 'package:flclashx/providers/config.dart';
-import 'package:flclashx/state.dart';
-import 'package:flclashx/widgets/dialog.dart';
-import 'package:flclashx/widgets/fade_box.dart';
-import 'package:flclashx/widgets/input.dart';
-import 'package:flclashx/widgets/list.dart';
-import 'package:flclashx/widgets/text.dart';
+import 'package:meowclash/common/common.dart';
+import 'package:meowclash/common/dav_client.dart';
+import 'package:meowclash/enum/enum.dart';
+import 'package:meowclash/models/models.dart';
+import 'package:meowclash/providers/config.dart';
+import 'package:meowclash/state.dart';
+import 'package:meowclash/widgets/dialog.dart';
+import 'package:meowclash/widgets/fade_box.dart';
+import 'package:meowclash/widgets/input.dart';
+import 'package:meowclash/widgets/list.dart';
+import 'package:meowclash/widgets/text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';

@@ -5,11 +5,11 @@ import 'dart:io';
 import 'dart:isolate' show Isolate, IsolateNameServer, ReceivePort, SendPort;
 import 'dart:ui';
 
-import 'package:flclashx/enum/enum.dart';
-import 'package:flclashx/plugins/app.dart';
-import 'package:flclashx/plugins/tile.dart';
-import 'package:flclashx/plugins/vpn.dart';
-import 'package:flclashx/state.dart';
+import 'package:meowclash/enum/enum.dart';
+import 'package:meowclash/plugins/app.dart';
+import 'package:meowclash/plugins/tile.dart';
+import 'package:meowclash/plugins/vpn.dart';
+import 'package:meowclash/state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -46,7 +46,7 @@ Future<void> main() async {
     if (Platform.isAndroid) {
       vpn; // Accessing the getter initializes the singleton
     }
-    HttpOverrides.global = FlClashHttpOverrides();
+    HttpOverrides.global = MeowClashHttpOverrides();
     commonPrint.log("[DART] Running application...");
     runApp(const ProviderScope(
       child: Application(),
@@ -277,10 +277,10 @@ Future<void> _service(List<String> flags) async {
       try {
         final traffic = clashLibHandler.getTraffic();
         final profile = globalState.config.currentProfile;
-        final profileName = profile?.label ?? profile?.id ?? "FlClashX";
+        final profileName = profile?.label ?? profile?.id ?? "MeowClash";
 
         // Get server group name from header (may be base64-encoded)
-        String? groupName = profile?.providerHeaders['flclashx-serverinfo'];
+        String? groupName = profile?.providerHeaders['meowclash-serverinfo'];
         if (groupName != null && groupName.isNotEmpty) {
           try {
             final normalized = base64.normalize(groupName);
@@ -302,10 +302,10 @@ Future<void> _service(List<String> flags) async {
         final serverDisplay = serverName.trim();
         final title = serverDisplay.isNotEmpty ? "$profileName / $serverDisplay" : profileName;
 
-        // Service name (subtext) from header flclashx-servicename (constant per profile)
+        // Service name (subtext) from header meowclash-servicename (constant per profile)
         String serviceName = "";
         try {
-          String? svc = profile?.providerHeaders['flclashx-servicename'];
+          String? svc = profile?.providerHeaders['meowclash-servicename'];
           if (svc != null && svc.isNotEmpty) {
             try {
               final normalized = base64.normalize(svc);
@@ -323,7 +323,7 @@ Future<void> _service(List<String> flags) async {
       } catch (_) {
         // Fallback minimal
         return json.encode({
-          "title": "FlClashX",
+          "title": "MeowClash",
           "server": "",
           "content": ""
         });
@@ -351,7 +351,7 @@ Future<void> _service(List<String> flags) async {
       final currentMode = globalState.config.patchClashConfig.mode.name;
       unawaited(tile?.updateMode(currentMode));
       final globalHeader =
-          globalState.config.currentProfile?.providerHeaders['flclashx-globalmode'];
+          globalState.config.currentProfile?.providerHeaders['meowclash-globalmode'];
       final globalEnabled = globalHeader?.toLowerCase() != 'false';
       unawaited(tile?.updateGlobalModeEnabled(globalEnabled));
     } catch (e) {

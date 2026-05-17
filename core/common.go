@@ -30,11 +30,12 @@ import (
 )
 
 var (
-	currentConfig *config.Config
-	version       = 0
-	isRunning     = false
-	runLock       sync.Mutex
-	mBatch, _     = batch.New[bool](context.Background(), batch.WithConcurrencyNum[bool](50))
+	currentConfig     *config.Config
+	version           = 0
+	isRunning         = false
+	runLock           sync.Mutex
+	proxyDescLock     sync.RWMutex
+	mBatch, _         = batch.New[bool](context.Background(), batch.WithConcurrencyNum[bool](50))
 	proxyDescriptions = map[string]string{}
 	pendingTunEnable  = false
 )

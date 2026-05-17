@@ -10,7 +10,6 @@ import (
 	bridge "core/dart-bridge"
 	"encoding/json"
 	"fmt"
-	"sync"
 	"sync/atomic"
 	"unsafe"
 )
@@ -20,8 +19,6 @@ var messagePort atomic.Int64
 func init() {
 	messagePort.Store(-1)
 }
-
-var proxyDescLock sync.RWMutex
 
 //export initNativeApiBridge
 func initNativeApiBridge(api unsafe.Pointer) {

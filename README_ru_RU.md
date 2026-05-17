@@ -115,13 +115,3 @@
            ```bash
            dart .\setup.dart macos --arch <arm64 | amd64>
            ```
-
-## Звезды (Star)
-
-Самый простой способ поддержать разработчиков - поставить звезду (⭐) в верхней части страницы.
-
-<p style="text-align: center;">
-    <a href="https://api.star-history.com/svg?repos=Loischsiy/MeowClash&Date">
-        <img alt="start" width=50% src="https://api.star-history.com/svg?repos=Loischsiy/MeowClash&Date"/>
-    </a>
-</p>

@@ -1,0 +1,543 @@
+name: release all platforms
+run-name: Release ${{ inputs.version }} (${{ inputs.app_env }})
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version, for example 1.0.0'
+        required: true
+        type: string
+      app_env:
+        description: 'Application environment'
+        required: true
+        type: choice
+        options:
+          - stable
+          - pre
+        default: stable
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-all-${{ github.event.inputs.version }}
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      app_version: ${{ steps.version.outputs.app_version }}
+      pubspec_version: ${{ steps.version.outputs.pubspec_version }}
+      release_tag: ${{ steps.version.outputs.release_tag }}
+    steps:
+      - name: Normalize release version
+        id: version
+        shell: bash
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          version="${INPUT_VERSION#v}"
+
+          if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Version must look like 1.0.0"
+            exit 1
+          fi
+
+          build_number="$(date -u +%Y%m%d%H)"
+          echo "app_version=$version" >> "$GITHUB_OUTPUT"
+          echo "pubspec_version=$version+$build_number" >> "$GITHUB_OUTPUT"
+          echo "release_tag=v$version" >> "$GITHUB_OUTPUT"
+
+  build-android:
+    needs: prepare
+    runs-on: ubuntu-22.04
+    env:
+      APP_ENV: ${{ inputs.app_env }}
+      PUBSPEC_VERSION: ${{ needs.prepare.outputs.pubspec_version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Patch app version
+        shell: bash
+        run: |
+          set -euo pipefail
+          sed -i.bak -E "s/^version: .*/version: ${PUBSPEC_VERSION}/" pubspec.yaml
+          rm -f pubspec.yaml.bak
+          grep '^version:' pubspec.yaml
+
+      - name: Setup flutter_distributor
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf plugins/flutter_distributor
+          git clone --depth 1 https://github.com/leanflutter/flutter_distributor plugins/flutter_distributor
+          rm -rf plugins/flutter_distributor/.git
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Android Signing
+        shell: bash
+        env:
+          KEYSTORE_SECRET: ${{ secrets.KEYSTORE }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          if [ -n "${KEYSTORE_SECRET:-}" ]; then
+            echo "$KEYSTORE_SECRET" | base64 --decode > android/app/keystore.jks
+            echo "keyAlias=$KEY_ALIAS" >> android/local.properties
+            echo "storePassword=$STORE_PASSWORD" >> android/local.properties
+            echo "keyPassword=$KEY_PASSWORD" >> android/local.properties
+          else
+            echo "No keystore secret, using debug signing"
+          fi
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.0'
+          cache-dependency-path: core/go.sum
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.35.7
+          cache: true
+
+      - name: Get Flutter Dependency
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter --version
+          flutter clean
+          flutter pub get
+
+      - name: Build
+        shell: bash
+        run: |
+          set -euo pipefail
+          set -o pipefail
+          export ANDROID_NDK="${ANDROID_NDK_LATEST_HOME:-${ANDROID_NDK_HOME:-${ANDROID_HOME}/ndk/$(ls -1 "${ANDROID_HOME}/ndk/" 2>/dev/null | sort -V | tail -1)}}"
+          echo "ANDROID_NDK=$ANDROID_NDK"
+          dart setup.dart android --env "$APP_ENV" 2>&1 | tee setup.log
+
+      - name: Upload setup log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: setup-log-android
+          path: setup.log
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-android
+          path: ./dist
+          overwrite: true
+
+  build-windows-amd64:
+    needs: prepare
+    runs-on: windows-2022
+    env:
+      APP_ENV: ${{ inputs.app_env }}
+      PUBSPEC_VERSION: ${{ needs.prepare.outputs.pubspec_version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Patch app version
+        shell: bash
+        run: |
+          set -euo pipefail
+          sed -i.bak -E "s/^version: .*/version: ${PUBSPEC_VERSION}/" pubspec.yaml
+          rm -f pubspec.yaml.bak
+          grep '^version:' pubspec.yaml
+
+      - name: Setup flutter_distributor
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf plugins/flutter_distributor
+          git clone --depth 1 https://github.com/leanflutter/flutter_distributor plugins/flutter_distributor
+          rm -rf plugins/flutter_distributor/.git
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.0'
+          cache-dependency-path: core/go.sum
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.35.7
+          cache: true
+
+      - name: Get Flutter Dependency
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter --version
+          flutter clean
+          flutter pub get
+
+      - name: Build
+        shell: bash
+        run: |
+          set -euo pipefail
+          set -o pipefail
+          dart setup.dart windows --arch amd64 --env "$APP_ENV" 2>&1 | tee setup.log
+
+      - name: Upload setup log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: setup-log-windows-amd64
+          path: setup.log
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-windows-amd64
+          path: ./dist
+          overwrite: true
+
+  build-linux-amd64:
+    needs: prepare
+    runs-on: ubuntu-22.04
+    env:
+      APP_ENV: ${{ inputs.app_env }}
+      PUBSPEC_VERSION: ${{ needs.prepare.outputs.pubspec_version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Patch app version
+        shell: bash
+        run: |
+          set -euo pipefail
+          sed -i.bak -E "s/^version: .*/version: ${PUBSPEC_VERSION}/" pubspec.yaml
+          rm -f pubspec.yaml.bak
+          grep '^version:' pubspec.yaml
+
+      - name: Setup flutter_distributor
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf plugins/flutter_distributor
+          git clone --depth 1 https://github.com/leanflutter/flutter_distributor plugins/flutter_distributor
+          rm -rf plugins/flutter_distributor/.git
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.0'
+          cache-dependency-path: core/go.sum
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.35.7
+          cache: true
+
+      - name: Get Flutter Dependency
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter --version
+          flutter clean
+          flutter pub get
+
+      - name: Build
+        shell: bash
+        run: |
+          set -euo pipefail
+          set -o pipefail
+          dart setup.dart linux --arch amd64 --env "$APP_ENV" 2>&1 | tee setup.log
+
+      - name: Upload setup log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: setup-log-linux-amd64
+          path: setup.log
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-linux-amd64
+          path: ./dist
+          overwrite: true
+
+  build-linux-arm64:
+    needs: prepare
+    runs-on: ubuntu-24.04-arm
+    env:
+      APP_ENV: ${{ inputs.app_env }}
+      PUBSPEC_VERSION: ${{ needs.prepare.outputs.pubspec_version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Patch app version
+        shell: bash
+        run: |
+          set -euo pipefail
+          sed -i.bak -E "s/^version: .*/version: ${PUBSPEC_VERSION}/" pubspec.yaml
+          rm -f pubspec.yaml.bak
+          grep '^version:' pubspec.yaml
+
+      - name: Setup flutter_distributor
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf plugins/flutter_distributor
+          git clone --depth 1 https://github.com/leanflutter/flutter_distributor plugins/flutter_distributor
+          rm -rf plugins/flutter_distributor/.git
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.0'
+          cache-dependency-path: core/go.sum
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: master
+          flutter-version: 3.35.7
+          cache: true
+
+      - name: Get Flutter Dependency
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter --version
+          flutter clean
+          flutter pub get
+
+      - name: Build
+        shell: bash
+        run: |
+          set -euo pipefail
+          set -o pipefail
+          dart setup.dart linux --arch arm64 --env "$APP_ENV" 2>&1 | tee setup.log
+
+      - name: Upload setup log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: setup-log-linux-arm64
+          path: setup.log
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-linux-arm64
+          path: ./dist
+          overwrite: true
+
+  build-macos-amd64:
+    needs: prepare
+    runs-on: macos-15-intel
+    env:
+      APP_ENV: ${{ inputs.app_env }}
+      PUBSPEC_VERSION: ${{ needs.prepare.outputs.pubspec_version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Patch app version
+        shell: bash
+        run: |
+          set -euo pipefail
+          sed -i.bak -E "s/^version: .*/version: ${PUBSPEC_VERSION}/" pubspec.yaml
+          rm -f pubspec.yaml.bak
+          grep '^version:' pubspec.yaml
+
+      - name: Setup flutter_distributor
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf plugins/flutter_distributor
+          git clone --depth 1 https://github.com/leanflutter/flutter_distributor plugins/flutter_distributor
+          rm -rf plugins/flutter_distributor/.git
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.0'
+          cache-dependency-path: core/go.sum
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.35.7
+          cache: true
+
+      - name: Get Flutter Dependency
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter --version
+          flutter clean
+          flutter pub get
+
+      - name: Build
+        shell: bash
+        run: |
+          set -euo pipefail
+          set -o pipefail
+          dart setup.dart macos --arch amd64 --env "$APP_ENV" 2>&1 | tee setup.log
+
+      - name: Upload setup log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: setup-log-macos-amd64
+          path: setup.log
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-macos-amd64
+          path: ./dist
+          overwrite: true
+
+  build-macos-arm64:
+    needs: prepare
+    runs-on: macos-latest
+    env:
+      APP_ENV: ${{ inputs.app_env }}
+      PUBSPEC_VERSION: ${{ needs.prepare.outputs.pubspec_version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Patch app version
+        shell: bash
+        run: |
+          set -euo pipefail
+          sed -i.bak -E "s/^version: .*/version: ${PUBSPEC_VERSION}/" pubspec.yaml
+          rm -f pubspec.yaml.bak
+          grep '^version:' pubspec.yaml
+
+      - name: Setup flutter_distributor
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf plugins/flutter_distributor
+          git clone --depth 1 https://github.com/leanflutter/flutter_distributor plugins/flutter_distributor
+          rm -rf plugins/flutter_distributor/.git
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.0'
+          cache-dependency-path: core/go.sum
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.35.7
+          cache: true
+
+      - name: Get Flutter Dependency
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter --version
+          flutter clean
+          flutter pub get
+
+      - name: Build
+        shell: bash
+        run: |
+          set -euo pipefail
+          set -o pipefail
+          dart setup.dart macos --arch arm64 --env "$APP_ENV" 2>&1 | tee setup.log
+
+      - name: Upload setup log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: setup-log-macos-arm64
+          path: setup.log
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-macos-arm64
+          path: ./dist
+          overwrite: true
+
+  publish-release:
+    needs:
+      - prepare
+      - build-android
+      - build-windows-amd64
+      - build-linux-amd64
+      - build-linux-arm64
+      - build-macos-amd64
+      - build-macos-arm64
+    runs-on: ubuntu-latest
+    env:
+      APP_VERSION: ${{ needs.prepare.outputs.app_version }}
+      RELEASE_TAG: ${{ needs.prepare.outputs.release_tag }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./dist
+          pattern: release-*
+          merge-multiple: true
+
+      - name: Generate release notes
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            echo "Release $RELEASE_TAG"
+            echo
+            echo "Built from $GITHUB_SHA."
+            echo
+            sed "s|VERSION|$APP_VERSION|g" ./.github/release_template.md
+          } > release.md
+
+      - name: Generate sha256
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd ./dist
+          find . -type f -not -name "*.sha256" -print0 | while IFS= read -r -d '' file; do
+            sha256sum "$file" > "${file}.sha256"
+          done
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.prepare.outputs.release_tag }}
+          name: MeowClash ${{ needs.prepare.outputs.release_tag }}
+          target_commitish: ${{ github.sha }}
+          files: ./dist/*
+          body_path: ./release.md
+          prerelease: ${{ inputs.app_env != 'stable' }}
+          fail_on_unmatched_files: true
+          overwrite_files: true

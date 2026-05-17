@@ -115,13 +115,3 @@ Support the following actions
            ```bash
            dart .\setup.dart macos --arch <arm64 | amd64>
            ```
-
-## Star
-
-The easiest way to support developers is to click on the star (⭐) at the top of the page.
-
-<p style="text-align: center;">
-    <a href="https://api.star-history.com/svg?repos=Loischsiy/MeowClash&Date">
-        <img alt="start" width=50% src="https://api.star-history.com/svg?repos=Loischsiy/MeowClash&Date"/>
-    </a>
-</p>

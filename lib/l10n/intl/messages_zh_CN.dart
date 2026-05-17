@@ -444,6 +444,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "DNS连接跟随rules,需配置proxy-server-nameserver",
     ),
     "restart": MessageLookupByLibrary.simpleMessage("重启"),
+    "restartCore": MessageLookupByLibrary.simpleMessage("重启内核"),
+    "restartCoreDesc": MessageLookupByLibrary.simpleMessage("重启代理内核服务"),
+    "restartCoreSuccess": MessageLookupByLibrary.simpleMessage("内核已成功重启"),
+    "restartCoreTip": MessageLookupByLibrary.simpleMessage(
+      "确定要重启内核吗？活动连接将短暂中断。",
+    ),
     "routeAddress": MessageLookupByLibrary.simpleMessage("路由地址"),
     "routeAddressDesc": MessageLookupByLibrary.simpleMessage("配置监听路由地址"),
     "routeMode": MessageLookupByLibrary.simpleMessage("路由模式"),

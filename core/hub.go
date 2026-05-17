@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net"
 	"runtime"
+	"runtime/debug"
 	"sort"
 	"strconv"
 	"time"
@@ -104,6 +105,7 @@ func handleForceGc() {
 	go func() {
 		log.Infoln("[APP] request force GC")
 		runtime.GC()
+		debug.FreeOSMemory()
 	}()
 }
 
@@ -112,7 +114,11 @@ func handleShutdown() bool {
 	stopRequestForwarder()
 	stopListeners()
 	executor.Shutdown()
+	requestSeen = nil
+	healthCheckSeen = nil
+	externalProviders = nil
 	runtime.GC()
+	debug.FreeOSMemory()
 	isInit = false
 	return true
 }
@@ -123,7 +129,7 @@ func startHealthCheckForwarder() {
 	}
 	healthCheckStopCh = make(chan struct{})
 	go func(stopCh chan struct{}) {
-		ticker := time.NewTicker(2 * time.Second)
+		ticker := time.NewTicker(3 * time.Second)
 		defer ticker.Stop()
 		for {
 			select {
@@ -208,7 +214,7 @@ func startRequestForwarder() {
 	requestSeen = map[string]bool{}
 	requestStopCh = make(chan struct{})
 	go func(stopCh chan struct{}) {
-		ticker := time.NewTicker(500 * time.Millisecond)
+		ticker := time.NewTicker(1 * time.Second)
 		defer ticker.Stop()
 		for {
 			select {

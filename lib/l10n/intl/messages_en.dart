@@ -675,6 +675,16 @@ class MessageLookup extends MessageLookupByLibrary {
       "DNS connection following rules, need to configure proxy-server-nameserver",
     ),
     "restart": MessageLookupByLibrary.simpleMessage("Restart"),
+    "restartCore": MessageLookupByLibrary.simpleMessage("Restart core"),
+    "restartCoreDesc": MessageLookupByLibrary.simpleMessage(
+      "Restart the proxy core service",
+    ),
+    "restartCoreSuccess": MessageLookupByLibrary.simpleMessage(
+      "Core restarted successfully",
+    ),
+    "restartCoreTip": MessageLookupByLibrary.simpleMessage(
+      "Are you sure you want to restart the core? Active connections will be interrupted briefly.",
+    ),
     "routeAddress": MessageLookupByLibrary.simpleMessage("Route address"),
     "routeAddressDesc": MessageLookupByLibrary.simpleMessage(
       "Config listen route address",

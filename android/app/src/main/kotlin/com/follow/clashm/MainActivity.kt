@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.provider.Settings
 import androidx.appcompat.app.AppCompatDelegate
 import com.follow.clashm.plugins.AppPlugin
+import com.follow.clashm.plugins.CryptoPlugin
 import com.follow.clashm.plugins.ServicePlugin
 import com.follow.clashm.plugins.TilePlugin
 import com.follow.clashm.plugins.VpnPlugin
@@ -65,6 +66,7 @@ class MainActivity : FlutterActivity() {
             }
         
         flutterEngine.plugins.add(AppPlugin())
+        flutterEngine.plugins.add(CryptoPlugin())
         flutterEngine.plugins.add(ServicePlugin)
         flutterEngine.plugins.add(TilePlugin())
         flutterEngine.plugins.add(VpnPlugin)

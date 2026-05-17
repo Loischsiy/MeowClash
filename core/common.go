@@ -47,14 +47,19 @@ func (a ExternalProviders) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 
 // proxiesWithProviders merges proxies from tunnel and all proxy providers
 func proxiesWithProviders() map[string]constant.Proxy {
-	allProxies := make(map[string]constant.Proxy)
-	for name, proxy := range tunnel.Proxies() {
+	tunnelProxies := tunnel.Proxies()
+	providers := tunnel.Providers()
+	capacity := len(tunnelProxies)
+	for _, p := range providers {
+		capacity += len(p.Proxies())
+	}
+	allProxies := make(map[string]constant.Proxy, capacity)
+	for name, proxy := range tunnelProxies {
 		allProxies[name] = proxy
 	}
-	for _, p := range tunnel.Providers() {
+	for _, p := range providers {
 		for _, proxy := range p.Proxies() {
-			name := proxy.Name()
-			allProxies[name] = proxy
+			allProxies[proxy.Name()] = proxy
 		}
 	}
 	return allProxies
@@ -100,8 +105,9 @@ func proxiesWithDescriptions() map[string]interface{} {
 	proxyDescLock.RLock()
 	descSnapshot := proxyDescriptions
 	proxyDescLock.RUnlock()
-	result := make(map[string]interface{})
-	for name, proxy := range proxiesWithProviders() {
+	proxies := proxiesWithProviders()
+	result := make(map[string]interface{}, len(proxies))
+	for name, proxy := range proxies {
 		data, err := json.Marshal(proxy)
 		if err != nil {
 			continue
@@ -119,13 +125,15 @@ func proxiesWithDescriptions() map[string]interface{} {
 }
 
 func getExternalProvidersRaw() map[string]cp.Provider {
-	eps := make(map[string]cp.Provider)
-	for n, p := range tunnel.Providers() {
+	providers := tunnel.Providers()
+	ruleProviders := tunnel.RuleProviders()
+	eps := make(map[string]cp.Provider, len(providers)+len(ruleProviders))
+	for n, p := range providers {
 		if p.VehicleType() != cp.Compatible {
 			eps[n] = p
 		}
 	}
-	for n, p := range tunnel.RuleProviders() {
+	for n, p := range ruleProviders {
 		if p.VehicleType() != cp.Compatible {
 			eps[n] = p
 		}

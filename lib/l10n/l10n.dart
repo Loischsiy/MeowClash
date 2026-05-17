@@ -3724,6 +3724,46 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `Restart core`
+  String get restartCore {
+    return Intl.message(
+      'Restart core',
+      name: 'restartCore',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Restart the proxy core service`
+  String get restartCoreDesc {
+    return Intl.message(
+      'Restart the proxy core service',
+      name: 'restartCoreDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Are you sure you want to restart the core? Active connections will be interrupted briefly.`
+  String get restartCoreTip {
+    return Intl.message(
+      'Are you sure you want to restart the core? Active connections will be interrupted briefly.',
+      name: 'restartCoreTip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Core restarted successfully`
+  String get restartCoreSuccess {
+    return Intl.message(
+      'Core restarted successfully',
+      name: 'restartCoreSuccess',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

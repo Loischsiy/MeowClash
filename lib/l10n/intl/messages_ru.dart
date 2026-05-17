@@ -712,6 +712,16 @@ class MessageLookup extends MessageLookupByLibrary {
       "DNS-запросы следуют правилам маршрутизации (требуется настройка proxy-server-nameserver)",
     ),
     "restart": MessageLookupByLibrary.simpleMessage("Перезапустить"),
+    "restartCore": MessageLookupByLibrary.simpleMessage("Перезапуск ядра"),
+    "restartCoreDesc": MessageLookupByLibrary.simpleMessage(
+      "Перезапустить службу прокси-ядра",
+    ),
+    "restartCoreSuccess": MessageLookupByLibrary.simpleMessage(
+      "Ядро успешно перезапущено",
+    ),
+    "restartCoreTip": MessageLookupByLibrary.simpleMessage(
+      "Вы действительно хотите перезапустить ядро? Активные соединения будут на короткое время прерваны.",
+    ),
     "routeAddress": MessageLookupByLibrary.simpleMessage("Адрес маршрутизации"),
     "routeAddressDesc": MessageLookupByLibrary.simpleMessage(
       "Настройка адреса прослушивания маршрутизации",

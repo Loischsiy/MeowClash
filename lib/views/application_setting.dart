@@ -419,6 +419,41 @@ class AutoCheckUpdateItem extends ConsumerWidget {
   }
 }
 
+class RestartCoreItem extends ConsumerWidget {
+  const RestartCoreItem({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) => ListItem(
+        title: Text(appLocalizations.restartCore),
+        subtitle: Text(appLocalizations.restartCoreDesc),
+        leading: const Icon(Icons.restart_alt),
+        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+        onTap: () async {
+          final res = await globalState.showMessage(
+            title: appLocalizations.restartCore,
+            message: TextSpan(
+              text: appLocalizations.restartCoreTip,
+              style: TextStyle(
+                color: context.colorScheme.onSurface,
+              ),
+            ),
+          );
+          if (res != true) return;
+          await globalState.appController.restartCore();
+          globalState.showMessage(
+            title: appLocalizations.restartCore,
+            message: TextSpan(
+              text: appLocalizations.restartCoreSuccess,
+              style: TextStyle(
+                color: context.colorScheme.onSurface,
+              ),
+            ),
+            confirmText: appLocalizations.confirm,
+          );
+        },
+      );
+}
+
 class ApplicationSettingView extends StatelessWidget {
   const ApplicationSettingView({super.key});
 
@@ -450,6 +485,10 @@ class ApplicationSettingView extends StatelessWidget {
           child: OpenLogsFolderItem(),
         ),
       ],
+      Padding(
+        padding: const EdgeInsets.only(top: 16),
+        child: RestartCoreItem(),
+      ),
       Padding(
         padding: EdgeInsets.only(top: system.isDesktop ? 0 : 16),
         child: ResetAppItem(),

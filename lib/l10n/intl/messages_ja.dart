@@ -512,6 +512,16 @@ class MessageLookup extends MessageLookupByLibrary {
       "DNS接続がルールに従う（proxy-server-nameserverの設定が必要）",
     ),
     "restart": MessageLookupByLibrary.simpleMessage("再起動"),
+    "restartCore": MessageLookupByLibrary.simpleMessage("コアの再起動"),
+    "restartCoreDesc": MessageLookupByLibrary.simpleMessage(
+      "プロキシコアサービスを再起動します",
+    ),
+    "restartCoreSuccess": MessageLookupByLibrary.simpleMessage(
+      "コアが正常に再起動しました",
+    ),
+    "restartCoreTip": MessageLookupByLibrary.simpleMessage(
+      "コアを再起動しますか？アクティブな接続は一時的に切断されます。",
+    ),
     "routeAddress": MessageLookupByLibrary.simpleMessage("ルートアドレス"),
     "routeAddressDesc": MessageLookupByLibrary.simpleMessage("ルートアドレスを設定"),
     "routeMode": MessageLookupByLibrary.simpleMessage("ルートモード"),

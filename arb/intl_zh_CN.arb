@@ -446,5 +446,9 @@
   "subscriptionExpiresToday": "您的订阅今天到期",
   "subscriptionExpired": "您的订阅已过期",
   "renew": "续订",
-  "announcement": "公告"
+  "announcement": "公告",
+  "restartCore": "重启内核",
+  "restartCoreDesc": "重启代理内核服务",
+  "restartCoreTip": "确定要重启内核吗？活动连接将短暂中断。",
+  "restartCoreSuccess": "内核已成功重启"
 }

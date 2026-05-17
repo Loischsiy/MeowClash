@@ -474,5 +474,9 @@
   "subscriptionExpiresToday": "Your subscription expires today",
   "subscriptionExpired": "Your subscription has expired",
   "renew": "Renew",
-  "announcement": "Announcement"
+  "announcement": "Announcement",
+  "restartCore": "Restart core",
+  "restartCoreDesc": "Restart the proxy core service",
+  "restartCoreTip": "Are you sure you want to restart the core? Active connections will be interrupted briefly.",
+  "restartCoreSuccess": "Core restarted successfully"
 }

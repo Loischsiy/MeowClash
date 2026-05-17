@@ -446,5 +446,9 @@
   "subscriptionExpiresToday": "サブスクリプションは本日期限切れになります",
   "subscriptionExpired": "サブスクリプションが期限切れになりました",
   "renew": "更新",
-  "announcement": "お知らせ"
+  "announcement": "お知らせ",
+  "restartCore": "コアの再起動",
+  "restartCoreDesc": "プロキシコアサービスを再起動します",
+  "restartCoreTip": "コアを再起動しますか？アクティブな接続は一時的に切断されます。",
+  "restartCoreSuccess": "コアが正常に再起動しました"
 }

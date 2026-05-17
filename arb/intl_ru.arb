@@ -475,5 +475,9 @@
   "subscriptionExpiresToday": "Ваша подписка истекает сегодня",
   "subscriptionExpired": "Ваша подписка истекла",
   "renew": "Продлить",
-  "announcement": "Объявление"
+  "announcement": "Объявление",
+  "restartCore": "Перезапуск ядра",
+  "restartCoreDesc": "Перезапустить службу прокси-ядра",
+  "restartCoreTip": "Вы действительно хотите перезапустить ядро? Активные соединения будут на короткое время прерваны.",
+  "restartCoreSuccess": "Ядро успешно перезапущено"
 }

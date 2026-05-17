@@ -1,7 +1,11 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:isolate';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:pointycastle/export.dart';
 
 /// Default PBKDF2 iteration count.
@@ -27,10 +31,10 @@ class SubscriptionPasswordRequiredException implements Exception {
 
   final String message;
 
-
   @override
   String toString() => message;
 }
+
 /// Decrypts a Base64-encoded blob produced by the companion `crypto.py`
 /// script (AES-256-CBC with a key derived from the supplied password via
 /// PBKDF2HMAC-SHA256).
@@ -49,6 +53,22 @@ class SubscriptionPasswordRequiredException implements Exception {
 /// padding fails to validate).
 class SubscriptionCrypto {
   const SubscriptionCrypto._();
+
+  /// Platform channel that delegates to the host platform's native
+  /// AES-256-CBC + PBKDF2 implementation (BoringSSL on Android), which
+  /// is one to two orders of magnitude faster than PointyCastle.
+  static const MethodChannel _nativeChannel = MethodChannel('crypto');
+
+  /// True once we've confirmed the native crypto channel is available.
+  /// `null` means the probe hasn't been performed yet.
+  static bool? _nativeAvailable;
+
+  /// Small cache of recently derived keys keyed by password + salt +
+  /// iteration count.  Subscription refreshes typically re-use the
+  /// same password and salt for the lifetime of the profile, so this
+  /// turns the second (and subsequent) updates into pure AES-CBC
+  /// operations with no PBKDF2 cost at all.
+  static final _KeyCache _keyCache = _KeyCache(maxEntries: 8);
 
   /// Returns the PBKDF2-derived 32-byte key for [password] and [salt].
   ///
@@ -72,60 +92,74 @@ class SubscriptionCrypto {
     String encoded, {
     required String password,
     int iterations = kDefaultPbkdf2Iterations,
-  }) {
+  }) async {
+    final cleaned = encoded
+        .replaceAll('\r', '')
+        .replaceAll('\n', '')
+        .replaceAll(' ', '')
+        .trim();
+    if (cleaned.isEmpty) {
+      throw const FormatException('Empty encrypted payload');
+    }
+
+    final Uint8List blob;
+    try {
+      blob = base64.decode(cleaned);
+    } on FormatException catch (e) {
+      throw FormatException('Invalid Base64 payload: ${e.message}');
+    }
+
+    if (blob.length < _kSaltSize + _kIvSize + _kIvSize) {
+      throw const FormatException(
+        'Encrypted payload is too short to contain salt, IV and a block',
+      );
+    }
+
+    final salt = Uint8List.fromList(blob.sublist(0, _kSaltSize));
+    final iv = Uint8List.fromList(
+      blob.sublist(_kSaltSize, _kSaltSize + _kIvSize),
+    );
+    final ciphertext = Uint8List.fromList(blob.sublist(_kSaltSize + _kIvSize));
+
+    if (ciphertext.length % _kIvSize != 0) {
+      throw const FormatException(
+        'Ciphertext length is not a multiple of the AES block size',
+      );
+    }
+
+    final cachedKey = _keyCache.lookup(password, salt, iterations);
+    if (cachedKey != null) {
+      return _decryptCbcWithKey(
+        key: cachedKey,
+        iv: iv,
+        ciphertext: ciphertext,
+      );
+    }
+
+    if (await _isNativeAvailable()) {
+      try {
+        final plaintext = await _decryptNative(
+          password: password,
+          salt: salt,
+          iv: iv,
+          ciphertext: ciphertext,
+          iterations: iterations,
+        );
+        unawaited(_warmKeyCache(password, salt, iterations));
+        return plaintext;
+      } on PlatformException catch (e) {
+        if (e.code == 'DECRYPT_FAILED') {
+          throw Exception(
+            'Failed to decrypt subscription: wrong password or iteration count',
+          );
+        }
+        _nativeAvailable = false;
+      }
+    }
+
     return Isolate.run(() {
-      final cleaned = encoded
-          .replaceAll('\r', '')
-          .replaceAll('\n', '')
-          .replaceAll(' ', '')
-          .trim();
-      if (cleaned.isEmpty) {
-        throw const FormatException('Empty encrypted payload');
-      }
-
-      final Uint8List blob;
-      try {
-        blob = base64.decode(cleaned);
-      } on FormatException catch (e) {
-        throw FormatException('Invalid Base64 payload: ${e.message}');
-      }
-
-      if (blob.length < _kSaltSize + _kIvSize + _kIvSize) {
-        throw const FormatException(
-          'Encrypted payload is too short to contain salt, IV and a block',
-        );
-      }
-
-      final salt = Uint8List.sublistView(blob, 0, _kSaltSize);
-      final iv = Uint8List.sublistView(blob, _kSaltSize, _kSaltSize + _kIvSize);
-      final ciphertext = Uint8List.sublistView(blob, _kSaltSize + _kIvSize);
-
-      if (ciphertext.length % _kIvSize != 0) {
-        throw const FormatException(
-          'Ciphertext length is not a multiple of the AES block size',
-        );
-      }
-
       final key = deriveKey(password, salt, iterations: iterations);
-
-      final cipher = PaddedBlockCipherImpl(
-        PKCS7Padding(),
-        CBCBlockCipher(AESEngine()),
-      )..init(
-          false,
-          PaddedBlockCipherParameters<CipherParameters, CipherParameters>(
-            ParametersWithIV<KeyParameter>(KeyParameter(key), iv),
-            null,
-          ),
-        );
-
-      try {
-        return cipher.process(ciphertext);
-      } catch (_) {
-        throw Exception(
-          'Failed to decrypt subscription: wrong password or iteration count',
-        );
-      }
+      return _decryptCbcWithKey(key: key, iv: iv, ciphertext: ciphertext);
     });
   }
 
@@ -156,5 +190,146 @@ class SubscriptionCrypto {
     } catch (_) {
       return false;
     }
+  }
+
+  static Future<bool> _isNativeAvailable() async {
+    if (_nativeAvailable != null) {
+      return _nativeAvailable!;
+    }
+    if (kIsWeb || !Platform.isAndroid) {
+      _nativeAvailable = false;
+      return false;
+    }
+    try {
+      final ok = await _nativeChannel.invokeMethod<bool>('isSupported');
+      _nativeAvailable = ok == true;
+    } on PlatformException {
+      _nativeAvailable = false;
+    } on MissingPluginException {
+      _nativeAvailable = false;
+    }
+    return _nativeAvailable ?? false;
+  }
+
+  static Future<Uint8List> _decryptNative({
+    required String password,
+    required Uint8List salt,
+    required Uint8List iv,
+    required Uint8List ciphertext,
+    required int iterations,
+  }) async {
+    final result = await _nativeChannel.invokeMethod<Uint8List>(
+      'decryptAesCbc',
+      <String, Object>{
+        'password': password,
+        'salt': salt,
+        'iv': iv,
+        'ciphertext': ciphertext,
+        'iterations': iterations,
+        'keyBits': _kKeySize * 8,
+      },
+    );
+    if (result == null) {
+      throw Exception('Native crypto returned an empty payload');
+    }
+    return result;
+  }
+
+  static Uint8List _decryptCbcWithKey({
+    required Uint8List key,
+    required Uint8List iv,
+    required Uint8List ciphertext,
+  }) {
+    final cipher = PaddedBlockCipherImpl(
+      PKCS7Padding(),
+      CBCBlockCipher(AESEngine()),
+    )..init(
+        false,
+        PaddedBlockCipherParameters<CipherParameters, CipherParameters>(
+          ParametersWithIV<KeyParameter>(KeyParameter(key), iv),
+          null,
+        ),
+      );
+
+    try {
+      return cipher.process(ciphertext);
+    } catch (_) {
+      throw Exception(
+        'Failed to decrypt subscription: wrong password or iteration count',
+      );
+    }
+  }
+
+  static Future<void> _warmKeyCache(
+    String password,
+    Uint8List salt,
+    int iterations,
+  ) async {
+    if (_keyCache.lookup(password, salt, iterations) != null) {
+      return;
+    }
+    final key = await Isolate.run(
+      () => deriveKey(password, salt, iterations: iterations),
+    );
+    _keyCache.store(password, salt, iterations, key);
+  }
+}
+
+class _KeyCache {
+  _KeyCache({required this.maxEntries});
+
+  final int maxEntries;
+  final List<_KeyCacheEntry> _entries = <_KeyCacheEntry>[];
+
+  Uint8List? lookup(String password, Uint8List salt, int iterations) {
+    for (var i = 0; i < _entries.length; i++) {
+      final entry = _entries[i];
+      if (entry.matches(password, salt, iterations)) {
+        _entries.removeAt(i);
+        _entries.insert(0, entry);
+        return entry.key;
+      }
+    }
+    return null;
+  }
+
+  void store(String password, Uint8List salt, int iterations, Uint8List key) {
+    _entries.removeWhere((e) => e.matches(password, salt, iterations));
+    _entries.insert(
+      0,
+      _KeyCacheEntry(
+        password: password,
+        salt: Uint8List.fromList(salt),
+        iterations: iterations,
+        key: Uint8List.fromList(key),
+      ),
+    );
+    while (_entries.length > maxEntries) {
+      _entries.removeLast();
+    }
+  }
+}
+
+class _KeyCacheEntry {
+  _KeyCacheEntry({
+    required this.password,
+    required this.salt,
+    required this.iterations,
+    required this.key,
+  });
+
+  final String password;
+  final Uint8List salt;
+  final int iterations;
+  final Uint8List key;
+
+  bool matches(String otherPassword, Uint8List otherSalt, int otherIterations) {
+    if (iterations != otherIterations) return false;
+    if (password != otherPassword) return false;
+    if (salt.length != otherSalt.length) return false;
+    for (var i = 0; i < salt.length; i++) {
+      if (salt[i] != otherSalt[i]) return false;
+    }
+    return true;
   }
 }

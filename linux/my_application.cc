@@ -8,10 +8,6 @@
 
 #include "flutter/generated_plugin_registrant.h"
 
-#ifndef G_APPLICATION_DEFAULT_FLAGS
-#define G_APPLICATION_DEFAULT_FLAGS G_APPLICATION_FLAGS_NONE
-#endif
-
 struct _MyApplication {
   GtkApplication parent_instance;
   char** dart_entrypoint_arguments;
@@ -187,6 +183,6 @@ MyApplication* my_application_new() {
 
   return MY_APPLICATION(g_object_new(my_application_get_type(),
                                      "application-id", APPLICATION_ID,
-                                     "flags", G_APPLICATION_DEFAULT_FLAGS,
+                                     "flags", static_cast<GApplicationFlags>(0),
                                      nullptr));
 }

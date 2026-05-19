@@ -33,6 +33,21 @@ class ProxyCard extends StatelessWidget {
     );
   }
 
+  bool _canDrillDown(Group? group) =>
+      group?.hidden == true && group?.type == GroupType.URLTest;
+
+  void _openProxyGroup(BuildContext context, Group group) {
+    showExtend(
+      context,
+      props: const ExtendProps(maxWidth: 480),
+      builder: (_, type) => AdaptiveSheetScaffold(
+        type: type,
+        body: _ProxyGroupDrillDownView(groupName: group.name),
+        title: group.name,
+      ),
+    );
+  }
+
   Widget _buildDelayText() => SizedBox(
       height: measure.labelSmallHeight,
       child: Consumer(
@@ -161,11 +176,20 @@ class ProxyCard extends StatelessWidget {
           builder: (_, ref, child) {
             final selectedProxyName =
                 ref.watch(getSelectedProxyNameProvider(groupName));
+            final drillDownGroup = ref.watch(
+              groupsProvider.select((state) {
+                final group = state.getGroup(proxy.name);
+                return _canDrillDown(group) ? group : null;
+              }),
+            );
             return CommonCard(
               key: key,
               onPressed: () {
                 _changeProxy(ref);
               },
+              onLongPress: drillDownGroup != null
+                  ? () => _openProxyGroup(context, drillDownGroup)
+                  : null,
               isSelected: selectedProxyName == proxy.name,
               child: child!,
             );
@@ -224,6 +248,85 @@ class ProxyCard extends StatelessWidget {
             ),
           )
       ],
+    );
+  }
+}
+
+class _ProxyGroupDrillDownView extends ConsumerStatefulWidget {
+  const _ProxyGroupDrillDownView({required this.groupName});
+
+  final String groupName;
+
+  @override
+  ConsumerState<_ProxyGroupDrillDownView> createState() =>
+      _ProxyGroupDrillDownViewState();
+}
+
+class _ProxyGroupDrillDownViewState
+    extends ConsumerState<_ProxyGroupDrillDownView> {
+  final _controller = ScrollController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final group = ref.watch(
+      groupsProvider.select((state) => state.getGroup(widget.groupName)),
+    );
+    if (group == null) {
+      return NullStatus(
+        label: appLocalizations.nullTip(appLocalizations.proxies),
+      );
+    }
+
+    final proxiesStyle = ref.watch(proxiesStyleSettingProvider);
+    ref.watch(sortNumProvider);
+    final sortedProxies = globalState.appController.getSortProxies(
+      group.all,
+      group.testUrl,
+    );
+    if (sortedProxies.isEmpty) {
+      return NullStatus(
+        label: appLocalizations.nullTip(appLocalizations.proxies),
+      );
+    }
+
+    return LayoutBuilder(
+      builder: (_, constraints) {
+        final columns = utils.getProxiesColumns(
+          constraints.maxWidth,
+          proxiesStyle.layout,
+        );
+        return CommonAutoHiddenScrollBar(
+          controller: _controller,
+          child: GridView.builder(
+            controller: _controller,
+            padding: const EdgeInsets.all(16),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: columns,
+              mainAxisSpacing: 8,
+              crossAxisSpacing: 8,
+              mainAxisExtent: getItemHeight(proxiesStyle.cardType),
+            ),
+            itemCount: sortedProxies.length,
+            itemBuilder: (_, index) {
+              final proxy = sortedProxies[index];
+              return ProxyCard(
+                testUrl: group.testUrl,
+                groupType: group.type,
+                type: proxiesStyle.cardType,
+                key: ValueKey('${group.name}.${proxy.name}'),
+                proxy: proxy,
+                groupName: group.name,
+              );
+            },
+          ),
+        );
+      },
     );
   }
 }

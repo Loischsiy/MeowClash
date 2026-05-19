@@ -90,54 +90,65 @@ class _ProxiesListViewState extends State<ProxiesListView> {
       if (group == null) {
         continue;
       }
-      final sortedProxies = globalState.appController.getSortProxies(
-        group.all
-            .where((item) => item.name.toLowerCase().contains(query))
-            .toList(),
-        group.testUrl,
-      );
-      groupNameProxiesMap[groupName] = sortedProxies;
-      final chunks = sortedProxies.chunks(columns);
-      final rows = chunks
-          .map<Widget>((proxies) {
-            final children = proxies
-                .map<Widget>(
-                  (proxy) => Flexible(
-                    flex: 1,
-                    child: RepaintBoundary(
-                      child: ProxyCard(
-                        testUrl: group.testUrl,
-                        type: type,
-                        groupType: group.type,
-                        key: ValueKey('$groupName.${proxy.name}'),
-                        proxy: proxy,
-                        groupName: groupName,
+
+      // Only do the heavy work (filter + sort + widget construction) for
+      // groups that are actually expanded. Building rows for every
+      // collapsed group was the main reason scrolling stuttered on large
+      // profiles — with `delay` sorting it costs O(N log N) ref reads per
+      // group on every rebuild, plus dozens of `ProxyCard` widgets that
+      // never even paint because the body is collapsed.
+      final isExpanded = currentUnfoldSet.contains(groupName);
+      List<Widget> rows = const <Widget>[];
+      if (isExpanded) {
+        final sortedProxies = globalState.appController.getSortProxies(
+          group.all
+              .where((item) => item.name.toLowerCase().contains(query))
+              .toList(),
+          group.testUrl,
+        );
+        groupNameProxiesMap[groupName] = sortedProxies;
+        final chunks = sortedProxies.chunks(columns);
+        rows = chunks
+            .map<Widget>((proxies) {
+              final children = proxies
+                  .map<Widget>(
+                    (proxy) => Flexible(
+                      flex: 1,
+                      child: RepaintBoundary(
+                        child: ProxyCard(
+                          testUrl: group.testUrl,
+                          type: type,
+                          groupType: group.type,
+                          key: ValueKey('$groupName.${proxy.name}'),
+                          proxy: proxy,
+                          groupName: groupName,
+                        ),
                       ),
                     ),
-                  ),
-                )
-                .fill(
-                  columns,
-                  filler: (_) => const Flexible(
-                    child: SizedBox(),
-                  ),
-                )
-                .separated(
-                  const SizedBox(
-                    width: 8,
-                  ),
-                );
+                  )
+                  .fill(
+                    columns,
+                    filler: (_) => const Flexible(
+                      child: SizedBox(),
+                    ),
+                  )
+                  .separated(
+                    const SizedBox(
+                      width: 8,
+                    ),
+                  );
 
-            return Row(
-              children: children.toList(),
-            );
-          })
-          .separated(
-            SizedBox(
-              height: type == ProxyCardType.oneline ? 4 : 8,
-            ),
-          )
-          .toList();
+              return Row(
+                children: children.toList(),
+              );
+            })
+            .separated(
+              SizedBox(
+                height: type == ProxyCardType.oneline ? 4 : 8,
+              ),
+            )
+            .toList();
+      }
 
       items.add(ProxyGroupCard(group: group, proxies: rows));
     }

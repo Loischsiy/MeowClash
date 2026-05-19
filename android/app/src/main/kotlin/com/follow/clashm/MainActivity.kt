@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.view.Display
 import androidx.appcompat.app.AppCompatDelegate
 import com.follow.clashm.plugins.AppPlugin
 import com.follow.clashm.plugins.CryptoPlugin
@@ -19,29 +20,77 @@ class MainActivity : FlutterActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         // Apply app theme before creating the activity to fix splash screen theme
         applyAppTheme()
-        
+
         super.onCreate(savedInstanceState)
-        
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            window.attributes.preferredDisplayModeId = getHighestRefreshRateDisplayMode()
+
+        applyHighestRefreshRate()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Re-apply the highest refresh rate every time the activity becomes
+        // foreground. Some OEMs (Pixel/Realme/etc.) drop the preferred display
+        // mode back to the default when the window is hidden and restored.
+        applyHighestRefreshRate()
+    }
+
+    private fun applyHighestRefreshRate() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            return
+        }
+        val modeId = getHighestRefreshRateDisplayMode()
+        if (modeId == 0) {
+            return
+        }
+        // IMPORTANT: mutate a local copy of `window.attributes` and assign the
+        // result back. Mutating the live `LayoutParams` instance in place
+        // does not propagate to the WindowManager on many devices (notably
+        // Pixel), so the preferred display mode silently has no effect and
+        // the screen stays at 60 Hz. Reassigning the field forces an
+        // updateViewLayout(), which is also why this no longer kicks the
+        // "Show refresh rate" developer overlay off on startup.
+        val attrs = window.attributes
+        if (attrs.preferredDisplayModeId != modeId) {
+            attrs.preferredDisplayModeId = modeId
+            window.attributes = attrs
+        }
+    }
+
+    @Suppress("DEPRECATION")
+    private fun activeDisplay(): Display? {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            display
+        } else {
+            windowManager.defaultDisplay
         }
     }
 
     private fun getHighestRefreshRateDisplayMode(): Int {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val modes = windowManager.defaultDisplay.supportedModes
-            var maxRefreshRate = 60f
-            var modeId = 0
-            
-            for (mode in modes) {
-                if (mode.refreshRate > maxRefreshRate) {
-                    maxRefreshRate = mode.refreshRate
-                    modeId = mode.modeId
-                }
-            }
-            return modeId
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            return 0
         }
-        return 0
+        val display = activeDisplay() ?: return 0
+        val current = display.mode
+        val modes = display.supportedModes
+
+        var bestModeId = current.modeId
+        var bestRefreshRate = current.refreshRate
+
+        // Only consider modes with the same physical resolution as the
+        // current one. Switching to a mode with a different resolution can
+        // trigger an unwanted reconfiguration on some devices.
+        for (mode in modes) {
+            if (mode.physicalWidth != current.physicalWidth ||
+                mode.physicalHeight != current.physicalHeight
+            ) {
+                continue
+            }
+            if (mode.refreshRate > bestRefreshRate) {
+                bestRefreshRate = mode.refreshRate
+                bestModeId = mode.modeId
+            }
+        }
+        return bestModeId
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {

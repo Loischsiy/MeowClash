@@ -30,6 +30,8 @@ class AppController {
   AppController(this.context, WidgetRef ref) : _ref = ref;
   int? lastProfileModified;
   Timer? _profileUpdateTimer;
+  Completer<void>? _exitLock;
+  Timer? _changeModeDebounce;
   final BuildContext context;
   final WidgetRef _ref;
 
@@ -1003,15 +1005,36 @@ class AppController {
   }
 
   Future<void> handleExit() async {
+    // Guard against re-entry. Without this, multiple back-presses (or both the
+    // back handler and a finalisation path) would each kick off a fresh
+    // teardown and call `system.exit()` more than once. On Android that
+    // surfaces as the activity "closing twice" — the user sees one close
+    // animation, then a second one a moment later.
+    final existing = _exitLock;
+    if (existing != null) {
+      return existing.future;
+    }
+    final completer = Completer<void>();
+    _exitLock = completer;
+
     _profileUpdateTimer?.cancel();
-    Future.delayed(commonDuration, system.exit);
+    _changeModeDebounce?.cancel();
     try {
       await savePreferences();
       await system.setMacOSDns(true);
       await proxy?.stopProxy();
       await clashCore.shutdown();
       await clashService?.destroy();
+    } catch (e) {
+      commonPrint.log('handleExit error: $e');
     } finally {
+      if (!completer.isCompleted) {
+        completer.complete();
+      }
+      // Exit exactly once. We intentionally do not also schedule a delayed
+      // `system.exit()` — if we did, Android would receive a second
+      // `SystemNavigator.pop()` after this one and tear the activity down a
+      // second time.
       system.exit();
     }
   }
@@ -1455,32 +1478,45 @@ class AppController {
   List<Proxy> _sortOfDelay({
     required List<Proxy> proxies,
     String? testUrl,
-  }) =>
-      List.of(proxies)
-        ..sort(
-          (a, b) {
-            final aDelay = _ref.read(getDelayProvider(
-              proxyName: a.name,
-              testUrl: testUrl,
-            ));
-            final bDelay = _ref.read(
-              getDelayProvider(
-                proxyName: b.name,
-                testUrl: testUrl,
-              ),
-            );
-            if (aDelay == null && bDelay == null) {
-              return 0;
-            }
-            if (aDelay == null || aDelay == -1) {
-              return 1;
-            }
-            if (bDelay == null || bDelay == -1) {
-              return -1;
-            }
-            return aDelay.compareTo(bDelay);
-          },
-        );
+  }) {
+    // Resolve each proxy's delay exactly once, instead of doing two
+    // `ref.read(getDelayProvider(...))` calls per comparator invocation
+    // (which yields O(N log N) family-provider lookups per sort). On large
+    // groups this was a measurable contributor to scroll jank.
+    final delays = <String, int?>{};
+    int? delayOf(String name) {
+      final cached = delays[name];
+      if (cached != null || delays.containsKey(name)) {
+        return cached;
+      }
+      final value = _ref.read(
+        getDelayProvider(
+          proxyName: name,
+          testUrl: testUrl,
+        ),
+      );
+      delays[name] = value;
+      return value;
+    }
+
+    return List.of(proxies)
+      ..sort(
+        (a, b) {
+          final aDelay = delayOf(a.name);
+          final bDelay = delayOf(b.name);
+          if (aDelay == null && bDelay == null) {
+            return 0;
+          }
+          if (aDelay == null || aDelay == -1) {
+            return 1;
+          }
+          if (bDelay == null || bDelay == -1) {
+            return -1;
+          }
+          return aDelay.compareTo(bDelay);
+        },
+      );
+  }
 
   List<Proxy> getSortProxies(List<Proxy> proxies, [String? url]) =>
       switch (_ref.read(proxiesStyleSettingProvider).sortType) {
@@ -1672,13 +1708,29 @@ class AppController {
   }
 
   void changeMode(Mode mode) {
+    final current =
+        _ref.read(patchClashConfigProvider.select((state) => state.mode));
+    // Skip the entire provider chain (and its `currentGroupsState` /
+    // `proxiesListSelectorState` / etc. invalidations) when the user taps
+    // the mode that is already active. The `CommonTabBar`'s thumb still
+    // gives feedback, but we don't rebuild the proxies list for nothing.
+    if (current == mode) {
+      return;
+    }
     _ref.read(patchClashConfigProvider.notifier).updateState(
           (state) => state.copyWith(mode: mode),
         );
     if (mode == Mode.global) {
       updateCurrentGroupName(GroupName.GLOBAL.name);
     }
-    addCheckIpNumDebounce();
+    // The IP-check is unrelated to UI responsiveness and was already
+    // debounced, but make sure rapid back-and-forth taps coalesce into a
+    // single trailing check.
+    _changeModeDebounce?.cancel();
+    _changeModeDebounce = Timer(midDuration, () {
+      _changeModeDebounce = null;
+      addCheckIpNumDebounce();
+    });
   }
 
   void updateAutoLaunch() {

@@ -85,6 +85,7 @@ class CommonCard extends StatelessWidget {
     bool? isSelected,
     this.type = CommonCardType.plain,
     this.onPressed,
+    this.onLongPress,
     this.selectWidget,
     this.radius = 12,
     required this.child,
@@ -96,6 +97,7 @@ class CommonCard extends StatelessWidget {
   final bool enterAnimated;
   final bool isSelected;
   final void Function()? onPressed;
+  final void Function()? onLongPress;
   final Widget? selectWidget;
   final Widget child;
   final EdgeInsets? padding;
@@ -178,7 +180,7 @@ class CommonCard extends StatelessWidget {
     }
 
     final card = OutlinedButton(
-      onLongPress: null,
+      onLongPress: onLongPress,
       clipBehavior: Clip.antiAlias,
       style: ButtonStyle(
         padding: const WidgetStatePropertyAll(EdgeInsets.zero),

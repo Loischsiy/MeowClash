@@ -251,6 +251,7 @@ enum ActionMethod {
   forceGc,
   shutdown,
   validateConfig,
+  convertSubscription,
   updateConfig,
   getConfig,
   getProxies,

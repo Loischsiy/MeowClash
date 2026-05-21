@@ -297,22 +297,25 @@ extension ProfileExtension on Profile {
   }
 
   Future<Profile> saveFile(Uint8List bytes) async {
-    final message = await clashCore.validateConfig(utf8.decode(bytes));
-    if (message.isNotEmpty) {
-      throw message;
-    }
-    final file = await getFile();
-    await file.writeAsBytes(bytes);
-    return copyWith(lastUpdateDate: DateTime.now());
+    return saveFileWithString(utf8.decode(bytes));
   }
 
+  /// Persists a clash profile to disk.
+  ///
+  /// Accepts either a clash YAML profile or a V2Ray-style subscription
+  /// (a base64 or plain text list of `vless://`, `vmess://`, `trojan://`,
+  /// `ss://`, `hysteria://` ... URIs). Subscription content is normalized
+  /// to a minimal clash YAML by the core before validation, so the file
+  /// on disk is always something the core can load.
   Future<Profile> saveFileWithString(String value) async {
-    final message = await clashCore.validateConfig(value);
+    final normalized = await clashCore.convertSubscription(value);
+    final yaml = normalized.isNotEmpty ? normalized : value;
+    final message = await clashCore.validateConfig(yaml);
     if (message.isNotEmpty) {
       throw message;
     }
     final file = await getFile();
-    await file.writeAsString(value);
+    await file.writeAsString(yaml);
     return copyWith(lastUpdateDate: DateTime.now());
   }
 }

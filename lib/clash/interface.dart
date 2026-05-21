@@ -20,6 +20,8 @@ mixin ClashInterface {
 
   FutureOr<String> validateConfig(String data);
 
+  FutureOr<String> convertSubscription(String data);
+
   FutureOr<Result> getConfig(String path);
 
   Future<String> asyncTestDelay(String url, String proxyName);
@@ -190,6 +192,12 @@ abstract class ClashHandlerInterface with ClashInterface {
   @override
   FutureOr<String> validateConfig(String data) => invoke<String>(
         method: ActionMethod.validateConfig,
+        data: data,
+      );
+
+  @override
+  FutureOr<String> convertSubscription(String data) => invoke<String>(
+        method: ActionMethod.convertSubscription,
         data: data,
       );
 

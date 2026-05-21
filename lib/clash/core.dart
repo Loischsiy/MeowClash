@@ -105,6 +105,8 @@ class ClashCore {
 
   FutureOr<String> validateConfig(String data) => clashInterface.validateConfig(data);
 
+  FutureOr<String> convertSubscription(String data) => clashInterface.convertSubscription(data);
+
   Future<String> updateConfig(UpdateParams updateParams) => clashInterface.updateConfig(updateParams);
 
   Future<String> setupConfig(SetupParams setupParams) => clashInterface.setupConfig(setupParams);

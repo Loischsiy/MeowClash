@@ -66,6 +66,13 @@ func handleAction(action *Action, result ActionResult) {
 		}
 		result.success(handleValidateConfig([]byte(dataStr)))
 		return
+	case convertSubscriptionMethod:
+		if !dataIsStr {
+			result.error("invalid data type")
+			return
+		}
+		result.success(handleConvertSubscription([]byte(dataStr)))
+		return
 	case updateConfigMethod:
 		if !dataIsStr {
 			result.error("invalid data type")

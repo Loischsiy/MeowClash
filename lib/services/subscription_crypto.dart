@@ -167,6 +167,13 @@ class SubscriptionCrypto {
   /// AES-256-CBC blob produced by `crypto.py`.  Used by the UI to
   /// decide whether to show the decryption controls on the edit
   /// profile screen.
+  ///
+  /// V2Ray-style subscriptions are themselves a Base64 blob (a list
+  /// of `vless://`, `vmess://`, `trojan://`, ... share-link URIs that
+  /// happens to be Base64-encoded by the provider) and would otherwise
+  /// pass the basic length/alignment checks for an AES-CBC payload --
+  /// so we additionally peek at the decoded bytes and treat them as
+  /// plaintext (not encrypted) when they look like ASCII / URI text.
   static bool looksLikeEncryptedPayload(String data) {
     final cleaned = data
         .replaceAll('\r', '')
@@ -183,13 +190,65 @@ class SubscriptionCrypto {
     if (cleaned.length % 4 != 0) {
       return false;
     }
+    final Uint8List decoded;
     try {
-      final decoded = base64.decode(cleaned);
-      return decoded.length >= _kSaltSize + _kIvSize + _kIvSize &&
-          (decoded.length - _kSaltSize - _kIvSize) % _kIvSize == 0;
+      decoded = base64.decode(cleaned);
     } catch (_) {
       return false;
     }
+    if (decoded.length < _kSaltSize + _kIvSize + _kIvSize) {
+      return false;
+    }
+    if ((decoded.length - _kSaltSize - _kIvSize) % _kIvSize != 0) {
+      return false;
+    }
+    // The decoded blob has the right length to be an AES-CBC payload,
+    // but a V2Ray subscription decodes to ASCII share-link URIs.
+    // Differentiate by looking at the decoded bytes themselves.
+    if (_looksLikeSubscriptionPlaintext(decoded)) {
+      return false;
+    }
+    return true;
+  }
+
+  /// Returns true when [decoded] (the result of base64-decoding a
+  /// subscription blob) plausibly contains share-link URIs rather
+  /// than random AES-CBC ciphertext bytes.
+  ///
+  /// A real encrypted blob starts with 16 random salt bytes followed
+  /// by 16 random IV bytes -- random binary almost never decodes as
+  /// valid UTF-8 of any meaningful length, and never contains a
+  /// scheme separator `://` near the start.
+  static bool _looksLikeSubscriptionPlaintext(Uint8List decoded) {
+    final String text;
+    try {
+      text = utf8.decode(decoded, allowMalformed: false);
+    } on FormatException {
+      return false;
+    }
+    if (text.contains('://')) {
+      return true;
+    }
+    // The provider may have wrapped the share-link list in an extra
+    // base64 layer -- in which case the first decode yields more
+    // base64 text that still looks like a "valid" AES-CBC payload by
+    // length but is in fact ASCII.  Detect this by recursively
+    // peeking one more level.
+    final trimmed = text.replaceAll(RegExp(r'\s+'), '');
+    if (trimmed.length >= 8 &&
+        RegExp(r'^[A-Za-z0-9+/]+={0,2}$').hasMatch(trimmed) &&
+        trimmed.length % 4 == 0) {
+      try {
+        final inner = base64.decode(trimmed);
+        final innerText = utf8.decode(inner, allowMalformed: false);
+        if (innerText.contains('://')) {
+          return true;
+        }
+      } catch (_) {
+        // fall through
+      }
+    }
+    return false;
   }
 
   static Future<bool> _isNativeAvailable() async {

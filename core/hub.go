@@ -287,11 +287,25 @@ func emitLatestDelay(proxyName string, testURL string, history []constant.DelayH
 }
 
 func handleValidateConfig(bytes []byte) string {
-	_, err := config.UnmarshalRawConfig(bytes)
+	normalized := normalizeSubscription(bytes)
+	_, err := config.UnmarshalRawConfig(normalized)
 	if err != nil {
 		return err.Error()
 	}
 	return ""
+}
+
+// handleConvertSubscription returns the input as a clash YAML profile.
+//
+// If the input is already a clash YAML it is returned unchanged.
+// If it is a V2Ray-style subscription (base64 or plain text list of
+// vless://, vmess://, trojan://, ss://, hysteria:// ... URIs) it is
+// converted to a minimal clash YAML containing the parsed proxies.
+//
+// Callers can use this to normalize a downloaded subscription before
+// persisting it to disk so that subsequent loads succeed.
+func handleConvertSubscription(bytes []byte) string {
+	return string(normalizeSubscription(bytes))
 }
 
 func handleGetProxies() interface{} {

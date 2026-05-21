@@ -68,6 +68,27 @@ void main() {
         isFalse,
       );
     });
+
+    test('looksLikeEncryptedPayload rejects V2Ray base64 subscriptions', () {
+      // Standard V2Ray-style subscription: a newline-separated list of
+      // share-link URIs (vless://, vmess://, trojan://, ss://, ...)
+      // that the provider returns base64-encoded. None of these are
+      // encrypted -- they must NOT trigger the password prompt.
+      const plainList = 'vless://[email protected]:443?type=tcp&security=tls#A\n'
+          'vmess://eyJhZGQiOiJleGFtcGxlLmNvbSIsImFpZCI6IjAiLCJob3N0IjoiIiwiaWQiOiJjMjMzMTk2NS01M2NkLTQ0YzAtOTM1ZS0xZjA2Y2I3M2I3MzIiLCJuZXQiOiJ3cyIsInBhdGgiOiIvIiwicG9ydCI6IjQ0MyIsInBzIjoiVmlubmV0IiwidGxzIjoidGxzIiwidHlwZSI6IiIsInYiOiIyIn0=\n'
+          'trojan://[email protected]:443?sni=example.com#C\n'
+          'ss://YWVzLTI1Ni1nY206cGFzc3dvcmQ=@example.com:8388#D\n';
+      final b64 = base64.encode(utf8.encode(plainList));
+      expect(SubscriptionCrypto.looksLikeEncryptedPayload(b64), isFalse);
+
+      // Same content but double-base64 wrapped, which a few providers
+      // still do.
+      final doubleB64 = base64.encode(utf8.encode(b64));
+      expect(
+        SubscriptionCrypto.looksLikeEncryptedPayload(doubleB64),
+        isFalse,
+      );
+    });
   });
 }
 

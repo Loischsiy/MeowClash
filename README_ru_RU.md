@@ -50,11 +50,11 @@
 Поддерживаются следующие действия (actions)
 
    ```bash
-    com.follow.clash.action.START
+    com.meowclash.app.action.START
     
-    com.follow.clash.action.STOP
+    com.meowclash.app.action.STOP
     
-    com.follow.clash.action.TOGGLE
+    com.meowclash.app.action.TOGGLE
    ```
 
 ## Скачать

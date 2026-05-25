@@ -186,11 +186,11 @@ begin
     
     usPostUninstall:
     begin
-      if DirExists(ExpandConstant('{userappdata}\com.follow\clashx')) then
+      if DirExists(ExpandConstant('{userappdata}\com.meowclash\app')) then
       begin
         if MsgBox('Удалить пользовательские данные программы?', mbConfirmation, MB_YESNO) = IDYES then
         begin
-          DelTree(ExpandConstant('{userappdata}\com.follow\clashx'), True, True, True);
+          DelTree(ExpandConstant('{userappdata}\com.meowclash\app'), True, True, True);
         end;
       end;
     end;

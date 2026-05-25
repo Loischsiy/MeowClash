@@ -1,17 +1,17 @@
 -keepattributes *Annotation*,SourceFile,LineNumberTable,Signature,Exceptions,InnerClasses,EnclosingMethod
 
--keep class com.follow.clashm.models.** { *; }
--keep class com.follow.clashm.core.** { *; }
--keep class com.follow.clashm.plugins.** { *; }
--keep class com.follow.clashm.services.** { *; }
--keep class com.follow.clashm.widgets.** { *; }
--keep class com.follow.clashm.MeowClashApplication { *; }
--keep class com.follow.clashm.MainActivity { *; }
--keep class com.follow.clashm.TempActivity { *; }
--keep class com.follow.clashm.FilesProvider { *; }
--keep class com.follow.clashm.GlobalState { *; }
+-keep class com.meowclash.app.models.** { *; }
+-keep class com.meowclash.app.core.** { *; }
+-keep class com.meowclash.app.plugins.** { *; }
+-keep class com.meowclash.app.services.** { *; }
+-keep class com.meowclash.app.widgets.** { *; }
+-keep class com.meowclash.app.MeowClashApplication { *; }
+-keep class com.meowclash.app.MainActivity { *; }
+-keep class com.meowclash.app.TempActivity { *; }
+-keep class com.meowclash.app.FilesProvider { *; }
+-keep class com.meowclash.app.GlobalState { *; }
 
--dontwarn com.follow.clashm.**
+-dontwarn com.meowclash.app.**
 -dontwarn com.google.gson.**
 -dontwarn javax.xml.stream.**
 -dontwarn javax.xml.bind.**

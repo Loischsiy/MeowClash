@@ -39,10 +39,10 @@ class AppPath {
 
   String get corePath {
     if (Platform.isMacOS) {
-      // Core is stored in Application Support/com.follow.clash/cores/ (copied by Swift code on launch)
+      // Core is stored in Application Support/com.meowclash.app/cores/ (copied by Swift code on launch)
       // Permissions are set automatically in Swift
       final home = Platform.environment['HOME'] ?? '';
-      return '$home/Library/Application Support/com.follow.clash/cores/MeowClashCore';
+      return '$home/Library/Application Support/com.meowclash.app/cores/MeowClashCore';
     }
     return join(executableDirPath, "MeowClashCore$executableExtension");
   }

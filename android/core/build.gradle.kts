@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.follow.clashm.core"
+    namespace = "com.meowclash.app.core"
     compileSdk = 35
     ndkVersion = "27.0.12077973"
 

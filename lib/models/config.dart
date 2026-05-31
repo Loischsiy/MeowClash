@@ -30,7 +30,10 @@ const defaultBypassDomain = [
   "192.168.*"
 ];
 
-const defaultAppSettingProps = AppSettingProps();
+const defaultAppSettingProps = AppSettingProps(
+  autoCheckUpdate: true,
+  minimizeOnExit: true,
+);
 const defaultVpnProps = VpnProps();
 const defaultNetworkProps = NetworkProps();
 const defaultProxiesStyle = ProxiesStyle();
@@ -38,6 +41,7 @@ const defaultWindowProps = WindowProps();
 const defaultAccessControl = AccessControl();
 const defaultThemeProps = ThemeProps(
   primaryColor: null,
+  themeMode: ThemeMode.system,
 );
 
 const List<DashboardWidget> defaultDashboardWidgets = [

@@ -28,6 +28,17 @@ interface BaseServiceInterface {
     fun stop()
 
     suspend fun startForeground(title: String, server: String?, content: String)
+
+    var destroyed: Boolean
+
+    fun handleCreate() {
+        destroyed = false
+    }
+
+    fun handleDestroy() {
+        if (destroyed) return
+        destroyed = true
+    }
 }
 
 fun Service.createMeowClashNotificationBuilder(): Deferred<NotificationCompat.Builder> =

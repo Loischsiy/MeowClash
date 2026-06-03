@@ -69,7 +69,14 @@
   "add": "追加",
   "save": "保存",
   "delete": "削除",
+  "years": "年",
+  "months": "月",
+  "hours": "時間",
+  "days": "日",
+  "minutes": "分",
   "seconds": "秒",
+  "ago": "前",
+  "just": "たった今",
   "qrcode": "QRコード",
   "qrcodeDesc": "QRコードをスキャンしてプロファイルを取得",
   "url": "URL",
@@ -446,17 +453,6 @@
   "restartCoreTip": "コアを再起動しますか？アクティブな接続は一時的に切断されます。",
   "restartCoreSuccess": "コアが正常に再起動しました",
   "yearsAgo": "{count} 年前",
-  "monthsAgo": "{count} ヶ月前",
-  "daysAgo": "{count} 日前",
-  "hoursAgo": "{count} 時間前",
-  "minutesAgo": "{count} 分前",
-  "justNow": "たった今",
-  "addProfile": "プロファイルを追加",
-  "editProfile": "プロファイルを編集",
-  "createProfile": "プロファイルを作成",
-  "requestDetails": "リクエストの詳細",
-  "connectionDetails": "接続の詳細",
-  "logDetails": "ログの詳細",
   "@yearsAgo": {
     "placeholders": {
       "count": {
@@ -464,6 +460,7 @@
       }
     }
   },
+  "monthsAgo": "{count} ヶ月前",
   "@monthsAgo": {
     "placeholders": {
       "count": {
@@ -471,6 +468,7 @@
       }
     }
   },
+  "daysAgo": "{count} 日前",
   "@daysAgo": {
     "placeholders": {
       "count": {
@@ -478,6 +476,7 @@
       }
     }
   },
+  "hoursAgo": "{count} 時間前",
   "@hoursAgo": {
     "placeholders": {
       "count": {
@@ -485,11 +484,19 @@
       }
     }
   },
+  "minutesAgo": "{count} 分前",
   "@minutesAgo": {
     "placeholders": {
       "count": {
         "type": "int"
       }
     }
-  }
+  },
+  "justNow": "たった今",
+  "addProfile": "プロファイルを追加",
+  "editProfile": "プロファイルを編集",
+  "createProfile": "プロファイルを作成",
+  "requestDetails": "リクエストの詳細",
+  "connectionDetails": "接続の詳細",
+  "logDetails": "ログの詳細"
 }

@@ -1,16 +1,9 @@
-import 'package:meowclash/common/app_localizations.dart';
+import re
 
-extension DateTimeExtension on DateTime {
-  bool get isBeforeNow => isBefore(DateTime.now());
+with open("lib/common/datetime.dart", "r") as f:
+    content = f.read()
 
-  bool isBeforeSecure(DateTime? dateTime) {
-    if (dateTime == null) {
-      return false;
-    }
-    return true;
-  }
-
-    String get lastUpdateTimeDesc {
+new_method = """  String get lastUpdateTimeDesc {
     final currentDateTime = DateTime.now();
     final difference = currentDateTime.difference(this);
     final days = difference.inDays;
@@ -37,7 +30,10 @@ extension DateTimeExtension on DateTime {
 
     return appLocalizations.justNow;
   }
+"""
 
+content = re.sub(r'String get lastUpdateTimeDesc \{.*?\n  \}', new_method, content, flags=re.DOTALL)
 
-  String get show => toIso8601String().substring(0, 10);
-}
+with open("lib/common/datetime.dart", "w") as f:
+    f.write(content)
+print("Patched datetime.dart")

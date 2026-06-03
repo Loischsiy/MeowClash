@@ -154,16 +154,12 @@ class ProviderItem extends StatelessWidget {
     globalState.appController.updateGroupsDebounce();
   }
 
-  String _buildProviderDesc(BuildContext context) {
-    final baseInfo = provider.updateAt.getLastUpdateTimeDesc(context);
-    final trafficInfo = _buildTrafficInfoText(provider.subscriptionInfo);
-    final infoText = trafficInfo == null
-        ? baseInfo
-        : "${trafficInfo.left} · ${trafficInfo.right} - $baseInfo";
+  String _buildProviderDesc() {
+    final baseInfo = provider.updateAt.lastUpdateTimeDesc;
     final count = provider.count;
     return switch (count == 0) {
-      true => infoText,
-      false => "$infoText  ·  $count${appLocalizations.entries}",
+      true => baseInfo,
+      false => "$baseInfo  ·  $count${appLocalizations.entries}",
     };
   }
 

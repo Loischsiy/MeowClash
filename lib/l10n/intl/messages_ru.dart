@@ -99,6 +99,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "adminAutoLaunchDesc": MessageLookupByLibrary.simpleMessage(
       "Запускать с правами администратора при старте системы",
     ),
+    "ago": MessageLookupByLibrary.simpleMessage(" назад"),
     "agree": MessageLookupByLibrary.simpleMessage("Согласен"),
     "allApps": MessageLookupByLibrary.simpleMessage("Все приложения"),
     "allowBypass": MessageLookupByLibrary.simpleMessage("Разрешить обход VPN"),
@@ -233,6 +234,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "dark": MessageLookupByLibrary.simpleMessage("Темный"),
     "dashboard": MessageLookupByLibrary.simpleMessage("Главная"),
     "day": MessageLookupByLibrary.simpleMessage("день"),
+    "days": MessageLookupByLibrary.simpleMessage("дней"),
     "daysAgo": m0,
     "daysGenitive": MessageLookupByLibrary.simpleMessage("дня"),
     "defaultNameserver": MessageLookupByLibrary.simpleMessage(
@@ -376,6 +378,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Управление приложением с помощью клавиатуры",
     ),
     "hour": MessageLookupByLibrary.simpleMessage("час"),
+    "hours": MessageLookupByLibrary.simpleMessage("Часов"),
     "hoursAgo": m5,
     "hoursGenitive": MessageLookupByLibrary.simpleMessage("часов"),
     "hoursPlural": MessageLookupByLibrary.simpleMessage("часа"),
@@ -410,6 +413,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Разрешить входящий IPv6",
     ),
     "ja": MessageLookupByLibrary.simpleMessage("Японский"),
+    "just": MessageLookupByLibrary.simpleMessage("Только что"),
     "justNow": MessageLookupByLibrary.simpleMessage("Только что"),
     "keepAliveIntervalDesc": MessageLookupByLibrary.simpleMessage(
       "Интервал поддержания TCP-соединения",
@@ -459,10 +463,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "minimizeOnExitDesc": MessageLookupByLibrary.simpleMessage(
       "Сворачивать приложение в трей вместо закрытия",
     ),
+    "minutes": MessageLookupByLibrary.simpleMessage("Минут"),
     "minutesAgo": m6,
     "mixedPort": MessageLookupByLibrary.simpleMessage("Смешанный порт"),
     "mode": MessageLookupByLibrary.simpleMessage("Режим"),
     "monochromeScheme": MessageLookupByLibrary.simpleMessage("Монохром"),
+    "months": MessageLookupByLibrary.simpleMessage("Месяцев"),
     "monthsAgo": m7,
     "more": MessageLookupByLibrary.simpleMessage("Еще"),
     "name": MessageLookupByLibrary.simpleMessage("Имя"),
@@ -924,6 +930,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "whitelistMode": MessageLookupByLibrary.simpleMessage(
       "Режим белого списка",
     ),
+    "years": MessageLookupByLibrary.simpleMessage("Лет"),
     "yearsAgo": m14,
     "zh_CN": MessageLookupByLibrary.simpleMessage("Упрощенный китайский"),
   };

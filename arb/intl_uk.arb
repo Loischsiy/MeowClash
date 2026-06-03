@@ -69,12 +69,19 @@
   "add": "Додати",
   "save": "Зберегти",
   "delete": "Видалити",
+  "years": "Років",
+  "months": "Місяців",
+  "hours": "Годин",
   "day": "день",
+  "days": "днів",
   "daysGenitive": "дня",
   "hour": "година",
   "hoursPlural": "години",
   "hoursGenitive": "годин",
+  "minutes": "Хвилин",
   "seconds": "Секунд",
+  "ago": " тому",
+  "just": "Щойно",
   "qrcode": "QR-код",
   "qrcodeDesc": "Сканувати QR-код для отримання профілю",
   "url": "URL",
@@ -475,16 +482,6 @@
   "restartCoreTip": "Ви дійсно хочете перезапустити ядро? Активні з'єднання буде на короткий час перервано.",
   "restartCoreSuccess": "Ядро успішно перезапущено",
   "yearsAgo": "{count, plural, one{{count} рік тому} few{{count} роки тому} many{{count} років тому} other{{count} років тому}}",
-  "monthsAgo": "{count, plural, one{{count} місяць тому} few{{count} місяці тому} many{{count} місяців тому} other{{count} місяців тому}}",
-  "daysAgo": "{count, plural, one{{count} день тому} few{{count} дні тому} many{{count} днів тому} other{{count} днів тому}}",
-  "hoursAgo": "{count, plural, one{{count} годину тому} few{{count} години тому} many{{count} годин тому} other{{count} годин тому}}",
-  "minutesAgo": "{count, plural, one{{count} хвилину тому} few{{count} хвилини тому} many{{count} хвилин тому} other{{count} хвилин тому}}",
-  "justNow": "Щойно",
-  "editProfile": "Редагувати профіль",
-  "createProfile": "Створити профіль",
-  "requestDetails": "Деталі запиту",
-  "connectionDetails": "Деталі з'єднання",
-  "logDetails": "Деталі журналу",
   "@yearsAgo": {
     "placeholders": {
       "count": {
@@ -492,6 +489,7 @@
       }
     }
   },
+  "monthsAgo": "{count, plural, one{{count} місяць тому} few{{count} місяці тому} many{{count} місяців тому} other{{count} місяців тому}}",
   "@monthsAgo": {
     "placeholders": {
       "count": {
@@ -499,6 +497,7 @@
       }
     }
   },
+  "daysAgo": "{count, plural, one{{count} день тому} few{{count} дні тому} many{{count} днів тому} other{{count} днів тому}}",
   "@daysAgo": {
     "placeholders": {
       "count": {
@@ -506,6 +505,7 @@
       }
     }
   },
+  "hoursAgo": "{count, plural, one{{count} годину тому} few{{count} години тому} many{{count} годин тому} other{{count} годин тому}}",
   "@hoursAgo": {
     "placeholders": {
       "count": {
@@ -513,11 +513,18 @@
       }
     }
   },
+  "minutesAgo": "{count, plural, one{{count} хвилину тому} few{{count} хвилини тому} many{{count} хвилин тому} other{{count} хвилин тому}}",
   "@minutesAgo": {
     "placeholders": {
       "count": {
         "type": "int"
       }
     }
-  }
+  },
+  "justNow": "Щойно",
+  "editProfile": "Редагувати профіль",
+  "createProfile": "Створити профіль",
+  "requestDetails": "Деталі запиту",
+  "connectionDetails": "Деталі з'єднання",
+  "logDetails": "Деталі журналу"
 }

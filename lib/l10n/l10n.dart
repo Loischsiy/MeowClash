@@ -569,9 +569,29 @@ class AppLocalizations {
     return Intl.message('Delete', name: 'delete', desc: '', args: []);
   }
 
+  /// `Years`
+  String get years {
+    return Intl.message('Years', name: 'years', desc: '', args: []);
+  }
+
+  /// `Months`
+  String get months {
+    return Intl.message('Months', name: 'months', desc: '', args: []);
+  }
+
+  /// `Hours`
+  String get hours {
+    return Intl.message('Hours', name: 'hours', desc: '', args: []);
+  }
+
   /// `day`
   String get day {
     return Intl.message('day', name: 'day', desc: '', args: []);
+  }
+
+  /// `days`
+  String get days {
+    return Intl.message('days', name: 'days', desc: '', args: []);
   }
 
   /// `days`
@@ -594,9 +614,24 @@ class AppLocalizations {
     return Intl.message('hours', name: 'hoursGenitive', desc: '', args: []);
   }
 
+  /// `Minutes`
+  String get minutes {
+    return Intl.message('Minutes', name: 'minutes', desc: '', args: []);
+  }
+
   /// `Seconds`
   String get seconds {
     return Intl.message('Seconds', name: 'seconds', desc: '', args: []);
+  }
+
+  /// ` Ago`
+  String get ago {
+    return Intl.message(' Ago', name: 'ago', desc: '', args: []);
+  }
+
+  /// `Just`
+  String get just {
+    return Intl.message('Just', name: 'just', desc: '', args: []);
   }
 
   /// `QR code`

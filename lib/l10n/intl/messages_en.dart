@@ -100,6 +100,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "adminAutoLaunchDesc": MessageLookupByLibrary.simpleMessage(
       "Boot up by using admin mode",
     ),
+    "ago": MessageLookupByLibrary.simpleMessage(" Ago"),
     "agree": MessageLookupByLibrary.simpleMessage("Agree"),
     "allApps": MessageLookupByLibrary.simpleMessage("All apps"),
     "allowBypass": MessageLookupByLibrary.simpleMessage(
@@ -228,6 +229,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "dark": MessageLookupByLibrary.simpleMessage("Dark"),
     "dashboard": MessageLookupByLibrary.simpleMessage("Dashboard"),
     "day": MessageLookupByLibrary.simpleMessage("day"),
+    "days": MessageLookupByLibrary.simpleMessage("days"),
     "daysAgo": m0,
     "daysGenitive": MessageLookupByLibrary.simpleMessage("days"),
     "defaultNameserver": MessageLookupByLibrary.simpleMessage(
@@ -357,6 +359,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Use keyboard to control applications",
     ),
     "hour": MessageLookupByLibrary.simpleMessage("hour"),
+    "hours": MessageLookupByLibrary.simpleMessage("Hours"),
     "hoursAgo": m5,
     "hoursGenitive": MessageLookupByLibrary.simpleMessage("hours"),
     "hoursPlural": MessageLookupByLibrary.simpleMessage("hours"),
@@ -389,6 +392,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Allow IPv6 inbound",
     ),
     "ja": MessageLookupByLibrary.simpleMessage("Japanese"),
+    "just": MessageLookupByLibrary.simpleMessage("Just"),
     "justNow": MessageLookupByLibrary.simpleMessage("Just now"),
     "keepAliveIntervalDesc": MessageLookupByLibrary.simpleMessage(
       "Tcp keep alive interval",
@@ -436,10 +440,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "minimizeOnExitDesc": MessageLookupByLibrary.simpleMessage(
       "Modify the default system exit event",
     ),
+    "minutes": MessageLookupByLibrary.simpleMessage("Minutes"),
     "minutesAgo": m6,
     "mixedPort": MessageLookupByLibrary.simpleMessage("Mixed Port"),
     "mode": MessageLookupByLibrary.simpleMessage("Mode"),
     "monochromeScheme": MessageLookupByLibrary.simpleMessage("Monochrome"),
+    "months": MessageLookupByLibrary.simpleMessage("Months"),
     "monthsAgo": m7,
     "more": MessageLookupByLibrary.simpleMessage("More"),
     "name": MessageLookupByLibrary.simpleMessage("Name"),
@@ -879,6 +885,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "WebDAV configuration",
     ),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("Whitelist mode"),
+    "years": MessageLookupByLibrary.simpleMessage("Years"),
     "yearsAgo": m14,
     "zh_CN": MessageLookupByLibrary.simpleMessage("Simplified Chinese"),
   };

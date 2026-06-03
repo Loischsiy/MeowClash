@@ -5,7 +5,6 @@ import 'dart:math';
 import 'package:meowclash/common/common.dart';
 import 'package:meowclash/enum/enum.dart';
 import 'package:flutter/material.dart';
-import 'package:meowclash/common/datetime.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'generated/common.freezed.dart';
@@ -189,8 +188,8 @@ class FileInfo with _$FileInfo {
 }
 
 extension FileInfoExt on FileInfo {
-  String getDesc(BuildContext context) =>
-      "${TrafficValue(value: size).show}  ·  ${lastModified.getLastUpdateTimeDesc(context)}";
+  String get desc =>
+      "${TrafficValue(value: size).show}  ·  ${lastModified.lastUpdateTimeDesc}";
 }
 
 @freezed

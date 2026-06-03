@@ -276,40 +276,78 @@ class _ProfileItemState extends State<ProfileItem> {
   }
 
   List<Widget> _buildUrlProfileInfo(BuildContext context) {
-    final subscriptionInfo = profile.subscriptionInfo;
-    final labelStyle = context.textTheme.labelMedium?.toLight;
+    final subscriptionInfo = widget.profile.subscriptionInfo;
+
+    if (subscriptionInfo == null) {
+      return [
+        Text(
+          widget.profile.lastUpdateDate?.lastUpdateTimeDesc ?? "",
+          style: context.textTheme.labelMedium?.toLight,
+        ),
+      ];
+    }
+
+    final isUnlimited = subscriptionInfo.total == 0;
+
+    final expireDate = subscriptionInfo.expire > 0
+        ? DateFormat('dd.MM.yyyy').format(
+            DateTime.fromMillisecondsSinceEpoch(subscriptionInfo.expire * 1000))
+        : "N/A";
 
     return [
-      const SizedBox(
-        height: 8,
-      ),
-      if (subscriptionInfo != null) ...[
-        SubscriptionInfoView(
-          subscriptionInfo: subscriptionInfo,
-        ),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.baseline,
-          textBaseline: TextBaseline.alphabetic,
-          children: [
-            Flexible(
-              child: Text(
-                '${_getTrafficText(subscriptionInfo)} · ${_getExpireText(subscriptionInfo)} - ',
-                style: labelStyle,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+      const SizedBox(height: 4),
+      if (!isUnlimited)
+        Builder(builder: (context) {
+          final totalTraffic = TrafficValue(value: subscriptionInfo.total);
+          final usedTrafficValue =
+              subscriptionInfo.upload + subscriptionInfo.download;
+          final usedTraffic = TrafficValue(value: usedTrafficValue);
+
+          var progress = 0.0;
+          if (subscriptionInfo.total > 0) {
+            progress = usedTrafficValue / subscriptionInfo.total;
+          }
+          progress = progress.clamp(0.0, 1.0);
+
+          Color progressColor = Colors.green;
+          if (progress > 0.9) {
+            progressColor = Colors.red;
+          } else if (progress > 0.7) {
+            progressColor = Colors.orange;
+          }
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '${appLocalizations.traffic} ${usedTraffic.showValue} ${usedTraffic.showUnit} / ${totalTraffic.showValue} ${totalTraffic.showUnit}',
+                style: context.textTheme.bodySmall,
               ),
-            ),
-            LastUpdateTimeText(
-              lastUpdateDate: profile.lastUpdateDate,
-              style: labelStyle,
-            ),
-          ],
-        ),
-      ] else
-        LastUpdateTimeText(
-          lastUpdateDate: profile.lastUpdateDate,
-          style: labelStyle,
-        ),
+              const SizedBox(height: 6),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: LinearProgressIndicator(
+                  value: progress,
+                  minHeight: 6,
+                  backgroundColor:
+                      Theme.of(context).colorScheme.surfaceContainerHighest,
+                  valueColor: AlwaysStoppedAnimation<Color>(progressColor),
+                ),
+              ),
+            ],
+          );
+        }),
+      const SizedBox(height: 6),
+      Text(
+      expireDate != "N/A"
+          ? '${appLocalizations.expiresOn} $expireDate'
+          : appLocalizations.subscriptionUnlimited,
+      style: context.textTheme.bodySmall,
+      ),
+      const SizedBox(height: 4),
+      Text(
+        '${appLocalizations.updated} ${widget.profile.lastUpdateDate?.lastUpdateTimeDesc ?? ""}',
+        style: context.textTheme.labelMedium?.toLight,
+      ),
     ];
   }
 
@@ -591,31 +629,4 @@ class _ReorderableProfilesSheetState extends State<ReorderableProfilesSheet> {
       ),
       title: appLocalizations.profilesSort,
     );
-}
-
-class LastUpdateTimeText extends StatelessWidget {
-  final DateTime? lastUpdateDate;
-  final TextStyle? style;
-
-  const LastUpdateTimeText({
-    super.key,
-    required this.lastUpdateDate,
-    this.style,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    if (lastUpdateDate == null) {
-      return Text('', style: style);
-    }
-    return TickBuilder(
-      duration: const Duration(minutes: 1),
-      builder: (context, _) {
-        return Text(
-          lastUpdateDate!.getLastUpdateTimeDesc(context),
-          style: style,
-        );
-      },
-    );
-  }
 }

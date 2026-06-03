@@ -7,4 +7,6 @@
     <string name="widget_mode_direct">Direct</string>
     <string name="widget_toggle_desc">Toggle tunnel</string>
     <string name="widget_on_off_description">MeowClash Tunnel On/Off</string>
+    <string name="notification_stop">Stop</string>
+    <string name="notification_channel_name">MeowClash</string>
 </resources>

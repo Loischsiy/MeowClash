@@ -16,6 +16,7 @@ import com.meowclash.app.MainActivity
 import com.meowclash.app.R
 import com.meowclash.app.extensions.getActionPendingIntent
 import com.meowclash.app.models.VpnOptions
+import com.meowclash.app.models.BroadcastAction
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -28,6 +29,17 @@ interface BaseServiceInterface {
     fun stop()
 
     suspend fun startForeground(title: String, server: String?, content: String)
+
+    var destroyed: Boolean
+
+    fun handleCreate() {
+        destroyed = false
+    }
+
+    fun handleDestroy() {
+        if (destroyed) return
+        destroyed = true
+    }
 }
 
 fun Service.createMeowClashNotificationBuilder(): Deferred<NotificationCompat.Builder> =

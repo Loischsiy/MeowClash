@@ -12,6 +12,12 @@ import com.meowclash.app.models.VpnOptions
 
 
 class MeowClashService : Service(), BaseServiceInterface {
+    override var destroyed = false
+
+    override fun onCreate() {
+        super.onCreate()
+        handleCreate()
+    }
 
     override fun start(options: VpnOptions) = 0
 
@@ -63,6 +69,7 @@ class MeowClashService : Service(), BaseServiceInterface {
     }
 
     override fun onDestroy() {
+        handleDestroy()
         stop()
         super.onDestroy()
     }

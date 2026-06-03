@@ -23,8 +23,11 @@ import kotlinx.coroutines.launch
 
 
 class MeowClashVpnService : VpnService(), BaseServiceInterface {
+    override var destroyed = false
+
     override fun onCreate() {
         super.onCreate()
+        handleCreate()
         GlobalState.initServiceEngine()
     }
 
@@ -224,6 +227,7 @@ class MeowClashVpnService : VpnService(), BaseServiceInterface {
     }
 
     override fun onDestroy() {
+        handleDestroy()
         stop()
         super.onDestroy()
     }

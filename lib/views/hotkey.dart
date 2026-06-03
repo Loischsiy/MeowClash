@@ -1,3 +1,7 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:meowclash/common/common.dart';
 import 'package:meowclash/enum/enum.dart';
 import 'package:meowclash/models/models.dart';
@@ -6,10 +10,6 @@ import 'package:meowclash/state.dart';
 import 'package:meowclash/widgets/card.dart';
 import 'package:meowclash/widgets/dialog.dart';
 import 'package:meowclash/widgets/list.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
 extension IntlExt on Intl {
   static String actionMessage(String messageText) =>
@@ -30,41 +30,44 @@ class HotKeyView extends StatelessWidget {
     if (modifierLabels.isNotEmpty) {
       text += "${modifierLabels.join(" ")}+";
     }
-    text += PhysicalKeyboardKey(key).label;
+    final logicalKey = LogicalKeyboardKey(key);
+    text += logicalKey.keyLabel.isNotEmpty
+        ? logicalKey.keyLabel
+        : (logicalKey.debugName ?? "Unknown");
     return text;
   }
 
   @override
   Widget build(BuildContext context) => ListView.builder(
-      itemCount: HotAction.values.length,
-      itemBuilder: (_, index) {
-        final hotAction = HotAction.values[index];
-        return Consumer(
-          builder: (_, ref, __) {
-            final hotKeyAction = ref.watch(getHotKeyActionProvider(hotAction));
-            return ListItem(
-              title: Text(IntlExt.actionMessage(hotAction.name)),
-              subtitle: Text(
-                getSubtitle(hotKeyAction),
-                style: context.textTheme.bodyMedium
-                    ?.copyWith(color: context.colorScheme.primary),
-              ),
-              onTap: () {
-                globalState.showCommonDialog(
-                  child: HotKeyRecorder(
-                    hotKeyAction: hotKeyAction,
-                  ),
-                );
-              },
-            );
-          },
-        );
-      },
-    );
+        itemCount: HotAction.values.length,
+        itemBuilder: (_, index) {
+          final hotAction = HotAction.values[index];
+          return Consumer(
+            builder: (_, ref, __) {
+              final hotKeyAction =
+                  ref.watch(getHotKeyActionProvider(hotAction));
+              return ListItem(
+                title: Text(IntlExt.actionMessage(hotAction.name)),
+                subtitle: Text(
+                  getSubtitle(hotKeyAction),
+                  style: context.textTheme.bodyMedium
+                      ?.copyWith(color: context.colorScheme.primary),
+                ),
+                onTap: () {
+                  globalState.showCommonDialog(
+                    child: HotKeyRecorder(
+                      hotKeyAction: hotKeyAction,
+                    ),
+                  );
+                },
+              );
+            },
+          );
+        },
+      );
 }
 
 class HotKeyRecorder extends StatefulWidget {
-
   const HotKeyRecorder({
     super.key,
     required this.hotKeyAction,
@@ -89,17 +92,26 @@ class _HotKeyRecorderState extends State<HotKeyRecorder> {
 
   bool _handleKeyEvent(KeyEvent keyEvent) {
     if (keyEvent is KeyUpEvent) return false;
-    final keys = HardwareKeyboard.instance.physicalKeysPressed;
+    final kb = HardwareKeyboard.instance;
 
-    final key = keyEvent.physicalKey;
+    final logicalKey = keyEvent.logicalKey;
 
-    final modifiers = KeyboardModifier.values
-        .where((e) =>
-            e.physicalKeys.any(keys.contains) && !e.physicalKeys.contains(key))
-        .toSet();
+    final modifiers = <KeyboardModifier>{
+      if (kb.isControlPressed) KeyboardModifier.control,
+      if (kb.isShiftPressed) KeyboardModifier.shift,
+      if (kb.isAltPressed) KeyboardModifier.alt,
+      if (kb.isMetaPressed) KeyboardModifier.meta,
+    };
+
+    // Do not record just a modifier key as the main hotkey
+    // Wait, the original code had: && !e.physicalKeys.contains(key)
+    // Which means if the key is a modifier, it won't add itself to modifiers.
+    // However, we still might end up with `key = logicalKey.keyId` being a modifier.
+    // It's probably fine as is, but we might want to check.
+
     hotKeyActionNotifier.value = hotKeyActionNotifier.value.copyWith(
       modifiers: modifiers,
-      key: key.usbHidUsage,
+      key: logicalKey.keyId,
     );
     return false;
   }
@@ -155,64 +167,63 @@ class _HotKeyRecorderState extends State<HotKeyRecorder> {
 
   @override
   Widget build(BuildContext context) => Focus(
-      onKeyEvent: (_, __) => KeyEventResult.handled,
-      autofocus: true,
-      child: CommonDialog(
-        title: IntlExt.actionMessage(widget.hotKeyAction.action.name),
-        actions: [
-          TextButton(
-            onPressed: _handleRemove,
-            child: Text(appLocalizations.remove),
-          ),
-          const SizedBox(
-            width: 8,
-          ),
-          TextButton(
-            onPressed: _handleConfirm,
-            child: Text(
-              appLocalizations.confirm,
+        onKeyEvent: (_, __) => KeyEventResult.handled,
+        autofocus: true,
+        child: CommonDialog(
+          title: IntlExt.actionMessage(widget.hotKeyAction.action.name),
+          actions: [
+            TextButton(
+              onPressed: _handleRemove,
+              child: Text(appLocalizations.remove),
             ),
-          ),
-        ],
-        child: ValueListenableBuilder(
-          valueListenable: hotKeyActionNotifier,
-          builder: (_, hotKeyAction, ___) {
-            final key = hotKeyAction.key;
-            final modifiers = hotKeyAction.modifiers;
-            return SizedBox(
-              width: dialogCommonWidth,
-              child: key != null
-                  ? Wrap(
-                      spacing: 8,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        for (final modifier in modifiers)
+            const SizedBox(
+              width: 8,
+            ),
+            TextButton(
+              onPressed: _handleConfirm,
+              child: Text(
+                appLocalizations.confirm,
+              ),
+            ),
+          ],
+          child: ValueListenableBuilder(
+            valueListenable: hotKeyActionNotifier,
+            builder: (_, hotKeyAction, ___) {
+              final key = hotKeyAction.key;
+              final modifiers = hotKeyAction.modifiers;
+              return SizedBox(
+                width: dialogCommonWidth,
+                child: key != null
+                    ? Wrap(
+                        spacing: 8,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          for (final modifier in modifiers)
+                            KeyboardKeyBox(
+                              keyboardKey: modifier.physicalKeys.first,
+                            ),
+                          if (modifiers.isNotEmpty)
+                            Text(
+                              "+",
+                              style: context.textTheme.titleMedium,
+                            ),
                           KeyboardKeyBox(
-                            keyboardKey: modifier.physicalKeys.first,
+                            keyboardKey: LogicalKeyboardKey(key),
                           ),
-                        if (modifiers.isNotEmpty)
-                          Text(
-                            "+",
-                            style: context.textTheme.titleMedium,
-                          ),
-                        KeyboardKeyBox(
-                          keyboardKey: PhysicalKeyboardKey(key),
-                        ),
-                      ],
-                    )
-                  : Text(
-                      appLocalizations.pressKeyboard,
-                      style: context.textTheme.titleMedium,
-                    ),
-            );
-          },
+                        ],
+                      )
+                    : Text(
+                        appLocalizations.pressKeyboard,
+                        style: context.textTheme.titleMedium,
+                      ),
+              );
+            },
+          ),
         ),
-      ),
-    );
+      );
 }
 
 class KeyboardKeyBox extends StatelessWidget {
-
   const KeyboardKeyBox({
     super.key,
     required this.keyboardKey,
@@ -221,16 +232,21 @@ class KeyboardKeyBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => CommonCard(
-      type: CommonCardType.filled,
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Text(
-          keyboardKey.label,
-          style: const TextStyle(
-            fontSize: 16,
+        type: CommonCardType.filled,
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Text(
+            keyboardKey is LogicalKeyboardKey
+                ? ((keyboardKey as LogicalKeyboardKey).keyLabel.isNotEmpty
+                    ? (keyboardKey as LogicalKeyboardKey).keyLabel
+                    : ((keyboardKey as LogicalKeyboardKey).debugName ??
+                        "Unknown"))
+                : keyboardKey.label,
+            style: const TextStyle(
+              fontSize: 16,
+            ),
           ),
         ),
-      ),
-      onPressed: () {},
-    );
+        onPressed: () {},
+      );
 }

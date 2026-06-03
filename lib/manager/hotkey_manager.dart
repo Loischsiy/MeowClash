@@ -1,12 +1,12 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hotkey_manager/hotkey_manager.dart';
 import 'package:meowclash/common/common.dart';
 import 'package:meowclash/enum/enum.dart';
 import 'package:meowclash/models/common.dart';
 import 'package:meowclash/providers/config.dart';
 import 'package:meowclash/state.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hotkey_manager/hotkey_manager.dart';
 
 class HotKeyManager extends ConsumerStatefulWidget {
 
@@ -62,7 +62,7 @@ class _HotKeyManagerState extends ConsumerState<HotKeyManager> {
             .map((item) => item.toHotKeyModifier())
             .toList();
         final hotKey = HotKey(
-          key: PhysicalKeyboardKey(hotKeyAction.key!),
+          key: LogicalKeyboardKey(hotKeyAction.key!),
           modifiers: modifiers,
         );
         return hotKeyManager.register(

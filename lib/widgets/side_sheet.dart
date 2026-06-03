@@ -374,9 +374,7 @@ class _ModalSideSheetState<T> extends State<_ModalSideSheet<T>> {
           child: ClipRect(
             child: _SideSheetLayoutWithSizeListener(
               onChildSizeChanged: (size) {
-                widget.route._didChangeBarrierSemanticsClip(
-                  _getNewClipDetails(size),
-                );
+                widget.route._clipDetailsNotifier.value = _getNewClipDetails(size);
               },
               animationValue: animationValue,
               isScrollControlled: widget.isScrollControlled,
@@ -450,14 +448,6 @@ class ModalSideSheetRoute<T> extends PopupRoute<T> {
   void dispose() {
     _clipDetailsNotifier.dispose();
     super.dispose();
-  }
-
-  bool _didChangeBarrierSemanticsClip(EdgeInsets newClipDetails) {
-    if (_clipDetailsNotifier.value == newClipDetails) {
-      return false;
-    }
-    _clipDetailsNotifier.value = newClipDetails;
-    return true;
   }
 
   @override

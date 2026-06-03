@@ -42,7 +42,6 @@ class MeowClashHttpOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext? context) {
     final client = super.createHttpClient(context);
-    client.badCertificateCallback = (_, __, ___) => true;
     client.findProxy = handleFindProxy;
     return client;
   }

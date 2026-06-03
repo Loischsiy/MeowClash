@@ -451,5 +451,52 @@
   "restartCore": "重启内核",
   "restartCoreDesc": "重启代理内核服务",
   "restartCoreTip": "确定要重启内核吗？活动连接将短暂中断。",
-  "restartCoreSuccess": "内核已成功重启"
+  "restartCoreSuccess": "内核已成功重启",
+  "yearsAgo": "{count} 年前",
+  "@yearsAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "monthsAgo": "{count} 个月前",
+  "@monthsAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "daysAgo": "{count} 天前",
+  "@daysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hoursAgo": "{count} 小时前",
+  "@hoursAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "minutesAgo": "{count} 分钟前",
+  "@minutesAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "justNow": "刚刚",
+  "addProfile": "添加配置",
+  "editProfile": "编辑配置",
+  "createProfile": "创建配置",
+  "requestDetails": "请求详情",
+  "connectionDetails": "活跃连接详情",
+  "logDetails": "日志详情"
 }

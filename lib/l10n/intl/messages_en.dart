@@ -20,31 +20,45 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'en';
 
-  static String m0(label) =>
-      "Are you sure you want to delete the selected ${label}?";
+  static String m0(count) =>
+      "${Intl.plural(count, one: '1 day ago', other: '${count} days ago')}";
 
   static String m1(label) =>
+      "Are you sure you want to delete the selected ${label}?";
+
+  static String m2(label) =>
       "Are you sure you want to delete the current ${label}?";
 
-  static String m2(label) => "${label} cannot be empty";
+  static String m3(label) => "${label} cannot be empty";
 
-  static String m3(label) => "Current ${label} already exists";
+  static String m4(label) => "Current ${label} already exists";
 
-  static String m4(label) => "No ${label} at the moment";
+  static String m5(count) =>
+      "${Intl.plural(count, one: '1 hour ago', other: '${count} hours ago')}";
 
-  static String m5(label) => "${label} must be a number";
+  static String m6(count) =>
+      "${Intl.plural(count, one: '1 minute ago', other: '${count} minutes ago')}";
 
-  static String m6(label) => "${label} must be between 1024 and 49151";
+  static String m7(count) =>
+      "${Intl.plural(count, one: '1 month ago', other: '${count} months ago')}";
 
-  static String m7(count) => "${count} items have been selected";
+  static String m8(label) => "No ${label} at the moment";
 
-  static String m8(days) => "Your subscription expires in ${days} day(s)";
+  static String m9(label) => "${label} must be a number";
 
-  static String m9(label) => "${label} must be a url";
+  static String m10(label) => "${label} must be between 1024 and 49151";
+
+  static String m11(count) => "${count} items have been selected";
+
+  static String m12(days) => "Your subscription expires in ${days} day(s)";
+
+  static String m13(label) => "${label} must be a url";
+
+  static String m14(count) =>
+      "${Intl.plural(count, one: '1 year ago', other: '${count} years ago')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
-    "uk": MessageLookupByLibrary.simpleMessage("Ukrainian"),
     "about": MessageLookupByLibrary.simpleMessage("About"),
     "accessControl": MessageLookupByLibrary.simpleMessage("AccessControl"),
     "accessControlAllowDesc": MessageLookupByLibrary.simpleMessage(
@@ -68,7 +82,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Scan QR code with phone",
     ),
     "addFromPhoneTitle": MessageLookupByLibrary.simpleMessage("Add from Phone"),
-    "addProfile": MessageLookupByLibrary.simpleMessage("Add Profile"),
+    "addProfile": MessageLookupByLibrary.simpleMessage("Add profile"),
     "addRule": MessageLookupByLibrary.simpleMessage("Add rule"),
     "addedOriginRules": MessageLookupByLibrary.simpleMessage(
       "Attach on the original rules",
@@ -188,6 +202,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Opening it will lose part of its application ability and gain the support of full amount of Clash.",
     ),
     "confirm": MessageLookupByLibrary.simpleMessage("Confirm"),
+    "connectionDetails": MessageLookupByLibrary.simpleMessage(
+      "Connection details",
+    ),
     "connections": MessageLookupByLibrary.simpleMessage("Connections"),
     "connectionsDesc": MessageLookupByLibrary.simpleMessage(
       "View current connections data",
@@ -207,11 +224,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "country": MessageLookupByLibrary.simpleMessage("Country"),
     "crashTest": MessageLookupByLibrary.simpleMessage("Crash test"),
     "create": MessageLookupByLibrary.simpleMessage("Create"),
+    "createProfile": MessageLookupByLibrary.simpleMessage("Create profile"),
     "cut": MessageLookupByLibrary.simpleMessage("Cut"),
     "dark": MessageLookupByLibrary.simpleMessage("Dark"),
     "dashboard": MessageLookupByLibrary.simpleMessage("Dashboard"),
     "day": MessageLookupByLibrary.simpleMessage("day"),
     "days": MessageLookupByLibrary.simpleMessage("days"),
+    "daysAgo": m0,
     "daysGenitive": MessageLookupByLibrary.simpleMessage("days"),
     "defaultNameserver": MessageLookupByLibrary.simpleMessage(
       "Default nameserver",
@@ -224,8 +243,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "delay": MessageLookupByLibrary.simpleMessage("Delay"),
     "delaySort": MessageLookupByLibrary.simpleMessage("Sort by delay"),
     "delete": MessageLookupByLibrary.simpleMessage("Delete"),
-    "deleteMultipTip": m0,
-    "deleteTip": m1,
+    "deleteMultipTip": m1,
+    "deleteTip": m2,
     "desc": MessageLookupByLibrary.simpleMessage(
       "A multi-platform proxy client based on ClashMeta, simple and easy to use, open-source and ad-free.",
     ),
@@ -257,7 +276,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "domain": MessageLookupByLibrary.simpleMessage("Domain"),
     "download": MessageLookupByLibrary.simpleMessage("Download"),
     "edit": MessageLookupByLibrary.simpleMessage("Edit"),
-    "emptyTip": m2,
+    "editProfile": MessageLookupByLibrary.simpleMessage("Edit profile"),
+    "emptyTip": m3,
     "en": MessageLookupByLibrary.simpleMessage("English"),
     "enableOverride": MessageLookupByLibrary.simpleMessage("Enable override"),
     "entries": MessageLookupByLibrary.simpleMessage(" entries"),
@@ -266,7 +286,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "excludeDesc": MessageLookupByLibrary.simpleMessage(
       "When the app is in the background, the app is hidden from the recent task",
     ),
-    "existsTip": m3,
+    "existsTip": m4,
     "exit": MessageLookupByLibrary.simpleMessage("Exit"),
     "expand": MessageLookupByLibrary.simpleMessage("Standard"),
     "expirationTime": MessageLookupByLibrary.simpleMessage("Expiration time"),
@@ -340,6 +360,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "hour": MessageLookupByLibrary.simpleMessage("hour"),
     "hours": MessageLookupByLibrary.simpleMessage("Hours"),
+    "hoursAgo": m5,
     "hoursGenitive": MessageLookupByLibrary.simpleMessage("hours"),
     "hoursPlural": MessageLookupByLibrary.simpleMessage("hours"),
     "icon": MessageLookupByLibrary.simpleMessage("Icon"),
@@ -372,6 +393,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "ja": MessageLookupByLibrary.simpleMessage("Japanese"),
     "just": MessageLookupByLibrary.simpleMessage("Just"),
+    "justNow": MessageLookupByLibrary.simpleMessage("Just now"),
     "keepAliveIntervalDesc": MessageLookupByLibrary.simpleMessage(
       "Tcp keep alive interval",
     ),
@@ -388,6 +410,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "localRecoveryDesc": MessageLookupByLibrary.simpleMessage(
       "Recovery data from file",
     ),
+    "logDetails": MessageLookupByLibrary.simpleMessage("Log details"),
     "logLevel": MessageLookupByLibrary.simpleMessage("LogLevel"),
     "logcat": MessageLookupByLibrary.simpleMessage("Logcat"),
     "logcatDesc": MessageLookupByLibrary.simpleMessage(
@@ -418,10 +441,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "Modify the default system exit event",
     ),
     "minutes": MessageLookupByLibrary.simpleMessage("Minutes"),
+    "minutesAgo": m6,
     "mixedPort": MessageLookupByLibrary.simpleMessage("Mixed Port"),
     "mode": MessageLookupByLibrary.simpleMessage("Mode"),
     "monochromeScheme": MessageLookupByLibrary.simpleMessage("Monochrome"),
     "months": MessageLookupByLibrary.simpleMessage("Months"),
+    "monthsAgo": m7,
     "more": MessageLookupByLibrary.simpleMessage("More"),
     "name": MessageLookupByLibrary.simpleMessage("Name"),
     "nameSort": MessageLookupByLibrary.simpleMessage("Sort by name"),
@@ -462,8 +487,8 @@ class MessageLookup extends MessageLookupByLibrary {
       "No profile, Please add a profile",
     ),
     "nullScriptTip": MessageLookupByLibrary.simpleMessage("No scripts"),
-    "nullTip": m4,
-    "numberTip": m5,
+    "nullTip": m8,
+    "numberTip": m9,
     "oneColumn": MessageLookupByLibrary.simpleMessage("One column"),
     "oneline": MessageLookupByLibrary.simpleMessage("Oneline"),
     "onlyIcon": MessageLookupByLibrary.simpleMessage("Icon"),
@@ -533,7 +558,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "portConflictTip": MessageLookupByLibrary.simpleMessage(
       "Please enter a different port",
     ),
-    "portTip": m6,
+    "portTip": m10,
     "preferH3Desc": MessageLookupByLibrary.simpleMessage(
       "Prioritize the use of DOH\'s http/3",
     ),
@@ -587,7 +612,6 @@ class MessageLookup extends MessageLookupByLibrary {
         ),
     "profileEncryptedPasswordRequired": MessageLookupByLibrary.simpleMessage(
       "This subscription appears to be encrypted. Please provide the decryption password.",
-
     ),
     "profileHasUpdate": MessageLookupByLibrary.simpleMessage(
       "The profile has been modified. Do you want to disable auto update?",
@@ -661,6 +685,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "remove": MessageLookupByLibrary.simpleMessage("Remove"),
     "rename": MessageLookupByLibrary.simpleMessage("Rename"),
     "renew": MessageLookupByLibrary.simpleMessage("Renew"),
+    "requestDetails": MessageLookupByLibrary.simpleMessage("Request details"),
     "requests": MessageLookupByLibrary.simpleMessage("Requests"),
     "requestsDesc": MessageLookupByLibrary.simpleMessage(
       "View recently request records",
@@ -714,7 +739,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "selectAll": MessageLookupByLibrary.simpleMessage("Select all"),
     "selectProfile": MessageLookupByLibrary.simpleMessage("Select Profile"),
     "selected": MessageLookupByLibrary.simpleMessage("Selected"),
-    "selectedCountTitle": m7,
+    "selectedCountTitle": m11,
     "sendToTv": MessageLookupByLibrary.simpleMessage("Send to TV"),
     "sendToTvTitle": MessageLookupByLibrary.simpleMessage("Send to TV"),
     "sentSuccessfullyMessage": MessageLookupByLibrary.simpleMessage(
@@ -758,7 +783,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionExpired": MessageLookupByLibrary.simpleMessage(
       "Your subscription has expired",
     ),
-    "subscriptionExpiresInDays": m8,
+    "subscriptionExpiresInDays": m12,
     "subscriptionExpiresSoon": MessageLookupByLibrary.simpleMessage(
       "Subscription expires soon",
     ),
@@ -817,6 +842,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "only effective in administrator mode",
     ),
     "twoColumns": MessageLookupByLibrary.simpleMessage("Two columns"),
+    "uk": MessageLookupByLibrary.simpleMessage("Ukrainian"),
     "unableToUpdateCurrentProfileDesc": MessageLookupByLibrary.simpleMessage(
       "unable to update current profile",
     ),
@@ -837,7 +863,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlDesc": MessageLookupByLibrary.simpleMessage(
       "Obtain profile through URL",
     ),
-    "urlTip": m9,
+    "urlTip": m13,
     "useHosts": MessageLookupByLibrary.simpleMessage("Use hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("Use system hosts"),
     "value": MessageLookupByLibrary.simpleMessage("Value"),
@@ -860,6 +886,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("Whitelist mode"),
     "years": MessageLookupByLibrary.simpleMessage("Years"),
+    "yearsAgo": m14,
     "zh_CN": MessageLookupByLibrary.simpleMessage("Simplified Chinese"),
   };
 }

@@ -20,27 +20,42 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'uk';
 
-  static String m0(label) =>
-      "Ви впевнені, що хочете видалити вибрані ${label}?";
+  static String m0(count) =>
+      "${Intl.plural(count, one: '${count} день тому', few: '${count} дні тому', many: '${count} днів тому', other: '${count} днів тому')}";
 
   static String m1(label) =>
+      "Ви впевнені, що хочете видалити вибрані ${label}?";
+
+  static String m2(label) =>
       "Ви впевнені, що хочете видалити поточний ${label}?";
 
-  static String m2(label) => "${label} не може бути порожнім";
+  static String m3(label) => "${label} не може бути порожнім";
 
-  static String m3(label) => "Поточний ${label} вже існує";
+  static String m4(label) => "Поточний ${label} вже існує";
 
-  static String m4(label) => "Зараз ${label} немає";
+  static String m5(count) =>
+      "${Intl.plural(count, one: '${count} годину тому', few: '${count} години тому', many: '${count} годин тому', other: '${count} годин тому')}";
 
-  static String m5(label) => "${label} має бути числом";
+  static String m6(count) =>
+      "${Intl.plural(count, one: '${count} хвилину тому', few: '${count} хвилини тому', many: '${count} хвилин тому', other: '${count} хвилин тому')}";
 
-  static String m6(label) => "${label} має бути числом від 1024 до 49151";
+  static String m7(count) =>
+      "${Intl.plural(count, one: '${count} місяць тому', few: '${count} місяці тому', many: '${count} місяців тому', other: '${count} місяців тому')}";
 
-  static String m7(count) => "Вибрано ${count} елементів";
+  static String m8(label) => "Зараз ${label} немає";
 
-  static String m8(days) => "Ваша підписка закінчується через ${days} дн.";
+  static String m9(label) => "${label} має бути числом";
 
-  static String m9(label) => "${label} має бути URL";
+  static String m10(label) => "${label} має бути числом від 1024 до 49151";
+
+  static String m11(count) => "Вибрано ${count} елементів";
+
+  static String m12(days) => "Ваша підписка закінчується через ${days} дн.";
+
+  static String m13(label) => "${label} має бути URL";
+
+  static String m14(count) =>
+      "${Intl.plural(count, one: '${count} рік тому', few: '${count} роки тому', many: '${count} років тому', other: '${count} років тому')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -75,7 +90,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Додати до оригінальних правил",
     ),
     "address": MessageLookupByLibrary.simpleMessage("Адреса"),
-    "addressHelp": MessageLookupByLibrary.simpleMessage("Адреса сервера WebDAV"),
+    "addressHelp": MessageLookupByLibrary.simpleMessage(
+      "Адреса сервера WebDAV",
+    ),
     "addressTip": MessageLookupByLibrary.simpleMessage(
       "Будь ласка, введіть дійсну адресу WebDAV",
     ),
@@ -102,9 +119,11 @@ class MessageLookup extends MessageLookupByLibrary {
       "Контроль доступу застосунків",
     ),
     "appDesc": MessageLookupByLibrary.simpleMessage(
-      "Обробка налаштувань, пов'язаних із застосунком",
+      "Обробка налаштувань, пов\'язаних із застосунком",
     ),
-    "application": MessageLookupByLibrary.simpleMessage("Налаштування застосунку"),
+    "application": MessageLookupByLibrary.simpleMessage(
+      "Налаштування застосунку",
+    ),
     "applicationDesc": MessageLookupByLibrary.simpleMessage(
       "Стандартні налаштування застосунку",
     ),
@@ -116,10 +135,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "Перевіряти оновлення під час запуску",
     ),
     "autoCloseConnections": MessageLookupByLibrary.simpleMessage(
-      "Автозакриття з'єднань",
+      "Автозакриття з\'єднань",
     ),
     "autoCloseConnectionsDesc": MessageLookupByLibrary.simpleMessage(
-      "Автоматично закривати з'єднання під час зміни сервера",
+      "Автоматично закривати з\'єднання під час зміни сервера",
     ),
     "autoLaunch": MessageLookupByLibrary.simpleMessage("Автозапуск застосунку"),
     "autoLaunchDesc": MessageLookupByLibrary.simpleMessage(
@@ -150,7 +169,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "basicConfigDesc": MessageLookupByLibrary.simpleMessage(
       "Перевизначення конфігурації ядра",
     ),
-    "bind": MessageLookupByLibrary.simpleMessage("Прив'язати"),
+    "bind": MessageLookupByLibrary.simpleMessage("Прив\'язати"),
     "blacklistMode": MessageLookupByLibrary.simpleMessage(
       "Режим чорного списку",
     ),
@@ -193,12 +212,15 @@ class MessageLookup extends MessageLookupByLibrary {
       "Увімкнення призведе до втрати частини функціональності, але забезпечить повну сумісність із Clash",
     ),
     "confirm": MessageLookupByLibrary.simpleMessage("Підтвердити"),
-    "connections": MessageLookupByLibrary.simpleMessage("З'єднання"),
-    "connectionsDesc": MessageLookupByLibrary.simpleMessage(
-      "Перегляд поточних даних про з'єднання",
+    "connectionDetails": MessageLookupByLibrary.simpleMessage(
+      "Деталі з\'єднання",
     ),
-    "connectivity": MessageLookupByLibrary.simpleMessage("Зв'язок："),
-    "contactMe": MessageLookupByLibrary.simpleMessage("Зв'яжіться зі мною"),
+    "connections": MessageLookupByLibrary.simpleMessage("З\'єднання"),
+    "connectionsDesc": MessageLookupByLibrary.simpleMessage(
+      "Перегляд поточних даних про з\'єднання",
+    ),
+    "connectivity": MessageLookupByLibrary.simpleMessage("Зв\'язок："),
+    "contactMe": MessageLookupByLibrary.simpleMessage("Зв\'яжіться зі мною"),
     "content": MessageLookupByLibrary.simpleMessage("Вміст"),
     "contentScheme": MessageLookupByLibrary.simpleMessage("Контентна тема"),
     "copy": MessageLookupByLibrary.simpleMessage("Копіювати"),
@@ -212,27 +234,31 @@ class MessageLookup extends MessageLookupByLibrary {
     "country": MessageLookupByLibrary.simpleMessage("Країна"),
     "crashTest": MessageLookupByLibrary.simpleMessage("Тест на збої"),
     "create": MessageLookupByLibrary.simpleMessage("Створити"),
+    "createProfile": MessageLookupByLibrary.simpleMessage("Створити профіль"),
     "cut": MessageLookupByLibrary.simpleMessage("Вирізати"),
     "dark": MessageLookupByLibrary.simpleMessage("Темний"),
     "dashboard": MessageLookupByLibrary.simpleMessage("Головна"),
     "day": MessageLookupByLibrary.simpleMessage("день"),
     "days": MessageLookupByLibrary.simpleMessage("днів"),
+    "daysAgo": m0,
     "daysGenitive": MessageLookupByLibrary.simpleMessage("дня"),
     "defaultNameserver": MessageLookupByLibrary.simpleMessage(
       "Сервер імен за замовчуванням",
     ),
     "defaultNameserverDesc": MessageLookupByLibrary.simpleMessage(
-      "Для розв'язання DNS-сервера",
+      "Для розв\'язання DNS-сервера",
     ),
     "defaultSort": MessageLookupByLibrary.simpleMessage(
       "Сортування за замовчуванням",
     ),
     "defaultText": MessageLookupByLibrary.simpleMessage("За замовчуванням"),
     "delay": MessageLookupByLibrary.simpleMessage("Затримка"),
-    "delaySort": MessageLookupByLibrary.simpleMessage("Сортування за затримкою"),
+    "delaySort": MessageLookupByLibrary.simpleMessage(
+      "Сортування за затримкою",
+    ),
     "delete": MessageLookupByLibrary.simpleMessage("Видалити"),
-    "deleteMultipTip": m0,
-    "deleteTip": m1,
+    "deleteMultipTip": m1,
+    "deleteTip": m2,
     "desc": MessageLookupByLibrary.simpleMessage(
       "Багатоплатформовий проксі-клієнт на основі ClashMeta, простий і зручний у використанні, з відкритим кодом і без реклами.",
     ),
@@ -253,11 +279,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "discoverNewVersion": MessageLookupByLibrary.simpleMessage(
       "Виявлено нову версію",
     ),
-    "discovery": MessageLookupByLibrary.simpleMessage(
-      "Виявлено нову версію",
-    ),
+    "discovery": MessageLookupByLibrary.simpleMessage("Виявлено нову версію"),
     "dnsDesc": MessageLookupByLibrary.simpleMessage(
-      "Оновлення налаштувань, пов'язаних із DNS",
+      "Оновлення налаштувань, пов\'язаних із DNS",
     ),
     "dnsMode": MessageLookupByLibrary.simpleMessage("Режим DNS"),
     "doYouWantToPass": MessageLookupByLibrary.simpleMessage(
@@ -266,18 +290,21 @@ class MessageLookup extends MessageLookupByLibrary {
     "domain": MessageLookupByLibrary.simpleMessage("Домен"),
     "download": MessageLookupByLibrary.simpleMessage("Завантаження"),
     "edit": MessageLookupByLibrary.simpleMessage("Редагувати"),
-    "emptyTip": m2,
+    "editProfile": MessageLookupByLibrary.simpleMessage("Редагувати профіль"),
+    "emptyTip": m3,
     "en": MessageLookupByLibrary.simpleMessage("Англійська"),
     "enableOverride": MessageLookupByLibrary.simpleMessage(
       "Увімкнути перевизначення",
     ),
     "entries": MessageLookupByLibrary.simpleMessage(" записів"),
     "errorTitle": MessageLookupByLibrary.simpleMessage("Помилка"),
-    "exclude": MessageLookupByLibrary.simpleMessage("Сховати зі списку завдань"),
+    "exclude": MessageLookupByLibrary.simpleMessage(
+      "Сховати зі списку завдань",
+    ),
     "excludeDesc": MessageLookupByLibrary.simpleMessage(
       "Приховувати застосунок зі списку останніх завдань у фоновому режимі",
     ),
-    "existsTip": m3,
+    "existsTip": m4,
     "exit": MessageLookupByLibrary.simpleMessage("Вихід"),
     "expand": MessageLookupByLibrary.simpleMessage("Стандартний"),
     "expirationTime": MessageLookupByLibrary.simpleMessage("Час закінчення"),
@@ -331,10 +358,10 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "geoData": MessageLookupByLibrary.simpleMessage("Геодані"),
     "geodataLoader": MessageLookupByLibrary.simpleMessage(
-      "Економія пам'яті для геоданих",
+      "Економія пам\'яті для геоданих",
     ),
     "geodataLoaderDesc": MessageLookupByLibrary.simpleMessage(
-      "Використовувати режим завантаження геоданих з низьким споживанням пам'яті",
+      "Використовувати режим завантаження геоданих з низьким споживанням пам\'яті",
     ),
     "geoipCode": MessageLookupByLibrary.simpleMessage("Код Geoip"),
     "getOriginRules": MessageLookupByLibrary.simpleMessage(
@@ -342,7 +369,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "global": MessageLookupByLibrary.simpleMessage("Глобальний"),
     "go": MessageLookupByLibrary.simpleMessage("Перейти"),
-    "goDownload": MessageLookupByLibrary.simpleMessage("Перейти до завантаження"),
+    "goDownload": MessageLookupByLibrary.simpleMessage(
+      "Перейти до завантаження",
+    ),
     "gratitude": MessageLookupByLibrary.simpleMessage("Подяка"),
     "hasCacheChange": MessageLookupByLibrary.simpleMessage(
       "Зберегти зміни в кеші?",
@@ -357,6 +386,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "hour": MessageLookupByLibrary.simpleMessage("година"),
     "hours": MessageLookupByLibrary.simpleMessage("Годин"),
+    "hoursAgo": m5,
     "hoursGenitive": MessageLookupByLibrary.simpleMessage("годин"),
     "hoursPlural": MessageLookupByLibrary.simpleMessage("години"),
     "icon": MessageLookupByLibrary.simpleMessage("Іконка"),
@@ -368,9 +398,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "importFile": MessageLookupByLibrary.simpleMessage("Імпорт із файлу"),
     "importFromURL": MessageLookupByLibrary.simpleMessage("Імпорт з URL"),
     "importUrl": MessageLookupByLibrary.simpleMessage("Імпорт за URL"),
-    "infiniteTime": MessageLookupByLibrary.simpleMessage(
-      "Довгострокова дія",
-    ),
+    "infiniteTime": MessageLookupByLibrary.simpleMessage("Довгострокова дія"),
     "init": MessageLookupByLibrary.simpleMessage("Ініціалізація"),
     "inputCorrectHotkey": MessageLookupByLibrary.simpleMessage(
       "Введіть коректну комбінацію клавіш",
@@ -391,8 +419,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "ja": MessageLookupByLibrary.simpleMessage("Японська"),
     "just": MessageLookupByLibrary.simpleMessage("Щойно"),
+    "justNow": MessageLookupByLibrary.simpleMessage("Щойно"),
     "keepAliveIntervalDesc": MessageLookupByLibrary.simpleMessage(
-      "Інтервал підтримання TCP-з'єднання",
+      "Інтервал підтримання TCP-з\'єднання",
     ),
     "key": MessageLookupByLibrary.simpleMessage("Ключ"),
     "language": MessageLookupByLibrary.simpleMessage("Мова"),
@@ -407,6 +436,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "localRecoveryDesc": MessageLookupByLibrary.simpleMessage(
       "Відновлення даних із файлу",
     ),
+    "logDetails": MessageLookupByLibrary.simpleMessage("Деталі журналу"),
     "logLevel": MessageLookupByLibrary.simpleMessage("Рівень журналів"),
     "logcat": MessageLookupByLibrary.simpleMessage("Журналювання"),
     "logcatDesc": MessageLookupByLibrary.simpleMessage(
@@ -426,7 +456,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "managedByProviderNetwork": MessageLookupByLibrary.simpleMessage(
       "Цими параметрами керує ваш провайдер",
     ),
-    "memoryInfo": MessageLookupByLibrary.simpleMessage("Інформація про пам'ять"),
+    "memoryInfo": MessageLookupByLibrary.simpleMessage(
+      "Інформація про пам\'ять",
+    ),
     "messageTest": MessageLookupByLibrary.simpleMessage(
       "Тестування повідомлення",
     ),
@@ -439,16 +471,18 @@ class MessageLookup extends MessageLookupByLibrary {
       "Згортати застосунок у трей замість закриття",
     ),
     "minutes": MessageLookupByLibrary.simpleMessage("Хвилин"),
+    "minutesAgo": m6,
     "mixedPort": MessageLookupByLibrary.simpleMessage("Змішаний порт"),
     "mode": MessageLookupByLibrary.simpleMessage("Режим"),
     "monochromeScheme": MessageLookupByLibrary.simpleMessage("Монохром"),
     "months": MessageLookupByLibrary.simpleMessage("Місяців"),
+    "monthsAgo": m7,
     "more": MessageLookupByLibrary.simpleMessage("Ще"),
-    "name": MessageLookupByLibrary.simpleMessage("Ім'я"),
+    "name": MessageLookupByLibrary.simpleMessage("Ім\'я"),
     "nameSort": MessageLookupByLibrary.simpleMessage("Сортування за іменем"),
     "nameserver": MessageLookupByLibrary.simpleMessage("Сервер імен"),
     "nameserverDesc": MessageLookupByLibrary.simpleMessage(
-      "Для розв'язання домену",
+      "Для розв\'язання домену",
     ),
     "nameserverPolicy": MessageLookupByLibrary.simpleMessage(
       "Політика сервера імен",
@@ -458,7 +492,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "network": MessageLookupByLibrary.simpleMessage("Мережа"),
     "networkDesc": MessageLookupByLibrary.simpleMessage(
-      "Зміна налаштувань, пов'язаних із мережею",
+      "Зміна налаштувань, пов\'язаних із мережею",
     ),
     "networkDetection": MessageLookupByLibrary.simpleMessage("Ваша IP-адреса"),
     "networkSpeed": MessageLookupByLibrary.simpleMessage("Швидкість мережі"),
@@ -471,12 +505,14 @@ class MessageLookup extends MessageLookupByLibrary {
       "Додаткова інформація відсутня",
     ),
     "noNetwork": MessageLookupByLibrary.simpleMessage("Немає мережі"),
-    "noNetworkApp": MessageLookupByLibrary.simpleMessage("Застосунок без мережі"),
+    "noNetworkApp": MessageLookupByLibrary.simpleMessage(
+      "Застосунок без мережі",
+    ),
     "noProxy": MessageLookupByLibrary.simpleMessage("Немає проксі"),
     "noProxyDesc": MessageLookupByLibrary.simpleMessage(
       "Будь ласка, створіть профіль або додайте дійсний профіль",
     ),
-    "noResolve": MessageLookupByLibrary.simpleMessage("Не розв'язувати IP"),
+    "noResolve": MessageLookupByLibrary.simpleMessage("Не розв\'язувати IP"),
     "none": MessageLookupByLibrary.simpleMessage("Немає"),
     "notSelectedTip": MessageLookupByLibrary.simpleMessage(
       "Поточна група проксі недоступна для вибору",
@@ -484,11 +520,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "nullProfileDesc": MessageLookupByLibrary.simpleMessage(
       "Профіль відсутній. Будь ласка, додайте профіль",
     ),
-    "nullScriptTip": MessageLookupByLibrary.simpleMessage(
-      "Скрипти відсутні",
-    ),
-    "nullTip": m4,
-    "numberTip": m5,
+    "nullScriptTip": MessageLookupByLibrary.simpleMessage("Скрипти відсутні"),
+    "nullTip": m8,
+    "numberTip": m9,
     "oneColumn": MessageLookupByLibrary.simpleMessage("Один стовпець"),
     "oneline": MessageLookupByLibrary.simpleMessage("Лінія"),
     "onlyIcon": MessageLookupByLibrary.simpleMessage("Лише іконка"),
@@ -544,7 +578,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "paste": MessageLookupByLibrary.simpleMessage("Вставити"),
     "pasteFromClipboard": MessageLookupByLibrary.simpleMessage("Вставити"),
     "pleaseBindWebDAV": MessageLookupByLibrary.simpleMessage(
-      "Будь ласка, прив'яжіть WebDAV",
+      "Будь ласка, прив\'яжіть WebDAV",
     ),
     "pleaseEnterScriptName": MessageLookupByLibrary.simpleMessage(
       "Будь ласка, введіть назву скрипту",
@@ -562,7 +596,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "portConflictTip": MessageLookupByLibrary.simpleMessage(
       "Введіть інший порт",
     ),
-    "portTip": m6,
+    "portTip": m10,
     "preferH3Desc": MessageLookupByLibrary.simpleMessage(
       "Використовувати HTTP/3 для DOH (якщо доступно)",
     ),
@@ -621,7 +655,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Профіль було змінено. Вимкнути автооновлення?",
     ),
     "profileNameNullValidationDesc": MessageLookupByLibrary.simpleMessage(
-      "Будь ласка, введіть ім'я профілю",
+      "Будь ласка, введіть ім\'я профілю",
     ),
     "profileParseErrorDesc": MessageLookupByLibrary.simpleMessage(
       "Помилка розбору профілю",
@@ -637,13 +671,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "project": MessageLookupByLibrary.simpleMessage("Проєкт"),
     "providers": MessageLookupByLibrary.simpleMessage("Провайдери"),
     "proxies": MessageLookupByLibrary.simpleMessage("Проксі"),
-    "proxiesSetting": MessageLookupByLibrary.simpleMessage("Налаштування проксі"),
+    "proxiesSetting": MessageLookupByLibrary.simpleMessage(
+      "Налаштування проксі",
+    ),
     "proxyGroup": MessageLookupByLibrary.simpleMessage("Група проксі"),
     "proxyNameserver": MessageLookupByLibrary.simpleMessage(
       "Проксі-сервер імен",
     ),
     "proxyNameserverDesc": MessageLookupByLibrary.simpleMessage(
-      "Домен для розв'язання проксі-вузлів",
+      "Домен для розв\'язання проксі-вузлів",
     ),
     "proxyPort": MessageLookupByLibrary.simpleMessage("Порт проксі"),
     "proxyPortDesc": MessageLookupByLibrary.simpleMessage(
@@ -661,9 +697,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Отримання підписки",
     ),
     "recovery": MessageLookupByLibrary.simpleMessage("Відновлення"),
-    "recoveryAll": MessageLookupByLibrary.simpleMessage(
-      "Відновити всі дані",
-    ),
+    "recoveryAll": MessageLookupByLibrary.simpleMessage("Відновити всі дані"),
     "recoveryProfiles": MessageLookupByLibrary.simpleMessage(
       "Лише відновлення профілів",
     ),
@@ -695,6 +729,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "remove": MessageLookupByLibrary.simpleMessage("Видалити"),
     "rename": MessageLookupByLibrary.simpleMessage("Перейменувати"),
     "renew": MessageLookupByLibrary.simpleMessage("Продовжити"),
+    "requestDetails": MessageLookupByLibrary.simpleMessage("Деталі запиту"),
     "requests": MessageLookupByLibrary.simpleMessage("Запити"),
     "requestsDesc": MessageLookupByLibrary.simpleMessage(
       "Перегляд останніх записів запитів",
@@ -707,7 +742,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "resourcesDesc": MessageLookupByLibrary.simpleMessage(
       "Керування зовнішніми ресурсами",
     ),
-    "respectRules": MessageLookupByLibrary.simpleMessage("Дотримуватися правил"),
+    "respectRules": MessageLookupByLibrary.simpleMessage(
+      "Дотримуватися правил",
+    ),
     "respectRulesDesc": MessageLookupByLibrary.simpleMessage(
       "DNS-запити дотримуються правил маршрутизації (потрібне налаштування proxy-server-nameserver)",
     ),
@@ -720,9 +757,11 @@ class MessageLookup extends MessageLookupByLibrary {
       "Ядро успішно перезапущено",
     ),
     "restartCoreTip": MessageLookupByLibrary.simpleMessage(
-      "Ви дійсно хочете перезапустити ядро? Активні з'єднання буде на короткий час перервано.",
+      "Ви дійсно хочете перезапустити ядро? Активні з\'єднання буде на короткий час перервано.",
     ),
-    "routeAddress": MessageLookupByLibrary.simpleMessage("Адреса маршрутизації"),
+    "routeAddress": MessageLookupByLibrary.simpleMessage(
+      "Адреса маршрутизації",
+    ),
     "routeAddressDesc": MessageLookupByLibrary.simpleMessage(
       "Налаштування адреси прослуховування маршрутизації",
     ),
@@ -748,7 +787,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "selectAll": MessageLookupByLibrary.simpleMessage("Вибрати все"),
     "selectProfile": MessageLookupByLibrary.simpleMessage("Вибрати профіль"),
     "selected": MessageLookupByLibrary.simpleMessage("Вибрано"),
-    "selectedCountTitle": m7,
+    "selectedCountTitle": m11,
     "sendToTv": MessageLookupByLibrary.simpleMessage("Надіслати на ТВ"),
     "sendToTvTitle": MessageLookupByLibrary.simpleMessage("Надіслати на ТВ"),
     "sentSuccessfullyMessage": MessageLookupByLibrary.simpleMessage(
@@ -792,7 +831,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionExpired": MessageLookupByLibrary.simpleMessage(
       "Ваша підписка закінчилася",
     ),
-    "subscriptionExpiresInDays": m8,
+    "subscriptionExpiresInDays": m12,
     "subscriptionExpiresSoon": MessageLookupByLibrary.simpleMessage(
       "Підписка скоро закінчується",
     ),
@@ -819,7 +858,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "tcpConcurrent": MessageLookupByLibrary.simpleMessage("Паралельний TCP"),
     "tcpConcurrentDesc": MessageLookupByLibrary.simpleMessage(
-      "Використовувати паралельні TCP-з'єднання",
+      "Використовувати паралельні TCP-з\'єднання",
     ),
     "testUrl": MessageLookupByLibrary.simpleMessage("Тест URL"),
     "textScale": MessageLookupByLibrary.simpleMessage("Масштабування тексту"),
@@ -858,7 +897,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Неможливо оновити поточний профіль",
     ),
     "undo": MessageLookupByLibrary.simpleMessage("Скасувати"),
-    "unifiedDelay": MessageLookupByLibrary.simpleMessage("Уніфікована затримка"),
+    "unifiedDelay": MessageLookupByLibrary.simpleMessage(
+      "Уніфікована затримка",
+    ),
     "unifiedDelayDesc": MessageLookupByLibrary.simpleMessage(
       "Не враховувати додаткові затримки (наприклад, рукостискання)",
     ),
@@ -874,7 +915,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlDesc": MessageLookupByLibrary.simpleMessage(
       "Завантажити профіль за URL",
     ),
-    "urlTip": m9,
+    "urlTip": m13,
     "useHosts": MessageLookupByLibrary.simpleMessage("Використовувати hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Використовувати системні hosts",
@@ -883,7 +924,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "vibrantScheme": MessageLookupByLibrary.simpleMessage("Яскраві"),
     "view": MessageLookupByLibrary.simpleMessage("Перегляд"),
     "vpnDesc": MessageLookupByLibrary.simpleMessage(
-      "Зміна налаштувань, пов'язаних із VPN",
+      "Зміна налаштувань, пов\'язаних із VPN",
     ),
     "vpnEnableDesc": MessageLookupByLibrary.simpleMessage(
       "Автоматично спрямовує весь системний трафік через VpnService",
@@ -897,9 +938,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage(
       "Конфігурація WebDAV",
     ),
-    "whitelistMode": MessageLookupByLibrary.simpleMessage("Режим білого списку"),
+    "whitelistMode": MessageLookupByLibrary.simpleMessage(
+      "Режим білого списку",
+    ),
     "years": MessageLookupByLibrary.simpleMessage("Років"),
+    "yearsAgo": m14,
     "zh_CN": MessageLookupByLibrary.simpleMessage("Спрощена китайська"),
-    "zoom": MessageLookupByLibrary.simpleMessage("Масштаб"),
   };
 }

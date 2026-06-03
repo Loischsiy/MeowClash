@@ -1116,7 +1116,7 @@ class AppController {
     linkManager.initAppLinksListen(
       (url) async {
         final res = await globalState.showMessage(
-          title: "${appLocalizations.add} ${appLocalizations.profile}",
+          title: appLocalizations.addProfile,
           message: TextSpan(
             children: [
               TextSpan(text: appLocalizations.doYouWantToPass),
@@ -1205,7 +1205,7 @@ class AppController {
                     decryptionIterations ?? kDefaultPbkdf2Iterations,
               );
         },
-        title: "${appLocalizations.add}${appLocalizations.profile}",
+        title: appLocalizations.addProfile,
       );
 
       if (profile != null) {
@@ -1241,7 +1241,7 @@ class AppController {
         await Future.delayed(const Duration(milliseconds: 300));
         return Profile.normal(label: platformFile?.name).saveFile(bytes);
       },
-      title: "${appLocalizations.add}${appLocalizations.profile}",
+      title: appLocalizations.addProfile,
     );
     if (profile != null) {
       await addProfile(profile);

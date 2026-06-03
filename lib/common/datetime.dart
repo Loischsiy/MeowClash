@@ -10,29 +10,34 @@ extension DateTimeExtension on DateTime {
     return true;
   }
 
-  String get lastUpdateTimeDesc {
+    String get lastUpdateTimeDesc {
     final currentDateTime = DateTime.now();
     final difference = currentDateTime.difference(this);
     final days = difference.inDays;
+
     if (days >= 365) {
-      return "${(days / 365).floor()} ${appLocalizations.years}${appLocalizations.ago}";
+      return appLocalizations.yearsAgo((days / 365).floor());
     }
     if (days >= 30) {
-      return "${(days / 30).floor()} ${appLocalizations.months}${appLocalizations.ago}";
+      return appLocalizations.monthsAgo((days / 30).floor());
     }
     if (days >= 1) {
-      return "$days ${appLocalizations.days}${appLocalizations.ago}";
+      return appLocalizations.daysAgo(days);
     }
+
     final hours = difference.inHours;
     if (hours >= 1) {
-      return "$hours ${appLocalizations.hours}${appLocalizations.ago}";
+      return appLocalizations.hoursAgo(hours);
     }
+
     final minutes = difference.inMinutes;
     if (minutes >= 1) {
-      return "$minutes ${appLocalizations.minutes}${appLocalizations.ago}";
+      return appLocalizations.minutesAgo(minutes);
     }
-    return appLocalizations.just;
+
+    return appLocalizations.justNow;
   }
+
 
   String get show => toIso8601String().substring(0, 10);
 }

@@ -480,5 +480,51 @@
   "restartCore": "Перезапуск ядра",
   "restartCoreDesc": "Перезапустити службу проксі-ядра",
   "restartCoreTip": "Ви дійсно хочете перезапустити ядро? Активні з'єднання буде на короткий час перервано.",
-  "restartCoreSuccess": "Ядро успішно перезапущено"
+  "restartCoreSuccess": "Ядро успішно перезапущено",
+  "yearsAgo": "{count, plural, one{{count} рік тому} few{{count} роки тому} many{{count} років тому} other{{count} років тому}}",
+  "@yearsAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "monthsAgo": "{count, plural, one{{count} місяць тому} few{{count} місяці тому} many{{count} місяців тому} other{{count} місяців тому}}",
+  "@monthsAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "daysAgo": "{count, plural, one{{count} день тому} few{{count} дні тому} many{{count} днів тому} other{{count} днів тому}}",
+  "@daysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hoursAgo": "{count, plural, one{{count} годину тому} few{{count} години тому} many{{count} годин тому} other{{count} годин тому}}",
+  "@hoursAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "minutesAgo": "{count, plural, one{{count} хвилину тому} few{{count} хвилини тому} many{{count} хвилин тому} other{{count} хвилин тому}}",
+  "@minutesAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "justNow": "Щойно",
+  "editProfile": "Редагувати профіль",
+  "createProfile": "Створити профіль",
+  "requestDetails": "Деталі запиту",
+  "connectionDetails": "Деталі з'єднання",
+  "logDetails": "Деталі журналу"
 }

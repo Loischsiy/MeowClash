@@ -480,5 +480,51 @@
   "restartCore": "Перезапуск ядра",
   "restartCoreDesc": "Перезапустить службу прокси-ядра",
   "restartCoreTip": "Вы действительно хотите перезапустить ядро? Активные соединения будут на короткое время прерваны.",
-  "restartCoreSuccess": "Ядро успешно перезапущено"
+  "restartCoreSuccess": "Ядро успешно перезапущено",
+  "yearsAgo": "{count, plural, one{{count} год назад} few{{count} года назад} many{{count} лет назад} other{{count} лет назад}}",
+  "@yearsAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "monthsAgo": "{count, plural, one{{count} месяц назад} few{{count} месяца назад} many{{count} месяцев назад} other{{count} месяцев назад}}",
+  "@monthsAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "daysAgo": "{count, plural, one{{count} день назад} few{{count} дня назад} many{{count} дней назад} other{{count} дней назад}}",
+  "@daysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hoursAgo": "{count, plural, one{{count} час назад} few{{count} часа назад} many{{count} часов назад} other{{count} часов назад}}",
+  "@hoursAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "minutesAgo": "{count, plural, one{{count} минуту назад} few{{count} минуты назад} many{{count} минут назад} other{{count} минут назад}}",
+  "@minutesAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "justNow": "Только что",
+  "editProfile": "Редактировать профиль",
+  "createProfile": "Создать профиль",
+  "requestDetails": "Подробности запроса",
+  "connectionDetails": "Подробности соединения",
+  "logDetails": "Подробности лога"
 }

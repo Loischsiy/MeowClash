@@ -441,7 +441,7 @@
   "importUrl": "Import from URL",
   "autoSetSystemDns": "Auto set system DNS",
   "changeServer": "Change Server",
-  "addProfile": "Add Profile",
+  "addProfile": "Add profile",
   "traffic": "Traffic",
   "trafficUnlimited": "Unlimited Traffic",
   "subscriptionEternal": "Lifetime Subscription",
@@ -479,5 +479,51 @@
   "restartCore": "Restart core",
   "restartCoreDesc": "Restart the proxy core service",
   "restartCoreTip": "Are you sure you want to restart the core? Active connections will be interrupted briefly.",
-  "restartCoreSuccess": "Core restarted successfully"
+  "restartCoreSuccess": "Core restarted successfully",
+  "yearsAgo": "{count, plural, =1{1 year ago} other{{count} years ago}}",
+  "@yearsAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "monthsAgo": "{count, plural, =1{1 month ago} other{{count} months ago}}",
+  "@monthsAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "daysAgo": "{count, plural, =1{1 day ago} other{{count} days ago}}",
+  "@daysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hoursAgo": "{count, plural, =1{1 hour ago} other{{count} hours ago}}",
+  "@hoursAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "minutesAgo": "{count, plural, =1{1 minute ago} other{{count} minutes ago}}",
+  "@minutesAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "justNow": "Just now",
+  "editProfile": "Edit profile",
+  "createProfile": "Create profile",
+  "requestDetails": "Request details",
+  "connectionDetails": "Connection details",
+  "logDetails": "Log details"
 }

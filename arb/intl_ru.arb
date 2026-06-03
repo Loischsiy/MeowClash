@@ -69,19 +69,12 @@
   "add": "Добавить",
   "save": "Сохранить",
   "delete": "Удалить",
-  "years": "Лет",
-  "months": "Месяцев",
-  "hours": "Часов",
   "day": "день",
-  "days": "дней",
   "daysGenitive": "дня",
   "hour": "час",
   "hoursPlural": "часа",
   "hoursGenitive": "часов",
-  "minutes": "Минут",
   "seconds": "Секунд",
-  "ago": " назад",
-  "just": "Только что",
   "qrcode": "QR-код",
   "qrcodeDesc": "Сканировать QR-код для получения профиля",
   "url": "URL",
@@ -480,5 +473,51 @@
   "restartCore": "Перезапуск ядра",
   "restartCoreDesc": "Перезапустить службу прокси-ядра",
   "restartCoreTip": "Вы действительно хотите перезапустить ядро? Активные соединения будут на короткое время прерваны.",
-  "restartCoreSuccess": "Ядро успешно перезапущено"
+  "restartCoreSuccess": "Ядро успешно перезапущено",
+  "yearsAgo": "{count, plural, one{{count} год назад} few{{count} года назад} many{{count} лет назад} other{{count} лет назад}}",
+  "monthsAgo": "{count, plural, one{{count} месяц назад} few{{count} месяца назад} many{{count} месяцев назад} other{{count} месяцев назад}}",
+  "daysAgo": "{count, plural, one{{count} день назад} few{{count} дня назад} many{{count} дней назад} other{{count} дней назад}}",
+  "hoursAgo": "{count, plural, one{{count} час назад} few{{count} часа назад} many{{count} часов назад} other{{count} часов назад}}",
+  "minutesAgo": "{count, plural, one{{count} минуту назад} few{{count} минуты назад} many{{count} минут назад} other{{count} минут назад}}",
+  "justNow": "Только что",
+  "editProfile": "Редактировать профиль",
+  "createProfile": "Создать профиль",
+  "requestDetails": "Подробности запроса",
+  "connectionDetails": "Подробности соединения",
+  "logDetails": "Подробности лога",
+  "@yearsAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@monthsAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@daysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@hoursAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@minutesAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

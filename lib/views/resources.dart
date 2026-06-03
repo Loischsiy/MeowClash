@@ -329,7 +329,7 @@ class _GeoDataListItemState extends State<GeoDataListItem> {
                           ),
                         )
                       : Text(
-                          snapshot.data!.desc,
+                          snapshot.data!.getDesc(context),
                           style: context.textTheme.bodyMedium,
                         ),
                     );

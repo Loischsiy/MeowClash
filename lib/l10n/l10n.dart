@@ -569,29 +569,9 @@ class AppLocalizations {
     return Intl.message('Delete', name: 'delete', desc: '', args: []);
   }
 
-  /// `Years`
-  String get years {
-    return Intl.message('Years', name: 'years', desc: '', args: []);
-  }
-
-  /// `Months`
-  String get months {
-    return Intl.message('Months', name: 'months', desc: '', args: []);
-  }
-
-  /// `Hours`
-  String get hours {
-    return Intl.message('Hours', name: 'hours', desc: '', args: []);
-  }
-
   /// `day`
   String get day {
     return Intl.message('day', name: 'day', desc: '', args: []);
-  }
-
-  /// `days`
-  String get days {
-    return Intl.message('days', name: 'days', desc: '', args: []);
   }
 
   /// `days`
@@ -614,24 +594,9 @@ class AppLocalizations {
     return Intl.message('hours', name: 'hoursGenitive', desc: '', args: []);
   }
 
-  /// `Minutes`
-  String get minutes {
-    return Intl.message('Minutes', name: 'minutes', desc: '', args: []);
-  }
-
   /// `Seconds`
   String get seconds {
     return Intl.message('Seconds', name: 'seconds', desc: '', args: []);
-  }
-
-  /// ` Ago`
-  String get ago {
-    return Intl.message(' Ago', name: 'ago', desc: '', args: []);
-  }
-
-  /// `Just`
-  String get just {
-    return Intl.message('Just', name: 'just', desc: '', args: []);
   }
 
   /// `QR code`
@@ -797,7 +762,6 @@ class AppLocalizations {
       desc: '',
       args: [],
     );
-
   }
 
   /// `PBKDF2 iterations`
@@ -3435,9 +3399,9 @@ class AppLocalizations {
     );
   }
 
-  /// `Add Profile`
+  /// `Add profile`
   String get addProfile {
-    return Intl.message('Add Profile', name: 'addProfile', desc: '', args: []);
+    return Intl.message('Add profile', name: 'addProfile', desc: '', args: []);
   }
 
   /// `Traffic`
@@ -3769,6 +3733,116 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `{count, plural, =1{1 year ago} other{{count} years ago}}`
+  String yearsAgo(int count) {
+    return Intl.plural(
+      count,
+      one: '1 year ago',
+      other: '$count years ago',
+      name: 'yearsAgo',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `{count, plural, =1{1 month ago} other{{count} months ago}}`
+  String monthsAgo(int count) {
+    return Intl.plural(
+      count,
+      one: '1 month ago',
+      other: '$count months ago',
+      name: 'monthsAgo',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `{count, plural, =1{1 day ago} other{{count} days ago}}`
+  String daysAgo(int count) {
+    return Intl.plural(
+      count,
+      one: '1 day ago',
+      other: '$count days ago',
+      name: 'daysAgo',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `{count, plural, =1{1 hour ago} other{{count} hours ago}}`
+  String hoursAgo(int count) {
+    return Intl.plural(
+      count,
+      one: '1 hour ago',
+      other: '$count hours ago',
+      name: 'hoursAgo',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `{count, plural, =1{1 minute ago} other{{count} minutes ago}}`
+  String minutesAgo(int count) {
+    return Intl.plural(
+      count,
+      one: '1 minute ago',
+      other: '$count minutes ago',
+      name: 'minutesAgo',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Just now`
+  String get justNow {
+    return Intl.message('Just now', name: 'justNow', desc: '', args: []);
+  }
+
+  /// `Edit profile`
+  String get editProfile {
+    return Intl.message(
+      'Edit profile',
+      name: 'editProfile',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Create profile`
+  String get createProfile {
+    return Intl.message(
+      'Create profile',
+      name: 'createProfile',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Request details`
+  String get requestDetails {
+    return Intl.message(
+      'Request details',
+      name: 'requestDetails',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Connection details`
+  String get connectionDetails {
+    return Intl.message(
+      'Connection details',
+      name: 'connectionDetails',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Log details`
+  String get logDetails {
+    return Intl.message('Log details', name: 'logDetails', desc: '', args: []);
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {
@@ -3779,8 +3853,8 @@ class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {
       Locale.fromSubtags(languageCode: 'en'),
       Locale.fromSubtags(languageCode: 'ja'),
       Locale.fromSubtags(languageCode: 'ru'),
-      Locale.fromSubtags(languageCode: 'zh', countryCode: 'CN'),
       Locale.fromSubtags(languageCode: 'uk'),
+      Locale.fromSubtags(languageCode: 'zh', countryCode: 'CN'),
     ];
   }
 

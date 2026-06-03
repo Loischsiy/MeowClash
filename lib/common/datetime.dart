@@ -1,4 +1,5 @@
-import 'package:meowclash/common/app_localizations.dart';
+import 'package:meowclash/l10n/l10n.dart';
+import 'package:flutter/material.dart';
 
 extension DateTimeExtension on DateTime {
   bool get isBeforeNow => isBefore(DateTime.now());
@@ -10,29 +11,37 @@ extension DateTimeExtension on DateTime {
     return true;
   }
 
-  String get lastUpdateTimeDesc {
+    String getLastUpdateTimeDesc(BuildContext context) {
     final currentDateTime = DateTime.now();
     final difference = currentDateTime.difference(this);
     final days = difference.inDays;
+    final l10n = AppLocalizations.of(context);
+
+    if (l10n == null) return show;
+
     if (days >= 365) {
-      return "${(days / 365).floor()} ${appLocalizations.years}${appLocalizations.ago}";
+      return l10n.yearsAgo((days / 365).floor());
     }
     if (days >= 30) {
-      return "${(days / 30).floor()} ${appLocalizations.months}${appLocalizations.ago}";
+      return l10n.monthsAgo((days / 30).floor());
     }
     if (days >= 1) {
-      return "$days ${appLocalizations.days}${appLocalizations.ago}";
+      return l10n.daysAgo(days);
     }
+
     final hours = difference.inHours;
     if (hours >= 1) {
-      return "$hours ${appLocalizations.hours}${appLocalizations.ago}";
+      return l10n.hoursAgo(hours);
     }
+
     final minutes = difference.inMinutes;
     if (minutes >= 1) {
-      return "$minutes ${appLocalizations.minutes}${appLocalizations.ago}";
+      return l10n.minutesAgo(minutes);
     }
-    return appLocalizations.just;
+
+    return l10n.justNow;
   }
+
 
   String get show => toIso8601String().substring(0, 10);
 }

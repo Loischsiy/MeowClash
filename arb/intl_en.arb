@@ -69,19 +69,12 @@
   "add": "Add",
   "save": "Save",
   "delete": "Delete",
-  "years": "Years",
-  "months": "Months",
-  "hours": "Hours",
   "day": "day",
-  "days": "days",
   "daysGenitive": "days",
   "hour": "hour",
   "hoursPlural": "hours",
   "hoursGenitive": "hours",
-  "minutes": "Minutes",
   "seconds": "Seconds",
-  "ago": " Ago",
-  "just": "Just",
   "qrcode": "QR code",
   "qrcodeDesc": "Scan QR code to obtain profile",
   "url": "URL",
@@ -441,7 +434,7 @@
   "importUrl": "Import from URL",
   "autoSetSystemDns": "Auto set system DNS",
   "changeServer": "Change Server",
-  "addProfile": "Add Profile",
+  "addProfile": "Add profile",
   "traffic": "Traffic",
   "trafficUnlimited": "Unlimited Traffic",
   "subscriptionEternal": "Lifetime Subscription",
@@ -479,5 +472,51 @@
   "restartCore": "Restart core",
   "restartCoreDesc": "Restart the proxy core service",
   "restartCoreTip": "Are you sure you want to restart the core? Active connections will be interrupted briefly.",
-  "restartCoreSuccess": "Core restarted successfully"
+  "restartCoreSuccess": "Core restarted successfully",
+  "yearsAgo": "{count, plural, =1{1 year ago} other{{count} years ago}}",
+  "monthsAgo": "{count, plural, =1{1 month ago} other{{count} months ago}}",
+  "daysAgo": "{count, plural, =1{1 day ago} other{{count} days ago}}",
+  "hoursAgo": "{count, plural, =1{1 hour ago} other{{count} hours ago}}",
+  "minutesAgo": "{count, plural, =1{1 minute ago} other{{count} minutes ago}}",
+  "justNow": "Just now",
+  "editProfile": "Edit profile",
+  "createProfile": "Create profile",
+  "requestDetails": "Request details",
+  "connectionDetails": "Connection details",
+  "logDetails": "Log details",
+  "@yearsAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@monthsAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@daysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@hoursAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@minutesAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

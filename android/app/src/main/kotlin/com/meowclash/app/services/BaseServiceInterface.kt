@@ -16,7 +16,6 @@ import com.meowclash.app.MainActivity
 import com.meowclash.app.R
 import com.meowclash.app.extensions.getActionPendingIntent
 import com.meowclash.app.models.VpnOptions
-import com.meowclash.app.models.BroadcastAction
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers

@@ -360,7 +360,7 @@ class _ProfileItemState extends State<ProfileItem> {
         final file = await widget.profile.getFile();
         final value = await picker.saveFile(
           widget.profile.label ?? widget.profile.id,
-          file.readAsBytesSync(),
+          await file.readAsBytes(),
         );
         if (value == null) return false;
         return true;

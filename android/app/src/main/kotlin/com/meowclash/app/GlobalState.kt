@@ -143,11 +143,27 @@ object GlobalState {
         return false
     }
 
-    fun handleStop() {
-        Log.d("GlobalState", "handleStop called, current runState: ${runState.value}")
-        if (runState.value == RunState.START) {
+    fun handleStop(force: Boolean = false) {
+        Log.d("GlobalState", "handleStop called, current runState: ${runState.value}, force: $force")
+        // When the stop request comes from the persistent notification's "Stop"
+        // button, the app process may have been killed and freshly recreated to
+        // handle the action (this happens when the task is swiped away from
+        // recents). A new process resets `runState` back to its default STOP
+        // value even though the VPN is still running, so the old
+        // `runState == START` guard silently swallowed the request and the
+        // button appeared dead until the app was reopened (which re-synced the
+        // state via syncStatus()). For an explicit user-initiated stop we bypass
+        // the guard and always drive the teardown.
+        if (force || runState.value == RunState.START) {
             runState.value = RunState.PENDING
             runLock.withLock {
+                // When the app is open, getCurrentTilePlugin() returns the MAIN
+                // engine's tile plugin so the stop is handled gracefully and the
+                // in-app UI updates. When the app is closed (flutterEngine == null),
+                // it falls back to the SERVICE engine, which owns the core and is
+                // still alive. The real reason stop failed when closed was that the
+                // service engine's "vpn" handler was being wiped on the main
+                // engine's detach — fixed in VpnPlugin.onDetachedFromEngine.
                 val tilePlugin = getCurrentTilePlugin()
                 if (tilePlugin != null) {
                     tilePlugin.handleStop()
@@ -168,6 +184,7 @@ object GlobalState {
 
     fun destroyServiceEngine() {
         runLock.withLock {
+            VpnPlugin.onServiceEngineDestroyed()
             serviceEngine?.destroy()
             serviceEngine = null
         }
@@ -184,7 +201,17 @@ object GlobalState {
             Log.d("GlobalState", "Creating new serviceEngine")
             serviceEngine = FlutterEngine(MeowClashApplication.getAppContext())
             Log.d("GlobalState", "Registering plugins")
+            // Mark this attach so VpnPlugin records the SERVICE engine's method
+            // channel separately. The foreground-notification loop must always
+            // talk to the service engine (which owns the core and stays alive
+            // while the VPN runs), not to whichever engine attached last. The
+            // main UI engine also attaches the VpnPlugin singleton and would
+            // otherwise clobber the shared channel; when the app is swiped from
+            // recents the main engine dies and the notification could no longer
+            // fetch live up/down traffic (it showed "0 0").
+            VpnPlugin.attachingServiceEngine = true
             serviceEngine?.plugins?.add(VpnPlugin)
+            VpnPlugin.attachingServiceEngine = false
             serviceEngine?.plugins?.add(AppPlugin())
             serviceEngine?.plugins?.add(TilePlugin())
             val vpnService = DartExecutor.DartEntrypoint(

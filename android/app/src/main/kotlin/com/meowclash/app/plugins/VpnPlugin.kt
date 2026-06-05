@@ -43,6 +43,20 @@ import kotlin.concurrent.withLock
 
 data object VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
     private lateinit var flutterMethodChannel: MethodChannel
+    // Method channel bound to the background SERVICE engine specifically. The
+    // foreground-notification loop uses THIS channel (not the shared
+    // `flutterMethodChannel`) so it can keep fetching live up/down traffic even
+    // after the main UI engine is destroyed — e.g. when the app is swiped away
+    // from recents. Because VpnPlugin is a singleton attached to BOTH the main
+    // engine and the service engine, the main engine (which attaches last once
+    // the app is opened) used to clobber `flutterMethodChannel`; once the main
+    // engine died, the notification could no longer reach a live isolate and the
+    // traffic counters froze/dropped to "0 0".
+    private var foregroundChannel: MethodChannel? = null
+    // Set by GlobalState around the service engine's plugin registration so we
+    // can tell which onAttachedToEngine call corresponds to the service engine.
+    @Volatile
+    var attachingServiceEngine: Boolean = false
     private var flClashXService: BaseServiceInterface? = null
     private var options: VpnOptions? = null
     private var isBind: Boolean = false
@@ -79,11 +93,37 @@ data object VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
         }
         flutterMethodChannel = MethodChannel(flutterPluginBinding.binaryMessenger, "vpn")
         flutterMethodChannel.setMethodCallHandler(this)
+        // Remember the service engine's channel for the foreground-notification
+        // loop. It owns the core (direct FFI traffic) and stays alive while the
+        // VPN runs, so the notification keeps showing real up/down even when the
+        // app is closed from recents.
+        if (attachingServiceEngine) {
+            foregroundChannel = flutterMethodChannel
+        }
+    }
+
+    // Called by GlobalState when the background service engine is torn down so we
+    // don't keep a reference to a destroyed channel.
+    fun onServiceEngineDestroyed() {
+        foregroundChannel = null
     }
 
     override fun onDetachedFromEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         unRegisterNetworkCallback()
-        flutterMethodChannel.setMethodCallHandler(null)
+        // Clear the handler for the engine that is ACTUALLY detaching — not for
+        // whatever `flutterMethodChannel` happens to point at. VpnPlugin is a
+        // singleton attached to BOTH the main UI engine and the background
+        // service engine, and `flutterMethodChannel` holds whichever attached
+        // LAST. When the VPN is started from the open app, the service engine
+        // attaches last, so the field points at the SERVICE channel. The old code
+        // (`flutterMethodChannel.setMethodCallHandler(null)`) therefore wiped the
+        // SERVICE engine's "vpn" handler when the MAIN engine detached (app swiped
+        // from recents) — afterwards the service isolate's vpn.stop() failed with
+        // MissingPluginException and the VPN never actually stopped.
+        MethodChannel(flutterPluginBinding.binaryMessenger, "vpn").setMethodCallHandler(null)
+        // Keep the shared channel pointed at a still-live engine (the service
+        // engine, if any) so later Kotlin->Dart invokes don't target a dead engine.
+        foregroundChannel?.let { flutterMethodChannel = it }
     }
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
@@ -182,7 +222,12 @@ data object VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
         GlobalState.runLock.lock()
         try {
             if (GlobalState.runState.value != RunState.START) return
-            val data = flutterMethodChannel.awaitResult<String>("getStartForegroundParams")
+            // Always query the SERVICE engine's channel for notification params.
+            // It owns the core (live FFI traffic) and outlives the main UI engine,
+            // which may already be gone if the app was swiped from recents. Fall
+            // back to the shared channel only if the service channel isn't set yet.
+            val channel = foregroundChannel ?: flutterMethodChannel
+            val data = channel.awaitResult<String>("getStartForegroundParams")
             val startForegroundParams = if (data != null) Gson().fromJson(
                 data, StartForegroundParams::class.java
             ) else StartForegroundParams(

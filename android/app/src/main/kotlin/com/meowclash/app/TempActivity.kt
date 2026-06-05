@@ -13,7 +13,10 @@ class TempActivity : Activity() {
             }
 
             wrapAction("STOP") -> {
-                GlobalState.handleStop()
+                // Force the stop: the notification action can be delivered to a
+                // freshly recreated process whose in-memory runState is no
+                // longer START, which would otherwise be ignored.
+                GlobalState.handleStop(force = true)
             }
 
             wrapAction("CHANGE") -> {

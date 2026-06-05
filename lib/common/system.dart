@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:io' as io;
 
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:meowclash/common/common.dart';
@@ -230,9 +231,23 @@ class System {
     if (Platform.isAndroid) {
       commonPrint.log("System: Calling SystemNavigator.pop()");
       await SystemNavigator.pop();
+      return;
     }
+    // Desktop: terminate the whole process. Closing only the window is not
+    // enough — if the platform intercepts the close (e.g. window_manager's
+    // setPreventClose on Windows), the GUI process can survive after the core
+    // has already been shut down. That leaves a "zombie": the interface keeps
+    // working while the app has vanished from the task manager, and background
+    // timers keep writing to the now-dead core socket (StreamSink is closed).
+    // exit(0) guarantees the process is actually gone.
     commonPrint.log("System: Closing window...");
-    await window?.close();
+    try {
+      await window?.close();
+    } catch (e) {
+      commonPrint.log("System: window.close() failed: $e");
+    }
+    commonPrint.log("System: Forcing process exit");
+    io.exit(0);
   }
 }
 

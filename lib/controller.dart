@@ -834,7 +834,19 @@ class AppController {
       // `system.exit()` — if we did, Android would receive a second
       // `SystemNavigator.pop()` after this one and tear the activity down a
       // second time.
-      system.exit();
+      await system.exit();
+      // Reaching this point means the platform exit did NOT terminate the
+      // process. On desktop this is the reported Windows "zombie" state: the
+      // core was already shut down (it disappears from the task manager) but
+      // the GUI keeps running, so the UI still responds while every background
+      // call floods the dead core socket with "StreamSink is closed" errors.
+      // Clear the guard so the user can trigger Exit again, then force a hard
+      // process exit. Never do this on Android, where SystemNavigator.pop() is
+      // the correct single teardown.
+      if (system.isDesktop) {
+        _exitLock = null;
+        exit(0);
+      }
     }
   }
 

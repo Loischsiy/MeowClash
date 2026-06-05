@@ -128,7 +128,18 @@ class ClashService extends ClashHandlerInterface {
   @override
   Future<void> sendMessage(String message) async {
     final socket = await socketCompleter.future;
-    socket.writeln(message);
+    try {
+      socket.writeln(message);
+    } on SocketException catch (e) {
+      // The core forcibly dropped the connection (e.g. errno 10054 on
+      // Windows when the core process restarts). Swallow it so it does not
+      // surface as an unhandled zone error; callers such as updateGroups
+      // already handle a missing response gracefully.
+      commonPrint.log("sendMessage failed, socket unavailable: $e");
+    } on StateError catch (e) {
+      // The underlying StreamSink was already closed.
+      commonPrint.log("sendMessage failed, socket closed: $e");
+    }
   }
 
   Future<void> _deleteSocketFile() async {

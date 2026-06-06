@@ -2,6 +2,13 @@
 
 > Compact, repo-specific instructions for AI agents. Omit anything already obvious from file names or defaults.
 
+## AI Instructions for this Repo
+
+1. **Context Awareness:** Before performing any task, always review the project structure. If you notice new technologies not described here, suggest updating this file.
+2. **Analysis Mode:** When prompted to “Analyze and Update AGENTS.md,” you must rescan the entire project, identify changes in the architecture, and update the Tech Stack and Project Structure sections.
+3. **Consistency:** Always follow the patterns already implemented in the `/src` folder (or equivalent). Do not suggest third-party libraries if the project already has a built-in solution.
+4. **Recursive Improvement:** You are permitted to edit this file if you believe that adding a new rule will improve the quality of your work with the current code.
+
 ## Project type
 
 Multi-platform Flutter proxy client (Android, Windows, macOS, Linux).

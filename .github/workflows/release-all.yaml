@@ -521,6 +521,68 @@ jobs:
             sed "s|VERSION|$APP_VERSION|g" ./.github/release_template.md
           } > release.md
 
+      - name: Rename release assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$APP_VERSION"
+          cd ./dist
+          find . -type f -not -name "*.sha256" | while read -r filepath; do
+            filename=$(basename "$filepath" | tr '[:upper:]' '[:lower:]')
+            ext=".${filepath##*.}"
+            new_name=""
+            
+            if [[ "$filename" == *"android"* ]]; then
+              if [[ "$filename" == *"arm64"* || "$filename" == *"arm64-v8a"* ]]; then
+                new_name="MeowClash-${version}-android-arm64-v8a${ext}"
+              elif [[ "$filename" == *"armeabi-v7a"* || "$filename" == *"armv7"* || "$filename" == *"android-arm"* ]]; then
+                new_name="MeowClash-${version}-android-armeabi-v7a${ext}"
+              elif [[ "$filename" == *"x86_64"* || "$filename" == *"x64"* || "$filename" == *"x86-64"* ]]; then
+                new_name="MeowClash-${version}-android-x86_64${ext}"
+              else
+                new_name="MeowClash-${version}-android${ext}"
+              fi
+            elif [[ "$filename" == *"windows"* ]]; then
+              if [[ "$filename" == *"setup.exe" ]]; then
+                new_name="MeowClash-${version}-windows-amd64-setup.exe"
+              elif [[ "$filename" == *".zip" ]]; then
+                new_name="MeowClash-${version}-windows-amd64.zip"
+              fi
+            elif [[ "$filename" == *"macos"* || "$filename" == *"darwin"* ]]; then
+              if [[ "$filename" == *"arm64"* ]]; then
+                new_name="MeowClash-${version}-macos-arm64${ext}"
+              elif [[ "$filename" == *"amd64"* || "$filename" == *"x64"* || "$filename" == *"x86_64"* ]]; then
+                new_name="MeowClash-${version}-macos-amd64${ext}"
+              fi
+            elif [[ "$filename" == *"linux"* ]]; then
+              if [[ "$filename" == *"arm64"* ]]; then
+                new_name="MeowClash-${version}-linux-arm64${ext}"
+              elif [[ "$filename" == *"amd64"* || "$filename" == *"x64"* || "$filename" == *"x86_64"* ]]; then
+                if [[ "$filename" == *".appimage" ]]; then
+                  new_name="MeowClash-${version}-linux-amd64.AppImage"
+                elif [[ "$filename" == *".deb" ]]; then
+                  new_name="MeowClash-${version}-linux-amd64.deb"
+                elif [[ "$filename" == *".rpm" ]]; then
+                  new_name="MeowClash-${version}-linux-amd64.rpm"
+                else
+                  new_name="MeowClash-${version}-linux-amd64${ext}"
+                fi
+              fi
+            fi
+            
+            if [ -n "$new_name" ]; then
+              if [ "$(realpath "$filepath")" != "$(realpath "./$new_name")" ]; then
+                echo "Renaming/moving: $filepath -> ./$new_name"
+                mv "$filepath" "./$new_name"
+              else
+                echo "File is already named correctly: $new_name"
+              fi
+            else
+              echo "Warning: Could not determine target filename pattern for: $filepath"
+            fi
+          done
+          find . -type d -empty -delete
+
       - name: Generate sha256
         shell: bash
         run: |

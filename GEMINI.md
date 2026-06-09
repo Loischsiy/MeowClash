@@ -24,7 +24,7 @@
 | **UI Framework**    | Flutter 3.35 (Dart 3.5+), Material Design 3                                |
 | **State Management**| Riverpod (`flutter_riverpod`, `riverpod_generator`, `riverpod_annotation`) |
 | **Code Generation** | `build_runner` + `freezed` (models) + `json_serializable` + `riverpod_generator` |
-| **Proxy Engine**    | Go 1.20 (`github.com/metacubex/mihomo` v1.19.23), compiled via cgo → shared library |
+| **Proxy Engine**    | Go 1.20 (`github.com/metacubex/mihomo` v1.19.27), compiled via cgo → shared library |
 | **Dart↔Go Bridge**  | FFI (`dart:ffi`) + FFIgen-generated bindings (`lib/clash/generated/clash_ffi.dart`) |
 | **Windows Service** | Rust (`services/helper/`) — warp HTTP server + windows-service crate        |
 | **Custom Plugins**  | Flutter plugin `proxy` (C++/Windows), `window_ext` (Swift/macOS)           |

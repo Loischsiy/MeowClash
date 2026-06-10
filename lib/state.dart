@@ -557,7 +557,7 @@ class GlobalState {
           final file = File(path);
           if (!await file.exists() || await file.length() == 0) {
             try {
-              await clashCore._downloadAndDecryptProvider(
+              await clashCore.downloadAndDecryptProvider(
                 profile: profile,
                 providerName: key.toString(),
                 url: proxyProvider["url"].toString(),
@@ -589,7 +589,7 @@ class GlobalState {
           final file = File(path);
           if (!await file.exists() || await file.length() == 0) {
             try {
-              await clashCore._downloadAndDecryptProvider(
+              await clashCore.downloadAndDecryptProvider(
                 profile: profile,
                 providerName: key.toString(),
                 url: ruleProvider["url"].toString(),

@@ -197,7 +197,7 @@ class ClashCore {
   }) => clashInterface.sideLoadExternalProvider(
         providerName: providerName, data: data);
 
-  static Future<Uint8List> _maybeDecryptProvider(
+  static Future<Uint8List> maybeDecryptProvider(
     Uint8List data, {
     required String? password,
     required int iterations,
@@ -223,7 +223,7 @@ class ClashCore {
     );
   }
 
-  Future<void> _downloadAndDecryptProvider({
+  Future<void> downloadAndDecryptProvider({
     required Profile profile,
     required String providerName,
     required String url,
@@ -239,7 +239,7 @@ class ClashCore {
     final password = profile.providerHeaders['meowclash-password'];
     final iterations = int.tryParse(profile.providerHeaders['meowclash-password-iterations'] ?? '') ?? kDefaultPbkdf2Iterations;
 
-    final decryptedData = await _maybeDecryptProvider(
+    final decryptedData = await maybeDecryptProvider(
       responseData,
       password: password,
       iterations: iterations,
@@ -278,7 +278,7 @@ class ClashCore {
 
         if (url != null && type != null) {
           final providerPath = await appPath.getProvidersFilePath(profileId, type, url);
-          await _downloadAndDecryptProvider(
+          await downloadAndDecryptProvider(
             profile: currentProfile,
             providerName: providerName,
             url: url,

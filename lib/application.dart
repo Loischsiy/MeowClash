@@ -29,6 +29,7 @@ class Application extends ConsumerStatefulWidget {
 class ApplicationState extends ConsumerState<Application> {
   Timer? _autoUpdateGroupTaskTimer;
   Timer? _autoUpdateProfilesTaskTimer;
+  Timer? _autoUpdateProvidersTaskTimer;
 
   final _pageTransitionsTheme = const PageTransitionsTheme(
     builders: <TargetPlatform, PageTransitionsBuilder>{
@@ -55,6 +56,7 @@ class ApplicationState extends ConsumerState<Application> {
 
     _autoUpdateGroupTask();
     _autoUpdateProfilesTask();
+    _autoUpdateProvidersTask();
     globalState.appController = AppController(context, ref);
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       final currentContext = globalState.navigatorKey.currentContext;
@@ -80,6 +82,13 @@ class ApplicationState extends ConsumerState<Application> {
     _autoUpdateProfilesTaskTimer = Timer(const Duration(minutes: 20), () async {
       await globalState.appController.autoUpdateProfiles();
       _autoUpdateProfilesTask();
+    });
+  }
+
+  void _autoUpdateProvidersTask() {
+    _autoUpdateProvidersTaskTimer = Timer(const Duration(minutes: 1), () async {
+      await globalState.appController.autoUpdateProviders();
+      _autoUpdateProvidersTask();
     });
   }
 
@@ -213,6 +222,7 @@ class ApplicationState extends ConsumerState<Application> {
     linkManager.destroy();
     _autoUpdateGroupTaskTimer?.cancel();
     _autoUpdateProfilesTaskTimer?.cancel();
+    _autoUpdateProvidersTaskTimer?.cancel();
     await clashCore.destroy();
     await globalState.appController.savePreferences();
     await globalState.appController.handleExit();

@@ -70,7 +70,10 @@ class Providers extends _$Providers with AutoDisposeNotifierMixin {
   void setProvider(ExternalProvider? provider) {
     if (provider == null) return;
     final index = state.indexWhere((item) => item.name == provider.name);
-    if (index == -1) return;
+    if (index == -1) {
+      state = List.from(state)..add(provider);
+      return;
+    }
     state = List.from(state)..[index] = provider;
   }
 }

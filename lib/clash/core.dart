@@ -9,6 +9,8 @@ import 'package:meowclash/common/common.dart';
 import 'package:meowclash/enum/enum.dart';
 import 'package:meowclash/models/models.dart';
 import 'package:meowclash/state.dart';
+import 'package:meowclash/services/subscription_crypto.dart';
+import 'package:meowclash/l10n/l10n.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart';
 
@@ -195,9 +197,108 @@ class ClashCore {
   }) => clashInterface.sideLoadExternalProvider(
         providerName: providerName, data: data);
 
+  static Future<Uint8List> _maybeDecryptProvider(
+    Uint8List data, {
+    required String? password,
+    required int iterations,
+  }) async {
+    final String text;
+    try {
+      text = utf8.decode(data, allowMalformed: false);
+    } on FormatException {
+      return data;
+    }
+    if (!SubscriptionCrypto.looksLikeEncryptedPayload(text)) {
+      return data;
+    }
+    if (password == null || password.isEmpty) {
+      throw SubscriptionPasswordRequiredException(
+        AppLocalizations.current.profileEncryptedPasswordRequired,
+      );
+    }
+    return SubscriptionCrypto.decryptBase64(
+      text,
+      password: password,
+      iterations: iterations,
+    );
+  }
+
+  Future<void> _downloadAndDecryptProvider({
+    required Profile profile,
+    required String providerName,
+    required String url,
+    required String type,
+    required String providerPath,
+  }) async {
+    final response = await request.getFileResponseForUrl(url);
+    final responseData = response.data;
+    if (responseData == null) {
+      throw Exception("Failed to download provider data");
+    }
+
+    final password = profile.providerHeaders['meowclash-password'];
+    final iterations = int.tryParse(profile.providerHeaders['meowclash-password-iterations'] ?? '') ?? kDefaultPbkdf2Iterations;
+
+    final decryptedData = await _maybeDecryptProvider(
+      responseData,
+      password: password,
+      iterations: iterations,
+    );
+
+    final file = File(providerPath);
+    await file.create(recursive: true);
+    await file.writeAsBytes(decryptedData);
+  }
+
   Future<String> updateExternalProvider({
     required String providerName,
-  }) async => clashInterface.updateExternalProvider(providerName);
+  }) async {
+    final currentProfile = globalState.config.currentProfile;
+    if (currentProfile != null) {
+      final profileId = currentProfile.id;
+      try {
+        final configMap = await globalState.getProfileConfig(profileId);
+        String? url;
+        String? type;
+
+        if (configMap['proxy-providers'] != null) {
+          final provider = configMap['proxy-providers'][providerName];
+          if (provider is Map && provider['url'] != null) {
+            url = provider['url'].toString();
+            type = 'proxies';
+          }
+        }
+        if (url == null && configMap['rule-providers'] != null) {
+          final provider = configMap['rule-providers'][providerName];
+          if (provider is Map && provider['url'] != null) {
+            url = provider['url'].toString();
+            type = 'rules';
+          }
+        }
+
+        if (url != null && type != null) {
+          final providerPath = await appPath.getProvidersFilePath(profileId, type, url);
+          await _downloadAndDecryptProvider(
+            profile: currentProfile,
+            providerName: providerName,
+            url: url,
+            type: type,
+            providerPath: providerPath,
+          );
+
+          final text = await File(providerPath).readAsString();
+          return clashInterface.sideLoadExternalProvider(
+            providerName: providerName,
+            data: text,
+          );
+        }
+      } catch (e) {
+        commonPrint.log("Custom updateExternalProvider failed: $e");
+        // Fallback to default Clash update if anything fails
+      }
+    }
+    return clashInterface.updateExternalProvider(providerName);
+  }
 
   Future<void> startListener() async {
     await clashInterface.startListener();

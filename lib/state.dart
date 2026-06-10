@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:ffi' show Pointer;
-import 'dart:io' show Platform;
+import 'dart:io' show Platform, File;
 
 import 'package:animations/animations.dart';
 import 'package:dio/dio.dart';
@@ -548,11 +548,26 @@ class GlobalState {
           continue;
         }
         if (proxyProvider["url"] != null) {
-          proxyProvider["path"] = await appPath.getProvidersFilePath(
+          final path = await appPath.getProvidersFilePath(
             profile.id,
             "proxies",
             proxyProvider["url"],
           );
+          proxyProvider["path"] = path;
+          final file = File(path);
+          if (!await file.exists() || await file.length() == 0) {
+            try {
+              await clashCore._downloadAndDecryptProvider(
+                profile: profile,
+                providerName: key.toString(),
+                url: proxyProvider["url"].toString(),
+                type: "proxies",
+                providerPath: path,
+              );
+            } catch (e) {
+              commonPrint.log("Pre-download proxy provider $key failed: $e");
+            }
+          }
         }
       }
     }
@@ -565,11 +580,26 @@ class GlobalState {
           continue;
         }
         if (ruleProvider["url"] != null) {
-          ruleProvider["path"] = await appPath.getProvidersFilePath(
+          final path = await appPath.getProvidersFilePath(
             profile.id,
             "rules",
             ruleProvider["url"],
           );
+          ruleProvider["path"] = path;
+          final file = File(path);
+          if (!await file.exists() || await file.length() == 0) {
+            try {
+              await clashCore._downloadAndDecryptProvider(
+                profile: profile,
+                providerName: key.toString(),
+                url: ruleProvider["url"].toString(),
+                type: "rules",
+                providerPath: path,
+              );
+            } catch (e) {
+              commonPrint.log("Pre-download rule provider $key failed: $e");
+            }
+          }
         }
       }
     }

@@ -1571,6 +1571,12 @@ class AppController {
     for (final profile in profiles) {
       if (!profile.isFile) continue;
       final filePath = join(homeDirPath, profile.name);
+      final canonicalizedHome = canonicalize(homeDirPath);
+      final canonicalizedFile = canonicalize(filePath);
+      if (!canonicalizedFile.startsWith(canonicalizedHome + separator) &&
+          canonicalizedFile != canonicalizedHome) {
+        throw "Path traversal detected in backup archive";
+      }
       final file = File(filePath);
       await file.create(recursive: true);
       await file.writeAsBytes(profile.content);

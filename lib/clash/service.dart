@@ -2,11 +2,13 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
+import 'dart:math';
 
 import 'package:meowclash/clash/interface.dart';
 import 'package:meowclash/common/common.dart';
 import 'package:meowclash/models/core.dart';
 import 'package:meowclash/state.dart';
+import 'package:path/path.dart';
 
 class ClashService extends ClashHandlerInterface {
 
@@ -29,11 +31,17 @@ class ClashService extends ClashHandlerInterface {
 
   Process? process;
 
+  String? _unixSocketPath;
+
   Future<void> _initServer() async {
     runZonedGuarded(() async {
+      if (!Platform.isWindows) {
+        final tempDirPath = await appPath.tempPath;
+        _unixSocketPath = join(tempDirPath, "MeowClashSocket_${Random().nextInt(10000)}.sock");
+      }
       final address = !Platform.isWindows
           ? InternetAddress(
-              unixSocketPath,
+              _unixSocketPath!,
               type: InternetAddressType.unix,
             )
           : InternetAddress(
@@ -143,8 +151,8 @@ class ClashService extends ClashHandlerInterface {
   }
 
   Future<void> _deleteSocketFile() async {
-    if (!Platform.isWindows) {
-      final file = File(unixSocketPath);
+    if (!Platform.isWindows && _unixSocketPath != null) {
+      final file = File(_unixSocketPath!);
       if (await file.exists()) {
         await file.delete();
       }

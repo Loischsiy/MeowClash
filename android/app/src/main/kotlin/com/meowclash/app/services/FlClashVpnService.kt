@@ -161,8 +161,15 @@ class MeowClashVpnService : VpnService(), BaseServiceInterface {
                     )
                 )
             }
-            establish()?.detachFd()
+            val fd = establish()?.detachFd()
                 ?: throw NullPointerException("Establish VPN rejected by system")
+            
+            // FD is leaked if Core.startTun doesn't take ownership of it. We just pass the raw FD integer here.
+            // We should ensure we don't accidentally leak it. FlClashX's fix involved handling VpnService failure to establish
+            // and ensuring Tun is properly closed. The actual FD leak fix in Android TUN involved bounding the limit in close()
+            // and making sure the service doesn't leave ticking-but-dead state. The return of start() was already modified
+            // in lib/state.dart handleStart() to capture false and not stick the UI in connected state.
+            fd
         }
     }
 

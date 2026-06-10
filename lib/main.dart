@@ -449,16 +449,19 @@ class _TileListenerWithService with TileListener {
 
   @override
   void onStart() {
+    if (globalState.isAppControllerReady) return;
     _onStart();
   }
 
   @override
   void onStop() {
+    if (globalState.isAppControllerReady) return;
     _onStop();
   }
 
   @override
   void onChangeMode(String mode) {
+    if (globalState.isAppControllerReady) return;
     _onChangeMode(mode);
   }
 }

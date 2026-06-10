@@ -2,7 +2,10 @@ package com.meowclash.app
 
 import android.content.Context
 import android.os.Build
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.os.PowerManager
 import android.provider.Settings
 import android.view.Display
 import androidx.appcompat.app.AppCompatDelegate
@@ -121,9 +124,27 @@ class MainActivity : FlutterActivity() {
         flutterEngine.plugins.add(VpnPlugin)
         GlobalState.flutterEngine = flutterEngine
         
+        maybeRequestBatteryExemption()
         // Sync VPN status when app opens - this ensures UI reflects actual VPN state
         // especially important when VPN was started via Tile while app was not in memory
         GlobalState.syncStatus()
+    }
+
+    private fun maybeRequestBatteryExemption() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return
+        val pm = getSystemService(PowerManager::class.java) ?: return
+        if (pm.isIgnoringBatteryOptimizations(packageName)) return
+        val prefs = getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+        if (prefs.getBoolean("flutter.battery_opt_prompted", false)) return
+        prefs.edit().putBoolean("flutter.battery_opt_prompted", true).apply()
+        runCatching {
+            startActivity(
+                Intent(
+                    Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
+                    Uri.parse("package:$packageName"),
+                ),
+            )
+        }
     }
 
     override fun onDestroy() {

@@ -77,6 +77,8 @@ class GlobalState {
 
   AppController get appController => _appController!;
 
+  bool get isAppControllerReady => _appController != null;
+
   set appController(AppController appController) {
     _appController = appController;
     isInit = true;
@@ -154,11 +156,18 @@ class GlobalState {
     timer = null;
   }
 
-  Future<void> handleStart([UpdateTasks? tasks]) async {
+  Future<bool> handleStart([UpdateTasks? tasks]) async {
     startTime ??= DateTime.now();
     await clashCore.startListener();
-    await service?.startVpn();
+    final started = await service?.startVpn();
+    if (started == false) {
+      startTime = null;
+      await clashCore.stopListener();
+      stopUpdateTasks();
+      return false;
+    }
     startUpdateTasks(tasks);
+    return true;
   }
 
   Future updateStartTime() async {

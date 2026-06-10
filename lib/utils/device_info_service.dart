@@ -6,7 +6,6 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:meowclash/common/common.dart';
 import 'package:flutter/services.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:win32_registry/win32_registry.dart';
 
 class DeviceDetails {
@@ -26,7 +25,7 @@ class DeviceDetails {
 
 class DeviceInfoService {
   final DeviceInfoPlugin _deviceInfoPlugin = DeviceInfoPlugin();
-  static const String _hwidStorageKey = 'app_persistent_hwid';
+  static String? _cachedHwid;
   static const MethodChannel _channel =
       MethodChannel('com.meowclash.app/device_id');
 
@@ -106,15 +105,9 @@ class DeviceInfoService {
     }
   }
 
-  Future<String?> _getOrCreatePersistentHwid() async {
+  Future<String?> _resolveHwid() async {
+    if (_cachedHwid != null) return _cachedHwid;
     try {
-      final prefs = await SharedPreferences.getInstance();
-
-      final storedHwid = prefs.getString(_hwidStorageKey);
-      if (storedHwid != null && storedHwid.isNotEmpty) {
-        return storedHwid;
-      }
-
       final deviceId = await _getPlatformDeviceId();
 
       if (deviceId == null || deviceId.isEmpty) {
@@ -122,14 +115,10 @@ class DeviceInfoService {
         return null;
       }
 
-      // For Android, use ANDROID_ID directly without hashing
-      // For other platforms, hash the device ID to 16 characters
-      final newHwid =
+      _cachedHwid =
           Platform.isAndroid ? deviceId : _generateCompact16CharId(deviceId);
 
-      await prefs.setString(_hwidStorageKey, newHwid);
-
-      return newHwid;
+      return _cachedHwid;
     } catch (e) {
       commonPrint.log("ERROR getting HWID: $e");
       return null;
@@ -142,7 +131,7 @@ class DeviceInfoService {
     final appVersion = packageInfo.version;
 
     try {
-      hwid = await _getOrCreatePersistentHwid();
+      hwid = await _resolveHwid();
 
       if (Platform.isWindows) {
         final info = await _deviceInfoPlugin.windowsInfo;

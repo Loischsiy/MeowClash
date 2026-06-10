@@ -23,6 +23,8 @@ class AppStateManager extends ConsumerStatefulWidget {
 
 class _AppStateManagerState extends ConsumerState<AppStateManager>
     with WidgetsBindingObserver {
+  Future<void> _dnsOp = Future.value();
+
   @override
   void initState() {
     super.initState();
@@ -50,15 +52,14 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
     });
     ref.listenManual(
       autoSetSystemDnsStateProvider,
-      (prev, next) async {
+      (prev, next) {
         if (prev == next) {
           return;
         }
-        if (next.a == true && next.b == true) {
-          system.setMacOSDns(false);
-        } else {
-          system.setMacOSDns(true);
-        }
+        final restore = !(next.a == true && next.b == true);
+        _dnsOp = _dnsOp
+            .then((_) => system.setMacOSDns(restore))
+            .catchError((_) {});
       },
     );
     ref.listenManual(
@@ -105,8 +106,7 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
   }
 
   @override
-  void dispose() async {
-    await system.setMacOSDns(true);
+  void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }

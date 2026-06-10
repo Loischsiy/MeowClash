@@ -3,6 +3,8 @@ import 'package:meowclash/providers/providers.dart';
 import 'package:meowclash/state.dart';
 import 'package:meowclash/widgets/widgets.dart';
 import 'package:flutter/gestures.dart';
+import 'package:emoji_regex/emoji_regex.dart';
+import 'package:meowclash/enum/enum.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -10,6 +12,22 @@ class AnnounceWidget extends ConsumerWidget {
   const AnnounceWidget({super.key});
 
   List<InlineSpan> _buildTextSpans(BuildContext context, String text) {
+    List<InlineSpan> parseEmojis(String plainText, TextStyle? baseStyle) {
+      final spans = <InlineSpan>[];
+      final matches = emojiRegex().allMatches(plainText);
+      var lastMatchEnd = 0;
+      for (final match in matches) {
+        if (match.start > lastMatchEnd) {
+          spans.add(TextSpan(text: plainText.substring(lastMatchEnd, match.start), style: baseStyle));
+        }
+        spans.add(TextSpan(text: match.group(0), style: baseStyle?.copyWith(fontFamily: FontFamily.twEmoji.value)));
+        lastMatchEnd = match.end;
+      }
+      if (lastMatchEnd < plainText.length) {
+        spans.add(TextSpan(text: plainText.substring(lastMatchEnd), style: baseStyle));
+      }
+      return spans;
+    }
     final urlPattern = RegExp(
       r'https?://[^\s]+',
       caseSensitive: false,
@@ -21,8 +39,7 @@ class AnnounceWidget extends ConsumerWidget {
     for (final match in urlPattern.allMatches(text)) {
       if (match.start > lastIndex) {
         spans.add(TextSpan(
-          text: text.substring(lastIndex, match.start),
-          style: Theme.of(context).textTheme.bodyLarge,
+          children: parseEmojis(text.substring(lastIndex, match.start), Theme.of(context).textTheme.bodyLarge),
         ));
       }
       
@@ -43,8 +60,7 @@ class AnnounceWidget extends ConsumerWidget {
     
     if (lastIndex < text.length) {
       spans.add(TextSpan(
-        text: text.substring(lastIndex),
-        style: Theme.of(context).textTheme.bodyLarge,
+        children: parseEmojis(text.substring(lastIndex), Theme.of(context).textTheme.bodyLarge),
       ));
     }
     

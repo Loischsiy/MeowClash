@@ -20,7 +20,11 @@ class Request {
         },
       ),
     );
-    _clashDio = Dio();
+    _clashDio = Dio(
+      BaseOptions(
+        connectTimeout: const Duration(seconds: 5),
+      ),
+    );
     _clashDio.httpClientAdapter = IOHttpClientAdapter(createHttpClient: () {
       final client = HttpClient();
       client.findProxy = (uri) {
@@ -114,43 +118,36 @@ class Request {
   }
 
   final Map<String, IpInfo Function(Map<String, dynamic>)> _ipInfoSources = {
-    "https://ipwho.is/": IpInfo.fromIpwhoIsJson,
-    "https://api.ip.sb/geoip/": IpInfo.fromIpSbJson,
+    "https://api-ipv4.ip.sb/geoip": IpInfo.fromIpSbJson,
     "https://ipapi.co/json/": IpInfo.fromIpApiCoJson,
-    "https://ipinfo.io/json/": IpInfo.fromIpInfoIoJson,
+    "https://ipinfo.io/json": IpInfo.fromIpInfoIoJson,
   };
 
   Future<Result<IpInfo?>> checkIp({CancelToken? cancelToken}) async {
-    var failureCount = 0;
-    final futures = _ipInfoSources.entries.map((source) async {
-      final completer = Completer<Result<IpInfo?>>();
-      final future = Dio().get<Map<String, dynamic>>(
-        source.key,
-        cancelToken: cancelToken,
-        options: Options(
-          responseType: ResponseType.json,
-        ),
-      );
-      future.then((res) {
+    for (final source in _ipInfoSources.entries) {
+      if (cancelToken?.isCancelled ?? false) {
+        return Result.error("cancelled");
+      }
+      try {
+        final res = await _clashDio.get<Map<String, dynamic>>(
+          source.key,
+          cancelToken: cancelToken,
+          options: Options(
+            responseType: ResponseType.json,
+            receiveTimeout: const Duration(seconds: 3),
+          ),
+        );
         if (res.statusCode == HttpStatus.ok && res.data != null) {
-          completer.complete(Result.success(source.value(res.data!)));
-        } else {
-          failureCount++;
-          if (failureCount == _ipInfoSources.length) {
-            completer.complete(Result.success(null));
-          }
+          return Result.success(source.value(res.data!));
         }
-      }).catchError((e) {
-        failureCount++;
-        if (e == DioExceptionType.cancel) {
-          completer.complete(Result.error("cancelled"));
+      } on DioException catch (e) {
+        if (e.type == DioExceptionType.cancel) {
+          return Result.error("cancelled");
         }
-      });
-      return completer.future;
-    });
-    final res = await Future.any(futures);
-    cancelToken?.cancel();
-    return res;
+      } catch (_) {
+      }
+    }
+    return Result.success(null);
   }
 
   Future<bool> pingHelper() async {

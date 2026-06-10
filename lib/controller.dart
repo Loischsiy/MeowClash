@@ -122,10 +122,16 @@ class AppController {
     if (isStart) {
       // Initialize foreground notification cache before starting
       initForegroundCache();
-      await globalState.handleStart([
+      final started = await globalState.handleStart([
         updateRunTime,
         updateTraffic,
       ]);
+      if (!started) {
+        await StatusBarManager.updateIcon(isConnected: false);
+        _ref.read(runTimeProvider.notifier).value = null;
+        addCheckIpNumDebounce();
+        return;
+      }
       final currentLastModified =
           await _ref.read(currentProfileProvider)?.profileLastModified;
       if (currentLastModified == null || lastProfileModified == null) {

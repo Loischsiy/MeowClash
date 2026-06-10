@@ -50,7 +50,7 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
 
     private lateinit var scope: CoroutineScope
 
-    private var vpnCallBack: (() -> Unit)? = null
+    private val vpnCallBacks = mutableListOf<(granted: Boolean) -> Unit>()
 
     private val iconMap = mutableMapOf<String, String?>()
 
@@ -321,14 +321,20 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
         }
     }
 
-    fun requestVpnPermission(callBack: () -> Unit) {
-        vpnCallBack = callBack
+    fun requestVpnPermission(callBack: (granted: Boolean) -> Unit) {
         val intent = VpnService.prepare(MeowClashApplication.getAppContext())
         if (intent != null) {
-            activityRef?.get()?.startActivityForResult(intent, VPN_PERMISSION_REQUEST_CODE)
-            return
+            val activity = activityRef?.get()
+            if (activity != null) {
+                val alreadyInFlight = vpnCallBacks.isNotEmpty()
+                vpnCallBacks.add(callBack)
+                if (!alreadyInFlight) {
+                    activity.startActivityForResult(intent, VPN_PERMISSION_REQUEST_CODE)
+                }
+                return
+            }
         }
-        vpnCallBack?.invoke()
+        callBack(true)
     }
 
     fun requestNotificationsPermission() {
@@ -439,19 +445,27 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
 
     override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
         activityRef = WeakReference(binding.activity)
+        binding.addActivityResultListener(::onActivityResult)
+        binding.addRequestPermissionsResultListener(::onRequestPermissionsResultListener)
     }
 
     override fun onDetachedFromActivity() {
         channel.invokeMethod("exit", null)
         activityRef = null
+        val pending = vpnCallBacks.toList()
+        vpnCallBacks.clear()
+        pending.forEach { it.invoke(false) }
     }
 
     private fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean {
         if (requestCode == VPN_PERMISSION_REQUEST_CODE) {
-            if (resultCode == FlutterActivity.RESULT_OK) {
+            val granted = resultCode == FlutterActivity.RESULT_OK
+            if (granted) {
                 GlobalState.initServiceEngine()
-                vpnCallBack?.invoke()
             }
+            val pending = vpnCallBacks.toList()
+            vpnCallBacks.clear()
+            pending.forEach { it.invoke(granted) }
         }
         return true
     }

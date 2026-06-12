@@ -8,7 +8,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
-import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.meowclash.app.GlobalState
@@ -96,7 +96,7 @@ fun Service.startForeground(notification: Notification) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
         try {
             startForeground(
-                GlobalState.NOTIFICATION_ID, notification, FOREGROUND_SERVICE_TYPE_DATA_SYNC
+                GlobalState.NOTIFICATION_ID, notification, FOREGROUND_SERVICE_TYPE_SPECIAL_USE
             )
         } catch (_: Exception) {
             startForeground(GlobalState.NOTIFICATION_ID, notification)

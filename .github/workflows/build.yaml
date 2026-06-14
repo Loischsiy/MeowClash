@@ -30,7 +30,7 @@ on:
         type: choice
         options:
           - stable
-          - beta
+          - pre
           - ''
 
 env:
@@ -98,8 +98,8 @@ jobs:
           ARCH_FLAG=""
           if [[ "${{ github.event.inputs.env }}" == "stable" ]]; then
             ENV_FLAG="--env stable"
-          elif [[ "${{ github.event.inputs.env }}" == "beta" ]]; then
-            ENV_FLAG="--env beta"
+          elif [[ "${{ github.event.inputs.env }}" == "pre" ]]; then
+            ENV_FLAG="--env pre"
           elif [[ "${{ env.IS_STABLE }}" == "true" ]]; then
             ENV_FLAG="--env stable"
           fi
@@ -160,7 +160,7 @@ jobs:
         run: |
           $env:ENV_FLAG = ""
           if ("${{ github.event.inputs.env }}" -eq "stable") { $env:ENV_FLAG = "--env stable" }
-          elseif ("${{ github.event.inputs.env }}" -eq "beta") { $env:ENV_FLAG = "--env beta" }
+          elseif ("${{ github.event.inputs.env }}" -eq "pre") { $env:ENV_FLAG = "--env pre" }
           elseif ("${{ env.IS_STABLE }}" -eq "true") { $env:ENV_FLAG = "--env stable" }
           dart setup.dart windows --arch amd64 $env:ENV_FLAG
 
@@ -209,12 +209,24 @@ jobs:
           ENV_FLAG=""
           if [[ "${{ github.event.inputs.env }}" == "stable" ]]; then
             ENV_FLAG="--env stable"
-          elif [[ "${{ github.event.inputs.env }}" == "beta" ]]; then
-            ENV_FLAG="--env beta"
+          elif [[ "${{ github.event.inputs.env }}" == "pre" ]]; then
+            ENV_FLAG="--env pre"
           elif [[ "${{ env.IS_STABLE }}" == "true" ]]; then
             ENV_FLAG="--env stable"
           fi
           dart setup.dart linux --arch amd64 $ENV_FLAG
+
+      - name: Verify AppImage launcher
+        shell: bash
+        run: |
+          set -euo pipefail
+          appimage="$(find dist -type f -iname '*.appimage' | head -n 1)"
+          test -n "$appimage"
+          chmod +x "$appimage"
+          rm -rf squashfs-root
+          "$appimage" --appimage-extract >/dev/null
+          test -x squashfs-root/meowclash
+          grep -q 'exec ./meowclash' squashfs-root/AppRun
 
       - name: Upload
         uses: actions/upload-artifact@v4
@@ -261,8 +273,8 @@ jobs:
           ENV_FLAG=""
           if [[ "${{ github.event.inputs.env }}" == "stable" ]]; then
             ENV_FLAG="--env stable"
-          elif [[ "${{ github.event.inputs.env }}" == "beta" ]]; then
-            ENV_FLAG="--env beta"
+          elif [[ "${{ github.event.inputs.env }}" == "pre" ]]; then
+            ENV_FLAG="--env pre"
           elif [[ "${{ env.IS_STABLE }}" == "true" ]]; then
             ENV_FLAG="--env stable"
           fi
@@ -313,8 +325,8 @@ jobs:
           ENV_FLAG=""
           if [[ "${{ github.event.inputs.env }}" == "stable" ]]; then
             ENV_FLAG="--env stable"
-          elif [[ "${{ github.event.inputs.env }}" == "beta" ]]; then
-            ENV_FLAG="--env beta"
+          elif [[ "${{ github.event.inputs.env }}" == "pre" ]]; then
+            ENV_FLAG="--env pre"
           elif [[ "${{ env.IS_STABLE }}" == "true" ]]; then
             ENV_FLAG="--env stable"
           fi
@@ -365,8 +377,8 @@ jobs:
           ENV_FLAG=""
           if [[ "${{ github.event.inputs.env }}" == "stable" ]]; then
             ENV_FLAG="--env stable"
-          elif [[ "${{ github.event.inputs.env }}" == "beta" ]]; then
-            ENV_FLAG="--env beta"
+          elif [[ "${{ github.event.inputs.env }}" == "pre" ]]; then
+            ENV_FLAG="--env pre"
           elif [[ "${{ env.IS_STABLE }}" == "true" ]]; then
             ENV_FLAG="--env stable"
           fi

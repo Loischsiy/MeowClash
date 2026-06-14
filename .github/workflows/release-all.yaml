@@ -267,6 +267,18 @@ jobs:
           set -o pipefail
           dart setup.dart linux --arch amd64 --env "$APP_ENV" 2>&1 | tee setup.log
 
+      - name: Verify AppImage launcher
+        shell: bash
+        run: |
+          set -euo pipefail
+          appimage="$(find dist -type f -iname '*.appimage' | head -n 1)"
+          test -n "$appimage"
+          chmod +x "$appimage"
+          rm -rf squashfs-root
+          "$appimage" --appimage-extract >/dev/null
+          test -x squashfs-root/meowclash
+          grep -q 'exec ./meowclash' squashfs-root/AppRun
+
       - name: Upload setup log
         if: failure()
         uses: actions/upload-artifact@v4

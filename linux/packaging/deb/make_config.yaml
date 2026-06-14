@@ -1,5 +1,5 @@
 display_name: MeowClash
-package_name: MeowClash
+package_name: meowclash
 maintainer:
   name: pluralplay
   email: mail@pluralplay.rw
@@ -11,8 +11,9 @@ essential: false
 icon: ./assets/images/icon.png
 
 dependencies:
-  - libayatana-appindicator3-dev
-  - libkeybinder-3.0-dev
+  - libgtk-3-0
+  - libayatana-appindicator3-1
+  - libkeybinder-3.0-0
 
 keywords:
   - MeowClash

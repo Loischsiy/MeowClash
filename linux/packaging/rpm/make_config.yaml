@@ -13,10 +13,13 @@ icon: ./assets/images/icon.png
 keywords:
   - MeowClash
   - Clash
-    - Proxy
+  - Proxy
 
 generic_name: MeowClash
 
 group: Applications/Internet
+
+categories:
+  - Network
 
 startup_notify: true

@@ -3,7 +3,8 @@
 
 let
   cfg = config.programs.meowclash;
-  defaultPackage = packageFor pkgs.system;
+  system = pkgs.stdenv.hostPlatform.system;
+  defaultPackage = packageFor system;
 in
 {
   options.programs.meowclash = {

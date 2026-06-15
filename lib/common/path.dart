@@ -60,7 +60,7 @@ class AppPath {
     }
     final result = await Process.run(
       'sh',
-      ['-c', 'command -v -- "$1"', 'resolve-core', path],
+      ['-c', r'command -v -- "$1"', 'resolve-core', path],
     );
     if (result.exitCode == 0) {
       final output = result.stdout.toString().trim();

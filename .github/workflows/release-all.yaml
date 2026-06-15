@@ -131,6 +131,21 @@ jobs:
           echo "ANDROID_NDK=$ANDROID_NDK"
           dart setup.dart android --env "$APP_ENV" 2>&1 | tee setup.log
 
+      - name: Keep Android split APKs only
+        shell: bash
+        run: |
+          set -euo pipefail
+          find ./dist -type f -name "*.apk" \
+            ! \( -path "*arm64-v8a*.apk" -o -path "*armeabi-v7a*.apk" \) \
+            -delete
+
+          apk_count="$(find ./dist -type f -name "*.apk" | wc -l | tr -d ' ')"
+          if [ "$apk_count" != "2" ]; then
+            echo "::error::Expected exactly 2 Android split APKs, found $apk_count"
+            find ./dist -type f -name "*.apk" -print
+            exit 1
+          fi
+
       - name: Upload setup log
         if: failure()
         uses: actions/upload-artifact@v4

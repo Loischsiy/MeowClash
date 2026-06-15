@@ -707,15 +707,6 @@ class BuildCommand extends Command {
         // Build all architectures: armeabi-v7a, arm64-v8a
         final allTargets = "android-arm,android-arm64";
 
-        // Build split APKs (one per architecture)
-        await _buildDistributor(
-          target: target,
-          targets: "apk",
-          args:
-              ",split-per-abi --build-target-platform $allTargets --build-dart-define=CORE_VERSION=$coreVersion",
-          env: env,
-        );
-
         // Build universal APK (all architectures in one file)
         await _buildDistributor(
           target: target,

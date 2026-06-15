@@ -69,7 +69,7 @@ The main build script is **`setup.dart`** (not raw `flutter build`). It cross-co
 
 ### Important build behaviors
 
-- **Android**: builds `libclash.so` (CGO, `c-shared`) for all ABIs (`armeabi-v7a`, `arm64-v8a`, `x86_64`). `setup.dart` automatically produces both split-per-abi APKs and a universal APK.
+- **Android**: builds `libclash.so` (CGO, `c-shared`) for all ABIs (`armeabi-v7a`, `arm64-v8a`, `x86_64`). `setup.dart` produces a universal APK.
 - **Desktop** (win/linux/mac): builds a `MeowClashCore` executable (Go, no CGO).
 - **Windows**: also builds the Rust `helper.exe` and packages with `flutter_distributor` into `exe` + `zip`.
 - **macOS**: uses `create-dmg` to produce a DMG in `dist/`.

@@ -124,11 +124,6 @@ class Build {
           arch: Arch.arm64,
           archName: 'arm64-v8a',
         ),
-        BuildItem(
-          target: Target.android,
-          arch: Arch.amd64,
-          archName: 'x86_64',
-        ),
       ];
 
   static String get appName => "MeowClash";
@@ -709,8 +704,8 @@ class BuildCommand extends Command {
         _renameLinuxOutputs(arch);
         return;
       case Target.android:
-        // Build all architectures: armeabi-v7a, arm64-v8a, x86_64
-        final allTargets = "android-arm,android-arm64,android-x64";
+        // Build all architectures: armeabi-v7a, arm64-v8a
+        final allTargets = "android-arm,android-arm64";
 
         // Build split APKs (one per architecture)
         await _buildDistributor(

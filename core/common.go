@@ -230,6 +230,9 @@ func updateListeners() {
 			general.Tun.Stack,
 			general.Tun.AutoRoute,
 		)
+		if general.Tun.Enable {
+			cleanupStaleTunDevice(general.Tun.Device)
+		}
 		listener.ReCreateTun(general.Tun, tunnel.Tunnel)
 	}
 }

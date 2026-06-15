@@ -38,7 +38,16 @@ class AppPath {
   }
 
   String get corePath {
+    if (Platform.isLinux) {
+      final overridePath = Platform.environment['MEOWCLASH_CORE_PATH'];
+      if (overridePath != null && overridePath.isNotEmpty) {
+        return overridePath;
+      }
+      return "MeowClashCore";
+    }
     if (Platform.isMacOS) {
+
+
       // Core is stored in Application Support/com.meowclash.app/cores/ (copied by Swift code on launch)
       // Permissions are set automatically in Swift
       final home = Platform.environment['HOME'] ?? '';

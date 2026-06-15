@@ -1,3 +1,5 @@
+[NixOS Installation Instructions](docs/nixos.md)
+
 <div align="center">
 
 # MeowClash

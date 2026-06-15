@@ -387,6 +387,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Конфигурация иконки",
     ),
     "iconStyle": MessageLookupByLibrary.simpleMessage("Стиль иконки"),
+    "immutableCorePrompt": MessageLookupByLibrary.simpleMessage(
+      "MeowClash must be installed or configured through the system package manager (e.g. NixOS security.wrappers).",
+    ),
     "import": MessageLookupByLibrary.simpleMessage("Импорт"),
     "importFile": MessageLookupByLibrary.simpleMessage("Импорт из файла"),
     "importFromURL": MessageLookupByLibrary.simpleMessage("Импорт из URL"),

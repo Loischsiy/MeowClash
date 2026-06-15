@@ -8,6 +8,7 @@ import 'package:meowclash/plugins/app.dart';
 import 'package:meowclash/state.dart';
 import 'package:meowclash/widgets/input.dart';
 import 'package:flutter/services.dart';
+import 'package:meowclash/widgets/dialog.dart';
 
 class System {
 
@@ -64,7 +65,19 @@ class System {
       if (output.startsWith('root:') && output.contains('rws')) {
         return true;
       }
+      // Also check capability based on path resolved from PATH, if available.
+      // E.g. NixOS wrappers or generic Linux installations using setcap.
+      final whichResult = await Process.run('which', [appPath.corePath], runInShell: true);
+      if (whichResult.exitCode == 0) {
+        final resolvedCorePath = whichResult.stdout.trim();
+        final capResult = await Process.run('getcap', [resolvedCorePath]);
+        final capOutput = capResult.stdout.trim();
+        if (capOutput.contains('cap_net_admin')) {
+          return true;
+        }
+      }
       return false;
+
     }
     return true;
   }
@@ -107,148 +120,3 @@ class System {
       }
       return AuthorizeCode.error;
     } else if (Platform.isLinux) {
-      final shell = Platform.environment['SHELL'] ?? 'bash';
-      final password = await globalState.showCommonDialog<String>(
-        child: InputDialog(
-          title: appLocalizations.pleaseInputAdminPassword,
-          value: '',
-        ),
-      );
-      final arguments = [
-        "-c",
-        'echo "$password" | sudo -S chown root:root "$corePath" && echo "$password" | sudo -S chmod +sx "$corePath"'
-      ];
-      final result = await Process.run(shell, arguments);
-      if (result.exitCode != 0) {
-        return AuthorizeCode.error;
-      }
-      return AuthorizeCode.success;
-    }
-    return AuthorizeCode.error;
-  }
-
-  Future<String?> getMacOSDefaultServiceName() async {
-    if (!Platform.isMacOS) {
-      return null;
-    }
-    final result = await Process.run('route', ['-n', 'get', 'default']);
-    final output = result.stdout.toString();
-    final deviceLine = output
-        .split('\n')
-        .firstWhere((s) => s.contains('interface:'), orElse: () => "");
-    final lineSplits = deviceLine.trim().split(' ');
-    if (lineSplits.length != 2) {
-      return null;
-    }
-    final device = lineSplits[1];
-    final serviceResult = await Process.run(
-      'networksetup',
-      ['-listnetworkserviceorder'],
-    );
-    final serviceResultOutput = serviceResult.stdout.toString();
-    final currentService = serviceResultOutput.split('\n\n').firstWhere(
-          (s) => s.contains("Device: $device"),
-          orElse: () => "",
-        );
-    if (currentService.isEmpty) {
-      return null;
-    }
-    final currentServiceNameLine = currentService.split("\n").firstWhere(
-        (line) => RegExp(r'^\(\d+\).*').hasMatch(line),
-        orElse: () => "");
-    final currentServiceNameLineSplits =
-        currentServiceNameLine.trim().split(' ');
-    if (currentServiceNameLineSplits.length < 2) {
-      return null;
-    }
-    return currentServiceNameLineSplits[1];
-  }
-
-  Future<List<String>?> getMacOSOriginDns() async {
-    if (!Platform.isMacOS) {
-      return null;
-    }
-    final deviceServiceName = await getMacOSDefaultServiceName();
-    if (deviceServiceName == null) {
-      return null;
-    }
-    final result = await Process.run(
-      'networksetup',
-      ['-getdnsservers', deviceServiceName],
-    );
-    final output = result.stdout.toString().trim();
-    if (output.startsWith("There aren't any DNS Servers set on")) {
-      originDns = [];
-    } else {
-      originDns = output.split("\n");
-    }
-    return originDns;
-  }
-
-  Future<void> setMacOSDns(bool restore) async {
-    if (!Platform.isMacOS) {
-      return;
-    }
-    final serviceName = await getMacOSDefaultServiceName();
-    if (serviceName == null) {
-      return;
-    }
-    List<String>? nextDns;
-    if (restore) {
-      nextDns = originDns;
-    } else {
-      final originDns = await system.getMacOSOriginDns();
-      if (originDns == null) {
-        return;
-      }
-      const needAddDns = "1.1.1.1"; // Cloudflare DNS
-      if (originDns.contains(needAddDns)) {
-        return;
-      }
-      nextDns = List.from(originDns)..add(needAddDns);
-    }
-    if (nextDns == null) {
-      return;
-    }
-    await Process.run(
-      'networksetup',
-      [
-        '-setdnsservers',
-        serviceName,
-        if (nextDns.isNotEmpty) ...nextDns,
-        if (nextDns.isEmpty) "Empty",
-      ],
-    );
-  }
-
-  Future<void> back() async {
-    await app?.moveTaskToBack();
-    await window?.hide();
-  }
-
-  Future<void> exit() async {
-    commonPrint.log("System: Exiting application...");
-    if (Platform.isAndroid) {
-      commonPrint.log("System: Calling SystemNavigator.pop()");
-      await SystemNavigator.pop();
-      return;
-    }
-    // Desktop: terminate the whole process. Closing only the window is not
-    // enough — if the platform intercepts the close (e.g. window_manager's
-    // setPreventClose on Windows), the GUI process can survive after the core
-    // has already been shut down. That leaves a "zombie": the interface keeps
-    // working while the app has vanished from the task manager, and background
-    // timers keep writing to the now-dead core socket (StreamSink is closed).
-    // exit(0) guarantees the process is actually gone.
-    commonPrint.log("System: Closing window...");
-    try {
-      await window?.close();
-    } catch (e) {
-      commonPrint.log("System: window.close() failed: $e");
-    }
-    commonPrint.log("System: Forcing process exit");
-    io.exit(0);
-  }
-}
-
-final system = System();

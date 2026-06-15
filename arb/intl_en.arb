@@ -525,5 +525,9 @@
   "createProfile": "Create profile",
   "requestDetails": "Request details",
   "connectionDetails": "Connection details",
-  "logDetails": "Log details"
+  "logDetails": "Log details",
+  "immutableCorePrompt": "MeowClash must be installed or configured through the system package manager (e.g. NixOS security.wrappers).",
+  "@immutableCorePrompt": {
+    "description": "Prompt showing that core cannot be modified at runtime"
+  }
 }

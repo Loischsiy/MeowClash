@@ -3878,6 +3878,16 @@ class AppLocalizations {
   String get logDetails {
     return Intl.message('Log details', name: 'logDetails', desc: '', args: []);
   }
+
+  /// `MeowClash must be installed or configured through the system package manager (e.g. NixOS security.wrappers).`
+  String get immutableCorePrompt {
+    return Intl.message(
+      'MeowClash must be installed or configured through the system package manager (e.g. NixOS security.wrappers).',
+      name: 'immutableCorePrompt',
+      desc: 'Prompt showing that core cannot be modified at runtime',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

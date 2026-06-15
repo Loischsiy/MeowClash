@@ -271,6 +271,9 @@ class Build {
       env["GOOS"] = item.target.os;
       if (item.arch != null) {
         env["GOARCH"] = item.arch!.name;
+        if (item.arch == Arch.arm) {
+          env["GOARM"] = "7";
+        }
       }
       if (isLib) {
         env["CGO_ENABLED"] = "1";
@@ -598,6 +601,40 @@ class BuildCommand extends Command {
     );
   }
 
+  void _renameLinuxOutputs(Arch arch) {
+    final distDir = Directory(Build.distPath);
+    if (!distDir.existsSync()) return;
+
+    final pubspecFile = File(join(current, "pubspec.yaml"));
+    final pubspecContent = pubspecFile.readAsStringSync();
+    final versionMatch = RegExp(r'version:\s*(.+)').firstMatch(pubspecContent);
+    final pubspecVersion = versionMatch?.group(1)?.trim() ?? "0.0.0";
+    final cleanVersion = pubspecVersion.split('+').first;
+
+    final archName = arch == Arch.arm64 ? "arm64" : "amd64";
+
+    final files = distDir.listSync(recursive: true);
+    for (final entity in files) {
+      if (entity is File) {
+        final filePath = entity.path;
+        final fileName = basename(filePath);
+        if (fileName.startsWith("meowclash") && fileName.contains("linux")) {
+          final ext = filePath.substring(filePath.lastIndexOf('.'));
+          final targetFileName = "MeowClash-$cleanVersion-linux-$archName$ext";
+          final targetPath = join(entity.parent.path, targetFileName);
+          if (filePath != targetPath) {
+            print("Renaming: $filePath -> $targetPath");
+            final targetFile = File(targetPath);
+            if (targetFile.existsSync()) {
+              targetFile.deleteSync();
+            }
+            entity.renameSync(targetPath);
+          }
+        }
+      }
+    }
+  }
+
   Future<String?> get systemArch async {
     if (Platform.isWindows) {
       return Platform.environment["PROCESSOR_ARCHITECTURE"];
@@ -669,6 +706,7 @@ class BuildCommand extends Command {
               " --build-target-platform $defaultTarget --build-dart-define=CORE_VERSION=$coreVersion",
           env: env,
         );
+        _renameLinuxOutputs(arch);
         return;
       case Target.android:
         // Build all architectures: armeabi-v7a, arm64-v8a, x86_64

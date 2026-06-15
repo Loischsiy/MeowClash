@@ -58,12 +58,9 @@
 
       nixosModules = {
         default = self.nixosModules.meowclash;
-        meowclash =
-          { lib, pkgs, ... }:
-          import ./nix/module.nix {
-            inherit lib pkgs;
-            package = self.packages.${pkgs.system}.default;
-          };
+        meowclash = import ./nix/module.nix {
+          packageFor = system: self.packages.${system}.default;
+        };
       };
     };
 }

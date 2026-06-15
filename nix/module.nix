@@ -1,12 +1,9 @@
-{
-  lib,
-  pkgs,
-  package,
-}:
-{ config, ... }:
+{ packageFor }:
+{ config, lib, pkgs, ... }:
 
 let
   cfg = config.programs.meowclash;
+  defaultPackage = packageFor pkgs.system;
 in
 {
   options.programs.meowclash = {
@@ -14,14 +11,14 @@ in
 
     package = lib.mkOption {
       type = lib.types.package;
-      default = package;
+      default = defaultPackage;
       defaultText = lib.literalExpression "inputs.meowclash.packages.${pkgs.system}.default";
       description = "MeowClash package to install.";
     };
 
     corePackage = lib.mkOption {
       type = lib.types.package;
-      default = package.core;
+      default = defaultPackage.core;
       defaultText = lib.literalExpression "config.programs.meowclash.package.core";
       description = "MeowClash core package used for the NixOS capability wrapper.";
     };

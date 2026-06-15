@@ -223,6 +223,13 @@ func updateListeners() {
 	listener.ReCreateTuic(general.TuicServer, tunnel.Tunnel)
 	// Desktop builds may include the `cmfa` tag, so gate TUN only on Android.
 	if runtime.GOOS != "android" {
+		log.Infoln(
+			"[Listener] recreate TUN enable=%t device=%s stack=%s auto-route=%t",
+			general.Tun.Enable,
+			general.Tun.Device,
+			general.Tun.Stack,
+			general.Tun.AutoRoute,
+		)
 		listener.ReCreateTun(general.Tun, tunnel.Tunnel)
 	}
 }
@@ -238,6 +245,7 @@ func stopListeners() {
 	listener.ReCreateVmess("", tunnel.Tunnel)
 	listener.ReCreateTuic(LC.TuicServer{}, tunnel.Tunnel)
 	if runtime.GOOS != "android" {
+		log.Infoln("[Listener] stop TUN")
 		listener.ReCreateTun(LC.Tun{}, tunnel.Tunnel)
 	}
 	listener.Cleanup()

@@ -13,8 +13,8 @@ import (
 	"time"
 
 	"github.com/metacubex/mihomo/adapter"
-	"github.com/metacubex/mihomo/adapter/provider"
 	"github.com/metacubex/mihomo/adapter/outboundgroup"
+	"github.com/metacubex/mihomo/adapter/provider"
 	"github.com/metacubex/mihomo/common/observable"
 	"github.com/metacubex/mihomo/common/utils"
 	"github.com/metacubex/mihomo/component/mmdb"
@@ -30,13 +30,13 @@ import (
 )
 
 var (
-	isInit              = false
-	externalProviders   = map[string]cp.Provider{}
-	logSubscriber       observable.Subscription[log.Event]
-	healthCheckStopCh   chan struct{}
-	healthCheckSeen     = map[string]string{}
-	requestStopCh       chan struct{}
-	requestSeen         = map[string]bool{}
+	isInit            = false
+	externalProviders = map[string]cp.Provider{}
+	logSubscriber     observable.Subscription[log.Event]
+	healthCheckStopCh chan struct{}
+	healthCheckSeen   = map[string]string{}
+	requestStopCh     chan struct{}
+	requestSeen       = map[string]bool{}
 )
 
 func handleInitClash(paramsString string) bool {
@@ -55,8 +55,8 @@ func handleInitClash(paramsString string) bool {
 
 func handleStartListener() bool {
 	runLock.Lock()
+	defer runLock.Unlock()
 	if isRunning {
-		runLock.Unlock()
 		return true
 	}
 	isRunning = true
@@ -70,19 +70,17 @@ func handleStartListener() bool {
 			currentConfig.General.Tun.Enable = pendingTunEnable
 		}
 	}
-	runLock.Unlock()
 
 	// setupConfig already ran executor.ApplyConfig when the profile was loaded,
 	// so proxies/rules/DNS/providers are live. Starting only needs to (re)bind
 	// listeners and (re)create the TUN device — calling ApplyConfig again would
 	// re-run updateProxies, loadProvider(wg.Wait()), updateDNS and runtime.GC()
 	// for no reason and was the main source of the long "start" delay.
-	go func() {
-		updateListeners()
-		resolver.ResetConnection()
-		startHealthCheckForwarder()
-		startRequestForwarder()
-	}()
+	log.Infoln("[Listener] start")
+	updateListeners()
+	resolver.ResetConnection()
+	startHealthCheckForwarder()
+	startRequestForwarder()
 	return true
 }
 
@@ -90,6 +88,9 @@ func handleStopListener() bool {
 	runLock.Lock()
 	defer runLock.Unlock()
 	isRunning = false
+	log.Infoln("[Listener] stop")
+	closeConnections()
+	resolver.ResetConnection()
 	// Keep health-check forwarder running so proxy pings stay fresh in the UI
 	// while the VPN is off. It is torn down only on full shutdown.
 	stopRequestForwarder()

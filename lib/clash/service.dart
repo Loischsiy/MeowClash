@@ -108,8 +108,9 @@ class ClashService extends ClashHandlerInterface {
     // This ensures the core can access provider files before SetHomeDir is called
     environment['SAFE_PATHS'] = homeDirPath;
     
+    final corePath = await appPath.resolvedCorePath;
     process = await Process.start(
-      appPath.corePath,
+      corePath,
       [
         arg,
       ],

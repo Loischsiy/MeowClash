@@ -15,9 +15,11 @@ class AutoLaunch {
   }
 
   AutoLaunch._internal() {
+    final appPath = Platform.environment['MEOWCLASH_AUTOSTART_PATH'] ??
+        Platform.resolvedExecutable;
     launchAtStartup.setup(
       appName: appName,
-      appPath: Platform.resolvedExecutable,
+      appPath: appPath,
     );
   }
   static AutoLaunch? _instance;

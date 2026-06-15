@@ -24,6 +24,7 @@ Also contains a Rust Windows service helper (`services/helper/`).
 | Rust    | latest     | `services/helper/` is a Cargo project. |
 | Java    | 17         | CI uses Temurin 17 for Android builds. |
 | Android NDK | latest | Must set `ANDROID_NDK` env var for Android builds. |
+| Nix     | nixpkgs unstable | `flake.nix` packages Linux builds and exposes a NixOS module. |
 
 ## Architecture & ownership
 
@@ -38,6 +39,7 @@ plugins/
   proxy/            Windows plugin for system proxy toggle
   window_ext/       macOS/Windows window management plugin
   flutter_distributor/  NOT in repo; cloned at build time from leanflutter/flutter_distributor
+nix/                Nix package/module support; includes pubspec.lock.json for nixpkgs Flutter builder
 services/helper/    Rust binary (Windows service helper)
 ```
 
@@ -62,6 +64,8 @@ The main build script is **`setup.dart`** (not raw `flutter build`). It cross-co
 | macOS (arm64) local | `make macLocal` (cleans `dist/` + `build/` first) |
 | macOS (amd64) local | `make macLocal_amd64` |
 | Core only (skip app) | `dart setup.dart <platform> --arch <arch> --out core` |
+| Nix Linux package | `nix build .#meowclash` |
+| Nix Linux core only | `nix build .#core` |
 
 ### Important build behaviors
 
@@ -70,6 +74,26 @@ The main build script is **`setup.dart`** (not raw `flutter build`). It cross-co
 - **Windows**: also builds the Rust `helper.exe` and packages with `flutter_distributor` into `exe` + `zip`.
 - **macOS**: uses `create-dmg` to produce a DMG in `dist/`.
 - **Linux**: installs `libayatana-appindicator3-dev`, `libkeybinder-3.0-dev`, etc. For amd64 also produces AppImage + RPM.
+- **Nix/NixOS**: `flake.nix` builds the Go core with `buildGoModule` and the Flutter app with nixpkgs `buildFlutterApplication`; it does not use `setup.dart` or `flutter_distributor`. Current app package support is `x86_64-linux` because `flutter_js` ships an x86-64 Linux `libquickjs_c_bridge_plugin.so`.
+
+### NixOS TUN mode
+
+Use the flake module when TUN mode is needed on NixOS:
+
+```nix
+{
+  imports = [ inputs.meowclash.nixosModules.default ];
+
+  programs.meowclash = {
+    enable = true;
+    tunMode.enable = true;
+  };
+}
+```
+
+The module creates a `/run/wrappers/bin/MeowClashCore` wrapper with `cap_net_admin+ep`.
+The app package sets `MEOWCLASH_CORE_PATH=MeowClashCore` and searches `/run/wrappers/bin` before the store core, so TUN works without trying to mutate the read-only Nix store.
+If `tunMode.enable` is false, the app must not attempt to `chown`/`chmod` the store core; it should show the NixOS module hint instead.
 
 ### Environment variables
 
@@ -85,6 +109,7 @@ Generated files are **checked in**, but you must regenerate after editing source
 | `build_runner` | `lib/models/*.dart`, `lib/providers/*.dart` | `lib/models/generated/*.{g,freezed}.dart`, `lib/providers/generated/*.g.dart` | `dart run build_runner build --delete-conflicting-outputs` |
 | `ffigen` | `libclash/android/arm64-v8a/libclash.h` | `lib/clash/generated/clash_ffi.dart` | `dart run ffigen --config ffigen.yaml` (if config exists) or via pubspec ffigen section |
 | `flutter_intl` | `arb/*.arb` | `lib/l10n/l10n.dart` | IDE plugin or `flutter pub run intl_utils:generate` |
+| Nix pub lock JSON | `pubspec.lock` | `nix/pubspec.lock.json` | `ruby -e 'require "yaml"; require "json"; File.write("nix/pubspec.lock.json", JSON.pretty_generate(YAML.load_file("pubspec.lock")) + "\n")'` |
 
 ### Analysis / lint quirks
 
@@ -138,6 +163,13 @@ flutter pub run intl_utils:generate
 flutter analyze
 # Test:
 flutter test
+```
+
+For Nix packaging changes, additionally evaluate/build on NixOS or a Linux Nix host:
+
+```bash
+nix flake check
+nix build .#meowclash
 ```
 
 ## Fork changes — `meowclash-*` provider-override system removed (2026-05)

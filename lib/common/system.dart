@@ -47,7 +47,7 @@ class System {
   }
 
   Future<bool> checkIsAdmin() async {
-    final corePath = appPath.corePath.replaceAll(' ', r'\\ ');
+    final corePath = await appPath.resolvedCorePath;
     if (Platform.isWindows) {
       final result = await windows?.checkService();
       return result == WindowsHelperServiceStatus.running;
@@ -59,6 +59,9 @@ class System {
       }
       return false;
     } else if (Platform.isLinux) {
+      if (await _linuxCoreHasNetAdminCapability(corePath)) {
+        return true;
+      }
       final result = await Process.run('stat', ['-c', '%U:%G %A', corePath]);
       final output = result.stdout.trim();
       if (output.startsWith('root:') && output.contains('rws')) {
@@ -67,6 +70,21 @@ class System {
       return false;
     }
     return true;
+  }
+
+  Future<bool> _linuxCoreHasNetAdminCapability(String corePath) async {
+    if (!Platform.isLinux) {
+      return false;
+    }
+    final ProcessResult result;
+    try {
+      result = await Process.run('getcap', [corePath]);
+    } on ProcessException {
+      return false;
+    }
+    final output = result.stdout.toString();
+    return output.contains('cap_net_admin') &&
+        (output.contains('=ep') || output.contains('+ep'));
   }
 
   Future<AuthorizeCode> authorizeCore() async {
@@ -78,7 +96,7 @@ class System {
       return AuthorizeCode.none;
     }
 
-    final corePath = appPath.corePath.replaceAll(' ', r'\\ ');
+    final corePath = await appPath.resolvedCorePath;
     final isAdmin = await checkIsAdmin();
     if (isAdmin) {
       return AuthorizeCode.none;
@@ -107,6 +125,12 @@ class System {
       }
       return AuthorizeCode.error;
     } else if (Platform.isLinux) {
+      if (appPath.isNixPackage) {
+        globalState.showNotifier(
+          'TUN mode on NixOS requires programs.meowclash.tunMode.enable = true and a system rebuild.',
+        );
+        return AuthorizeCode.error;
+      }
       final shell = Platform.environment['SHELL'] ?? 'bash';
       final password = await globalState.showCommonDialog<String>(
         child: InputDialog(
@@ -114,9 +138,10 @@ class System {
           value: '',
         ),
       );
+      final escapedCorePath = corePath.replaceAll('"', r'\"');
       final arguments = [
         "-c",
-        'echo "$password" | sudo -S chown root:root "$corePath" && echo "$password" | sudo -S chmod +sx "$corePath"'
+        'echo "$password" | sudo -S chown root:root "$escapedCorePath" && echo "$password" | sudo -S chmod +sx "$escapedCorePath"'
       ];
       final result = await Process.run(shell, arguments);
       if (result.exitCode != 0) {

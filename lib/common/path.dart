@@ -32,12 +32,18 @@ class AppPath {
 
   String get executableExtension => Platform.isWindows ? ".exe" : "";
 
+  bool get isNixPackage => Platform.environment['MEOWCLASH_NIX_PACKAGE'] == '1';
+
   String get executableDirPath {
     final currentExecutablePath = Platform.resolvedExecutable;
     return dirname(currentExecutablePath);
   }
 
   String get corePath {
+    final nixCorePath = Platform.environment['MEOWCLASH_CORE_PATH'];
+    if (!Platform.isWindows && nixCorePath != null && nixCorePath.isNotEmpty) {
+      return nixCorePath;
+    }
     if (Platform.isMacOS) {
       // Core is stored in Application Support/com.meowclash.app/cores/ (copied by Swift code on launch)
       // Permissions are set automatically in Swift
@@ -45,6 +51,24 @@ class AppPath {
       return '$home/Library/Application Support/com.meowclash.app/cores/MeowClashCore';
     }
     return join(executableDirPath, "MeowClashCore$executableExtension");
+  }
+
+  Future<String> get resolvedCorePath async {
+    final path = corePath;
+    if (isAbsolute(path) || path.contains(separator)) {
+      return path;
+    }
+    final result = await Process.run(
+      'sh',
+      ['-c', 'command -v -- "$1"', 'resolve-core', path],
+    );
+    if (result.exitCode == 0) {
+      final output = result.stdout.toString().trim();
+      if (output.isNotEmpty) {
+        return output;
+      }
+    }
+    return path;
   }
 
   String get helperPath => join(executableDirPath, "$appHelperService$executableExtension");

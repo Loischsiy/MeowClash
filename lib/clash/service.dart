@@ -33,6 +33,12 @@ class ClashService extends ClashHandlerInterface {
 
   String? _unixSocketPath;
 
+  bool _isShuttingDown = false;
+
+  int _unexpectedExitCount = 0;
+
+  DateTime? _lastUnexpectedExitTime;
+
   Future<void> _initServer() async {
     runZonedGuarded(() async {
       if (!Platform.isWindows) {
@@ -87,43 +93,98 @@ class ClashService extends ClashHandlerInterface {
       return;
     }
     isStarting = true;
-    socketCompleter = Completer();
-    if (process != null) {
-      await shutdown();
-    }
-    final serverSocket = await serverCompleter.future;
-    final arg = Platform.isWindows
-        ? "${serverSocket.port}"
-        : serverSocket.address.address;
-    if (Platform.isWindows && await system.checkIsAdmin()) {
-      final isSuccess = await request.startCoreByHelper(arg);
-      if (isSuccess) {
-        return;
+    try {
+      if (process != null) {
+        await shutdown();
       }
+      socketCompleter = Completer();
+      final serverSocket = await serverCompleter.future;
+      final arg = Platform.isWindows
+          ? "${serverSocket.port}"
+          : serverSocket.address.address;
+      if (Platform.isWindows && await system.checkIsAdmin()) {
+        final isSuccess = await request.startCoreByHelper(arg);
+        if (isSuccess) {
+          _isShuttingDown = false;
+          return;
+        }
+      }
+
+      final homeDirPath = await appPath.homeDirPath;
+      final environment = Map<String, String>.from(Platform.environment);
+      // Set SAFE_PATHS to prevent "path is not subpath of home directory" errors
+      // This ensures the core can access provider files before SetHomeDir is called
+      environment['SAFE_PATHS'] = homeDirPath;
+
+      final corePath = await appPath.resolvedCorePath;
+      commonPrint.log("ClashService: starting core at $corePath");
+      _isShuttingDown = false;
+      final nextProcess = await Process.start(
+        corePath,
+        [
+          arg,
+        ],
+        environment: environment,
+      );
+      process = nextProcess;
+      commonPrint.log("ClashService: core pid ${nextProcess.pid}");
+      _watchProcess(nextProcess);
+    } catch (error, stackTrace) {
+      commonPrint.log("ClashService: failed to start core: $error");
+      commonPrint.log(stackTrace.toString());
+    } finally {
+      isStarting = false;
     }
-    
-    final homeDirPath = await appPath.homeDirPath;
-    final environment = Map<String, String>.from(Platform.environment);
-    // Set SAFE_PATHS to prevent "path is not subpath of home directory" errors
-    // This ensures the core can access provider files before SetHomeDir is called
-    environment['SAFE_PATHS'] = homeDirPath;
-    
-    final corePath = await appPath.resolvedCorePath;
-    process = await Process.start(
-      corePath,
-      [
-        arg,
-      ],
-      environment: environment,
-    );
-    process?.stdout.listen((_) {});
-    process?.stderr.listen((e) {
-      final error = utf8.decode(e);
-      if (error.isNotEmpty) {
-        commonPrint.log(error);
+  }
+
+  Duration _nextRestartDelay() {
+    final now = DateTime.now();
+    final lastExitTime = _lastUnexpectedExitTime;
+    if (lastExitTime == null ||
+        now.difference(lastExitTime) > const Duration(minutes: 1)) {
+      _unexpectedExitCount = 0;
+    }
+    _lastUnexpectedExitTime = now;
+    _unexpectedExitCount += 1;
+    final delaySeconds = min(30, 1 << min(_unexpectedExitCount - 1, 5));
+    return Duration(seconds: delaySeconds);
+  }
+
+  void _watchProcess(Process watchedProcess) {
+    watchedProcess.stdout
+        .transform(utf8.decoder)
+        .transform(const LineSplitter())
+        .listen((line) {
+      if (line.isNotEmpty) {
+        commonPrint.log("[core stdout] $line");
       }
     });
-    isStarting = false;
+    watchedProcess.stderr
+        .transform(utf8.decoder)
+        .transform(const LineSplitter())
+        .listen((line) {
+      if (line.isNotEmpty) {
+        commonPrint.log("[core stderr] $line");
+      }
+    });
+    unawaited(watchedProcess.exitCode.then((exitCode) async {
+      if (process != watchedProcess) {
+        return;
+      }
+      commonPrint.log("ClashService: core exited with code $exitCode");
+      process = null;
+      await _destroySocket();
+      if (_isShuttingDown) {
+        return;
+      }
+      final restartDelay = _nextRestartDelay();
+      commonPrint.log(
+        "ClashService: restarting core after unexpected exit in "
+        "${restartDelay.inSeconds}s",
+      );
+      await Future<void>.delayed(restartDelay);
+      await reStart();
+    }));
   }
 
   @override
@@ -170,6 +231,7 @@ class ClashService extends ClashHandlerInterface {
 
   @override
   Future<bool> shutdown() async {
+    _isShuttingDown = true;
     if (Platform.isWindows) {
       await request.stopCoreByHelper();
     }

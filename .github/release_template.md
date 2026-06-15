@@ -18,8 +18,7 @@
         <tr>
         <td>Android</td>
             <td>
-                <a href="https://github.com/Loischsiy/MeowClash/releases/download/vVERSION/MeowClash-VERSION-android-arm64-v8a.apk"><img src="https://img.shields.io/badge/APK-ARMv8-168039.svg?logo=android"></a><br>
-                <a href="https://github.com/Loischsiy/MeowClash/releases/download/vVERSION/MeowClash-VERSION-android-armeabi-v7a.apk"><img src="https://img.shields.io/badge/APK-ARMv7-45bf55.svg?logo=android"></a>
+                <a href="https://github.com/Loischsiy/MeowClash/releases/download/vVERSION/MeowClash-VERSION-android.apk"><img src="https://img.shields.io/badge/APK-Universal-168039.svg?logo=android"></a>
             </td>
         </tr>
         <tr>

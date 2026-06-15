@@ -85,6 +85,41 @@
 sudo apt-get install libayatana-appindicator3-dev libkeybinder-3.0-dev
 ```
 
+### NixOS (Flake)
+
+Якщо ви використовуєте NixOS, ви можете скористатися наданим Flake та модулем NixOS.
+
+Додайте репозиторій у вхідні дані (inputs) вашого `flake.nix`:
+```nix
+{
+  inputs = {
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    meowclash.url = "github:Loischsiy/MeowClash";
+  };
+
+  outputs = { self, nixpkgs, meowclash, ... }: {
+    nixosConfigurations.your-hostname = nixpkgs.lib.nixosSystem {
+      modules = [
+        # Імпорт модуля
+        meowclash.nixosModules.default
+        ./configuration.nix
+      ];
+    };
+  };
+}
+```
+
+Потім налаштуйте програму у `configuration.nix`:
+```nix
+{
+  # Увімкнення програми та (опціонально) режиму TUN (налаштування обгортки з cap_net_admin для ядра)
+  programs.meowclash = {
+    enable = true;
+    tunMode.enable = true; # Необхідно для роботи режиму TUN без прав root
+  };
+}
+```
+
 ### Android
 Підтримується керування через сторонні інструменти автоматизації (наприклад, Tasker) за допомогою Intents (дій):
 - **Запуск VPN**: `com.meowclash.app.action.START`

@@ -85,6 +85,41 @@
 sudo apt-get install libayatana-appindicator3-dev libkeybinder-3.0-dev
 ```
 
+### NixOS (Flake)
+
+NixOS を使用している場合は、提供されている Flake インプットと NixOS モジュールを利用できます。
+
+`flake.nix` の `inputs` に以下を追加します：
+```nix
+{
+  inputs = {
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    meowclash.url = "github:Loischsiy/MeowClash";
+  };
+
+  outputs = { self, nixpkgs, meowclash, ... }: {
+    nixosConfigurations.your-hostname = nixpkgs.lib.nixosSystem {
+      modules = [
+        # モジュールをインポート
+        meowclash.nixosModules.default
+        ./configuration.nix
+      ];
+    };
+  };
+}
+```
+
+その後、`configuration.nix` でプログラムを有効化・設定します：
+```nix
+{
+  # プログラムを有効化し、必要に応じて TUN モジュールを設定（コア用のケーパビリティラッパーを作成）
+  programs.meowclash = {
+    enable = true;
+    tunMode.enable = true; # root 権限なしで TUN モードを動作させるために必要
+  };
+}
+```
+
 ### Android
 インテントを使用して、サードパーティの自動化ツール（Tasker など）経由でアプリを制御できます：
 - **VPNの開始**: `com.meowclash.app.action.START`

@@ -85,6 +85,41 @@
 sudo apt-get install libayatana-appindicator3-dev libkeybinder-3.0-dev
 ```
 
+### NixOS (Flake)
+
+如果您使用的是 NixOS，可以使用项目提供的 Flake 和 NixOS 模块。
+
+在您的 `flake.nix` 的 inputs 中添加：
+```nix
+{
+  inputs = {
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    meowclash.url = "github:Loischsiy/MeowClash";
+  };
+
+  outputs = { self, nixpkgs, meowclash, ... }: {
+    nixosConfigurations.your-hostname = nixpkgs.lib.nixosSystem {
+      modules = [
+        # 导入模块
+        meowclash.nixosModules.default
+        ./configuration.nix
+      ];
+    };
+  };
+}
+```
+
+然后，在您的 `configuration.nix` 中配置应用：
+```nix
+{
+  # 启用应用并选择性开启 TUN 模式（配置核心的 cap_net_admin 包装器）
+  programs.meowclash = {
+    enable = true;
+    tunMode.enable = true; # 无需 root 权限运行 TUN 模式所需
+  };
+}
+```
+
 ### Android
 支持通过第三方自动化工具（如 Tasker）使用 Intents (意图) 来控制客户端：
 - **启动 VPN**: `com.meowclash.app.action.START`

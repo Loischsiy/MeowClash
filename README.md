@@ -85,6 +85,41 @@ Before running the application, make sure to install the required system librari
 sudo apt-get install libayatana-appindicator3-dev libkeybinder-3.0-dev
 ```
 
+### NixOS (Flake)
+
+If you are using NixOS, you can use the provided Flake input and NixOS module.
+
+Add the input to your `flake.nix`:
+```nix
+{
+  inputs = {
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    meowclash.url = "github:Loischsiy/MeowClash";
+  };
+
+  outputs = { self, nixpkgs, meowclash, ... }: {
+    nixosConfigurations.your-hostname = nixpkgs.lib.nixosSystem {
+      modules = [
+        # Import the module
+        meowclash.nixosModules.default
+        ./configuration.nix
+      ];
+    };
+  };
+}
+```
+
+Then configure the program in your `configuration.nix`:
+```nix
+{
+  # Enable the program and optionally TUN mode (sets up a capability wrapper for the core)
+  programs.meowclash = {
+    enable = true;
+    tunMode.enable = true; # Required for TUN mode to work without root permissions
+  };
+}
+```
+
 ### Android
 Supports control via third-party automation tools (such as Tasker) using Intents:
 - **Start VPN**: `com.meowclash.app.action.START`

@@ -43,6 +43,29 @@ static void set_window_icon(GtkWindow* window) {
   }
 }
 
+static void set_linux_graphics_defaults() {
+#if defined(__linux__)
+#if defined(__arm__) || defined(__aarch64__)
+  const bool needs_safe_gl_defaults = true;
+#else
+  const bool needs_safe_gl_defaults = g_getenv("APPIMAGE") != nullptr;
+#endif
+
+  if (!needs_safe_gl_defaults) {
+    return;
+  }
+  if (!g_getenv("GDK_BACKEND")) {
+    g_setenv("GDK_BACKEND", "x11", FALSE);
+  }
+  if (!g_getenv("GDK_GL")) {
+    g_setenv("GDK_GL", "gles", FALSE);
+  }
+  if (!g_getenv("LIBGL_DRI3_DISABLE")) {
+    g_setenv("LIBGL_DRI3_DISABLE", "1", FALSE);
+  }
+#endif
+}
+
 // Implements GApplication::activate.
 static void my_application_activate(GApplication* application) {
   MyApplication* self = MY_APPLICATION(application);
@@ -127,20 +150,6 @@ static gboolean my_application_local_command_line(GApplication* application, gch
 
 // Implements GApplication::startup.
 static void my_application_startup(GApplication* application) {
-  // On some Raspberry Pi environments, setting safer defaults helps the
-  // Flutter engine initialize EGL/GL correctly. Only set if not already
-  // provided by the user environment.
-#if defined(__arm__) || defined(__aarch64__)
-  if (!g_getenv("GDK_BACKEND")) {
-    g_setenv("GDK_BACKEND", "x11", FALSE);
-  }
-  if (!g_getenv("GDK_GL")) {
-    g_setenv("GDK_GL", "gles", FALSE);
-  }
-  if (!g_getenv("LIBGL_DRI3_DISABLE")) {
-    g_setenv("LIBGL_DRI3_DISABLE", "1", FALSE);
-  }
-#endif
   //MyApplication* self = MY_APPLICATION(object);
 
   // Perform any actions required at application startup.
@@ -175,6 +184,8 @@ static void my_application_class_init(MyApplicationClass* klass) {
 static void my_application_init(MyApplication* self) {}
 
 MyApplication* my_application_new() {
+  set_linux_graphics_defaults();
+
   // Set the program name to the application ID, which helps various systems
   // like GTK and desktop environments map this running application to its
   // corresponding .desktop file. This ensures better integration by allowing

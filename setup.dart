@@ -630,6 +630,39 @@ class BuildCommand extends Command {
     }
   }
 
+  Future<void> _packageLinuxPortable(Arch arch) async {
+    final pubspecFile = File(join(current, "pubspec.yaml"));
+    final pubspecContent = pubspecFile.readAsStringSync();
+    final versionMatch = RegExp(r'version:\s*(.+)').firstMatch(pubspecContent);
+    final pubspecVersion = versionMatch?.group(1)?.trim() ?? "0.0.0";
+    final cleanVersion = pubspecVersion.split('+').first;
+    final archName = arch == Arch.arm64 ? "arm64" : "amd64";
+    final buildArchName = arch == Arch.arm64 ? "arm64" : "x64";
+    final bundleDir = Directory(
+      join(current, "build", "linux", buildArchName, "release", "bundle"),
+    );
+
+    if (!bundleDir.existsSync()) {
+      throw "Linux bundle not found: ${bundleDir.path}";
+    }
+
+    final distDir = Directory(Build.distPath)..createSync(recursive: true);
+    final targetPath = join(
+      distDir.path,
+      "MeowClash-$cleanVersion-linux-$archName-portable.tar.gz",
+    );
+    final targetFile = File(targetPath);
+    if (targetFile.existsSync()) {
+      targetFile.deleteSync();
+    }
+
+    await Build.exec(
+      ["tar", "-C", bundleDir.path, "-czf", targetPath, "."],
+      name: "package linux portable",
+      runInShell: false,
+    );
+  }
+
   Future<String?> get systemArch async {
     if (Platform.isWindows) {
       return Platform.environment["PROCESSOR_ARCHITECTURE"];
@@ -701,6 +734,7 @@ class BuildCommand extends Command {
               " --build-target-platform $defaultTarget --build-dart-define=CORE_VERSION=$coreVersion",
           env: env,
         );
+        await _packageLinuxPortable(arch);
         _renameLinuxOutputs(arch);
         return;
       case Target.android:

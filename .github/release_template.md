@@ -39,6 +39,8 @@
             <td>Linux</td>
             <td>
                 <a href="https://github.com/Loischsiy/MeowClash/releases/download/vVERSION/MeowClash-VERSION-linux-amd64.AppImage"><img src="https://img.shields.io/badge/AppImage-x64-f84e29.svg?logo=linux"> </a><br>
+                <a href="https://github.com/Loischsiy/MeowClash/releases/download/vVERSION/MeowClash-VERSION-linux-amd64-portable.tar.gz"><img src="https://img.shields.io/badge/Portable-x64-67b7d1.svg?logo=linux"> </a><br>
+                <a href="https://github.com/Loischsiy/MeowClash/releases/download/vVERSION/MeowClash-VERSION-linux-arm64-portable.tar.gz"><img src="https://img.shields.io/badge/Portable-ARM64-67b7d1.svg?logo=linux"> </a><br>
                 <a href="https://github.com/Loischsiy/MeowClash/releases/download/vVERSION/MeowClash-VERSION-linux-amd64.deb"><img src="https://img.shields.io/badge/DebPackage-x64-FF9966.svg?logo=debian"> </a><br>
                 <a href="https://github.com/Loischsiy/MeowClash/releases/download/vVERSION/MeowClash-VERSION-linux-amd64.rpm"><img src="https://img.shields.io/badge/RpmPackage-x64-F1B42F.svg?logo=redhat"> </a>
             </td>

@@ -542,6 +542,9 @@ jobs:
           find . -type f -not -name "*.sha256" | while read -r filepath; do
             filename=$(basename "$filepath" | tr '[:upper:]' '[:lower:]')
             ext=".${filepath##*.}"
+            if [[ "$filename" == *.tar.gz ]]; then
+              ext=".tar.gz"
+            fi
             new_name=""
             
             if [[ "$filename" == *"android"* ]]; then
@@ -568,9 +571,15 @@ jobs:
               fi
             elif [[ "$filename" == *"linux"* ]]; then
               if [[ "$filename" == *"arm64"* ]]; then
-                new_name="MeowClash-${version}-linux-arm64${ext}"
+                if [[ "$filename" == *"portable"* || "$filename" == *.tar.gz ]]; then
+                  new_name="MeowClash-${version}-linux-arm64-portable.tar.gz"
+                else
+                  new_name="MeowClash-${version}-linux-arm64${ext}"
+                fi
               elif [[ "$filename" == *"amd64"* || "$filename" == *"x64"* || "$filename" == *"x86_64"* ]]; then
-                if [[ "$filename" == *".appimage" ]]; then
+                if [[ "$filename" == *"portable"* || "$filename" == *.tar.gz ]]; then
+                  new_name="MeowClash-${version}-linux-amd64-portable.tar.gz"
+                elif [[ "$filename" == *".appimage" ]]; then
                   new_name="MeowClash-${version}-linux-amd64.AppImage"
                 elif [[ "$filename" == *".deb" ]]; then
                   new_name="MeowClash-${version}-linux-amd64.deb"
@@ -583,7 +592,7 @@ jobs:
             fi
             
             if [ -n "$new_name" ]; then
-              if [ "$(realpath "$filepath")" != "$(realpath "./$new_name")" ]; then
+              if [ "$filepath" != "./$new_name" ]; then
                 echo "Renaming/moving: $filepath -> ./$new_name"
                 mv "$filepath" "./$new_name"
               else

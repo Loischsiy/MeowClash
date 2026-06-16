@@ -631,12 +631,21 @@ class BuildCommand extends Command {
   }
 
   Future<void> _packageLinuxPortable(Arch arch) async {
-    final pubspecFile = File(join(current, "pubspec.yaml"));
-    final pubspecContent = pubspecFile.readAsStringSync();
-    final versionMatch = RegExp(r'version:\s*(.+)').firstMatch(pubspecContent);
-    final pubspecVersion = versionMatch?.group(1)?.trim() ?? "0.0.0";
-    final cleanVersion = pubspecVersion.split('+').first;
-    final archName = arch == Arch.arm64 ? "arm64" : "amd64";
+    final bundleDir = _linuxBundleDir(arch);
+    final targetPath = _linuxOutputPath(arch, "portable.tar.gz");
+    final targetFile = File(targetPath);
+    if (targetFile.existsSync()) {
+      targetFile.deleteSync();
+    }
+
+    await Build.exec(
+      ["tar", "-C", bundleDir.path, "-czf", targetPath, "."],
+      name: "package linux portable",
+      runInShell: false,
+    );
+  }
+
+  Directory _linuxBundleDir(Arch arch) {
     final buildArchName = arch == Arch.arm64 ? "arm64" : "x64";
     final bundleDir = Directory(
       join(current, "build", "linux", buildArchName, "release", "bundle"),
@@ -646,19 +655,78 @@ class BuildCommand extends Command {
       throw "Linux bundle not found: ${bundleDir.path}";
     }
 
+    return bundleDir;
+  }
+
+  String _linuxOutputPath(Arch arch, String suffix) {
+    final pubspecFile = File(join(current, "pubspec.yaml"));
+    final pubspecContent = pubspecFile.readAsStringSync();
+    final versionMatch = RegExp(r'version:\s*(.+)').firstMatch(pubspecContent);
+    final pubspecVersion = versionMatch?.group(1)?.trim() ?? "0.0.0";
+    final cleanVersion = pubspecVersion.split('+').first;
+    final archName = arch == Arch.arm64 ? "arm64" : "amd64";
     final distDir = Directory(Build.distPath)..createSync(recursive: true);
-    final targetPath = join(
+    final separator = suffix.startsWith(".") ? "" : "-";
+    return join(
       distDir.path,
-      "MeowClash-$cleanVersion-linux-$archName-portable.tar.gz",
+      "MeowClash-$cleanVersion-linux-$archName$separator$suffix",
     );
+  }
+
+  Future<void> _packageLinuxAppImage(Arch arch) async {
+    if (arch != Arch.amd64) {
+      return;
+    }
+
+    final bundleDir = _linuxBundleDir(arch);
+    final appDir = Directory(join(current, "build", "linux", "AppDir"));
+    if (appDir.existsSync()) {
+      appDir.deleteSync(recursive: true);
+    }
+    appDir.createSync(recursive: true);
+
+    await Build.exec(
+      ["cp", "-a", "${bundleDir.path}/.", appDir.path],
+      name: "prepare linux appimage",
+      runInShell: false,
+    );
+
+    final appRun = File(join(appDir.path, "AppRun"));
+    await appRun.writeAsString(
+      "#!/bin/sh\n"
+      "HERE=\"\$(dirname \"\$(readlink -f \"\$0\")\")\"\n"
+      "export LD_LIBRARY_PATH=\"\$HERE/lib\${LD_LIBRARY_PATH:+:\$LD_LIBRARY_PATH}\"\n"
+      "unset APPIMAGE\n"
+      "exec \"\$HERE/meowclash\" \"\$@\"\n",
+    );
+    await Build.exec(
+      ["chmod", "+x", appRun.path],
+      name: "chmod AppRun",
+      runInShell: false,
+    );
+
+    await File(join(current, "assets", "images", "icon.png")).copy(
+      join(appDir.path, "meowclash.png"),
+    );
+    await File(join(appDir.path, "meowclash.desktop")).writeAsString(
+      "[Desktop Entry]\n"
+      "Name=MeowClash\n"
+      "Exec=meowclash\n"
+      "Icon=meowclash\n"
+      "Type=Application\n"
+      "Categories=Network;\n",
+    );
+
+    final targetPath = _linuxOutputPath(arch, ".AppImage");
     final targetFile = File(targetPath);
     if (targetFile.existsSync()) {
       targetFile.deleteSync();
     }
 
     await Build.exec(
-      ["tar", "-C", bundleDir.path, "-czf", targetPath, "."],
-      name: "package linux portable",
+      ["appimagetool", appDir.path, targetPath],
+      environment: {"ARCH": "x86_64"},
+      name: "package linux appimage",
       runInShell: false,
     );
   }
@@ -722,7 +790,6 @@ class BuildCommand extends Command {
         };
         final targets = [
           "deb",
-          if (arch == Arch.amd64) "appimage",
           if (arch == Arch.amd64) "rpm",
         ].join(",");
         final defaultTarget = targetMap[arch];
@@ -735,6 +802,7 @@ class BuildCommand extends Command {
           env: env,
         );
         await _packageLinuxPortable(arch);
+        await _packageLinuxAppImage(arch);
         _renameLinuxOutputs(arch);
         return;
       case Target.android:

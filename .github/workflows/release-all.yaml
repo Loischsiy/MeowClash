@@ -277,7 +277,7 @@ jobs:
           rm -rf squashfs-root
           "$appimage" --appimage-extract >/dev/null
           test -x squashfs-root/meowclash
-          grep -q 'exec ./meowclash' squashfs-root/AppRun
+          grep -q 'exec "$HERE/meowclash" "$@"' squashfs-root/AppRun
 
       - name: Upload setup log
         if: failure()

@@ -48,7 +48,7 @@ static void set_linux_graphics_defaults() {
 #if defined(__arm__) || defined(__aarch64__)
   const bool needs_safe_gl_defaults = true;
 #else
-  const bool needs_safe_gl_defaults = g_getenv("APPIMAGE") != nullptr;
+  const bool needs_safe_gl_defaults = false;
 #endif
 
   if (!needs_safe_gl_defaults) {

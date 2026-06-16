@@ -2,6 +2,25 @@
 
 All notable changes to **MeowClash** will be documented in this file.
 
+## [v1.0.4]
+
+### ✨ New Features
+- **External Providers**: Added pre-download, decryption, and background auto-update support for proxy and rule providers.
+- **Nix/NixOS**: Added flake packaging, a dev shell, a core-only package, and a NixOS module with TUN capability support.
+- **Linux**: Added automatic cleanup of stale TUN devices during core initialization.
+
+### 🐛 Bug Fixes
+- **Security**: Prevented path traversal during profile extraction.
+- **Android**: Improved battery optimization prompts, VPN permission handling, DNS management, and foreground service configuration.
+- **Core**: Added automatic core restart with exponential backoff after unexpected process exits.
+- **NixOS**: Fixed module command quoting and package system detection.
+
+### 🚀 Improvements
+- **Core**: Updated mihomo proxy engine to version 1.19.27 and refreshed Go dependencies.
+- **Release**: Standardized release asset names, fixed RPM release links, and consolidated Android releases to a single universal APK.
+- **Build**: Added GOARM configuration, automatic Linux build output renaming, AppImage launcher verification, and Android compileSdk 36.
+- **Docs**: Refreshed README documentation and added multi-language README files.
+
 ## [v1.0.3]
 
 ### ✨ New Features

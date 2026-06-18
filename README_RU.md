@@ -82,7 +82,17 @@
 ### Linux
 Перед запуском приложения обязательно установите необходимые системные библиотеки:
 ```bash
+# Ubuntu / Debian
 sudo apt-get install libayatana-appindicator3-dev libkeybinder-3.0-dev
+
+# Arch Linux
+sudo pacman -S libayatana-appindicator libkeybinder3
+
+# Fedora
+sudo dnf install libayatana-appindicator-gtk3-devel keybinder3-devel
+
+# Alpine
+sudo apk add libayatana-appindicator-dev keybinder3-dev
 ```
 
 ### NixOS (Flake)

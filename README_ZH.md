@@ -82,7 +82,17 @@
 ### Linux
 在运行应用之前，请确保已安装以下系统依赖库：
 ```bash
+# Ubuntu / Debian
 sudo apt-get install libayatana-appindicator3-dev libkeybinder-3.0-dev
+
+# Arch Linux
+sudo pacman -S libayatana-appindicator libkeybinder3
+
+# Fedora
+sudo dnf install libayatana-appindicator-gtk3-devel keybinder3-devel
+
+# Alpine
+sudo apk add libayatana-appindicator-dev keybinder3-dev
 ```
 
 ### NixOS (Flake)

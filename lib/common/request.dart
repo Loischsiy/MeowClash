@@ -2,37 +2,27 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
-
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:meowclash/common/common.dart';
 import 'package:meowclash/models/models.dart';
 import 'package:meowclash/state.dart';
-import 'package:flutter/cupertino.dart';
 
 class Request {
-
   Request() {
-    _dio = Dio(
-      BaseOptions(
-        headers: {
-          "User-Agent": browserUa,
-        },
-      ),
+    _dio = Dio(BaseOptions(headers: {"User-Agent": browserUa}));
+    _clashDio = Dio(BaseOptions(connectTimeout: const Duration(seconds: 5)));
+    _clashDio.httpClientAdapter = IOHttpClientAdapter(
+      createHttpClient: () {
+        final client = HttpClient();
+        client.findProxy = (uri) {
+          client.userAgent = globalState.ua;
+          return MeowClashHttpOverrides.handleFindProxy(uri);
+        };
+        return client;
+      },
     );
-    _clashDio = Dio(
-      BaseOptions(
-        connectTimeout: const Duration(seconds: 5),
-      ),
-    );
-    _clashDio.httpClientAdapter = IOHttpClientAdapter(createHttpClient: () {
-      final client = HttpClient();
-      client.findProxy = (uri) {
-        client.userAgent = globalState.ua;
-        return MeowClashHttpOverrides.handleFindProxy(uri);
-      };
-      return client;
-    });
   }
   late final Dio _dio;
   late final Dio _clashDio;
@@ -80,9 +70,7 @@ class Request {
   Future<Response> getTextResponseForUrl(String url) async {
     final response = await _clashDio.get(
       url,
-      options: Options(
-        responseType: ResponseType.plain,
-      ),
+      options: Options(responseType: ResponseType.plain),
     );
     return response;
   }
@@ -91,9 +79,7 @@ class Request {
     if (url.isEmpty) return null;
     final response = await _dio.get<Uint8List>(
       url,
-      options: Options(
-        responseType: ResponseType.bytes,
-      ),
+      options: Options(responseType: ResponseType.bytes),
     );
     final data = response.data;
     if (data == null) return null;
@@ -103,9 +89,7 @@ class Request {
   Future<Map<String, dynamic>?> checkForUpdate() async {
     final response = await _dio.get(
       "https://api.github.com/repos/$repository/releases/latest",
-      options: Options(
-        responseType: ResponseType.json,
-      ),
+      options: Options(responseType: ResponseType.json),
     );
     if (response.statusCode != 200) return null;
     final data = response.data as Map<String, dynamic>;
@@ -124,30 +108,48 @@ class Request {
   };
 
   Future<Result<IpInfo?>> checkIp({CancelToken? cancelToken}) async {
-    for (final source in _ipInfoSources.entries) {
-      if (cancelToken?.isCancelled ?? false) {
+    final futures = _ipInfoSources.entries
+        .map((source) => _checkIpFromSource(source, cancelToken: cancelToken))
+        .toList();
+    await for (final ipInfo in Stream.fromFutures(futures)) {
+      if (cancelToken?.isCancelled == true) {
         return Result.error("cancelled");
       }
-      try {
-        final res = await _clashDio.get<Map<String, dynamic>>(
-          source.key,
-          cancelToken: cancelToken,
-          options: Options(
-            responseType: ResponseType.json,
-            receiveTimeout: const Duration(seconds: 3),
-          ),
-        );
-        if (res.statusCode == HttpStatus.ok && res.data != null) {
-          return Result.success(source.value(res.data!));
-        }
-      } on DioException catch (e) {
-        if (e.type == DioExceptionType.cancel) {
-          return Result.error("cancelled");
-        }
-      } catch (_) {
+      if (ipInfo != null) {
+        cancelToken?.cancel();
+        return Result.success(ipInfo);
       }
     }
     return Result.success(null);
+  }
+
+  Future<IpInfo?> _checkIpFromSource(
+    MapEntry<String, IpInfo Function(Map<String, dynamic>)> source, {
+    CancelToken? cancelToken,
+  }) async {
+    try {
+      final response = await _clashDio.get<Map<String, dynamic>>(
+        source.key,
+        cancelToken: cancelToken,
+        options: Options(
+          responseType: ResponseType.json,
+          receiveTimeout: const Duration(seconds: 5),
+        ),
+      );
+      if (response.statusCode != HttpStatus.ok || response.data == null) {
+        return null;
+      }
+      return source.value(response.data!);
+    } on DioException catch (e) {
+      if (CancelToken.isCancel(e)) {
+        return null;
+      }
+      commonPrint.log('Failed to check IP from ${source.key}: $e');
+      return null;
+    } catch (e) {
+      commonPrint.log('Failed to parse IP info from ${source.key}: $e');
+      return null;
+    }
   }
 
   Future<bool> pingHelper() async {
@@ -155,15 +157,9 @@ class Request {
       final response = await _dio
           .get(
             "http://$localhost:$helperPort/ping",
-            options: Options(
-              responseType: ResponseType.plain,
-            ),
+            options: Options(responseType: ResponseType.plain),
           )
-          .timeout(
-            const Duration(
-              milliseconds: 2000,
-            ),
-          );
+          .timeout(const Duration(milliseconds: 2000));
       if (response.statusCode != HttpStatus.ok) {
         return false;
       }
@@ -184,15 +180,9 @@ class Request {
               "arg": arg,
               "home_dir": homeDirPath,
             }),
-            options: Options(
-              responseType: ResponseType.plain,
-            ),
+            options: Options(responseType: ResponseType.plain),
           )
-          .timeout(
-            const Duration(
-              milliseconds: 2000,
-            ),
-          );
+          .timeout(const Duration(milliseconds: 2000));
       if (response.statusCode != HttpStatus.ok) {
         return false;
       }
@@ -222,13 +212,13 @@ class Request {
 
   Future<Map<String, dynamic>?> getCoreVersion() async {
     try {
-      final response = await _dio.get<Map<String, dynamic>>(
-        "http://$defaultExternalController/version",
-        options: Options(
-          responseType: ResponseType.json,
-        ),
-      ).timeout(const Duration(seconds: 2));
-      
+      final response = await _dio
+          .get<Map<String, dynamic>>(
+            "http://$defaultExternalController/version",
+            options: Options(responseType: ResponseType.json),
+          )
+          .timeout(const Duration(seconds: 2));
+
       if (response.statusCode != HttpStatus.ok) return null;
       return response.data;
     } catch (_) {

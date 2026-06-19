@@ -17,12 +17,6 @@ abstract mixin class AppMessageListener {
   void onLoaded(String providerName) {}
 }
 
-// abstract mixin class ServiceMessageListener {
-//   onProtect(Fd fd) {}
-//
-//   onProcess(ProcessData process) {}
-// }
-
 @freezed
 class SetupParams with _$SetupParams {
   const factory SetupParams({
@@ -172,27 +166,6 @@ class Now with _$Now {
 
   factory Now.fromJson(Map<String, Object?> json) => _$NowFromJson(json);
 }
-
-// @freezed
-// class ProcessData with _$ProcessData {
-//   const factory ProcessData({
-//     required String id,
-//     required Metadata metadata,
-//   }) = _ProcessData;
-//
-//   factory ProcessData.fromJson(Map<String, Object?> json) =>
-//       _$ProcessDataFromJson(json);
-// }
-//
-// @freezed
-// class Fd with _$Fd {
-//   const factory Fd({
-//     required String id,
-//     required int value,
-//   }) = _Fd;
-//
-//   factory Fd.fromJson(Map<String, Object?> json) => _$FdFromJson(json);
-// }
 
 @freezed
 class ProviderSubscriptionInfo with _$ProviderSubscriptionInfo {

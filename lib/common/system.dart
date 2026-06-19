@@ -131,20 +131,37 @@ class System {
         );
         return AuthorizeCode.error;
       }
-      final shell = Platform.environment['SHELL'] ?? 'bash';
       final password = await globalState.showCommonDialog<String>(
         child: InputDialog(
           title: appLocalizations.pleaseInputAdminPassword,
           value: '',
         ),
       );
-      final escapedCorePath = corePath.replaceAll('"', r'\"');
-      final arguments = [
-        "-c",
-        'echo "$password" | sudo -S chown root:root "$escapedCorePath" && echo "$password" | sudo -S chmod +sx "$escapedCorePath"'
-      ];
-      final result = await Process.run(shell, arguments);
-      if (result.exitCode != 0) {
+      if (password == null || password.isEmpty) {
+        return AuthorizeCode.error;
+      }
+
+      // Run privileged commands via `sudo -S`, feeding the password through
+      // stdin instead of interpolating it into a shell command string. This
+      // removes the shell command-injection vector (a crafted password could
+      // otherwise run arbitrary commands as root) and keeps the password out
+      // of the process argument list (which is visible via `ps`). Arguments
+      // are passed as a list, so corePath is never re-parsed by a shell and
+      // no manual escaping is required.
+      Future<int> runAsRoot(List<String> command) async {
+        final process = await Process.start('sudo', ['-S', '-k', ...command]);
+        process.stdin.writeln(password);
+        await process.stdin.close();
+        // Drain stdout/stderr so the child can't block on a full pipe buffer.
+        await process.stdout.drain<void>();
+        await process.stderr.drain<void>();
+        return process.exitCode;
+      }
+
+      if (await runAsRoot(['chown', 'root:root', corePath]) != 0) {
+        return AuthorizeCode.error;
+      }
+      if (await runAsRoot(['chmod', '+sx', corePath]) != 0) {
         return AuthorizeCode.error;
       }
       return AuthorizeCode.success;

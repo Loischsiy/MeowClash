@@ -34,7 +34,10 @@ class Proxy extends ProxyPlatform {
 
   Future<bool> _startProxyWithLinux(int port, List<String> bypassDomain) async {
     try {
-      final homeDir = Platform.environment['HOME']!;
+      final homeDir = Platform.environment['HOME'];
+      if (homeDir == null) {
+        return false;
+      }
       final configDir = join(homeDir, ".config");
       final cmdList = List<List<String>>.empty(growable: true);
       final desktop = Platform.environment['XDG_CURRENT_DESKTOP'];
@@ -68,7 +71,7 @@ class Proxy extends ProxyPlatform {
         cmdList.add(
           ["gsettings", "set", "org.gnome.system.proxy", "mode", "manual"],
         );
-        final ignoreHosts = "\"['${bypassDomain.join("', '")}']\"";
+        final ignoreHosts = "['${bypassDomain.join("', '")}']";
         cmdList.add(
           [
             "gsettings",
@@ -99,24 +102,6 @@ class Proxy extends ProxyPlatform {
               "$port"
             ],
           );
-          cmdList.add(
-            [
-              "gsettings",
-              "set",
-              "org.gnome.system.proxy.${type.name}",
-              "port",
-              "$port"
-            ],
-          );
-          cmdList.add(
-            [
-              "gsettings",
-              "set",
-              "org.gnome.system.proxy.${type.name}",
-              "port",
-              "$port"
-            ],
-          );
         }
         if (isKDE) {
           cmdList.add(
@@ -134,17 +119,21 @@ class Proxy extends ProxyPlatform {
         }
       }
       for (final cmd in cmdList) {
-        await Process.run(cmd[0], cmd.sublist(1), runInShell: true);
+        await Process.run(cmd[0], cmd.sublist(1));
       }
       return true;
-    } catch (_) {
+    } catch (e) {
+      stderr.writeln("Proxy: failed to enable system proxy on Linux: $e");
       return false;
     }
   }
 
   Future<bool> _stopProxyWithLinux() async {
     try {
-      final homeDir = Platform.environment['HOME']!;
+      final homeDir = Platform.environment['HOME'];
+      if (homeDir == null) {
+        return false;
+      }
       final configDir = join(homeDir, ".config/");
       final cmdList = List<List<String>>.empty(growable: true);
       final desktop = Platform.environment['XDG_CURRENT_DESKTOP'];
@@ -171,7 +160,8 @@ class Proxy extends ProxyPlatform {
         await Process.run(cmd[0], cmd.sublist(1));
       }
       return true;
-    } catch (_) {
+    } catch (e) {
+      stderr.writeln("Proxy: failed to disable system proxy on Linux: $e");
       return false;
     }
   }

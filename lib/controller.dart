@@ -1627,7 +1627,9 @@ class AppController {
         archive.files.where((item) => !item.name.endsWith(".json"));
     final configIndex =
         configs.indexWhere((config) => config.name == "config.json");
-    if (configIndex == -1) throw "invalid backup file";
+    if (configIndex == -1) {
+      throw const FormatException("invalid backup file");
+    }
     final configFile = configs[configIndex];
     var tempConfig = Config.compatibleFromJson(
       json.decode(
@@ -1636,12 +1638,20 @@ class AppController {
     );
     for (final profile in profiles) {
       if (!profile.isFile) continue;
-      final filePath = join(homeDirPath, profile.name);
-      final canonicalizedHome = canonicalize(homeDirPath);
-      final canonicalizedFile = canonicalize(filePath);
-      if (!canonicalizedFile.startsWith(canonicalizedHome + separator) &&
-          canonicalizedFile != canonicalizedHome) {
-        throw "Path traversal detected in backup archive";
+      final entryName = profile.name;
+      // Reject absolute paths and any ".." traversal segments outright.
+      if (isAbsolute(entryName) ||
+          split(entryName).any((segment) => segment == "..")) {
+        throw const FormatException(
+          "Path traversal detected in backup archive",
+        );
+      }
+      final filePath = join(homeDirPath, entryName);
+      // Ensure the resolved path stays strictly inside the home directory.
+      if (!isWithin(homeDirPath, filePath)) {
+        throw const FormatException(
+          "Path traversal detected in backup archive",
+        );
       }
       final file = File(filePath);
       await file.create(recursive: true);

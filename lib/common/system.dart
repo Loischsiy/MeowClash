@@ -101,6 +101,48 @@ class System {
     }
   }
 
+  /// Resolves [name] to an absolute executable path.
+  ///
+  /// This matters for privilege-elevation helpers: both `pkexec` and `sudo`
+  /// run the target with a sanitized PATH that frequently omits `/usr/sbin`
+  /// and `/sbin` (where `setcap` lives), and `pkexec` does not search PATH the
+  /// way a shell does. Passing a bare name like `setcap` then fails with
+  /// exit 127 ("No such file or directory") even though the tool is installed.
+  /// We first try `command -v`, then fall back to well-known sbin/bin
+  /// locations. Returns null if the executable cannot be found anywhere
+  /// (e.g. a minimal distro shipped without libcap's setcap binary).
+  Future<String?> _resolveExecutable(String name) async {
+    try {
+      final result = await Process.run(
+        'sh',
+        ['-c', r'command -v -- "$1"', '_', name],
+      );
+      if (result.exitCode == 0) {
+        final path = result.stdout.toString().trim();
+        if (path.startsWith('/')) {
+          return path;
+        }
+      }
+    } on ProcessException {
+      // Ignore and try the well-known locations below.
+    }
+    const candidateDirs = [
+      '/usr/sbin/',
+      '/sbin/',
+      '/usr/bin/',
+      '/bin/',
+      '/usr/local/sbin/',
+      '/usr/local/bin/',
+    ];
+    for (final dir in candidateDirs) {
+      final candidate = '$dir$name';
+      if (await File(candidate).exists()) {
+        return candidate;
+      }
+    }
+    return null;
+  }
+
   Future<AuthorizeCode> authorizeCore() async {
     if (Platform.isAndroid) {
       return AuthorizeCode.error;
@@ -148,18 +190,54 @@ class System {
       // Preferred path: a graphical polkit prompt (pkexec) that grants only
       // the cap_net_admin capability the core needs for TUN. This never routes
       // the password through our app and avoids making the core setuid root.
+      //
+      // setcap must be addressed by ABSOLUTE PATH here. pkexec/sudo run with a
+      // sanitized PATH that usually omits /usr/sbin, and pkexec does not search
+      // PATH like a shell — so `pkexec setcap ...` fails with exit 127
+      // ("Cannot run program setcap: No such file or directory") on many
+      // distros even when libcap is installed. If setcap is missing entirely
+      // we fall back to making the core setuid root, which needs no libcap.
       const capabilities = 'cap_net_admin,cap_net_raw+ep';
+      final setcapPath = await _resolveExecutable('setcap');
       if (await _hasExecutable('pkexec')) {
-        final result = await Process.run(
+        // 1) Least privilege: grant only cap_net_admin via setcap if present.
+        if (setcapPath != null) {
+          final result = await Process.run(
+            'pkexec',
+            [setcapPath, capabilities, corePath],
+          );
+          if (result.exitCode == 0) {
+            return AuthorizeCode.success;
+          }
+          commonPrint.log(
+            'authorizeCore: pkexec setcap failed (exit ${result.exitCode}): '
+            '${result.stderr}',
+          );
+        } else {
+          commonPrint.log(
+            'authorizeCore: setcap not found, using pkexec setuid-root fallback',
+          );
+        }
+        // 2) Fallback: make the core setuid root in a single graphical prompt.
+        //    corePath is passed as a positional argument (\$1) and never
+        //    interpolated into the script text, so there is no shell-injection
+        //    surface even if the path contained spaces or metacharacters.
+        final setuidResult = await Process.run(
           'pkexec',
-          ['setcap', capabilities, corePath],
+          [
+            'sh',
+            '-c',
+            r'chown root:root "$1" && chmod +sx "$1"',
+            '_',
+            corePath,
+          ],
         );
-        if (result.exitCode == 0) {
+        if (setuidResult.exitCode == 0) {
           return AuthorizeCode.success;
         }
         commonPrint.log(
-          'authorizeCore: pkexec setcap failed (exit ${result.exitCode}): '
-          '${result.stderr}',
+          'authorizeCore: pkexec setuid fallback failed '
+          '(exit ${setuidResult.exitCode}): ${setuidResult.stderr}',
         );
         // Fall through to the password-based fallback below.
       }
@@ -192,8 +270,10 @@ class System {
       }
 
       // Prefer least-privilege capabilities via sudo when setcap exists.
-      if (await _hasExecutable('setcap')) {
-        if (await runAsRoot(['setcap', capabilities, corePath]) == 0) {
+      // Use the absolute path resolved above for the same PATH-sanitization
+      // reason as the pkexec branch.
+      if (setcapPath != null) {
+        if (await runAsRoot([setcapPath, capabilities, corePath]) == 0) {
           return AuthorizeCode.success;
         }
         commonPrint.log(

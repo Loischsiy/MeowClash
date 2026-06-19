@@ -163,6 +163,7 @@ class _InputDialogState extends State<InputDialog> {
           runSpacing: 16,
           children: [
             TextFormField(
+              strutStyle: const StrutStyle(forceStrutHeight: true),
               keyboardType: TextInputType.url,
               maxLines: 5,
               minLines: 1,
@@ -527,6 +528,7 @@ class _AddDialogState extends State<AddDialog> {
           children: [
             if (keyField != null)
               TextFormField(
+                strutStyle: const StrutStyle(forceStrutHeight: true),
                 maxLines: 2,
                 minLines: 1,
                 controller: keyController,
@@ -549,6 +551,7 @@ class _AddDialogState extends State<AddDialog> {
                 },
               ),
             TextFormField(
+              strutStyle: const StrutStyle(forceStrutHeight: true),
               maxLines: 3,
               minLines: 1,
               controller: valueController,

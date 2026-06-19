@@ -208,6 +208,7 @@ class _URLFormDialogState extends State<URLFormDialog> {
           children: [
             TextField(
               controller: urlController,
+              strutStyle: const StrutStyle(forceStrutHeight: true),
               keyboardType: TextInputType.url,
               autofocus: true,
               minLines: 1,
@@ -220,6 +221,7 @@ class _URLFormDialogState extends State<URLFormDialog> {
             const SizedBox(height: 16),
             TextField(
               controller: passwordController,
+              strutStyle: const StrutStyle(forceStrutHeight: true),
               obscureText: !_showPassword,
               autofillHints: const [AutofillHints.password],
               decoration: InputDecoration(
@@ -244,6 +246,7 @@ class _URLFormDialogState extends State<URLFormDialog> {
             const SizedBox(height: 16),
             TextField(
               controller: iterationsController,
+              strutStyle: const StrutStyle(forceStrutHeight: true),
               keyboardType: TextInputType.number,
               onSubmitted: (_) => _handleSubmit(),
               decoration: InputDecoration(

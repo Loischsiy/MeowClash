@@ -428,6 +428,13 @@ class GlobalState {
       rawConfig["external-ui"] = "";
     }
     rawConfig["interface-name"] = "";
+    // Let the core auto-detect the physical outbound interface. Without this,
+    // TUN's auto-route default route also captures the core's own dials to the
+    // proxy server (interface-name is empty), creating a routing loop where all
+    // proxied traffic times out. On Linux this is required for TUN to route at
+    // all; the Proxy-tab delay test works without it because it isn't affected
+    // by the TUN default route, which is why only TUN mode timed out.
+    rawConfig["auto-detect-interface"] = true;
     if (rawConfig["external-ui-url"] == null || rawConfig["external-ui-url"] == "") {
       rawConfig["external-ui-url"] = "";
     }

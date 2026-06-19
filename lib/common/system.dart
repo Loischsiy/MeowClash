@@ -87,6 +87,20 @@ class System {
         (output.contains('=ep') || output.contains('+ep'));
   }
 
+  /// Returns true if [name] is an executable found on PATH.
+  Future<bool> _hasExecutable(String name) async {
+    try {
+      final result = await Process.run(
+        'sh',
+        ['-c', r'command -v -- "$1"', '_', name],
+      );
+      return result.exitCode == 0 &&
+          result.stdout.toString().trim().isNotEmpty;
+    } on ProcessException {
+      return false;
+    }
+  }
+
   Future<AuthorizeCode> authorizeCore() async {
     if (Platform.isAndroid) {
       return AuthorizeCode.error;
@@ -131,6 +145,32 @@ class System {
         );
         return AuthorizeCode.error;
       }
+      // Preferred path: a graphical polkit prompt (pkexec) that grants only
+      // the cap_net_admin capability the core needs for TUN. This never routes
+      // the password through our app and avoids making the core setuid root.
+      const capabilities = 'cap_net_admin,cap_net_raw+ep';
+      if (await _hasExecutable('pkexec')) {
+        final result = await Process.run(
+          'pkexec',
+          ['setcap', capabilities, corePath],
+        );
+        if (result.exitCode == 0) {
+          return AuthorizeCode.success;
+        }
+        commonPrint.log(
+          'authorizeCore: pkexec setcap failed (exit ${result.exitCode}): '
+          '${result.stderr}',
+        );
+        // Fall through to the password-based fallback below.
+      }
+
+      // Fallback: ask for the password and use `sudo -S`, feeding the password
+      // through stdin instead of interpolating it into a shell command string.
+      // This removes the shell command-injection vector (a crafted password
+      // could otherwise run arbitrary commands as root) and keeps the password
+      // out of the process argument list (visible via `ps`). Arguments are
+      // passed as a list, so corePath is never re-parsed by a shell and no
+      // manual escaping is required.
       final password = await globalState.showCommonDialog<String>(
         child: InputDialog(
           title: appLocalizations.pleaseInputAdminPassword,
@@ -141,13 +181,6 @@ class System {
         return AuthorizeCode.error;
       }
 
-      // Run privileged commands via `sudo -S`, feeding the password through
-      // stdin instead of interpolating it into a shell command string. This
-      // removes the shell command-injection vector (a crafted password could
-      // otherwise run arbitrary commands as root) and keeps the password out
-      // of the process argument list (which is visible via `ps`). Arguments
-      // are passed as a list, so corePath is never re-parsed by a shell and
-      // no manual escaping is required.
       Future<int> runAsRoot(List<String> command) async {
         final process = await Process.start('sudo', ['-S', '-k', ...command]);
         process.stdin.writeln(password);
@@ -158,6 +191,17 @@ class System {
         return process.exitCode;
       }
 
+      // Prefer least-privilege capabilities via sudo when setcap exists.
+      if (await _hasExecutable('setcap')) {
+        if (await runAsRoot(['setcap', capabilities, corePath]) == 0) {
+          return AuthorizeCode.success;
+        }
+        commonPrint.log(
+          'authorizeCore: sudo setcap failed, falling back to setuid root',
+        );
+      }
+
+      // Legacy fallback: make the core binary setuid root.
       if (await runAsRoot(['chown', 'root:root', corePath]) != 0) {
         return AuthorizeCode.error;
       }

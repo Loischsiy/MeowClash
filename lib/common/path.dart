@@ -54,6 +54,21 @@ class AppPath {
   }
 
   Future<String> get resolvedCorePath async {
+    final resolved = await _resolveCorePath();
+    // On Linux the app frequently runs from a read-only AppImage mount, where
+    // the core binary can never be granted the privileges TUN needs
+    // (setcap/setuid fail with "Read-only file system"). Stage the core in a
+    // writable per-user directory and run it from there. Nix packages and an
+    // explicit MEOWCLASH_CORE_PATH override are left untouched.
+    if (Platform.isLinux &&
+        !isNixPackage &&
+        (Platform.environment['MEOWCLASH_CORE_PATH'] ?? '').isEmpty) {
+      return _ensureWritableLinuxCore(resolved);
+    }
+    return resolved;
+  }
+
+  Future<String> _resolveCorePath() async {
     final path = corePath;
     if (isAbsolute(path) || path.contains(separator)) {
       return path;
@@ -69,6 +84,37 @@ class AppPath {
       }
     }
     return path;
+  }
+
+  /// Copies the bundled Linux core into a writable directory so it can be
+  /// granted privileges. Returns the staged path, or [sourcePath] on failure.
+  Future<String> _ensureWritableLinuxCore(String sourcePath) async {
+    try {
+      final source = File(sourcePath);
+      if (!await source.exists()) {
+        return sourcePath;
+      }
+      final dataDirPath = await homeDirPath;
+      final coresDir = Directory(join(dataDirPath, 'cores'));
+      if (!await coresDir.exists()) {
+        await coresDir.create(recursive: true);
+      }
+      final destPath = join(coresDir.path, 'MeowClashCore');
+      final dest = File(destPath);
+      // Re-copy only when the bundled core changed (e.g. after an app update),
+      // so that previously granted capabilities on the staged copy persist.
+      final needsCopy = !await dest.exists() ||
+          await source.length() != await dest.length() ||
+          (await source.lastModified()).isAfter(await dest.lastModified());
+      if (needsCopy) {
+        await source.copy(destPath);
+        await Process.run('chmod', ['+x', destPath]);
+      }
+      return destPath;
+    } catch (error) {
+      commonPrint.log('AppPath: failed to stage writable Linux core: $error');
+      return sourcePath;
+    }
   }
 
   String get helperPath => join(executableDirPath, "$appHelperService$executableExtension");

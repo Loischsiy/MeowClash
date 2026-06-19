@@ -127,8 +127,6 @@ class _DashboardViewState extends ConsumerState<DashboardView> with PageMixin {
     DashboardWidget item, {
     required bool globalModeEnabled,
     required bool hasAnnounceData,
-    required bool hasServiceInfoData,
-    required bool hasServerInfoData,
   }) {
     if (!item.platforms.contains(SupportPlatform.currentPlatform)) {
       return false;
@@ -144,12 +142,6 @@ class _DashboardViewState extends ConsumerState<DashboardView> with PageMixin {
     if (item == DashboardWidget.announce && !hasAnnounceData) {
       return false;
     }
-    if (item == DashboardWidget.serviceInfo && !hasServiceInfoData) {
-      return false;
-    }
-    if (item == DashboardWidget.changeServerButton && !hasServerInfoData) {
-      return false;
-    }
     
     return true;
   }
@@ -159,8 +151,6 @@ class _DashboardViewState extends ConsumerState<DashboardView> with PageMixin {
     final dashboardState = ref.watch(dashboardStateProvider);
     final globalModeEnabled = ref.watch(globalModeEnabledProvider);
     final hasAnnounce = ref.watch(hasAnnounceDataProvider);
-    final hasServiceInfo = ref.watch(hasServiceInfoDataProvider);
-    final hasServerInfo = ref.watch(hasServerInfoDataProvider);
     final columns = max(4 * ((dashboardState.viewWidth / 320).ceil()), 8);
     final spacing = 16.ap;
     
@@ -168,8 +158,6 @@ class _DashboardViewState extends ConsumerState<DashboardView> with PageMixin {
       item,
       globalModeEnabled: globalModeEnabled,
       hasAnnounceData: hasAnnounce,
-      hasServiceInfoData: hasServiceInfo,
-      hasServerInfoData: hasServerInfo,
     );
     
     final children = [

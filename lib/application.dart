@@ -11,6 +11,7 @@ import 'package:meowclash/plugins/app.dart';
 import 'package:meowclash/providers/providers.dart';
 import 'package:meowclash/state.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -153,6 +154,10 @@ class ApplicationState extends ConsumerState<Application> {
               final themeProps = ref.watch(themeSettingProvider);
               return MaterialApp(
                 debugShowCheckedModeBanner: false,
+                shortcuts: {
+                  ...WidgetsApp.defaultShortcuts,
+                  ..._physicalTextEditingShortcuts,
+                },
                 navigatorKey: globalState.navigatorKey,
                 checkerboardRasterCacheImages: false,
                 checkerboardOffscreenLayers: false,
@@ -233,3 +238,48 @@ class ApplicationState extends ConsumerState<Application> {
     super.dispose();
   }
 }
+
+/// Activates text-editing shortcuts by physical key position instead of the
+/// produced logical character.
+///
+/// This fixes copy/paste/cut/select-all not working on Linux (and Windows)
+/// when a non-Latin keyboard layout (e.g. Cyrillic) is active: Flutter's
+/// default text-editing shortcuts match the logical key, so with a Cyrillic
+/// layout Ctrl+V reports the logical key "м" instead of "v" and the paste
+/// shortcut never fires. Matching on the physical key makes Ctrl+V/C/X/A work
+/// regardless of the active layout.
+class _CtrlPhysicalActivator extends ShortcutActivator {
+  const _CtrlPhysicalActivator(this.physicalKey);
+
+  final PhysicalKeyboardKey physicalKey;
+
+  @override
+  bool accepts(KeyEvent event, HardwareKeyboard state) {
+    if (event is! KeyDownEvent) {
+      return false;
+    }
+    if (event.physicalKey != physicalKey) {
+      return false;
+    }
+    // Use Cmd on macOS, Ctrl on Linux/Windows.
+    return Platform.isMacOS ? state.isMetaPressed : state.isControlPressed;
+  }
+
+  @override
+  Iterable<LogicalKeyboardKey>? get triggers => null;
+
+  @override
+  String debugDescribeKeys() =>
+      '${Platform.isMacOS ? 'Meta' : 'Control'} + ${physicalKey.debugName}';
+}
+
+Map<ShortcutActivator, Intent> get _physicalTextEditingShortcuts => {
+      const _CtrlPhysicalActivator(PhysicalKeyboardKey.keyV):
+          const PasteTextIntent(SelectionChangedCause.keyboard),
+      const _CtrlPhysicalActivator(PhysicalKeyboardKey.keyC):
+          CopySelectionTextIntent.copy,
+      const _CtrlPhysicalActivator(PhysicalKeyboardKey.keyX):
+          CopySelectionTextIntent.cut(SelectionChangedCause.keyboard),
+      const _CtrlPhysicalActivator(PhysicalKeyboardKey.keyA):
+          const SelectAllTextIntent(SelectionChangedCause.keyboard),
+    };

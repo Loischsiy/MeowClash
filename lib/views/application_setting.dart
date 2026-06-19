@@ -29,10 +29,78 @@ class OpenLogsFolderItem extends ConsumerWidget {
       } else if (Platform.isMacOS) {
         await Process.run('open', [logsPath]);
       } else if (Platform.isLinux) {
-        await Process.run('xdg-open', [logsPath]);
+        await _openLinuxFolder(logsPath);
       }
     } catch (e) {
       commonPrint.log('Failed to open logs folder: $e');
+    }
+  }
+
+  Future<void> _openLinuxFolder(String path) async {
+    // When running from an AppImage (or other bundled build) the process
+    // environment is polluted with loader/library paths (LD_LIBRARY_PATH, GTK,
+    // GDK, etc.) that point at the bundle. A system file manager launched with
+    // that environment inherits these paths and usually fails to start, so the
+    // folder never opens. Strip those variables for the spawned process and try
+    // several common openers as a fallback.
+    final cleanEnv = Map<String, String>.from(Platform.environment);
+    const pollutedKeys = [
+      'LD_LIBRARY_PATH',
+      'LD_PRELOAD',
+      'GTK_PATH',
+      'GTK_EXE_PREFIX',
+      'GTK_DATA_PREFIX',
+      'GDK_PIXBUF_MODULE_FILE',
+      'GDK_PIXBUF_MODULEDIR',
+      'GSETTINGS_SCHEMA_DIR',
+      'GIO_MODULE_DIR',
+      'GIO_EXTRA_MODULES',
+      'FONTCONFIG_FILE',
+      'FONTCONFIG_PATH',
+      'GCONV_PATH',
+      'QT_PLUGIN_PATH',
+      'PYTHONPATH',
+      'PYTHONHOME',
+      'PERLLIB',
+    ];
+    for (final key in pollutedKeys) {
+      cleanEnv.remove(key);
+    }
+    // AppRun stores the pre-launch loader path here; restore it if present so
+    // the file manager uses the host system libraries.
+    final originalLdPath = Platform.environment['APPDIR_LD_LIBRARY_PATH'] ??
+        Platform.environment['LD_LIBRARY_PATH_ORIG'];
+    if (originalLdPath != null && originalLdPath.isNotEmpty) {
+      cleanEnv['LD_LIBRARY_PATH'] = originalLdPath;
+    }
+
+    const openers = <List<String>>[
+      ['xdg-open'],
+      ['gio', 'open'],
+      ['nautilus'],
+      ['dolphin'],
+      ['nemo'],
+      ['thunar'],
+      ['pcmanfm'],
+      ['caja'],
+    ];
+    for (final opener in openers) {
+      try {
+        final result = await Process.run(
+          opener.first,
+          [...opener.skip(1), path],
+          environment: cleanEnv,
+          includeParentEnvironment: false,
+        );
+        if (result.exitCode == 0) {
+          return;
+        }
+        commonPrint.log(
+          'open logs folder: ${opener.first} exited ${result.exitCode}: ${result.stderr}',
+        );
+      } catch (e) {
+        commonPrint.log('open logs folder: ${opener.first} not available: $e');
+      }
     }
   }
 

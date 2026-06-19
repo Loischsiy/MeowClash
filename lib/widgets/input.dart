@@ -167,6 +167,7 @@ class _InputDialogState extends State<InputDialog> {
               keyboardType: TextInputType.url,
               maxLines: 5,
               minLines: 1,
+              contextMenuBuilder: pasteableContextMenuBuilder,
               controller: textController,
               onFieldSubmitted: (_) {
                 _handleUpdate();
@@ -531,6 +532,7 @@ class _AddDialogState extends State<AddDialog> {
                 strutStyle: const StrutStyle(forceStrutHeight: true),
                 maxLines: 2,
                 minLines: 1,
+                contextMenuBuilder: pasteableContextMenuBuilder,
                 controller: keyController,
                 decoration: InputDecoration(
                   border: const OutlineInputBorder(),
@@ -554,6 +556,7 @@ class _AddDialogState extends State<AddDialog> {
               strutStyle: const StrutStyle(forceStrutHeight: true),
               maxLines: 3,
               minLines: 1,
+              contextMenuBuilder: pasteableContextMenuBuilder,
               controller: valueController,
               decoration: InputDecoration(
                 border: const OutlineInputBorder(),
@@ -595,4 +598,39 @@ class _InputItem extends StatelessWidget {
         child: child,
       ),
     );
+}
+
+/// Builds the text-field context menu while guaranteeing a "Paste" entry.
+///
+/// On Linux the framework's clipboard probe (`Clipboard.hasStrings`) is
+/// unreliable, so the default selection toolbar frequently omits the Paste
+/// button even when the clipboard holds text (the user only sees "Select all").
+/// Here we keep all of the default buttons and add a Paste button when it is
+/// missing. The actual paste still goes through the framework's `pasteText`,
+/// which reads the clipboard via `Clipboard.getData`.
+Widget pasteableContextMenuBuilder(
+  BuildContext context,
+  EditableTextState editableTextState,
+) {
+  final buttonItems = List<ContextMenuButtonItem>.of(
+    editableTextState.contextMenuButtonItems,
+  );
+  final hasPaste = buttonItems.any(
+    (item) => item.type == ContextMenuButtonType.paste,
+  );
+  if (!hasPaste) {
+    buttonItems.insert(
+      0,
+      ContextMenuButtonItem(
+        type: ContextMenuButtonType.paste,
+        onPressed: () {
+          editableTextState.pasteText(SelectionChangedCause.toolbar);
+        },
+      ),
+    );
+  }
+  return AdaptiveTextSelectionToolbar.buttonItems(
+    anchors: editableTextState.contextMenuAnchors,
+    buttonItems: buttonItems,
+  );
 }

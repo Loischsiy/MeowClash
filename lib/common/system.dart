@@ -143,6 +143,53 @@ class System {
     return null;
   }
 
+  /// Ensures the Linux `/dev/net/tun` device exists by loading the kernel
+  /// `tun` module when necessary.
+  ///
+  /// Granting cap_net_admin to the core is not enough for TUN: the core also
+  /// has to open `/dev/net/tun`. If the `tun` module is not loaded that node
+  /// is absent and the core reports "configure tun interface: no such file or
+  /// directory" (ENOENT) — which is distinct from a missing capability
+  /// (EPERM, "operation not permitted"). We load the module with a single
+  /// graphical prompt (pkexec), and surface a clear, actionable message if it
+  /// still cannot be loaded.
+  Future<void> _ensureLinuxTunDevice() async {
+    if (!Platform.isLinux) {
+      return;
+    }
+    if (await File('/dev/net/tun').exists()) {
+      return;
+    }
+    // modprobe lives in /usr/sbin or /sbin and needs root, so resolve its
+    // absolute path for the same PATH-sanitization reason as setcap.
+    final modprobePath = await _resolveExecutable('modprobe');
+    if (modprobePath == null) {
+      globalState.showNotifier(
+        'TUN needs the kernel "tun" module but modprobe was not found. '
+        'Run: sudo modprobe tun',
+      );
+      return;
+    }
+    if (await _hasExecutable('pkexec')) {
+      final result = await Process.run('pkexec', [modprobePath, 'tun']);
+      if (result.exitCode == 0 && await File('/dev/net/tun').exists()) {
+        return;
+      }
+      commonPrint.log(
+        'authorizeCore: pkexec modprobe tun failed '
+        '(exit ${result.exitCode}): ${result.stderr}',
+      );
+    }
+    if (await File('/dev/net/tun').exists()) {
+      return;
+    }
+    globalState.showNotifier(
+      'Could not load the "tun" kernel module automatically. '
+      'Run "sudo modprobe tun" and add "tun" to /etc/modules-load.d/tun.conf '
+      'to enable TUN mode.',
+    );
+  }
+
   Future<AuthorizeCode> authorizeCore() async {
     if (Platform.isAndroid) {
       return AuthorizeCode.error;
@@ -153,6 +200,20 @@ class System {
     }
 
     final corePath = await appPath.resolvedCorePath;
+
+    // TUN also needs the /dev/net/tun device node to exist. When the kernel
+    // "tun" module is not loaded the core fails with
+    //   "configure tun interface: no such file or directory" (ENOENT),
+    // which is distinct from a missing capability (EPERM). This must run even
+    // when the core is already authorized: a granted capability persists
+    // across runs (it lives on the staged binary), yet the module can be
+    // unloaded again after a reboot, leaving an already-"admin" core unable to
+    // create the interface. Running this before the isAdmin short-circuit
+    // guarantees the device is present whenever the user enables TUN.
+    if (Platform.isLinux && !appPath.isNixPackage) {
+      await _ensureLinuxTunDevice();
+    }
+
     final isAdmin = await checkIsAdmin();
     if (isAdmin) {
       return AuthorizeCode.none;

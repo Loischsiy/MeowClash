@@ -1,7 +1,7 @@
 name: meowclash
 description: Fork multi-platform proxy client MeowClash based on ClashMeta, simple and easy to use, open-source and ad-free.
 publish_to: "none"
-version: 1.0.4+20260616
+version: 1.0.5+20260620
 
 environment:
   sdk: ">=3.5.0 <4.0.0"

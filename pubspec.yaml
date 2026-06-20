@@ -90,6 +90,9 @@ flutter:
     - assets/images/
     - assets/images/avatars/
   fonts:
+    - family: NotoSans
+      fonts:
+        - asset: assets/fonts/NotoSans-VariableFont.ttf
     - family: JetBrainsMono
       fonts:
         - asset: assets/fonts/JetBrainsMono-Regular.ttf

@@ -74,12 +74,13 @@ class Profile with _$Profile {
   factory Profile.normal({
     String? label,
     String url = '',
-  }) => Profile(
-      label: label,
-      url: url,
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      autoUpdateDuration: defaultUpdateDuration,
-    );
+  }) =>
+      Profile(
+        label: label,
+        url: url,
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        autoUpdateDuration: defaultUpdateDuration,
+      );
 }
 
 @freezed
@@ -194,7 +195,7 @@ extension ProfileExtension on Profile {
 
     final disposition = response.headers.value("content-disposition");
     final userinfo = response.headers.value('subscription-userinfo');
-    
+
     final responseData = response.data;
     if (responseData == null) {
       throw Exception("Failed to get profile data from response.");
@@ -204,26 +205,27 @@ extension ProfileExtension on Profile {
       responseData,
       password: decryptionPassword ?? providerHeaders['meowclash-password'],
       iterations: decryptionIterations ??
-          int.tryParse(providerHeaders['meowclash-password-iterations'] ?? '') ??
+          int.tryParse(
+              providerHeaders['meowclash-password-iterations'] ?? '') ??
           kDefaultPbkdf2Iterations,
     );
 
     final newProviderHeaders = <String, String>{};
-    
+
     final headersToCollect = [
       'announce',
-      'support-url', 
+      'support-url',
       'profile-update-interval',
       'x-hwid-limit',
     ];
-    
+
     for (final headerName in headersToCollect) {
       final value = response.headers.value(headerName);
       if (value != null && value.isNotEmpty) {
         newProviderHeaders[headerName] = value;
       }
     }
-    
+
     // Only the subscription-decryption credentials are still read from
     // meowclash-* response headers. The rest of the meowclash-* customization
     // system has been removed.
@@ -253,7 +255,7 @@ extension ProfileExtension on Profile {
       newProviderHeaders['meowclash-password-iterations'] =
           providerHeaders['meowclash-password-iterations']!;
     }
-    
+
     Duration? durationFromHeader;
     final updateIntervalHeader = newProviderHeaders['profile-update-interval'];
     if (updateIntervalHeader != null) {
@@ -262,7 +264,7 @@ extension ProfileExtension on Profile {
         durationFromHeader = Duration(hours: hours);
       }
     }
-    
+
     return copyWith(
       label: label ?? utils.getFileNameForDisposition(disposition) ?? id,
       subscriptionInfo: SubscriptionInfo.formHString(userinfo),
@@ -300,7 +302,6 @@ extension ProfileExtension on Profile {
       text,
       password: password,
       iterations: iterations,
-
     );
   }
 
@@ -323,7 +324,22 @@ extension ProfileExtension on Profile {
       throw message;
     }
     final file = await getFile();
-    await file.writeAsString(yaml);
+    await _writeProfileFileAtomically(file, utf8.encode(yaml));
     return copyWith(lastUpdateDate: DateTime.now());
+  }
+
+  Future<void> _writeProfileFileAtomically(File file, List<int> bytes) async {
+    final tempFile = File(
+      '${file.path}.tmp.${DateTime.now().microsecondsSinceEpoch}',
+    );
+    try {
+      await tempFile.writeAsBytes(bytes, flush: true);
+      await tempFile.rename(file.path);
+    } catch (_) {
+      if (await tempFile.exists()) {
+        await tempFile.delete();
+      }
+      rethrow;
+    }
   }
 }

@@ -1555,6 +1555,20 @@ class AppController {
             (state) => state.snippet!,
           ),
         ),
+        // Enabled proxy chains are injected as hidden groups at config-build
+        // time, so they aren't in `snippet.proxyGroups`. Offer them explicitly
+        // here so a rule can target a chain (otherwise it only works in global
+        // mode, never via rules).
+        chainNames: ref.read(
+          profileOverrideStateProvider.select(
+            (state) =>
+                state.overrideData?.enabledChains
+                    .map((chain) => chain.name)
+                    .where((name) => name.isNotEmpty)
+                    .toList() ??
+                const <String>[],
+          ),
+        ),
       ),
     );
     if (res == null) {

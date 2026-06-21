@@ -21,16 +21,17 @@ _$AppSettingPropsImpl _$$AppSettingPropsImplFromJson(
       closeConnections: json['closeConnections'] as bool? ?? true,
       testUrl: json['testUrl'] as String? ?? defaultTestUrl,
       isAnimateToPage: json['isAnimateToPage'] as bool? ?? true,
-      autoCheckUpdate: json['autoCheckUpdate'] as bool? ?? false,
+      autoCheckUpdate: json['autoCheckUpdate'] as bool? ?? true,
       showLabel: json['showLabel'] as bool? ?? false,
       disclaimerAccepted: json['disclaimerAccepted'] as bool? ?? false,
-      minimizeOnExit: json['minimizeOnExit'] as bool? ?? false,
+      minimizeOnExit: json['minimizeOnExit'] as bool? ?? true,
       hidden: json['hidden'] as bool? ?? false,
       developerMode: json['developerMode'] as bool? ?? false,
       overrideProviderSettings:
           json['overrideProviderSettings'] as bool? ?? false,
       overrideNetworkSettings:
           json['overrideNetworkSettings'] as bool? ?? false,
+      chainMode: json['chainMode'] as bool? ?? false,
       recoveryStrategy: $enumDecodeNullable(
               _$RecoveryStrategyEnumMap, json['recoveryStrategy']) ??
           RecoveryStrategy.compatible,
@@ -59,6 +60,7 @@ Map<String, dynamic> _$$AppSettingPropsImplToJson(
       'developerMode': instance.developerMode,
       'overrideProviderSettings': instance.overrideProviderSettings,
       'overrideNetworkSettings': instance.overrideNetworkSettings,
+      'chainMode': instance.chainMode,
       'recoveryStrategy': _$RecoveryStrategyEnumMap[instance.recoveryStrategy]!,
     };
 
@@ -265,7 +267,7 @@ _$ThemePropsImpl _$$ThemePropsImplFromJson(Map<String, dynamic> json) =>
               .toList() ??
           defaultPrimaryColors,
       themeMode: $enumDecodeNullable(_$ThemeModeEnumMap, json['themeMode']) ??
-          ThemeMode.dark,
+          ThemeMode.system,
       schemeVariant: $enumDecodeNullable(
               _$DynamicSchemeVariantEnumMap, json['schemeVariant']) ??
           DynamicSchemeVariant.content,

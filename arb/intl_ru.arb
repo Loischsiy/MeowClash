@@ -526,5 +526,14 @@
   "createProfile": "Создать профиль",
   "requestDetails": "Подробности запроса",
   "connectionDetails": "Подробности соединения",
-  "logDetails": "Подробности лога"
+  "logDetails": "Подробности лога",
+  "proxyChains": "Прокси-цепочки",
+  "proxyChainsDesc": "Объединение прокси в цепочку: вход → выход",
+  "chainMode": "Режим цепочек",
+  "chainName": "Название цепочки",
+  "hop": "Звено",
+  "firstHop": "Первое звено (вход)",
+  "secondHop": "Второе звено (выход)",
+  "addHop": "Добавить звено",
+  "chainHopsRequired": "Выберите минимум два звена"
 }

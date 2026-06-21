@@ -670,6 +670,96 @@ class GlobalState {
       }
     }
     rawConfig["rule"] = rules;
+
+    // Inject profile-specific proxy chains. mihomo removed the `relay` group
+    // type and only honors `dialer-proxy` on concrete proxy nodes, so each
+    // chain is realized by cloning its exit hop (and any middle hops) into new
+    // proxy nodes that carry `dialer-proxy`, plus a `select` group named after
+    // the chain. Like override rules above, chains live in OverrideData (not
+    // the subscription YAML), so they survive subscription auto-updates: they
+    // are applied on top of the parsed config right before it is handed to the
+    // core. A chain becomes a normal selectable group on the proxies page and
+    // a valid rule target. Skipped when a JS override script is active, since
+    // the script owns the whole config.
+    if (config.scriptProps.currentScript == null) {
+      final existingProxies = (rawConfig["proxies"] as List?) ?? <dynamic>[];
+      // Index inline proxy node definitions by name so a chain can clone its
+      // exit hop. Groups and provider-backed nodes aren't here, so they can't
+      // be used as an exit hop (the chain builder UI enforces this).
+      final proxyDefsByName = <String, Map<String, dynamic>>{};
+      for (final p in existingProxies) {
+        if (p is Map && p["name"] is String) {
+          proxyDefsByName[p["name"] as String] = Map<String, dynamic>.from(p);
+        }
+      }
+      final chainConfig = overrideData.buildRunningChainConfig(
+        (name) => proxyDefsByName[name],
+      );
+      if (chainConfig.proxies.isNotEmpty) {
+        final existingProxyNames = <String>{
+          for (final p in existingProxies)
+            if (p is Map && p["name"] is String) p["name"] as String,
+        };
+        final mergedProxies = [...existingProxies];
+        for (final proxy in chainConfig.proxies) {
+          final name = proxy["name"];
+          if (name is String && existingProxyNames.contains(name)) {
+            continue;
+          }
+          mergedProxies.add(proxy);
+        }
+        rawConfig["proxies"] = mergedProxies;
+      }
+      if (chainConfig.proxyGroups.isNotEmpty) {
+        final existingGroups =
+            (rawConfig["proxy-groups"] as List?) ?? <dynamic>[];
+        final existingNames = <String>{
+          for (final g in existingGroups)
+            if (g is Map && g["name"] is String) g["name"] as String,
+        };
+        final mergedGroups = [...existingGroups];
+        for (final chainGroup in chainConfig.proxyGroups) {
+          final name = chainGroup["name"];
+          // Don't clobber a subscription group that already uses this name;
+          // the chain builder UI should prevent such collisions up front.
+          if (name is String && existingNames.contains(name)) {
+            continue;
+          }
+          mergedGroups.add(chainGroup);
+        }
+        rawConfig["proxy-groups"] = mergedGroups;
+      }
+
+      // Chain mode: expose a single visible `select` group whose members are
+      // the (successfully built) chains, and repoint the final MATCH rule to it
+      // so all otherwise-unmatched traffic egresses through the chain the user
+      // picks. The proxies page is narrowed to just this group (see
+      // currentGroupsState). Inert unless the user enabled chain mode AND at
+      // least one chain actually built.
+      final builtChainNames = chainConfig.proxyGroups
+          .map((group) => group["name"])
+          .whereType<String>()
+          .toList();
+      if (config.appSetting.chainMode && builtChainNames.isNotEmpty) {
+        final groups = (rawConfig["proxy-groups"] as List?) ?? <dynamic>[];
+        final hasSelector = groups
+            .any((g) => g is Map && g["name"] == kChainSelectorGroup);
+        if (!hasSelector) {
+          groups.add(<String, dynamic>{
+            "name": kChainSelectorGroup,
+            "type": "select",
+            "proxies": builtChainNames,
+          });
+          rawConfig["proxy-groups"] = groups;
+        }
+        final currentRules =
+            ((rawConfig["rule"] as List?) ?? <dynamic>[]).whereType<String>();
+        rawConfig["rule"] = withChainSelectorMatch(
+          currentRules.toList(),
+          kChainSelectorGroup,
+        );
+      }
+    }
     return rawConfig;
   }
 

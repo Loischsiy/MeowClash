@@ -498,5 +498,14 @@
   "createProfile": "创建配置",
   "requestDetails": "请求详情",
   "connectionDetails": "活跃连接详情",
-  "logDetails": "日志详情"
+  "logDetails": "日志详情",
+  "proxyChains": "代理链",
+  "proxyChainsDesc": "将代理串联：入口 → 出口",
+  "chainMode": "链模式",
+  "chainName": "链名称",
+  "hop": "跳点",
+  "firstHop": "第一跳点（入口）",
+  "secondHop": "第二跳点（出口）",
+  "addHop": "添加跳点",
+  "chainHopsRequired": "请至少选择两个跳点"
 }

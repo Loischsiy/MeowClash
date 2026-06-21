@@ -115,7 +115,7 @@ final requestsProvider =
 );
 
 typedef _$Requests = AutoDisposeNotifier<FixedList<Connection>>;
-String _$providersHash() => r'6e5a8ead4da4ab74a90f8afbb6f7ae70f515ef66';
+String _$providersHash() => r'6f08b674faf175c33fcdc7115d442b06975030ce';
 
 /// See also [Providers].
 @ProviderFor(Providers)

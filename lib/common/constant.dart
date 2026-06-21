@@ -9,6 +9,10 @@ import 'package:meowclash/models/models.dart';
 import 'package:flutter/material.dart';
 
 const appName = "MeowClash";
+// Name of the `select` group that chain mode injects so the user can pick which
+// proxy chain all otherwise-unmatched traffic egresses through. Fixed (not
+// localized) because it's persisted as a selectedMap key.
+const kChainSelectorGroup = "PROXY-CHAINS";
 const appHelperService = "MeowClashHelperService";
 const coreName = "clashx.meta";
 const browserUa =

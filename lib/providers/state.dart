@@ -49,6 +49,16 @@ GroupsState currentGroupsState(Ref ref) {
   final mode =
       ref.watch(patchClashConfigProvider.select((state) => state.mode));
   final groups = ref.watch(groupsProvider);
+  // Chain mode: narrow the proxies page to just the chain selector group so the
+  // only thing the user can pick is which chain to route through.
+  final chainMode = ref.watch(appSettingProvider.select((s) => s.chainMode));
+  final hasChains = ref.watch(currentProfileProvider
+      .select((p) => p?.overrideData.enabledChains.isNotEmpty ?? false));
+  if (chainMode && hasChains) {
+    return GroupsState(
+      value: groups.where((g) => g.name == kChainSelectorGroup).toList(),
+    );
+  }
   return GroupsState(
     value: switch (mode) {
       Mode.direct => [],

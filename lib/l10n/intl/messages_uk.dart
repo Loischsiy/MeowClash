@@ -60,6 +60,19 @@ class MessageLookup extends MessageLookupByLibrary {
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
     "about": MessageLookupByLibrary.simpleMessage("Про програму"),
+    "addHop": MessageLookupByLibrary.simpleMessage("Додати ланку"),
+    "chainHopsRequired": MessageLookupByLibrary.simpleMessage(
+      "Виберіть щонайменше дві ланки",
+    ),
+    "chainMode": MessageLookupByLibrary.simpleMessage("Режим ланцюжків"),
+    "chainName": MessageLookupByLibrary.simpleMessage("Назва ланцюжка"),
+    "firstHop": MessageLookupByLibrary.simpleMessage("Перша ланка (вхід)"),
+    "hop": MessageLookupByLibrary.simpleMessage("Ланка"),
+    "proxyChains": MessageLookupByLibrary.simpleMessage("Ланцюжки проксі"),
+    "proxyChainsDesc": MessageLookupByLibrary.simpleMessage(
+      "Об'єднання проксі в ланцюжок: вхід → вихід",
+    ),
+    "secondHop": MessageLookupByLibrary.simpleMessage("Друга ланка (вихід)"),
     "accessControl": MessageLookupByLibrary.simpleMessage("Контроль доступу"),
     "accessControlAllowDesc": MessageLookupByLibrary.simpleMessage(
       "Лише вибрані застосунки використовуватимуть VPN",

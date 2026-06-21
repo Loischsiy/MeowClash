@@ -59,6 +59,19 @@ class MessageLookup extends MessageLookupByLibrary {
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
     "about": MessageLookupByLibrary.simpleMessage("О программе"),
+    "addHop": MessageLookupByLibrary.simpleMessage("Добавить звено"),
+    "chainHopsRequired": MessageLookupByLibrary.simpleMessage(
+      "Выберите минимум два звена",
+    ),
+    "chainMode": MessageLookupByLibrary.simpleMessage("Режим цепочек"),
+    "chainName": MessageLookupByLibrary.simpleMessage("Название цепочки"),
+    "firstHop": MessageLookupByLibrary.simpleMessage("Первое звено (вход)"),
+    "hop": MessageLookupByLibrary.simpleMessage("Звено"),
+    "proxyChains": MessageLookupByLibrary.simpleMessage("Прокси-цепочки"),
+    "proxyChainsDesc": MessageLookupByLibrary.simpleMessage(
+      "Объединение прокси в цепочку: вход → выход",
+    ),
+    "secondHop": MessageLookupByLibrary.simpleMessage("Второе звено (выход)"),
     "accessControl": MessageLookupByLibrary.simpleMessage("Контроль доступа"),
     "accessControlAllowDesc": MessageLookupByLibrary.simpleMessage(
       "Только выбранные приложения будут использовать VPN",

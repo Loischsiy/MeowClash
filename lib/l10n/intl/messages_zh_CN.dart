@@ -53,6 +53,15 @@ class MessageLookup extends MessageLookupByLibrary {
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
     "about": MessageLookupByLibrary.simpleMessage("关于"),
+    "addHop": MessageLookupByLibrary.simpleMessage("添加跳点"),
+    "chainHopsRequired": MessageLookupByLibrary.simpleMessage("请至少选择两个跳点"),
+    "chainMode": MessageLookupByLibrary.simpleMessage("链模式"),
+    "chainName": MessageLookupByLibrary.simpleMessage("链名称"),
+    "firstHop": MessageLookupByLibrary.simpleMessage("第一跳点（入口）"),
+    "hop": MessageLookupByLibrary.simpleMessage("跳点"),
+    "proxyChains": MessageLookupByLibrary.simpleMessage("代理链"),
+    "proxyChainsDesc": MessageLookupByLibrary.simpleMessage("将代理串联：入口 → 出口"),
+    "secondHop": MessageLookupByLibrary.simpleMessage("第二跳点（出口）"),
     "accessControl": MessageLookupByLibrary.simpleMessage("访问控制"),
     "accessControlAllowDesc": MessageLookupByLibrary.simpleMessage(
       "只允许选中应用进入VPN",

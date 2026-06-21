@@ -93,6 +93,7 @@ class AppSettingProps with _$AppSettingProps {
     @Default(false) bool developerMode,
     @Default(false) bool overrideProviderSettings,
     @Default(false) bool overrideNetworkSettings,
+    @Default(false) bool chainMode,
     @Default(RecoveryStrategy.compatible) RecoveryStrategy recoveryStrategy,
   }) = _AppSettingProps;
 

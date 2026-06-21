@@ -526,5 +526,14 @@
   "createProfile": "Створити профіль",
   "requestDetails": "Деталі запиту",
   "connectionDetails": "Деталі з'єднання",
-  "logDetails": "Деталі журналу"
+  "logDetails": "Деталі журналу",
+  "proxyChains": "Ланцюжки проксі",
+  "proxyChainsDesc": "Об'єднання проксі в ланцюжок: вхід → вихід",
+  "chainMode": "Режим ланцюжків",
+  "chainName": "Назва ланцюжка",
+  "hop": "Ланка",
+  "firstHop": "Перша ланка (вхід)",
+  "secondHop": "Друга ланка (вихід)",
+  "addHop": "Додати ланку",
+  "chainHopsRequired": "Виберіть щонайменше дві ланки"
 }

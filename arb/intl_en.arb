@@ -525,5 +525,14 @@
   "createProfile": "Create profile",
   "requestDetails": "Request details",
   "connectionDetails": "Connection details",
-  "logDetails": "Log details"
+  "logDetails": "Log details",
+  "proxyChains": "Proxy chains",
+  "proxyChainsDesc": "Chain proxies together: entry → exit",
+  "chainMode": "Chain mode",
+  "chainName": "Chain name",
+  "hop": "Hop",
+  "firstHop": "First hop (entry)",
+  "secondHop": "Second hop (exit)",
+  "addHop": "Add hop",
+  "chainHopsRequired": "Select at least two hops"
 }

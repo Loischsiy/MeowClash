@@ -40,6 +40,7 @@ mixin _$AppSettingProps {
   bool get developerMode => throw _privateConstructorUsedError;
   bool get overrideProviderSettings => throw _privateConstructorUsedError;
   bool get overrideNetworkSettings => throw _privateConstructorUsedError;
+  bool get chainMode => throw _privateConstructorUsedError;
   RecoveryStrategy get recoveryStrategy => throw _privateConstructorUsedError;
 
   /// Serializes this AppSettingProps to a JSON map.
@@ -78,6 +79,7 @@ abstract class $AppSettingPropsCopyWith<$Res> {
       bool developerMode,
       bool overrideProviderSettings,
       bool overrideNetworkSettings,
+      bool chainMode,
       RecoveryStrategy recoveryStrategy});
 }
 
@@ -114,6 +116,7 @@ class _$AppSettingPropsCopyWithImpl<$Res, $Val extends AppSettingProps>
     Object? developerMode = null,
     Object? overrideProviderSettings = null,
     Object? overrideNetworkSettings = null,
+    Object? chainMode = null,
     Object? recoveryStrategy = null,
   }) {
     return _then(_value.copyWith(
@@ -189,6 +192,10 @@ class _$AppSettingPropsCopyWithImpl<$Res, $Val extends AppSettingProps>
           ? _value.overrideNetworkSettings
           : overrideNetworkSettings // ignore: cast_nullable_to_non_nullable
               as bool,
+      chainMode: null == chainMode
+          ? _value.chainMode
+          : chainMode // ignore: cast_nullable_to_non_nullable
+              as bool,
       recoveryStrategy: null == recoveryStrategy
           ? _value.recoveryStrategy
           : recoveryStrategy // ignore: cast_nullable_to_non_nullable
@@ -225,6 +232,7 @@ abstract class _$$AppSettingPropsImplCopyWith<$Res>
       bool developerMode,
       bool overrideProviderSettings,
       bool overrideNetworkSettings,
+      bool chainMode,
       RecoveryStrategy recoveryStrategy});
 }
 
@@ -259,6 +267,7 @@ class __$$AppSettingPropsImplCopyWithImpl<$Res>
     Object? developerMode = null,
     Object? overrideProviderSettings = null,
     Object? overrideNetworkSettings = null,
+    Object? chainMode = null,
     Object? recoveryStrategy = null,
   }) {
     return _then(_$AppSettingPropsImpl(
@@ -334,6 +343,10 @@ class __$$AppSettingPropsImplCopyWithImpl<$Res>
           ? _value.overrideNetworkSettings
           : overrideNetworkSettings // ignore: cast_nullable_to_non_nullable
               as bool,
+      chainMode: null == chainMode
+          ? _value.chainMode
+          : chainMode // ignore: cast_nullable_to_non_nullable
+              as bool,
       recoveryStrategy: null == recoveryStrategy
           ? _value.recoveryStrategy
           : recoveryStrategy // ignore: cast_nullable_to_non_nullable
@@ -357,14 +370,15 @@ class _$AppSettingPropsImpl implements _AppSettingProps {
       this.closeConnections = true,
       this.testUrl = defaultTestUrl,
       this.isAnimateToPage = true,
-      this.autoCheckUpdate = false,
+      this.autoCheckUpdate = true,
       this.showLabel = false,
       this.disclaimerAccepted = false,
-      this.minimizeOnExit = false,
+      this.minimizeOnExit = true,
       this.hidden = false,
       this.developerMode = false,
       this.overrideProviderSettings = false,
       this.overrideNetworkSettings = false,
+      this.chainMode = false,
       this.recoveryStrategy = RecoveryStrategy.compatible})
       : _dashboardWidgets = dashboardWidgets;
 
@@ -433,11 +447,14 @@ class _$AppSettingPropsImpl implements _AppSettingProps {
   final bool overrideNetworkSettings;
   @override
   @JsonKey()
+  final bool chainMode;
+  @override
+  @JsonKey()
   final RecoveryStrategy recoveryStrategy;
 
   @override
   String toString() {
-    return 'AppSettingProps(locale: $locale, dashboardWidgets: $dashboardWidgets, onlyStatisticsProxy: $onlyStatisticsProxy, autoLaunch: $autoLaunch, silentLaunch: $silentLaunch, autoRun: $autoRun, openLogs: $openLogs, closeConnections: $closeConnections, testUrl: $testUrl, isAnimateToPage: $isAnimateToPage, autoCheckUpdate: $autoCheckUpdate, showLabel: $showLabel, disclaimerAccepted: $disclaimerAccepted, minimizeOnExit: $minimizeOnExit, hidden: $hidden, developerMode: $developerMode, overrideProviderSettings: $overrideProviderSettings, overrideNetworkSettings: $overrideNetworkSettings, recoveryStrategy: $recoveryStrategy)';
+    return 'AppSettingProps(locale: $locale, dashboardWidgets: $dashboardWidgets, onlyStatisticsProxy: $onlyStatisticsProxy, autoLaunch: $autoLaunch, silentLaunch: $silentLaunch, autoRun: $autoRun, openLogs: $openLogs, closeConnections: $closeConnections, testUrl: $testUrl, isAnimateToPage: $isAnimateToPage, autoCheckUpdate: $autoCheckUpdate, showLabel: $showLabel, disclaimerAccepted: $disclaimerAccepted, minimizeOnExit: $minimizeOnExit, hidden: $hidden, developerMode: $developerMode, overrideProviderSettings: $overrideProviderSettings, overrideNetworkSettings: $overrideNetworkSettings, chainMode: $chainMode, recoveryStrategy: $recoveryStrategy)';
   }
 
   @override
@@ -479,6 +496,8 @@ class _$AppSettingPropsImpl implements _AppSettingProps {
             (identical(
                     other.overrideNetworkSettings, overrideNetworkSettings) ||
                 other.overrideNetworkSettings == overrideNetworkSettings) &&
+            (identical(other.chainMode, chainMode) ||
+                other.chainMode == chainMode) &&
             (identical(other.recoveryStrategy, recoveryStrategy) ||
                 other.recoveryStrategy == recoveryStrategy));
   }
@@ -505,6 +524,7 @@ class _$AppSettingPropsImpl implements _AppSettingProps {
         developerMode,
         overrideProviderSettings,
         overrideNetworkSettings,
+        chainMode,
         recoveryStrategy
       ]);
 
@@ -546,6 +566,7 @@ abstract class _AppSettingProps implements AppSettingProps {
       final bool developerMode,
       final bool overrideProviderSettings,
       final bool overrideNetworkSettings,
+      final bool chainMode,
       final RecoveryStrategy recoveryStrategy}) = _$AppSettingPropsImpl;
 
   factory _AppSettingProps.fromJson(Map<String, dynamic> json) =
@@ -588,6 +609,8 @@ abstract class _AppSettingProps implements AppSettingProps {
   bool get overrideProviderSettings;
   @override
   bool get overrideNetworkSettings;
+  @override
+  bool get chainMode;
   @override
   RecoveryStrategy get recoveryStrategy;
 
@@ -2213,7 +2236,7 @@ class _$ThemePropsImpl implements _ThemeProps {
   const _$ThemePropsImpl(
       {this.primaryColor,
       final List<int> primaryColors = defaultPrimaryColors,
-      this.themeMode = ThemeMode.dark,
+      this.themeMode = ThemeMode.system,
       this.schemeVariant = DynamicSchemeVariant.content,
       this.pureBlack = false,
       this.textScale = const TextScale()})

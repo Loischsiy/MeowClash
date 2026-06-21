@@ -1,3 +1,4 @@
+import 'package:meowclash/clash/clash.dart';
 import 'package:meowclash/common/common.dart';
 import 'package:meowclash/enum/enum.dart';
 import 'package:meowclash/models/models.dart';
@@ -158,6 +159,25 @@ class _OverrideProfileViewState extends State<OverrideProfileView> {
                   padding: EdgeInsets.symmetric(horizontal: 16),
                   sliver: SliverToBoxAdapter(
                     child: OverrideSwitch(),
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                      left: 8,
+                      right: 8,
+                    ),
+                    child: ChainTitle(
+                      profileId: widget.profileId,
+                    ),
+                  ),
+                ),
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  sliver: SliverToBoxAdapter(
+                    child: ChainContent(
+                      profileId: widget.profileId,
+                    ),
                   ),
                 ),
                 SliverToBoxAdapter(
@@ -640,9 +660,14 @@ class AddRuleDialog extends StatefulWidget {
     super.key,
     required this.snippet,
     this.rule,
+    this.chainNames = const <String>[],
   });
   final ClashConfigSnippet snippet;
   final Rule? rule;
+  // Names of enabled proxy chains for this profile. They are injected as hidden
+  // groups at config-build time (so they aren't in `snippet.proxyGroups`) but
+  // are valid rule targets, so they're offered here explicitly.
+  final List<String> chainNames;
 
   @override
   State<AddRuleDialog> createState() => _AddRuleDialogState();
@@ -669,6 +694,12 @@ class _AddRuleDialogState extends State<AddRuleDialog> {
 
   void _initState() {
     _targetItems = [
+      ...widget.chainNames.map(
+        (name) => DropdownMenuEntry(
+          value: name,
+          label: name,
+        ),
+      ),
       ...widget.snippet.proxyGroups.map(
         (item) => DropdownMenuEntry(
           value: item.name,
@@ -927,4 +958,507 @@ class _AddRuleDialogState extends State<AddRuleDialog> {
         ),
       ),
     );
+}
+
+class ChainTitle extends ConsumerWidget {
+  const ChainTitle({
+    super.key,
+    required this.profileId,
+  });
+  final String profileId;
+
+  Future<void> _handleAdd(WidgetRef ref) async {
+    final snippet = ref.read(
+      profileOverrideStateProvider.select(
+        (state) => state.snippet,
+      ),
+    );
+    if (snippet == null) {
+      return;
+    }
+    final chain = await globalState.showCommonDialog<ProxyChain>(
+      child: AddChainDialog(
+        snippet: snippet,
+      ),
+    );
+    if (chain == null) {
+      return;
+    }
+    ref.read(profileOverrideStateProvider.notifier).updateState(
+      (state) {
+        if (state.overrideData == null) {
+          return state;
+        }
+        final chains = List<ProxyChain>.from(state.overrideData!.chains)
+          ..add(chain);
+        return state.copyWith.overrideData!(
+          chains: chains,
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return FilledButtonTheme(
+      data: const FilledButtonThemeData(
+        style: ButtonStyle(
+          padding: WidgetStatePropertyAll(EdgeInsets.symmetric(
+            horizontal: 8,
+          )),
+          visualDensity: VisualDensity.compact,
+        ),
+      ),
+      child: ListHeader(
+        title: appLocalizations.proxyChains,
+        subTitle: appLocalizations.proxyChainsDesc,
+        space: 8,
+        actions: [
+          FilledButton.tonal(
+            onPressed: () async {
+              await _handleAdd(ref);
+            },
+            child: Text(appLocalizations.add),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class ChainContent extends ConsumerWidget {
+  const ChainContent({
+    super.key,
+    required this.profileId,
+  });
+  final String profileId;
+
+  Future<void> _handleEdit(WidgetRef ref, ProxyChain chain) async {
+    final snippet = ref.read(
+      profileOverrideStateProvider.select(
+        (state) => state.snippet,
+      ),
+    );
+    if (snippet == null) {
+      return;
+    }
+    final result = await globalState.showCommonDialog<ProxyChain>(
+      child: AddChainDialog(
+        snippet: snippet,
+        chain: chain,
+      ),
+    );
+    if (result == null) {
+      return;
+    }
+    ref.read(profileOverrideStateProvider.notifier).updateState(
+      (state) {
+        if (state.overrideData == null) {
+          return state;
+        }
+        final chains = List<ProxyChain>.from(state.overrideData!.chains);
+        final index = chains.indexWhere((item) => item.id == result.id);
+        if (index == -1) {
+          chains.add(result);
+        } else {
+          chains[index] = result;
+        }
+        return state.copyWith.overrideData!(
+          chains: chains,
+        );
+      },
+    );
+  }
+
+  Future<void> _handleDelete(WidgetRef ref, ProxyChain chain) async {
+    final res = await globalState.showMessage(
+      title: appLocalizations.tip,
+      message: TextSpan(
+        text: appLocalizations.deleteTip(
+          appLocalizations.proxyChains,
+        ),
+      ),
+    );
+    if (res != true) {
+      return;
+    }
+    ref.read(profileOverrideStateProvider.notifier).updateState(
+      (state) {
+        if (state.overrideData == null) {
+          return state;
+        }
+        final chains = List<ProxyChain>.from(state.overrideData!.chains)
+          ..removeWhere((item) => item.id == chain.id);
+        return state.copyWith.overrideData!(
+          chains: chains,
+        );
+      },
+    );
+  }
+
+  void _handleToggle(WidgetRef ref, ProxyChain chain, bool value) {
+    ref.read(profileOverrideStateProvider.notifier).updateState(
+      (state) {
+        if (state.overrideData == null) {
+          return state;
+        }
+        final chains = state.overrideData!.chains
+            .map(
+              (item) =>
+                  item.id == chain.id ? item.copyWith(enable: value) : item,
+            )
+            .toList();
+        return state.copyWith.overrideData!(
+          chains: chains,
+        );
+      },
+    );
+  }
+
+  Widget _buildItem(WidgetRef ref, ProxyChain chain) => Container(
+        margin: const EdgeInsets.symmetric(
+          vertical: 4,
+        ),
+        child: CommonCard(
+          radius: 18,
+          type: CommonCardType.filled,
+          onPressed: () {
+            _handleEdit(ref, chain);
+          },
+          child: ListTile(
+            contentPadding: const EdgeInsets.only(
+              left: 16,
+              right: 8,
+            ),
+            title: Text(
+              chain.name.isEmpty ? appLocalizations.unnamed : chain.name,
+            ),
+            subtitle: Text(
+              chain.hops.length < 2
+                  ? appLocalizations.chainHopsRequired
+                  : chain.hops.join("  \u2192  "),
+            ),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (chain.enable && chain.hops.length >= 2)
+                  _ChainTestButton(chainName: chain.name),
+                Switch(
+                  value: chain.enable,
+                  onChanged: (value) {
+                    _handleToggle(ref, chain, value);
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete),
+                  onPressed: () {
+                    _handleDelete(ref, chain);
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final chains = ref.watch(
+      profileOverrideStateProvider.select(
+        (state) => state.overrideData?.chains ?? const <ProxyChain>[],
+      ),
+    );
+    if (chains.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(
+          vertical: 24,
+        ),
+        child: Center(
+          child: Text(
+            appLocalizations.nullTip(
+              appLocalizations.proxyChains,
+            ),
+          ),
+        ),
+      );
+    }
+    return Column(
+      children: [
+        for (final chain in chains) _buildItem(ref, chain),
+      ],
+    );
+  }
+}
+
+class AddChainDialog extends StatefulWidget {
+  const AddChainDialog({
+    super.key,
+    required this.snippet,
+    this.chain,
+  });
+  final ClashConfigSnippet snippet;
+  final ProxyChain? chain;
+
+  @override
+  State<AddChainDialog> createState() => _AddChainDialogState();
+}
+
+class _AddChainDialogState extends State<AddChainDialog> {
+  final _nameController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  List<TextEditingController> _hopControllers = [];
+  // Candidates for the entry hop: it is only used as a `dialer-proxy` value,
+  // which may reference a group or a node, so any name is allowed.
+  List<DropdownMenuEntry<String>> _entryHopItems = [];
+  // Candidates for every later hop (including the exit): each is cloned into a
+  // proxy node that carries `dialer-proxy`, so it must be a concrete node.
+  List<DropdownMenuEntry<String>> _nodeHopItems = [];
+
+  @override
+  void initState() {
+    _initState();
+    super.initState();
+  }
+
+  void _initState() {
+    final groupNames = <String>{};
+    final memberNames = <String>{};
+    for (final group in widget.snippet.proxyGroups) {
+      groupNames.add(group.name);
+      for (final proxy in group.proxies ?? const <String>[]) {
+        memberNames.add(proxy);
+      }
+    }
+    // Entry hop: any group or node. Later hops: concrete nodes only (a member
+    // name that isn't itself a group), since they must be cloneable to carry
+    // `dialer-proxy` (mihomo only honors it on nodes, not groups).
+    final entryNames = <String>{...groupNames, ...memberNames};
+    final nodeNames = memberNames.difference(groupNames);
+    _entryHopItems = entryNames
+        .map((name) => DropdownMenuEntry<String>(value: name, label: name))
+        .toList();
+    _nodeHopItems = nodeNames
+        .map((name) => DropdownMenuEntry<String>(value: name, label: name))
+        .toList();
+    final chain = widget.chain;
+    if (chain != null) {
+      _nameController.text = chain.name;
+      _hopControllers = chain.hops
+          .map((hop) => TextEditingController(text: hop))
+          .toList();
+    }
+    while (_hopControllers.length < 2) {
+      _hopControllers.add(TextEditingController());
+    }
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    for (final controller in _hopControllers) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
+  String _hopLabel(int index) {
+    if (index == 0) {
+      return appLocalizations.firstHop;
+    }
+    if (index == 1) {
+      return appLocalizations.secondHop;
+    }
+    return "${appLocalizations.hop} ${index + 1}";
+  }
+
+  void _handleSubmit() {
+    final res = _formKey.currentState?.validate();
+    if (res == false) {
+      return;
+    }
+    final hops = _hopControllers
+        .map((controller) => controller.text.trim())
+        .where((hop) => hop.isNotEmpty)
+        .toList();
+    if (hops.length < 2) {
+      return;
+    }
+    final base = widget.chain ?? ProxyChain.create();
+    final chain = base.copyWith(
+      name: _nameController.text.trim(),
+      hops: hops,
+    );
+    Navigator.of(context).pop(chain);
+  }
+
+  @override
+  Widget build(BuildContext context) => CommonDialog(
+        title: appLocalizations.proxyChains,
+        actions: [
+          TextButton(
+            onPressed: _handleSubmit,
+            child: Text(
+              appLocalizations.confirm,
+            ),
+          ),
+        ],
+        child: DropdownMenuTheme(
+          data: DropdownMenuThemeData(
+            inputDecorationTheme: InputDecorationTheme(
+              border: const OutlineInputBorder(),
+              labelStyle: context.textTheme.bodyLarge
+                  ?.copyWith(overflow: TextOverflow.ellipsis),
+            ),
+          ),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  controller: _nameController,
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(),
+                    labelText: appLocalizations.chainName,
+                  ),
+                  validator: (_) {
+                    final value = _nameController.text.trim();
+                    if (value.isEmpty) {
+                      return appLocalizations.emptyTip(
+                        appLocalizations.chainName,
+                      );
+                    }
+                    final groupNames = widget.snippet.proxyGroups
+                        .map((group) => group.name)
+                        .toSet();
+                    if (groupNames.contains(value)) {
+                      return appLocalizations.existsTip(
+                        appLocalizations.proxyGroup,
+                      );
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(
+                  height: 24,
+                ),
+                ...List.generate(
+                  _hopControllers.length,
+                  (index) => Padding(
+                    padding: const EdgeInsets.only(
+                      bottom: 24,
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: FormField<String>(
+                            validator: (_) {
+                              if (_hopControllers[index].text.trim().isEmpty) {
+                                return appLocalizations.emptyTip(
+                                  _hopLabel(index),
+                                );
+                              }
+                              return null;
+                            },
+                            builder: (field) => DropdownMenu<String>(
+                              expandedInsets: EdgeInsets.zero,
+                              controller: _hopControllers[index],
+                              label: Text(_hopLabel(index)),
+                              menuHeight: 250,
+                              requestFocusOnTap: true,
+                              enableFilter: true,
+                              errorText: field.errorText,
+                              dropdownMenuEntries:
+                                  index == 0 ? _entryHopItems : _nodeHopItems,
+                            ),
+                          ),
+                        ),
+                        if (_hopControllers.length > 2)
+                          IconButton(
+                            icon: const Icon(Icons.remove_circle_outline),
+                            onPressed: () {
+                              setState(() {
+                                _hopControllers.removeAt(index).dispose();
+                              });
+                            },
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton.icon(
+                    onPressed: () {
+                      setState(() {
+                        _hopControllers.add(TextEditingController());
+                      });
+                    },
+                    icon: const Icon(Icons.add),
+                    label: Text(appLocalizations.addHop),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+}
+
+/// Delay-tests a proxy chain end to end. The chain's exit node is a clone that
+/// carries `dialer-proxy: <entry>`, so asking the core to test the (hidden)
+/// chain group measures latency *through* the entry hop — i.e. it pings the
+/// exit exactly as it is actually reached. Only meaningful once the chain has
+/// been saved and applied (the hidden chain group must exist in the running
+/// core); otherwise the test reports a timeout.
+class _ChainTestButton extends StatefulWidget {
+  const _ChainTestButton({required this.chainName});
+
+  final String chainName;
+
+  @override
+  State<_ChainTestButton> createState() => _ChainTestButtonState();
+}
+
+class _ChainTestButtonState extends State<_ChainTestButton> {
+  bool _testing = false;
+
+  Future<void> _handleTest() async {
+    if (_testing) {
+      return;
+    }
+    setState(() {
+      _testing = true;
+    });
+    try {
+      final testUrl = globalState.appController.getRealTestUrl(null);
+      final delay = await clashCore.getDelay(testUrl, widget.chainName);
+      final value = delay.value;
+      final message = value == null || value <= 0
+          ? "${widget.chainName}: timeout"
+          : "${widget.chainName}: $value ms";
+      globalState.showNotifier(message);
+    } catch (e) {
+      globalState.showNotifier(e.toString());
+    } finally {
+      if (mounted) {
+        setState(() {
+          _testing = false;
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => IconButton(
+        onPressed: _testing ? null : _handleTest,
+        icon: _testing
+            ? const SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : const Icon(Icons.speed),
+      );
 }

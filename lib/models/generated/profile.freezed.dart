@@ -706,6 +706,7 @@ OverrideData _$OverrideDataFromJson(Map<String, dynamic> json) {
 mixin _$OverrideData {
   bool get enable => throw _privateConstructorUsedError;
   OverrideRule get rule => throw _privateConstructorUsedError;
+  List<ProxyChain> get chains => throw _privateConstructorUsedError;
 
   /// Serializes this OverrideData to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -723,7 +724,7 @@ abstract class $OverrideDataCopyWith<$Res> {
           OverrideData value, $Res Function(OverrideData) then) =
       _$OverrideDataCopyWithImpl<$Res, OverrideData>;
   @useResult
-  $Res call({bool enable, OverrideRule rule});
+  $Res call({bool enable, OverrideRule rule, List<ProxyChain> chains});
 
   $OverrideRuleCopyWith<$Res> get rule;
 }
@@ -745,6 +746,7 @@ class _$OverrideDataCopyWithImpl<$Res, $Val extends OverrideData>
   $Res call({
     Object? enable = null,
     Object? rule = null,
+    Object? chains = null,
   }) {
     return _then(_value.copyWith(
       enable: null == enable
@@ -755,6 +757,10 @@ class _$OverrideDataCopyWithImpl<$Res, $Val extends OverrideData>
           ? _value.rule
           : rule // ignore: cast_nullable_to_non_nullable
               as OverrideRule,
+      chains: null == chains
+          ? _value.chains
+          : chains // ignore: cast_nullable_to_non_nullable
+              as List<ProxyChain>,
     ) as $Val);
   }
 
@@ -777,7 +783,7 @@ abstract class _$$OverrideDataImplCopyWith<$Res>
       __$$OverrideDataImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({bool enable, OverrideRule rule});
+  $Res call({bool enable, OverrideRule rule, List<ProxyChain> chains});
 
   @override
   $OverrideRuleCopyWith<$Res> get rule;
@@ -798,6 +804,7 @@ class __$$OverrideDataImplCopyWithImpl<$Res>
   $Res call({
     Object? enable = null,
     Object? rule = null,
+    Object? chains = null,
   }) {
     return _then(_$OverrideDataImpl(
       enable: null == enable
@@ -808,6 +815,10 @@ class __$$OverrideDataImplCopyWithImpl<$Res>
           ? _value.rule
           : rule // ignore: cast_nullable_to_non_nullable
               as OverrideRule,
+      chains: null == chains
+          ? _value._chains
+          : chains // ignore: cast_nullable_to_non_nullable
+              as List<ProxyChain>,
     ));
   }
 }
@@ -816,7 +827,10 @@ class __$$OverrideDataImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$OverrideDataImpl implements _OverrideData {
   const _$OverrideDataImpl(
-      {this.enable = false, this.rule = const OverrideRule()});
+      {this.enable = false,
+      this.rule = const OverrideRule(),
+      final List<ProxyChain> chains = const []})
+      : _chains = chains;
 
   factory _$OverrideDataImpl.fromJson(Map<String, dynamic> json) =>
       _$$OverrideDataImplFromJson(json);
@@ -827,10 +841,18 @@ class _$OverrideDataImpl implements _OverrideData {
   @override
   @JsonKey()
   final OverrideRule rule;
+  final List<ProxyChain> _chains;
+  @override
+  @JsonKey()
+  List<ProxyChain> get chains {
+    if (_chains is EqualUnmodifiableListView) return _chains;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_chains);
+  }
 
   @override
   String toString() {
-    return 'OverrideData(enable: $enable, rule: $rule)';
+    return 'OverrideData(enable: $enable, rule: $rule, chains: $chains)';
   }
 
   @override
@@ -839,12 +861,14 @@ class _$OverrideDataImpl implements _OverrideData {
         (other.runtimeType == runtimeType &&
             other is _$OverrideDataImpl &&
             (identical(other.enable, enable) || other.enable == enable) &&
-            (identical(other.rule, rule) || other.rule == rule));
+            (identical(other.rule, rule) || other.rule == rule) &&
+            const DeepCollectionEquality().equals(other._chains, _chains));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, enable, rule);
+  int get hashCode => Object.hash(
+      runtimeType, enable, rule, const DeepCollectionEquality().hash(_chains));
 
   /// Create a copy of OverrideData
   /// with the given fields replaced by the non-null parameter values.
@@ -863,8 +887,10 @@ class _$OverrideDataImpl implements _OverrideData {
 }
 
 abstract class _OverrideData implements OverrideData {
-  const factory _OverrideData({final bool enable, final OverrideRule rule}) =
-      _$OverrideDataImpl;
+  const factory _OverrideData(
+      {final bool enable,
+      final OverrideRule rule,
+      final List<ProxyChain> chains}) = _$OverrideDataImpl;
 
   factory _OverrideData.fromJson(Map<String, dynamic> json) =
       _$OverrideDataImpl.fromJson;
@@ -873,12 +899,230 @@ abstract class _OverrideData implements OverrideData {
   bool get enable;
   @override
   OverrideRule get rule;
+  @override
+  List<ProxyChain> get chains;
 
   /// Create a copy of OverrideData
   /// with the given fields replaced by the non-null parameter values.
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$OverrideDataImplCopyWith<_$OverrideDataImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+ProxyChain _$ProxyChainFromJson(Map<String, dynamic> json) {
+  return _ProxyChain.fromJson(json);
+}
+
+/// @nodoc
+mixin _$ProxyChain {
+  String get id => throw _privateConstructorUsedError;
+  String get name => throw _privateConstructorUsedError;
+  List<String> get hops => throw _privateConstructorUsedError;
+  bool get enable => throw _privateConstructorUsedError;
+
+  /// Serializes this ProxyChain to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of ProxyChain
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $ProxyChainCopyWith<ProxyChain> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $ProxyChainCopyWith<$Res> {
+  factory $ProxyChainCopyWith(
+          ProxyChain value, $Res Function(ProxyChain) then) =
+      _$ProxyChainCopyWithImpl<$Res, ProxyChain>;
+  @useResult
+  $Res call({String id, String name, List<String> hops, bool enable});
+}
+
+/// @nodoc
+class _$ProxyChainCopyWithImpl<$Res, $Val extends ProxyChain>
+    implements $ProxyChainCopyWith<$Res> {
+  _$ProxyChainCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of ProxyChain
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? id = null,
+    Object? name = null,
+    Object? hops = null,
+    Object? enable = null,
+  }) {
+    return _then(_value.copyWith(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      name: null == name
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String,
+      hops: null == hops
+          ? _value.hops
+          : hops // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      enable: null == enable
+          ? _value.enable
+          : enable // ignore: cast_nullable_to_non_nullable
+              as bool,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$ProxyChainImplCopyWith<$Res>
+    implements $ProxyChainCopyWith<$Res> {
+  factory _$$ProxyChainImplCopyWith(
+          _$ProxyChainImpl value, $Res Function(_$ProxyChainImpl) then) =
+      __$$ProxyChainImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({String id, String name, List<String> hops, bool enable});
+}
+
+/// @nodoc
+class __$$ProxyChainImplCopyWithImpl<$Res>
+    extends _$ProxyChainCopyWithImpl<$Res, _$ProxyChainImpl>
+    implements _$$ProxyChainImplCopyWith<$Res> {
+  __$$ProxyChainImplCopyWithImpl(
+      _$ProxyChainImpl _value, $Res Function(_$ProxyChainImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of ProxyChain
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? id = null,
+    Object? name = null,
+    Object? hops = null,
+    Object? enable = null,
+  }) {
+    return _then(_$ProxyChainImpl(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      name: null == name
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String,
+      hops: null == hops
+          ? _value._hops
+          : hops // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      enable: null == enable
+          ? _value.enable
+          : enable // ignore: cast_nullable_to_non_nullable
+              as bool,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$ProxyChainImpl implements _ProxyChain {
+  const _$ProxyChainImpl(
+      {required this.id,
+      this.name = "",
+      final List<String> hops = const [],
+      this.enable = true})
+      : _hops = hops;
+
+  factory _$ProxyChainImpl.fromJson(Map<String, dynamic> json) =>
+      _$$ProxyChainImplFromJson(json);
+
+  @override
+  final String id;
+  @override
+  @JsonKey()
+  final String name;
+  final List<String> _hops;
+  @override
+  @JsonKey()
+  List<String> get hops {
+    if (_hops is EqualUnmodifiableListView) return _hops;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_hops);
+  }
+
+  @override
+  @JsonKey()
+  final bool enable;
+
+  @override
+  String toString() {
+    return 'ProxyChain(id: $id, name: $name, hops: $hops, enable: $enable)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$ProxyChainImpl &&
+            (identical(other.id, id) || other.id == id) &&
+            (identical(other.name, name) || other.name == name) &&
+            const DeepCollectionEquality().equals(other._hops, _hops) &&
+            (identical(other.enable, enable) || other.enable == enable));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(runtimeType, id, name,
+      const DeepCollectionEquality().hash(_hops), enable);
+
+  /// Create a copy of ProxyChain
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$ProxyChainImplCopyWith<_$ProxyChainImpl> get copyWith =>
+      __$$ProxyChainImplCopyWithImpl<_$ProxyChainImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$ProxyChainImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _ProxyChain implements ProxyChain {
+  const factory _ProxyChain(
+      {required final String id,
+      final String name,
+      final List<String> hops,
+      final bool enable}) = _$ProxyChainImpl;
+
+  factory _ProxyChain.fromJson(Map<String, dynamic> json) =
+      _$ProxyChainImpl.fromJson;
+
+  @override
+  String get id;
+  @override
+  String get name;
+  @override
+  List<String> get hops;
+  @override
+  bool get enable;
+
+  /// Create a copy of ProxyChain
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$ProxyChainImplCopyWith<_$ProxyChainImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
 

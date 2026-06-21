@@ -77,6 +77,18 @@ dev_dependencies:
   riverpod_generator: ^2.4.3
   flutter_launcher_icons: ^0.14.4
 
+dependency_overrides:
+  # The codegen stack resolves analyzer 7.6.0, which everything compiles
+  # against EXCEPT analyzer_plugin 0.12.0: that release predates the analyzer
+  # Element2 migration and fails to compile against analyzer >=7.4.0
+  # (dart-lang/sdk#60542). analyzer itself cannot be pinned lower because
+  # custom_lint_visitor 1.0.0+7.7.0 needs the newer analyzer AST
+  # (DotShorthandInvocation / DotShorthandPropertyAccess nodes). So bump ONLY
+  # analyzer_plugin to 0.13.4 - the release that targets analyzer ^7.5.1 and
+  # keeps the same public API custom_lint_core 0.7.1 relies on. (0.13.5+ need
+  # analyzer 8.x and 0.14.0 removed deprecated APIs, so do not go higher.)
+  analyzer_plugin: 0.13.4
+
 flutter:
   uses-material-design: true
   assets:

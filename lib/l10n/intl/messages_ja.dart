@@ -53,6 +53,17 @@ class MessageLookup extends MessageLookupByLibrary {
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
     "about": MessageLookupByLibrary.simpleMessage("について"),
+    "addHop": MessageLookupByLibrary.simpleMessage("ホップを追加"),
+    "chainHopsRequired": MessageLookupByLibrary.simpleMessage(
+      "ホップを2つ以上選択してください",
+    ),
+    "chainMode": MessageLookupByLibrary.simpleMessage("チェーンモード"),
+    "chainName": MessageLookupByLibrary.simpleMessage("チェーン名"),
+    "firstHop": MessageLookupByLibrary.simpleMessage("最初のホップ（入口）"),
+    "hop": MessageLookupByLibrary.simpleMessage("ホップ"),
+    "proxyChains": MessageLookupByLibrary.simpleMessage("プロキシチェーン"),
+    "proxyChainsDesc": MessageLookupByLibrary.simpleMessage("プロキシを連鎖: 入口 → 出口"),
+    "secondHop": MessageLookupByLibrary.simpleMessage("2番目のホップ（出口）"),
     "accessControl": MessageLookupByLibrary.simpleMessage("アクセス制御"),
     "accessControlAllowDesc": MessageLookupByLibrary.simpleMessage(
       "選択したアプリのみVPNを許可",

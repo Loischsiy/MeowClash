@@ -120,6 +120,13 @@ class ClashCore {
       UsedProxy.GLOBAL.name,
       ...(proxies[UsedProxy.GLOBAL.name]["all"] as List).where((e) {
         final proxy = proxies[e] ?? {};
+        // Hide groups flagged `hidden: true` (e.g. proxy-chain groups injected
+        // by the override editor). mihomo forwards the flag through its API;
+        // such groups stay usable via rules but must not appear on the
+        // proxies page.
+        if (proxy['hidden'] == true) {
+          return false;
+        }
         return GroupTypeExtension.valueList.contains(proxy['type']);
       })
     ];

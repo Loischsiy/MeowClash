@@ -47,6 +47,7 @@
 - **Real-Time Statistics**: Dynamic network speed charts (Upload/Download) and overall traffic monitoring.
 - **Proxy Provider Controls**: Sort proxy nodes by delay, name, or default configuration.
 - **Auto-Close Connections**: Automatically terminate active connections when switching proxy nodes.
+- **Proxy Chains (Chain Mode)**: Build multi-hop chains (entry → exit) that route traffic through several proxies in sequence via `dialer-proxy`. Toggle **Chain Mode** right from the Proxies page to send all traffic through a selected chain while keeping your subscription rules intact; disabling it (or removing all chains) returns to normal mode automatically.
 
 ### 🛡️ Network & Advanced Core Options
 - **System Proxy**: Easily toggle system-wide proxy settings for Windows and macOS.

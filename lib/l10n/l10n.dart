@@ -3878,6 +3878,56 @@ class AppLocalizations {
   String get logDetails {
     return Intl.message('Log details', name: 'logDetails', desc: '', args: []);
   }
+
+  /// `Proxy chains`
+  String get proxyChains {
+    return Intl.message('Proxy chains',
+        name: 'proxyChains', desc: '', args: []);
+  }
+
+  /// `Chain proxies together: entry → exit`
+  String get proxyChainsDesc {
+    return Intl.message('Chain proxies together: entry → exit',
+        name: 'proxyChainsDesc', desc: '', args: []);
+  }
+
+  /// `Chain mode`
+  String get chainMode {
+    return Intl.message('Chain mode', name: 'chainMode', desc: '', args: []);
+  }
+
+  /// `Chain name`
+  String get chainName {
+    return Intl.message('Chain name', name: 'chainName', desc: '', args: []);
+  }
+
+  /// `Hop`
+  String get hop {
+    return Intl.message('Hop', name: 'hop', desc: '', args: []);
+  }
+
+  /// `First hop (entry)`
+  String get firstHop {
+    return Intl.message('First hop (entry)',
+        name: 'firstHop', desc: '', args: []);
+  }
+
+  /// `Second hop (exit)`
+  String get secondHop {
+    return Intl.message('Second hop (exit)',
+        name: 'secondHop', desc: '', args: []);
+  }
+
+  /// `Add hop`
+  String get addHop {
+    return Intl.message('Add hop', name: 'addHop', desc: '', args: []);
+  }
+
+  /// `Select at least two hops`
+  String get chainHopsRequired {
+    return Intl.message('Select at least two hops',
+        name: 'chainHopsRequired', desc: '', args: []);
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

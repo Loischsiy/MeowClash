@@ -55,6 +55,30 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> with PageMixin {
           child: const _ModeSelectorAction(),
         ),
         const SearchOrderMarker(),
+        Consumer(
+          builder: (_, ref, __) {
+            // Only meaningful when the active profile has at least one enabled
+            // chain; otherwise the toggle is hidden and the app stays in normal
+            // (non-chain) mode automatically.
+            final hasChains = ref.watch(currentProfileProvider.select(
+                (p) => p?.overrideData.enabledChains.isNotEmpty ?? false));
+            if (!hasChains) return const SizedBox.shrink();
+            final chainMode =
+                ref.watch(appSettingProvider.select((s) => s.chainMode));
+            return IconButton(
+              tooltip: appLocalizations.chainMode,
+              isSelected: chainMode,
+              selectedIcon: const Icon(Icons.link),
+              icon: const Icon(Icons.link_off),
+              onPressed: () {
+                ref.read(appSettingProvider.notifier).updateState(
+                      (s) => s.copyWith(chainMode: !s.chainMode),
+                    );
+                globalState.appController.setupClashConfigDebounce();
+              },
+            );
+          },
+        ),
         if (_isTab)
           IconButton(
             onPressed: () {

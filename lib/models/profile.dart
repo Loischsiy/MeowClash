@@ -88,6 +88,7 @@ class OverrideData with _$OverrideData {
   const factory OverrideData({
     @Default(false) bool enable,
     @Default(OverrideRule()) OverrideRule rule,
+    @Default([]) List<ProxyChain> chains,
   }) = _OverrideData;
 
   factory OverrideData.fromJson(Map<String, Object?> json) =>
@@ -101,6 +102,132 @@ extension OverrideDataExt on OverrideData {
     }
     return rule.rules.map((item) => item.value).toList();
   }
+
+  /// Enabled chains that have enough hops to form a chain (>= 2).
+  List<ProxyChain> get enabledChains => chains
+      .where((chain) => chain.enable && chain.hops.length >= 2)
+      .toList();
+
+  /// Builds the proxy nodes and proxy-groups needed to realize the enabled
+  /// chains for mihomo 1.19+, where the `relay` group type was removed and
+  /// `dialer-proxy` is only honored on concrete proxy *nodes* (not on groups).
+  ///
+  /// For a chain `entry -> ... -> exit`, traffic must flow
+  /// `client -> entry -> ... -> exit -> internet`. We achieve this by cloning
+  /// each hop after the entry into a new proxy node that carries
+  /// `dialer-proxy: <previous hop>`, so every later hop dials out through the
+  /// previous one. The entry hop is used as a dialer only and is never cloned,
+  /// so it may be a concrete node OR an existing group (a selector or an
+  /// auto/url-test group) — a `dialer-proxy` value is allowed to be a group.
+  ///
+  /// The final (exit) clone is wrapped in a hidden `select` group named after
+  /// the chain, so the chain can be used as a rule target like any other group
+  /// while staying hidden from the proxies page (mihomo's `hidden` flag).
+  ///
+  /// [resolveProxyNode] returns the raw definition of a concrete proxy node by
+  /// name, or null when the name is not an inline node (e.g. a proxy-group or a
+  /// provider-backed node that cannot be cloned). Because the exit hop must be
+  /// cloned, every hop after the entry must resolve to a concrete node;
+  /// otherwise the whole chain is skipped.
+  ///
+  /// The result is injected on top of the parsed profile config right before
+  /// it is handed to the core (see GlobalState.patchRawConfig), so chains live
+  /// outside the subscription YAML and survive subscription auto-updates.
+  ({
+    List<Map<String, dynamic>> proxies,
+    List<Map<String, dynamic>> proxyGroups,
+  }) buildRunningChainConfig(
+    Map<String, dynamic>? Function(String name) resolveProxyNode,
+  ) {
+    final proxies = <Map<String, dynamic>>[];
+    final groups = <Map<String, dynamic>>[];
+    for (final chain in enabledChains) {
+      final hops = chain.hops;
+      // The entry hop is the first dialer and is never cloned (it may be a
+      // group). Every later hop is cloned into a node carrying `dialer-proxy`.
+      var dialerProxy = hops.first;
+      final clonedNodes = <Map<String, dynamic>>[];
+      String? exitName;
+      var isValid = true;
+      for (var i = 1; i < hops.length; i++) {
+        final def = resolveProxyNode(hops[i]);
+        if (def == null) {
+          // A non-entry hop that isn't a concrete node can't carry
+          // `dialer-proxy`, so the chain can't be built — skip it entirely.
+          isValid = false;
+          break;
+        }
+        final cloneName = "${chain.name} \u00b7 ${i + 1}";
+        final clone = Map<String, dynamic>.from(def);
+        clone["name"] = cloneName;
+        clone["dialer-proxy"] = dialerProxy;
+        clonedNodes.add(clone);
+        dialerProxy = cloneName;
+        exitName = cloneName;
+      }
+      if (!isValid || exitName == null) {
+        continue;
+      }
+      proxies.addAll(clonedNodes);
+      // Expose the chain only as a hidden `select` group: it stays a valid rule
+      // target (rules reference it by name) but is filtered out of the proxies
+      // page, so traffic is routed to it via rules instead of being picked
+      // manually. mihomo forwards the `hidden` flag through its API and
+      // ClashCore.getProxiesGroups drops hidden groups from the UI.
+      groups.add(<String, dynamic>{
+        "name": chain.name,
+        "type": "select",
+        "hidden": true,
+        "proxies": [exitName],
+      });
+    }
+    return (proxies: proxies, proxyGroups: groups);
+  }
+}
+
+/// Returns [rules] with the final `MATCH` rule repointed to [selector]
+/// (appending one if there is none). Chain mode uses this so all
+/// otherwise-unmatched traffic egresses through the selected chain while the
+/// subscription's specific rules stay intact.
+List<String> withChainSelectorMatch(List<String> rules, String selector) {
+  final result = List<String>.from(rules);
+  final match = "MATCH,$selector";
+  final index = result.lastIndexWhere(
+    (rule) => rule.trimLeft().toUpperCase().startsWith("MATCH,"),
+  );
+  if (index == -1) {
+    result.add(match);
+  } else {
+    result[index] = match;
+  }
+  return result;
+}
+
+/// A user-defined proxy chain: entry hop -> ... -> exit hop.
+///
+/// Each entry in [hops] is the name of an existing proxy or proxy-group from
+/// the active profile (a specific node, a selector, or an auto/url-test
+/// group). The chain is realized by cloning each hop after the entry into a
+/// proxy node carrying `dialer-proxy`; the exit clone is wrapped in a `select`
+/// group named [name] so it can be selected on the proxies page and used as a
+/// rule target like any other group. The entry hop may be a node or a group,
+/// but every later hop (including the exit) must be a concrete node.
+@freezed
+class ProxyChain with _$ProxyChain {
+  const factory ProxyChain({
+    required String id,
+    @Default("") String name,
+    @Default([]) List<String> hops,
+    @Default(true) bool enable,
+  }) = _ProxyChain;
+
+  factory ProxyChain.fromJson(Map<String, Object?> json) =>
+      _$ProxyChainFromJson(json);
+
+  factory ProxyChain.create({String name = ""}) => ProxyChain(
+        id: utils.uuidV4,
+        name: name,
+      );
 }
 
 @freezed

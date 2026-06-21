@@ -498,5 +498,14 @@
   "createProfile": "プロファイルを作成",
   "requestDetails": "リクエストの詳細",
   "connectionDetails": "接続の詳細",
-  "logDetails": "ログの詳細"
+  "logDetails": "ログの詳細",
+  "proxyChains": "プロキシチェーン",
+  "proxyChainsDesc": "プロキシを連鎖: 入口 → 出口",
+  "chainMode": "チェーンモード",
+  "chainName": "チェーン名",
+  "hop": "ホップ",
+  "firstHop": "最初のホップ（入口）",
+  "secondHop": "2番目のホップ（出口）",
+  "addHop": "ホップを追加",
+  "chainHopsRequired": "ホップを2つ以上選択してください"
 }

@@ -79,12 +79,35 @@ _$OverrideDataImpl _$$OverrideDataImplFromJson(Map<String, dynamic> json) =>
       rule: json['rule'] == null
           ? const OverrideRule()
           : OverrideRule.fromJson(json['rule'] as Map<String, dynamic>),
+      chains: (json['chains'] as List<dynamic>?)
+              ?.map((e) => ProxyChain.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
     );
 
 Map<String, dynamic> _$$OverrideDataImplToJson(_$OverrideDataImpl instance) =>
     <String, dynamic>{
       'enable': instance.enable,
       'rule': instance.rule,
+      'chains': instance.chains,
+    };
+
+_$ProxyChainImpl _$$ProxyChainImplFromJson(Map<String, dynamic> json) =>
+    _$ProxyChainImpl(
+      id: json['id'] as String,
+      name: json['name'] as String? ?? "",
+      hops:
+          (json['hops'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+              const [],
+      enable: json['enable'] as bool? ?? true,
+    );
+
+Map<String, dynamic> _$$ProxyChainImplToJson(_$ProxyChainImpl instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'name': instance.name,
+      'hops': instance.hops,
+      'enable': instance.enable,
     };
 
 _$OverrideRuleImpl _$$OverrideRuleImplFromJson(Map<String, dynamic> json) =>

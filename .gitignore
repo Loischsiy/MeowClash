@@ -42,7 +42,6 @@ app.*.symbols
 app.*.map.json
 
 #AI generated
-CLAUDE.md
 /.claude
 .opencode
 .agents

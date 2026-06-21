@@ -2,6 +2,31 @@
 
 All notable changes to **MeowClash** will be documented in this file.
 
+## [v1.0.5]
+
+### ✨ New Features
+- **Linux Packaging**: Added portable `tar.gz` builds and custom AppImage packaging with an updated AppRun execution path.
+- **Linux**: Improved graphics initialization and ensured `/dev/net/tun` exists before enabling TUN mode.
+- **Proxy Chains**: Added multi-hop proxy chain support with chain mode.
+- **Sync**: Integrated concurrent IP checks, atomic saving, and more robust Send to TV sync from PR #96.
+
+### 🐛 Bug Fixes
+- **Security**: Removed a shell injection risk in privilege escalation and hardened backup archive path validation.
+- **Linux**: Improved proxy error handling, TUN mode support, and core authorization with better `setcap` path resolution.
+- **CI**: Dropped `custom_lint` / `riverpod_lint` to avoid the analyzer plugin crash during `build_runner`.
+
+### 🚀 Improvements
+- **UI**: Switched the default app font to Noto Sans with JetBrains Mono fallback, added the Noto Sans variable font, set JetBrains Mono on Linux, improved text input and clipboard handling, and made form text fields height-consistent.
+- **Dashboard**: Removed the ServiceInfo and ChangeServer widgets.
+- **Docs**: Added distro-specific Linux install tips and refreshed agent documentation with the CLAUDE guide.
+- **Dependencies**: Bumped dependency versions.
+- **Release**: Bumped app version to `1.0.5+20260620`.
+
+### 🧹 Internal
+- Removed dead widget builders, an unused YAML conversion utility, commented-out listener mixins, and unused models.
+- Added unit tests for ProxyChain and OverrideData chains.
+- Updated `.gitignore` so `CLAUDE.md` and `.fvmrc` are tracked.
+
 ## [v1.0.4]
 
 ### ✨ New Features

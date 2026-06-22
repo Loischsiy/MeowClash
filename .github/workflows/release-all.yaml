@@ -630,6 +630,7 @@ jobs:
         env:
           GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
           GITLAB_PROJECT: ${{ vars.GITLAB_PROJECT || 'Loischsiy/MeowClash' }}
+          GITLAB_REF: ${{ vars.GITLAB_REF || 'main' }}
         run: |
           set -euo pipefail
           : "${GITLAB_TOKEN:?Set GITLAB_TOKEN secret}"
@@ -650,7 +651,7 @@ jobs:
           jq -n \
             --arg name "MeowClash $RELEASE_TAG" \
             --arg tag "$RELEASE_TAG" \
-            --arg ref "$GITHUB_SHA" \
+            --arg ref "$GITLAB_REF" \
             --rawfile description release.md \
             --argjson links "$links" \
             '{name: $name, tag_name: $tag, ref: $ref, description: $description, assets: {links: $links}}' \
@@ -680,6 +681,7 @@ jobs:
         env:
           GITVERSE_TOKEN: ${{ secrets.GITVERSE_TOKEN }}
           GITVERSE_REPOSITORY: ${{ vars.GITVERSE_REPOSITORY || 'Loischsiy/MeowClash' }}
+          GITVERSE_REF: ${{ vars.GITVERSE_REF || 'main' }}
           PRERELEASE: ${{ inputs.app_env != 'stable' }}
         run: |
           set -euo pipefail
@@ -693,7 +695,7 @@ jobs:
           jq -n \
             --arg name "MeowClash $RELEASE_TAG" \
             --arg tag "$RELEASE_TAG" \
-            --arg target "$GITHUB_SHA" \
+            --arg target "$GITVERSE_REF" \
             --rawfile body release.md \
             --argjson prerelease "$PRERELEASE" \
             '{name: $name, tag_name: $tag, target_commitish: $target, body: $body, prerelease: $prerelease, draft: false}' \

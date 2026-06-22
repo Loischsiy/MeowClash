@@ -689,8 +689,13 @@ jobs:
 
           api="https://gitverse.ru/api/repos/$GITVERSE_REPOSITORY"
           auth_header="Authorization: token $GITVERSE_TOKEN"
+          gitverse_headers=(
+            --header "Accept: application/json"
+            --header "User-Agent: MeowClash release workflow"
+            --header "$auth_header"
+          )
           curl --silent --fail --request DELETE \
-            --header "$auth_header" \
+            "${gitverse_headers[@]}" \
             "$api/releases/tags/$RELEASE_TAG" >/dev/null || true
 
           jq -n \
@@ -705,7 +710,7 @@ jobs:
           status="$(curl --silent --show-error --output gitverse-response.json --write-out "%{http_code}" \
             --request POST \
             --header "Content-Type: application/json" \
-            --header "$auth_header" \
+            "${gitverse_headers[@]}" \
             --data @gitverse-release.json \
             "$api/releases")"
 
@@ -722,7 +727,7 @@ jobs:
             name="$(basename "$file")"
             asset_name="$(jq -rn --arg v "$name" '$v|@uri')"
             curl --fail --request POST \
-              --header "$auth_header" \
+              "${gitverse_headers[@]}" \
               --form "attachment=@$file" \
               "$api/releases/$release_id/assets?name=$asset_name"
           done

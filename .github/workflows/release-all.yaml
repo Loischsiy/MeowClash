@@ -688,8 +688,9 @@ jobs:
           : "${GITVERSE_TOKEN:?Set GITVERSE_TOKEN secret}"
 
           api="https://gitverse.ru/api/repos/$GITVERSE_REPOSITORY"
+          auth_header="Authorization: token $GITVERSE_TOKEN"
           curl --silent --fail --request DELETE \
-            --header "Authorization: Bearer $GITVERSE_TOKEN" \
+            --header "$auth_header" \
             "$api/releases/tags/$RELEASE_TAG" >/dev/null || true
 
           jq -n \
@@ -701,11 +702,17 @@ jobs:
             '{name: $name, tag_name: $tag, target_commitish: $target, body: $body, prerelease: $prerelease, draft: false}' \
             > gitverse-release.json
 
-          curl --fail --request POST \
+          status="$(curl --silent --show-error --output gitverse-response.json --write-out "%{http_code}" \
+            --request POST \
             --header "Content-Type: application/json" \
-            --header "Authorization: Bearer $GITVERSE_TOKEN" \
+            --header "$auth_header" \
             --data @gitverse-release.json \
-            "$api/releases" > gitverse-response.json
+            "$api/releases")"
+
+          if [ "$status" -lt 200 ] || [ "$status" -ge 300 ]; then
+            cat gitverse-response.json
+            exit 1
+          fi
 
           release_id="$(jq -r '.id' gitverse-response.json)"
           test -n "$release_id"
@@ -715,7 +722,7 @@ jobs:
             name="$(basename "$file")"
             asset_name="$(jq -rn --arg v "$name" '$v|@uri')"
             curl --fail --request POST \
-              --header "Authorization: Bearer $GITVERSE_TOKEN" \
+              --header "$auth_header" \
               --form "attachment=@$file" \
               "$api/releases/$release_id/assets?name=$asset_name"
           done

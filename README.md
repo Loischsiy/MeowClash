@@ -141,13 +141,16 @@ Supports control via third-party automation tools (such as Tasker) using Intents
 
 ## 📥 Download
 
-Grab the latest pre-compiled binaries from the GitHub Releases page:
+Grab the latest pre-compiled binaries from the release pages:
 
 <a href="https://github.com/Loischsiy/MeowClash/releases">
   <img alt="Get it on GitHub" src="snapshots/get-it-on-github.svg" width="220px"/>
 </a>
-<a href="https://github.com/Loischsiy/MeowClash-fdroid-repo">
-  <img alt="Get it on F-Droid" src="snapshots/get-it-on-fdroid.svg" width="220px"/>
+<a href="https://gitlab.com/Loischsiy/MeowClash/-/releases">
+  <img alt="Get it on GitLab" src="https://img.shields.io/badge/Get_it_on-GitLab-FC6D26?logo=gitlab&logoColor=white" width="220px"/>
+</a>
+<a href="https://gitverse.ru/Loischsiy/MeowClash/releases">
+  <img alt="Get it on GitVerse" src="https://img.shields.io/badge/Get_it_on-GitVerse-245BDB" width="220px"/>
 </a>
 
 ---

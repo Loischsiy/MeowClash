@@ -624,3 +624,97 @@ jobs:
           prerelease: ${{ inputs.app_env != 'stable' }}
           fail_on_unmatched_files: true
           overwrite_files: true
+
+      - name: Publish GitLab release
+        shell: bash
+        env:
+          GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
+          GITLAB_PROJECT: ${{ vars.GITLAB_PROJECT || 'Loischsiy/MeowClash' }}
+        run: |
+          set -euo pipefail
+          : "${GITLAB_TOKEN:?Set GITLAB_TOKEN secret}"
+
+          project="$(jq -rn --arg v "$GITLAB_PROJECT" '$v|@uri')"
+          api="https://gitlab.com/api/v4/projects/$project"
+          links_file="$(mktemp)"
+          : > "$links_file"
+
+          find ./dist -type f -print0 | sort -z | while IFS= read -r -d '' file; do
+            name="$(basename "$file")"
+            url="$api/packages/generic/meowclash/$APP_VERSION/$name"
+            curl --fail --location --header "PRIVATE-TOKEN: $GITLAB_TOKEN" --upload-file "$file" "$url"
+            jq -n --arg name "$name" --arg url "$url" \
+              '{name: $name, url: $url, link_type: "package"}' >> "$links_file"
+          done
+
+          links="$(jq -s . "$links_file")"
+          jq -n \
+            --arg name "MeowClash $RELEASE_TAG" \
+            --arg tag "$RELEASE_TAG" \
+            --arg ref "$GITHUB_SHA" \
+            --rawfile description release.md \
+            --argjson links "$links" \
+            '{name: $name, tag_name: $tag, ref: $ref, description: $description, assets: {links: $links}}' \
+            > gitlab-release.json
+
+          status="$(curl --silent --output gitlab-response.json --write-out "%{http_code}" \
+            --request POST \
+            --header "Content-Type: application/json" \
+            --header "PRIVATE-TOKEN: $GITLAB_TOKEN" \
+            --data @gitlab-release.json \
+            "$api/releases")"
+
+          if [ "$status" = "409" ]; then
+            curl --fail --request DELETE --header "PRIVATE-TOKEN: $GITLAB_TOKEN" "$api/releases/$RELEASE_TAG"
+            curl --fail --request POST \
+              --header "Content-Type: application/json" \
+              --header "PRIVATE-TOKEN: $GITLAB_TOKEN" \
+              --data @gitlab-release.json \
+              "$api/releases"
+          elif [ "$status" -lt 200 ] || [ "$status" -ge 300 ]; then
+            cat gitlab-response.json
+            exit 1
+          fi
+
+      - name: Publish GitVerse release
+        shell: bash
+        env:
+          GITVERSE_TOKEN: ${{ secrets.GITVERSE_TOKEN }}
+          GITVERSE_REPOSITORY: ${{ vars.GITVERSE_REPOSITORY || 'Loischsiy/MeowClash' }}
+          PRERELEASE: ${{ inputs.app_env != 'stable' }}
+        run: |
+          set -euo pipefail
+          : "${GITVERSE_TOKEN:?Set GITVERSE_TOKEN secret}"
+
+          api="https://gitverse.ru/api/repos/$GITVERSE_REPOSITORY"
+          curl --silent --fail --request DELETE \
+            --header "Authorization: Bearer $GITVERSE_TOKEN" \
+            "$api/releases/tags/$RELEASE_TAG" >/dev/null || true
+
+          jq -n \
+            --arg name "MeowClash $RELEASE_TAG" \
+            --arg tag "$RELEASE_TAG" \
+            --arg target "$GITHUB_SHA" \
+            --rawfile body release.md \
+            --argjson prerelease "$PRERELEASE" \
+            '{name: $name, tag_name: $tag, target_commitish: $target, body: $body, prerelease: $prerelease, draft: false}' \
+            > gitverse-release.json
+
+          curl --fail --request POST \
+            --header "Content-Type: application/json" \
+            --header "Authorization: Bearer $GITVERSE_TOKEN" \
+            --data @gitverse-release.json \
+            "$api/releases" > gitverse-response.json
+
+          release_id="$(jq -r '.id' gitverse-response.json)"
+          test -n "$release_id"
+          test "$release_id" != "null"
+
+          find ./dist -type f -print0 | sort -z | while IFS= read -r -d '' file; do
+            name="$(basename "$file")"
+            asset_name="$(jq -rn --arg v "$name" '$v|@uri')"
+            curl --fail --request POST \
+              --header "Authorization: Bearer $GITVERSE_TOKEN" \
+              --form "attachment=@$file" \
+              "$api/releases/$release_id/assets?name=$asset_name"
+          done

@@ -141,13 +141,16 @@ NixOS を使用している場合は、提供されている Flake インプッ�
 
 ## 📥 ダウンロード
 
-GitHub Releases ページから最新のプリコンパイル済みバイナリを取得してください：
+以下のリリースページから最新のプリコンパイル済みバイナリを取得してください：
 
 <a href="https://github.com/Loischsiy/MeowClash/releases">
   <img alt="Get it on GitHub" src="snapshots/get-it-on-github.svg" width="220px"/>
 </a>
-<a href="https://github.com/Loischsiy/MeowClash-fdroid-repo">
-  <img alt="Get it on F-Droid" src="snapshots/get-it-on-fdroid.svg" width="220px"/>
+<a href="https://gitlab.com/Loischsiy/MeowClash/-/releases">
+  <img alt="Get it on GitLab" src="https://img.shields.io/badge/Get_it_on-GitLab-FC6D26?logo=gitlab&logoColor=white" width="220px"/>
+</a>
+<a href="https://gitverse.ru/Loischsiy/MeowClash/releases">
+  <img alt="Get it on GitVerse" src="https://img.shields.io/badge/Get_it_on-GitVerse-245BDB" width="220px"/>
 </a>
 
 ---

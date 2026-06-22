@@ -641,10 +641,9 @@ jobs:
 
           find ./dist -type f -print0 | sort -z | while IFS= read -r -d '' file; do
             name="$(basename "$file")"
-            url="$api/packages/generic/meowclash/$APP_VERSION/$name"
-            curl --fail --location --header "PRIVATE-TOKEN: $GITLAB_TOKEN" --upload-file "$file" "$url"
+            url="https://github.com/$GITHUB_REPOSITORY/releases/download/$RELEASE_TAG/$name"
             jq -n --arg name "$name" --arg url "$url" \
-              '{name: $name, url: $url, link_type: "package"}' >> "$links_file"
+              '{name: $name, url: $url, link_type: "other"}' >> "$links_file"
           done
 
           links="$(jq -s . "$links_file")"

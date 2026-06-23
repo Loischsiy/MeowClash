@@ -149,9 +149,6 @@ sudo apk add libayatana-appindicator-dev keybinder3-dev
 <a href="https://gitlab.com/Loischsiy/MeowClash/-/releases">
   <img alt="Get it on GitLab" src="https://img.shields.io/badge/Get_it_on-GitLab-FC6D26?logo=gitlab&logoColor=white" width="220px"/>
 </a>
-<a href="https://gitverse.ru/Loischsiy/MeowClash/releases">
-  <img alt="Get it on GitVerse" src="https://img.shields.io/badge/Get_it_on-GitVerse-245BDB" width="220px"/>
-</a>
 
 ---
 

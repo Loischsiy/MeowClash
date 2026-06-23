@@ -167,7 +167,7 @@ On macOS you may need to codesign or disable gatekeeper for the local core binar
 - `.github/workflows/test.yaml` — test workflow.
 - `.github/workflows/release-all.yaml` — release-all workflow.
 - It clones `flutter_distributor` fresh each run (`plugins/flutter_distributor` is gitignored).
-- Artifacts are uploaded to GitHub Releases, GitLab Releases, and GitVerse Releases.
+- Artifacts are uploaded to GitHub Releases and GitLab Releases.
 - Changelog is auto-generated from commits between tags.
 
 ## Common gotchas

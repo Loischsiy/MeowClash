@@ -10,7 +10,6 @@ import 'package:meowclash/widgets/input.dart';
 import 'package:flutter/services.dart';
 
 class System {
-
   factory System() {
     _instance ??= System._internal();
     return _instance!;
@@ -94,8 +93,7 @@ class System {
         'sh',
         ['-c', r'command -v -- "$1"', '_', name],
       );
-      return result.exitCode == 0 &&
-          result.stdout.toString().trim().isNotEmpty;
+      return result.exitCode == 0 && result.stdout.toString().trim().isNotEmpty;
     } on ProcessException {
       return false;
     }
@@ -288,7 +286,7 @@ class System {
           [
             'sh',
             '-c',
-            r'chown root:root "$1" && chmod +sx "$1"',
+            r'chown -- root:root "$1" && chmod -- +sx "$1"',
             '_',
             corePath,
           ],

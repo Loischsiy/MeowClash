@@ -1,15 +1,13 @@
 import 'dart:convert';
+
 import 'package:dio/dio.dart';
-import 'package:meowclash/common/common.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:meowclash/common/common.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 class SendToTvPage extends ConsumerStatefulWidget {
-  const SendToTvPage({
-    super.key,
-    required this.profileUrl,
-  });
+  const SendToTvPage({super.key, required this.profileUrl});
   final String profileUrl;
 
   @override
@@ -34,20 +32,22 @@ class _SendToTvPageState extends ConsumerState<SendToTvPage> {
     }
 
     try {
-      final endpoint = _parseSyncEndpoint(rawValue);
-      if (endpoint == null) {
+      final sync = _parseSyncEndpoint(rawValue);
+      if (sync == null) {
         return;
       }
       setState(() {
         _isScanComplete = true;
       });
-      final dio = Dio(BaseOptions(
-        connectTimeout: const Duration(seconds: 5),
-        receiveTimeout: const Duration(seconds: 5),
-      ));
+      final dio = Dio(
+        BaseOptions(
+          connectTimeout: const Duration(seconds: 5),
+          receiveTimeout: const Duration(seconds: 5),
+        ),
+      );
       await dio.post(
-        endpoint,
-        data: {'url': widget.profileUrl},
+        sync.endpoint,
+        data: {'url': widget.profileUrl, 'token': sync.token},
       );
       if (!mounted) return;
       _showResultDialog(
@@ -67,7 +67,7 @@ class _SendToTvPageState extends ConsumerState<SendToTvPage> {
     }
   }
 
-  String? _parseSyncEndpoint(String rawValue) {
+  ({String endpoint, String token})? _parseSyncEndpoint(String rawValue) {
     final dynamic payload;
     try {
       payload = jsonDecode(rawValue);
@@ -82,18 +82,25 @@ class _SendToTvPageState extends ConsumerState<SendToTvPage> {
     }
     final ip = payload['ip'];
     final port = payload['port'];
+    final token = payload['token'];
     if (ip is! String || ip.isEmpty || port is! int) {
+      return null;
+    }
+    if (token is! String || token.isEmpty) {
       return null;
     }
     if (port < 1 || port > 65535) {
       return null;
     }
-    return Uri(
-      scheme: 'http',
-      host: ip,
-      port: port,
-      path: '/add-profile',
-    ).toString();
+    return (
+      endpoint: Uri(
+        scheme: 'http',
+        host: ip,
+        port: port,
+        path: '/add-profile',
+      ).toString(),
+      token: token,
+    );
   }
 
   void _showResultDialog(String title, String content) {

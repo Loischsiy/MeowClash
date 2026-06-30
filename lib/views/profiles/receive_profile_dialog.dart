@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
-import 'package:meowclash/common/common.dart';
 import 'package:flutter/material.dart';
+import 'package:meowclash/common/common.dart';
 import 'package:network_info_plus/network_info_plus.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:shelf/shelf.dart' as shelf;
@@ -18,11 +19,17 @@ class ReceiveProfileDialog extends StatefulWidget {
 
 class _ReceiveProfileDialogState extends State<ReceiveProfileDialog> {
   static const _syncType = 'meowclash_tv_sync';
-  static const _syncPort = 8899;
+  static const _syncPort = 0;
 
   HttpServer? _server;
   String? _qrData;
   bool _isLoading = true;
+  final String _syncToken = _createSyncToken();
+
+  static String _createSyncToken() {
+    final random = Random.secure();
+    return base64UrlEncode(List<int>.generate(32, (_) => random.nextInt(256)));
+  }
 
   @override
   void initState() {
@@ -38,17 +45,17 @@ class _ReceiveProfileDialogState extends State<ReceiveProfileDialog> {
         throw StateError('Could not get IP address');
       }
 
-      final router = shelf_router.Router();
-      router.post('/add-profile', (shelf.Request request) async {
-        final url = await _readProfileUrl(request);
+      final router = shelf_router.Router()
+        ..post('/add-profile', (shelf.Request request) async {
+          final url = await _readProfileUrl(request, _syncToken);
 
-        if (url != null && url.isNotEmpty) {
-          commonPrint.log('Received subscription link from TV sync');
-          if (mounted) Navigator.of(context).pop(url);
-          return shelf.Response.ok('Link received by TV');
-        }
-        return shelf.Response.badRequest(body: 'URL not found');
-      });
+          if (url != null && url.isNotEmpty) {
+            commonPrint.log('Received subscription link from TV sync');
+            if (mounted) Navigator.of(context).pop(url);
+            return shelf.Response.ok('Link received by TV');
+          }
+          return shelf.Response.badRequest(body: 'URL not found');
+        });
 
       _server = await shelf_io.serve(router.call, ip, _syncPort);
       commonPrint.log(
@@ -61,6 +68,7 @@ class _ReceiveProfileDialogState extends State<ReceiveProfileDialog> {
           'type': _syncType,
           'ip': _server?.address.host,
           'port': _server?.port,
+          'token': _syncToken,
         });
         _isLoading = false;
       });
@@ -70,11 +78,14 @@ class _ReceiveProfileDialogState extends State<ReceiveProfileDialog> {
     }
   }
 
-  Future<String?> _readProfileUrl(shelf.Request request) async {
+  Future<String?> _readProfileUrl(shelf.Request request, String token) async {
     try {
       final body = await request.readAsString();
       final payload = jsonDecode(body);
       if (payload is! Map<String, dynamic>) {
+        return null;
+      }
+      if (payload['token'] != token) {
         return null;
       }
       final url = payload['url'];

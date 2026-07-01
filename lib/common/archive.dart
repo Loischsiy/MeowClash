@@ -3,6 +3,19 @@ import 'dart:io';
 import 'package:archive/archive_io.dart';
 import 'package:path/path.dart';
 
+bool isSafeBackupProfileEntry({
+  required String homeDirPath,
+  required String profilesPath,
+  required String entryName,
+}) {
+  if (isAbsolute(entryName) ||
+      split(entryName).any((segment) => segment == "..")) {
+    return false;
+  }
+  final filePath = join(homeDirPath, entryName);
+  return isWithin(homeDirPath, filePath) && isWithin(profilesPath, filePath);
+}
+
 extension ArchiveExt on Archive {
   void addDirectoryToArchive(String dirPath, String parentPath) {
     final dir = Directory(dirPath);

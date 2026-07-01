@@ -1635,6 +1635,7 @@ class AppController {
       return zipDecoder.decodeBytes(data);
     });
     final homeDirPath = await appPath.homeDirPath;
+    final profilesPath = await appPath.profilesPath;
     final configs =
         archive.files.where((item) => item.name.endsWith(".json")).toList();
     final profiles =
@@ -1653,20 +1654,16 @@ class AppController {
     for (final profile in profiles) {
       if (!profile.isFile) continue;
       final entryName = profile.name;
-      // Reject absolute paths and any ".." traversal segments outright.
-      if (isAbsolute(entryName) ||
-          split(entryName).any((segment) => segment == "..")) {
+      if (!isSafeBackupProfileEntry(
+        homeDirPath: homeDirPath,
+        profilesPath: profilesPath,
+        entryName: entryName,
+      )) {
         throw const FormatException(
           "Path traversal detected in backup archive",
         );
       }
       final filePath = join(homeDirPath, entryName);
-      // Ensure the resolved path stays strictly inside the home directory.
-      if (!isWithin(homeDirPath, filePath)) {
-        throw const FormatException(
-          "Path traversal detected in backup archive",
-        );
-      }
       final file = File(filePath);
       await file.create(recursive: true);
       await file.writeAsBytes(profile.content);

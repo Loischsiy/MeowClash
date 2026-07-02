@@ -3881,14 +3881,22 @@ class AppLocalizations {
 
   /// `Proxy chains`
   String get proxyChains {
-    return Intl.message('Proxy chains',
-        name: 'proxyChains', desc: '', args: []);
+    return Intl.message(
+      'Proxy chains',
+      name: 'proxyChains',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Chain proxies together: entry → exit`
   String get proxyChainsDesc {
-    return Intl.message('Chain proxies together: entry → exit',
-        name: 'proxyChainsDesc', desc: '', args: []);
+    return Intl.message(
+      'Chain proxies together: entry → exit',
+      name: 'proxyChainsDesc',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Chain mode`
@@ -3908,14 +3916,22 @@ class AppLocalizations {
 
   /// `First hop (entry)`
   String get firstHop {
-    return Intl.message('First hop (entry)',
-        name: 'firstHop', desc: '', args: []);
+    return Intl.message(
+      'First hop (entry)',
+      name: 'firstHop',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Second hop (exit)`
   String get secondHop {
-    return Intl.message('Second hop (exit)',
-        name: 'secondHop', desc: '', args: []);
+    return Intl.message(
+      'Second hop (exit)',
+      name: 'secondHop',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Add hop`
@@ -3925,8 +3941,177 @@ class AppLocalizations {
 
   /// `Select at least two hops`
   String get chainHopsRequired {
-    return Intl.message('Select at least two hops',
-        name: 'chainHopsRequired', desc: '', args: []);
+    return Intl.message(
+      'Select at least two hops',
+      name: 'chainHopsRequired',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `zapret2 (DPI bypass)`
+  String get zapret2 {
+    return Intl.message(
+      'zapret2 (DPI bypass)',
+      name: 'zapret2',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Automatically find and apply a working DPI-bypass strategy`
+  String get zapret2Desc {
+    return Intl.message(
+      'Automatically find and apply a working DPI-bypass strategy',
+      name: 'zapret2Desc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enable zapret2`
+  String get zapret2Enable {
+    return Intl.message(
+      'Enable zapret2',
+      name: 'zapret2Enable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Additive mode, independent of the proxy. Off by default.`
+  String get zapret2EnableDesc {
+    return Intl.message(
+      'Additive mode, independent of the proxy. Off by default.',
+      name: 'zapret2EnableDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Re-check / reset strategy`
+  String get zapret2Rescan {
+    return Intl.message(
+      'Re-check / reset strategy',
+      name: 'zapret2Rescan',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Clear the cached strategy and search again`
+  String get zapret2RescanDesc {
+    return Intl.message(
+      'Clear the cached strategy and search again',
+      name: 'zapret2RescanDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Off`
+  String get zapret2StatusOff {
+    return Intl.message('Off', name: 'zapret2StatusOff', desc: '', args: []);
+  }
+
+  /// `Searching for a working strategy…`
+  String get zapret2StatusSelecting {
+    return Intl.message(
+      'Searching for a working strategy…',
+      name: 'zapret2StatusSelecting',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Running: {strategy}`
+  String zapret2StatusRunning(String strategy) {
+    return Intl.message(
+      'Running: $strategy',
+      name: 'zapret2StatusRunning',
+      desc: '',
+      args: [strategy],
+    );
+  }
+
+  /// `No working strategy found`
+  String get zapret2StatusFailed {
+    return Intl.message(
+      'No working strategy found',
+      name: 'zapret2StatusFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Testing {strategy} ({current}/{total})`
+  String zapret2Progress(String strategy, int current, int total) {
+    return Intl.message(
+      'Testing $strategy ($current/$total)',
+      name: 'zapret2Progress',
+      desc: '',
+      args: [strategy, current, total],
+    );
+  }
+
+  /// `Not supported on this platform yet`
+  String get zapret2Unsupported {
+    return Intl.message(
+      'Not supported on this platform yet',
+      name: 'zapret2Unsupported',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Engine binary is not bundled for this platform`
+  String get zapret2MissingBinary {
+    return Intl.message(
+      'Engine binary is not bundled for this platform',
+      name: 'zapret2MissingBinary',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Requires elevated privileges (admin/root)`
+  String get zapret2MissingPrivileges {
+    return Intl.message(
+      'Requires elevated privileges (admin/root)',
+      name: 'zapret2MissingPrivileges',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Native support is not built into this app`
+  String get zapret2MissingNative {
+    return Intl.message(
+      'Native support is not built into this app',
+      name: 'zapret2MissingNative',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `On Windows, WinDivert (the packet-filter driver) may trigger antivirus software. It is not a virus — add an exception if needed.`
+  String get zapret2AntivirusWarning {
+    return Intl.message(
+      'On Windows, WinDivert (the packet-filter driver) may trigger antivirus software. It is not a virus — add an exception if needed.',
+      name: 'zapret2AntivirusWarning',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Fully local and open-source. No telemetry or hidden network activity.`
+  String get zapret2NoTelemetry {
+    return Intl.message(
+      'Fully local and open-source. No telemetry or hidden network activity.',
+      name: 'zapret2NoTelemetry',
+      desc: '',
+      args: [],
+    );
   }
 }
 

@@ -9,6 +9,7 @@ import 'package:meowclash/views/about.dart';
 import 'package:meowclash/views/access.dart';
 import 'package:meowclash/views/application_setting.dart';
 import 'package:meowclash/views/config/config.dart';
+import 'package:meowclash/views/config/zapret2.dart';
 import 'package:meowclash/views/hotkey.dart';
 import 'package:meowclash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
@@ -72,6 +73,7 @@ class _ToolboxViewState extends ConsumerState<ToolsView> {
         if (Platform.isWindows) const _LoopbackItem(),
         if (Platform.isAndroid) const _AccessItem(),
         const _ConfigItem(),
+        const _Zapret2Item(),
         const _SettingItem(),
       ],
     );
@@ -249,6 +251,24 @@ class _ConfigItem extends StatelessWidget {
       delegate: OpenDelegate(
         title: appLocale.override,
         widget: const ConfigView(),
+      ),
+    );
+  }
+}
+
+class _Zapret2Item extends StatelessWidget {
+  const _Zapret2Item();
+
+  @override
+  Widget build(BuildContext context) {
+    final appLocale = AppLocalizations.of(context);
+    return ListItem.open(
+      leading: const Icon(Icons.shield_outlined),
+      title: Text(appLocale.zapret2),
+      subtitle: Text(appLocale.zapret2Desc),
+      delegate: OpenDelegate(
+        title: appLocale.zapret2,
+        widget: const Zapret2View(),
       ),
     );
   }

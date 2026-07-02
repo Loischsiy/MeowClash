@@ -34,6 +34,15 @@ const defaultAppSettingProps = AppSettingProps(
   autoCheckUpdate: true,
   minimizeOnExit: true,
 );
+
+/// Default blockcheck targets for the zapret2 auto-selector. Discord and
+/// YouTube are the canonical throttled/blocked services; users can add their
+/// own domains/IPs on top of these.
+const defaultZapret2Targets = [
+  Zapret2Target(host: "discord.com"),
+  Zapret2Target(host: "www.youtube.com"),
+];
+const defaultZapret2Props = Zapret2Props();
 const defaultVpnProps = VpnProps();
 const defaultNetworkProps = NetworkProps();
 const defaultProxiesStyle = ProxiesStyle();
@@ -156,6 +165,26 @@ class VpnProps with _$VpnProps {
 }
 
 @freezed
+class Zapret2Props with _$Zapret2Props {
+  const factory Zapret2Props({
+    /// Master switch for the additive zapret2 DPI-bypass mode. Off by default
+    /// so the feature never changes behaviour unless explicitly enabled.
+    @Default(false) bool enable,
+    /// Blockcheck targets the auto-selector probes when picking a strategy.
+    @Default(defaultZapret2Targets) List<Zapret2Target> targets,
+    /// Minimum success ratio (0..1) a strategy must reach across the targets
+    /// before the UCB1 selector accepts it and stops probing.
+    @Default(0.6) double acceptThreshold,
+    /// Absolute path to a user-provided engine binary. Empty means "use the
+    /// bundled binary" (resolved per-platform by the backend).
+    @Default("") String customEnginePath,
+  }) = _Zapret2Props;
+
+  factory Zapret2Props.fromJson(Map<String, Object?>? json) =>
+      json == null ? const Zapret2Props() : _$Zapret2PropsFromJson(json);
+}
+
+@freezed
 class NetworkProps with _$NetworkProps {
   const factory NetworkProps({
     @Default(false) bool systemProxy,
@@ -264,6 +293,9 @@ class Config with _$Config {
     DAV? dav,
     @Default(defaultNetworkProps) NetworkProps networkProps,
     @Default(defaultVpnProps) VpnProps vpnProps,
+    @JsonKey(fromJson: Zapret2Props.fromJson)
+    @Default(defaultZapret2Props)
+    Zapret2Props zapret2Props,
     @JsonKey(fromJson: ThemeProps.safeFromJson) required ThemeProps themeProps,
     @Default(defaultProxiesStyle) ProxiesStyle proxiesStyle,
     @Default(defaultWindowProps) WindowProps windowProps,

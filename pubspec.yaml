@@ -88,6 +88,11 @@ dependency_overrides:
   # keeps the same public API custom_lint_core 0.7.1 relies on. (0.13.5+ need
   # analyzer 8.x and 0.14.0 removed deprecated APIs, so do not go higher.)
   analyzer_plugin: 0.13.4
+  # re_editor 0.8.0 predates Flutter's TextInputClient.onFocusReceived and fails
+  # to compile against the current SDK (breaks `flutter test` for the whole
+  # package because enum.dart transitively imports the editor). 0.9.0 adds the
+  # missing override with the same public API.
+  re_editor: ^0.9.0
 
 flutter:
   uses-material-design: true

@@ -58,6 +58,23 @@ class VpnSetting extends _$VpnSetting with AutoDisposeNotifierMixin {
 }
 
 @riverpod
+class Zapret2Setting extends _$Zapret2Setting with AutoDisposeNotifierMixin {
+  @override
+  Zapret2Props build() => globalState.config.zapret2Props;
+
+  @override
+  void onUpdate(Zapret2Props value) {
+    globalState.config = globalState.config.copyWith(
+      zapret2Props: value,
+    );
+  }
+
+  void updateState(Zapret2Props Function(Zapret2Props state) builder) {
+    state = builder(state);
+  }
+}
+
+@riverpod
 class NetworkSetting extends _$NetworkSetting with AutoDisposeNotifierMixin {
   @override
   NetworkProps build() => globalState.config.networkProps;

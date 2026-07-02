@@ -262,8 +262,8 @@ class Build {
   /// upstream bol-van releases pinned to [extractZapret2Version]:
   ///   - Windows: winws.exe + WinDivert.dll/.sys (github.com/bol-van/zapret-win-bundle)
   ///   - Linux:   nfqws (github.com/bol-van/zapret2 releases)
-  ///   - Android: nfqws per-ABI, placed in jniLibs alongside libclash.so
-  ///   - macOS:   nfqws-darwin (pf divert build) — see README "macOS build".
+  ///   - Android: no nfqws; packet hook is built into libclash.so
+  ///   - macOS:   no staged binary; future local TUN backend.
   /// Assets are laid out under zapret/<target>/[<arch>/] mirroring libclash/ so
   /// the desktop CMake install() and Android copyNativeLibs steps can pick them
   /// up. Missing assets are logged (not fatal): the app then reports the mode as

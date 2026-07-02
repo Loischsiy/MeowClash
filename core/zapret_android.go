@@ -2,6 +2,8 @@
 
 package main
 
+import "C"
+
 // zapret2 Android seam — userspace DPI-bypass packet mutation.
 //
 // WHY THIS EXISTS
@@ -24,6 +26,7 @@ package main
 // outbound TLS/QUIC (:443) flows to the configured targets.
 
 import (
+	"encoding/json"
 	"sync"
 	"sync/atomic"
 )
@@ -62,6 +65,15 @@ func zapret2Apply(strategy string, args []string, hosts []string) bool {
 	return zapret2State.enabled.Load()
 }
 
+//export zapret2ApplyNative
+func zapret2ApplyNative(strategyChar *C.char, argsChar *C.char, hostsChar *C.char) bool {
+	var args []string
+	var hosts []string
+	_ = json.Unmarshal([]byte(C.GoString(argsChar)), &args)
+	_ = json.Unmarshal([]byte(C.GoString(hostsChar)), &hosts)
+	return zapret2Apply(C.GoString(strategyChar), args, hosts)
+}
+
 // zapret2Clear removes any applied strategy (channel "zapret2.clear").
 func zapret2Clear() {
 	zapret2State.mu.Lock()
@@ -70,6 +82,11 @@ func zapret2Clear() {
 	zapret2State.args = nil
 	zapret2State.hostFilter = map[string]struct{}{}
 	zapret2State.enabled.Store(false)
+}
+
+//export zapret2ClearNative
+func zapret2ClearNative() {
+	zapret2Clear()
 }
 
 // zapret2MutateOutbound is the hook the tun read loop calls for each outbound

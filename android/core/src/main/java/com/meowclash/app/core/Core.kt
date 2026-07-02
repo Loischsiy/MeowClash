@@ -44,6 +44,14 @@ data object Core {
 
     external fun stopTun()
 
+    external fun zapret2Apply(
+        strategy: String,
+        argsJson: String,
+        hostsJson: String,
+    ): Boolean
+
+    external fun zapret2Clear()
+
     init {
         System.loadLibrary("core")
     }

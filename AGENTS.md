@@ -241,7 +241,7 @@ Additive, **off-by-default**, **independent of the Clash proxy** mode that embed
 
 - `lib/services/zapret/` — the whole engine, all behind interfaces (fully unit-testable):
   - `backend.dart` — `Zapret2Backend` interface + `Zapret2Availability`/`Zapret2Session`/`Zapret2BackendException` (structured `Zapret2UnavailableReason` → explicit UI messages, never silent).
-  - `backends/{windows,linux,macos,android}_backend.dart` + `backend_factory.dart` (`createZapret2Backend`). Windows/Linux/macOS extend `process_backend.dart` (spawn `winws.exe`/`nfqws`/`nfqws-darwin`, mirrors `lib/clash/service.dart` process handling). Android uses the `zapret2` MethodChannel (`isSupported`/`apply`/`clear`).
+  - `backends/{windows,linux,macos,android}_backend.dart` + `backend_factory.dart` (`createZapret2Backend`). Windows/Linux extend `process_backend.dart` (spawn `winws.exe`/`nfqws`, mirrors `lib/clash/service.dart` process handling). Android uses the `zapret2` MethodChannel (`isSupported`/`apply`/`clear`) bridged through `Zapret2Plugin` → `Core.zapret2Apply/Clear` → `libclash.so`. macOS is now an explicit local-TUN TODO, not a fake `nfqws-darwin` process backend.
   - `binary_resolver.dart` — resolves bundled engine path (no hardcoded paths; `ZAPRET2_BIN_DIR`/custom override).
   - `strategy_provider.dart` — 8 candidate desync strategies (`--dpi-desync=...`).
   - `strategy_tester.dart` — applies a strategy, probes targets (injectable `TargetProber`; default = TLS connect + latency), stops the session.
@@ -267,7 +267,7 @@ Additive, **off-by-default**, **independent of the Clash proxy** mode that embed
 
 ### Per-platform status
 
-- Windows (winws+WinDivert), Linux (nfqws): supported (need elevation/root). macOS (`nfqws-darwin` pf-divert) and Android (Go-core packet mutation): **experimental seams** — report an explicit unavailable reason until the native piece is built/staged. Never fail silently.
+- Windows (winws+WinDivert), Linux (nfqws): supported (need elevation/root). Android has the native `zapret2` channel wired into the Go core, but packet mutation remains experimental. macOS should use a future local TUN/NetworkExtension backend; do not reintroduce the fake `nfqws-darwin` process path. Never fail silently.
 
 ### Tests & gotchas
 

@@ -94,7 +94,8 @@ abstract class ProcessZapret2Backend extends Zapret2Backend {
     required List<Zapret2Target> targets,
     String? customEnginePath,
   }) async {
-    final path = await _resolver.resolve(binaryName, customPath: customEnginePath);
+    final path =
+        await _resolver.resolve(binaryName, customPath: customEnginePath);
     if (path == null) {
       throw const Zapret2BackendException(
         Zapret2UnavailableReason.missingBinary,
@@ -119,7 +120,7 @@ abstract class ProcessZapret2Backend extends Zapret2Backend {
       ]);
       if (earlyExit != null) {
         throw Zapret2BackendException(
-          Zapret2UnavailableReason.missingNativeSupport,
+          Zapret2UnavailableReason.missingPrivileges,
           "$binaryName exited immediately with code $earlyExit",
         );
       }

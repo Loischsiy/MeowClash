@@ -184,8 +184,8 @@ network, caches it, and reuses it on the next launch.
 |----------|---------|--------|--------------|
 | **Windows** | `winws.exe` + WinDivert | ✅ Supported | Elevated (admin) to load the WinDivert driver |
 | **Linux** | `nfqws` (NFQUEUE) | ✅ Supported | Root or `cap_net_admin` on the binary |
-| **macOS** | `nfqws-darwin` (pf divert) | ⚙️ Experimental — requires a custom build (upstream has no macOS binary) | Root |
-| **Android** | userspace packet mutation in the Go core | ⚙️ Experimental — requires the native seam to be built in | none (no root) |
+| **macOS** | local TUN backend | 🚧 Not built yet | NetworkExtension/utun packet path needed |
+| **Android** | userspace packet mutation in the Go core | ⚙️ Experimental — native channel is built in | Android VPN permission |
 
 On any platform where the backend is not available, the UI shows an **explicit
 message** (missing binary, missing privileges, or platform unsupported) instead
@@ -215,7 +215,7 @@ version pattern).
 |----------|--------|---------|
 | Windows (`winws.exe`, `WinDivert.dll`/`.sys`) | [bol-van/zapret-win-bundle](https://github.com/bol-van/zapret-win-bundle) | zapret2: see repo; WinDivert: LGPLv3 / GPLv3 (dual) |
 | Linux (`nfqws`) | [bol-van/zapret2](https://github.com/bol-van/zapret2) releases | see the zapret2 repository |
-| macOS (`nfqws-darwin`) | built from [bol-van/zapret2](https://github.com/bol-van/zapret2) source (see below) | see the zapret2 repository |
+| macOS (local TUN backend) | planned in this project | part of this project |
 | Android (packet mutation) | built into the Go core (`libclash.so`) | part of this project |
 
 > Verify licensing of the upstream binaries before redistribution. The Windows
@@ -232,11 +232,11 @@ or drop a binary next to the executable / set `ZAPRET2_BIN_DIR` at runtime.
 - **Windows / Linux:** take the prebuilt `winws.exe` + `WinDivert*` / `nfqws`
   from the upstream releases above and stage them under
   `zapret/windows/` / `zapret/linux/`.
-- **macOS (`nfqws-darwin`):** upstream ships no macOS binary. Build `nfqws` from
-  the zapret2 source against a BSD **pf divert-socket** backend (Darwin exposes
-  `pf` + divert semantics similar to FreeBSD). Cross-compile per arch
-  (`arm64`, `x86_64`), stage under `zapret/macos/`, and grant it root at runtime.
-  Until a binary is present the mode reports "engine binary not bundled".
+- **macOS:** upstream zapret2 does not provide a macOS packet-capture backend.
+  MeowClash no longer pretends that a standalone `nfqws-darwin` binary is enough;
+  the supported direction is a local TUN/NetworkExtension path inside the app.
+  Until that native path lands, the mode reports "native support is not built
+  into this app".
 - **Android (packet mutation in the Go core):** because a non-root device cannot
   run `nfqws` (no userspace NFQUEUE), DPI bypass is applied as **userspace packet
   mutation on the sing-tun read path inside the Go core**, driven from Dart over
@@ -244,8 +244,9 @@ or drop a binary next to the executable / set `ZAPRET2_BIN_DIR` at runtime.
   [`core/zapret_android.go`](core/zapret_android.go) for the seam and
   `lib/services/zapret/backends/android_backend.dart` for the Dart side. The
   per-ABI native code ships inside `libclash.so` (same `setup.dart` per-ABI
-  pipeline as the core — `armeabi-v7a`, `arm64-v8a`, `x86_64`). Until the seam is
-  compiled in, the mode reports "native support is not built into this app".
+  pipeline as the core — `armeabi-v7a`, `arm64-v8a`, `x86_64`). The Android app
+  registers the `zapret2` channel in `Zapret2Plugin`; `apply`/`clear` are bridged
+  into `libclash.so`.
 
 ---
 

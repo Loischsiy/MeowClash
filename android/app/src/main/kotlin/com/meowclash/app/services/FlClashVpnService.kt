@@ -118,11 +118,11 @@ class MeowClashVpnService : VpnService(), BaseServiceInterface {
                         }
                     }
                 }
-                else -> options.accessControl.let { accessControl ->
+                else -> options.accessControl?.let { accessControl ->
                     if (accessControl.enable) {
                         when (accessControl.mode) {
                             AccessControlMode.acceptSelected -> {
-                                (accessControl.acceptList + packageName).forEach {
+                                (accessControl.acceptList.orEmpty() + packageName).forEach {
                                     try {
                                         addAllowedApplication(it)
                                     } catch (_: Exception) {
@@ -132,7 +132,7 @@ class MeowClashVpnService : VpnService(), BaseServiceInterface {
                             }
 
                             AccessControlMode.rejectSelected -> {
-                                (accessControl.rejectList - packageName).forEach {
+                                (accessControl.rejectList.orEmpty() - packageName).forEach {
                                     try {
                                         addDisallowedApplication(it)
                                     } catch (_: Exception) {
@@ -157,7 +157,7 @@ class MeowClashVpnService : VpnService(), BaseServiceInterface {
                     ProxyInfo.buildDirectProxy(
                         "127.0.0.1",
                         options.port,
-                        options.bypassDomain
+                        options.bypassDomain.orEmpty()
                     )
                 )
             }

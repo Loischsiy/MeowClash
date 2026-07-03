@@ -44,7 +44,7 @@ fun Metadata.getProtocol(): Int? {
 }
 
 fun VpnOptions.getIpv4RouteAddress(): List<CIDR> {
-    return routeAddress.filter {
+    return routeAddress.orEmpty().filter {
         it.isIpv4()
     }.map {
         it.toCIDR()
@@ -52,7 +52,7 @@ fun VpnOptions.getIpv4RouteAddress(): List<CIDR> {
 }
 
 fun VpnOptions.getIpv6RouteAddress(): List<CIDR> {
-    return routeAddress.filter {
+    return routeAddress.orEmpty().filter {
         it.isIpv6()
     }.map {
         it.toCIDR()

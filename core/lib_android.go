@@ -20,6 +20,7 @@ import (
 	"github.com/metacubex/mihomo/log"
 	"golang.org/x/sync/semaphore"
 	"net"
+	"net/netip"
 	"strconv"
 	"strings"
 	"sync"
@@ -158,19 +159,27 @@ func handleGetAndroidVpnOptions() string {
 	// advertise via VpnService.setHttpProxy — force it off so Android doesn't
 	// end up with a ProxyInfo pointing at 127.0.0.1:0.
 	systemProxy := state.CurrentState.VpnProps.SystemProxy && mixedPort != 0
+	accessControl := state.CurrentState.VpnProps.AccessControl
+	if accessControl == nil {
+		accessControl = &state.AccessControl{
+			Mode:       "rejectSelected",
+			AcceptList: []string{},
+			RejectList: []string{},
+		}
+	}
 	options := state.AndroidVpnOptions{
 		Enable:           state.CurrentState.VpnProps.Enable,
 		Port:             mixedPort,
 		Ipv4Address:      state.DefaultIpv4Address,
 		Ipv6Address:      state.GetIpv6Address(),
-		AccessControl:    state.CurrentState.VpnProps.AccessControl,
+		AccessControl:    accessControl,
 		SystemProxy:      systemProxy,
 		AllowBypass:      state.CurrentState.VpnProps.AllowBypass,
-		RouteAddress:     currentConfig.General.Tun.RouteAddress,
-		BypassDomain:     state.CurrentState.BypassDomain,
+		RouteAddress:     nonNilPrefixes(currentConfig.General.Tun.RouteAddress),
+		BypassDomain:     nonNilStrings(state.CurrentState.BypassDomain),
 		DnsServerAddress: state.GetDnsServerAddress(),
-		IncludePackage:   currentConfig.General.Tun.IncludePackage,
-		ExcludePackage:   currentConfig.General.Tun.ExcludePackage,
+		IncludePackage:   nonNilStrings(currentConfig.General.Tun.IncludePackage),
+		ExcludePackage:   nonNilStrings(currentConfig.General.Tun.ExcludePackage),
 	}
 	data, err := json.Marshal(options)
 	if err != nil {
@@ -178,6 +187,20 @@ func handleGetAndroidVpnOptions() string {
 		return ""
 	}
 	return string(data)
+}
+
+func nonNilStrings(values []string) []string {
+	if values == nil {
+		return []string{}
+	}
+	return values
+}
+
+func nonNilPrefixes(values []netip.Prefix) []netip.Prefix {
+	if values == nil {
+		return []netip.Prefix{}
+	}
+	return values
 }
 
 func handleUpdateDns(value string) {

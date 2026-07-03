@@ -11,6 +11,7 @@ import (
 	"sync/atomic"
 
 	"github.com/metacubex/mihomo/adapter"
+	"github.com/metacubex/mihomo/adapter/outboundgroup"
 	"github.com/metacubex/mihomo/common/buf"
 	C "github.com/metacubex/mihomo/constant"
 	"github.com/metacubex/mihomo/tunnel"
@@ -67,6 +68,9 @@ func zapret2ApplyJSON(data string) bool {
 }
 
 func zapret2InstallProxyWrappers() {
+	if !zapret2ShouldMutate() {
+		return
+	}
 	for _, proxy := range tunnel.Proxies() {
 		zapret2WrapProxy(proxy)
 	}
@@ -83,6 +87,9 @@ func zapret2WrapProxy(proxy C.Proxy) {
 		return
 	}
 	if _, wrapped := p.ProxyAdapter.(*zapret2ProxyAdapter); wrapped {
+		return
+	}
+	if _, group := p.ProxyAdapter.(outboundgroup.ProxyGroup); group {
 		return
 	}
 	p.ProxyAdapter = &zapret2ProxyAdapter{ProxyAdapter: p.ProxyAdapter}

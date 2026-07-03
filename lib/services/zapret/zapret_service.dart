@@ -118,10 +118,14 @@ class Zapret2Service {
     }
 
     final targets = props.targets;
-    final strategies = _strategyProvider.forPlatform(platform);
+    final manualStrategy = _manualStrategy(props);
+    final strategies = [
+      if (manualStrategy != null) manualStrategy,
+      ..._strategyProvider.forPlatform(platform),
+    ];
 
     // 1) Cache fast-path (unless the user forced a rescan).
-    if (!forceRescan) {
+    if (!forceRescan && manualStrategy == null) {
       final cached = await _cache.loadValid(
         engineVersion: _engineVersion,
         platform: platform,
@@ -157,7 +161,9 @@ class Zapret2Service {
     await _cache.save(Zapret2Cache(
       engineVersion: _engineVersion,
       platform: platform,
-      selectedStrategy: result.accepted ? result.selectedStrategy : null,
+      selectedStrategy: result.accepted && manualStrategy == null
+          ? result.selectedStrategy
+          : null,
       targets: targets,
       testedAt: DateTime.now(),
       stats: result.stats,
@@ -206,6 +212,22 @@ class Zapret2Service {
       _emit(status);
       return status;
     }
+  }
+
+  Zapret2Strategy? _manualStrategy(Zapret2Props props) {
+    final args = props.manualStrategyArgs
+        .split(RegExp(r'\s+'))
+        .map((arg) => arg.trim())
+        .where((arg) => arg.isNotEmpty)
+        .toList();
+    if (args.isEmpty) return null;
+    // ponytail: whitespace split is enough for zapret flags; add shell quoting
+    // only if a real flag with spaces appears.
+    return Zapret2Strategy(
+      id: 'manual_${args.join('|')}',
+      label: 'Manual strategy',
+      args: args,
+    );
   }
 
   /// Disables the mode and tears the engine down. Idempotent.

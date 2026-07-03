@@ -31,13 +31,32 @@ func TestZapret2SplitWriteSplitsTLSClientHello(t *testing.T) {
 	if !zapret2LooksLikeTLSClientHello(payload) {
 		t.Fatal("payload should be detected as TLS ClientHello")
 	}
-	if err := zapret2SplitWrite(conn, payload); err != nil {
+	if err := zapret2SplitWrite(conn, payload, []int{1}); err != nil {
 		t.Fatal(err)
 	}
 	if len(conn.writes) != 2 {
 		t.Fatalf("writes = %d, want 2", len(conn.writes))
 	}
 	if string(append(conn.writes[0], conn.writes[1]...)) != string(payload) {
+		t.Fatal("split writes did not preserve payload")
+	}
+}
+
+func TestZapret2SplitWriteUsesMultiplePositions(t *testing.T) {
+	payload := []byte{0x16, 0x03, 0x01, 0, 6, 0x01, 1, 2, 3, 4, 5, 6}
+	conn := &zapret2RecordingConn{}
+
+	if err := zapret2SplitWrite(conn, payload, []int{5, 1, 5, 99}); err != nil {
+		t.Fatal(err)
+	}
+	if len(conn.writes) != 3 {
+		t.Fatalf("writes = %d, want 3", len(conn.writes))
+	}
+	var got []byte
+	for _, write := range conn.writes {
+		got = append(got, write...)
+	}
+	if string(got) != string(payload) {
 		t.Fatal("split writes did not preserve payload")
 	}
 }

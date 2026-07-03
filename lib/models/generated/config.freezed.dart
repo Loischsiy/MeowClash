@@ -1405,6 +1405,9 @@ mixin _$Zapret2Props {
   /// before the UCB1 selector accepts it and stops probing.
   double get acceptThreshold => throw _privateConstructorUsedError;
 
+  /// Raw strategy args to try first. Empty = use the built-in catalogue.
+  String get manualStrategyArgs => throw _privateConstructorUsedError;
+
   /// Absolute path to a user-provided engine binary. Empty means "use the
   /// bundled binary" (resolved per-platform by the backend).
   String get customEnginePath => throw _privateConstructorUsedError;
@@ -1429,6 +1432,7 @@ abstract class $Zapret2PropsCopyWith<$Res> {
       {bool enable,
       List<Zapret2Target> targets,
       double acceptThreshold,
+      String manualStrategyArgs,
       String customEnginePath});
 }
 
@@ -1450,6 +1454,7 @@ class _$Zapret2PropsCopyWithImpl<$Res, $Val extends Zapret2Props>
     Object? enable = null,
     Object? targets = null,
     Object? acceptThreshold = null,
+    Object? manualStrategyArgs = null,
     Object? customEnginePath = null,
   }) {
     return _then(_value.copyWith(
@@ -1465,6 +1470,10 @@ class _$Zapret2PropsCopyWithImpl<$Res, $Val extends Zapret2Props>
           ? _value.acceptThreshold
           : acceptThreshold // ignore: cast_nullable_to_non_nullable
               as double,
+      manualStrategyArgs: null == manualStrategyArgs
+          ? _value.manualStrategyArgs
+          : manualStrategyArgs // ignore: cast_nullable_to_non_nullable
+              as String,
       customEnginePath: null == customEnginePath
           ? _value.customEnginePath
           : customEnginePath // ignore: cast_nullable_to_non_nullable
@@ -1485,6 +1494,7 @@ abstract class _$$Zapret2PropsImplCopyWith<$Res>
       {bool enable,
       List<Zapret2Target> targets,
       double acceptThreshold,
+      String manualStrategyArgs,
       String customEnginePath});
 }
 
@@ -1504,6 +1514,7 @@ class __$$Zapret2PropsImplCopyWithImpl<$Res>
     Object? enable = null,
     Object? targets = null,
     Object? acceptThreshold = null,
+    Object? manualStrategyArgs = null,
     Object? customEnginePath = null,
   }) {
     return _then(_$Zapret2PropsImpl(
@@ -1519,6 +1530,10 @@ class __$$Zapret2PropsImplCopyWithImpl<$Res>
           ? _value.acceptThreshold
           : acceptThreshold // ignore: cast_nullable_to_non_nullable
               as double,
+      manualStrategyArgs: null == manualStrategyArgs
+          ? _value.manualStrategyArgs
+          : manualStrategyArgs // ignore: cast_nullable_to_non_nullable
+              as String,
       customEnginePath: null == customEnginePath
           ? _value.customEnginePath
           : customEnginePath // ignore: cast_nullable_to_non_nullable
@@ -1534,6 +1549,7 @@ class _$Zapret2PropsImpl implements _Zapret2Props {
       {this.enable = false,
       final List<Zapret2Target> targets = defaultZapret2Targets,
       this.acceptThreshold = 0.6,
+      this.manualStrategyArgs = "",
       this.customEnginePath = ""})
       : _targets = targets;
 
@@ -1564,6 +1580,11 @@ class _$Zapret2PropsImpl implements _Zapret2Props {
   @JsonKey()
   final double acceptThreshold;
 
+  /// Raw strategy args to try first. Empty = use the built-in catalogue.
+  @override
+  @JsonKey()
+  final String manualStrategyArgs;
+
   /// Absolute path to a user-provided engine binary. Empty means "use the
   /// bundled binary" (resolved per-platform by the backend).
   @override
@@ -1572,7 +1593,7 @@ class _$Zapret2PropsImpl implements _Zapret2Props {
 
   @override
   String toString() {
-    return 'Zapret2Props(enable: $enable, targets: $targets, acceptThreshold: $acceptThreshold, customEnginePath: $customEnginePath)';
+    return 'Zapret2Props(enable: $enable, targets: $targets, acceptThreshold: $acceptThreshold, manualStrategyArgs: $manualStrategyArgs, customEnginePath: $customEnginePath)';
   }
 
   @override
@@ -1584,6 +1605,8 @@ class _$Zapret2PropsImpl implements _Zapret2Props {
             const DeepCollectionEquality().equals(other._targets, _targets) &&
             (identical(other.acceptThreshold, acceptThreshold) ||
                 other.acceptThreshold == acceptThreshold) &&
+            (identical(other.manualStrategyArgs, manualStrategyArgs) ||
+                other.manualStrategyArgs == manualStrategyArgs) &&
             (identical(other.customEnginePath, customEnginePath) ||
                 other.customEnginePath == customEnginePath));
   }
@@ -1595,6 +1618,7 @@ class _$Zapret2PropsImpl implements _Zapret2Props {
       enable,
       const DeepCollectionEquality().hash(_targets),
       acceptThreshold,
+      manualStrategyArgs,
       customEnginePath);
 
   /// Create a copy of Zapret2Props
@@ -1618,6 +1642,7 @@ abstract class _Zapret2Props implements Zapret2Props {
       {final bool enable,
       final List<Zapret2Target> targets,
       final double acceptThreshold,
+      final String manualStrategyArgs,
       final String customEnginePath}) = _$Zapret2PropsImpl;
 
   factory _Zapret2Props.fromJson(Map<String, dynamic> json) =
@@ -1636,6 +1661,10 @@ abstract class _Zapret2Props implements Zapret2Props {
   /// before the UCB1 selector accepts it and stops probing.
   @override
   double get acceptThreshold;
+
+  /// Raw strategy args to try first. Empty = use the built-in catalogue.
+  @override
+  String get manualStrategyArgs;
 
   /// Absolute path to a user-provided engine binary. Empty means "use the
   /// bundled binary" (resolved per-platform by the backend).

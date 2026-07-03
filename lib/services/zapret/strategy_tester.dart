@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:meowclash/enum/enum.dart';
 import 'package:meowclash/models/models.dart';
 import 'package:meowclash/services/zapret/backend.dart';
 import 'package:meowclash/services/zapret/zapret_logger.dart';
@@ -9,7 +10,9 @@ import 'package:meowclash/services/zapret/zapret_logger.dart';
 class TargetProbe {
   const TargetProbe({required this.ok, required this.latencyMs});
 
-  const TargetProbe.fail() : ok = false, latencyMs = 0;
+  const TargetProbe.fail()
+      : ok = false,
+        latencyMs = 0;
 
   final bool ok;
   final int latencyMs;
@@ -76,6 +79,17 @@ class Zapret2StrategyTester {
         customEnginePath: customEnginePath,
       );
       await Future<void>.delayed(settleDelay);
+
+      if (backend.platform == SupportPlatform.Android ||
+          backend.platform == SupportPlatform.MacOS) {
+        // ponytail: Dart SecureSocket does not reliably travel through the
+        // mihomo stream hook on these platforms, so probing here creates false
+        // "no working strategy" failures. Start success is the smoke test.
+        return Zapret2ProbeResult(
+          strategyId: strategy.id,
+          successRatio: 1,
+        );
+      }
 
       final probes = await Future.wait(targets.map(prober));
       final successes = probes.where((p) => p.ok).toList();

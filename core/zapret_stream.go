@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"net"
+	"sort"
+	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -19,6 +21,7 @@ type zapret2StateT struct {
 	enabled    atomic.Bool
 	strategy   string
 	args       []string
+	splitPos   []int
 	hostFilter map[string]struct{}
 }
 
@@ -31,6 +34,7 @@ func zapret2Apply(strategy string, args []string, hosts []string) bool {
 	defer zapret2State.mu.Unlock()
 	zapret2State.strategy = strategy
 	zapret2State.args = args
+	zapret2State.splitPos = zapret2ParseSplitPositions(strategy, args)
 	zapret2State.hostFilter = make(map[string]struct{}, len(hosts))
 	for _, h := range hosts {
 		zapret2State.hostFilter[strings.ToLower(strings.TrimSpace(h))] = struct{}{}
@@ -45,6 +49,7 @@ func zapret2Clear() {
 	defer zapret2State.mu.Unlock()
 	zapret2State.strategy = ""
 	zapret2State.args = nil
+	zapret2State.splitPos = nil
 	zapret2State.hostFilter = map[string]struct{}{}
 	zapret2State.enabled.Store(false)
 }
@@ -109,6 +114,12 @@ func zapret2Matches(metadata *C.Metadata) bool {
 	return ok
 }
 
+func zapret2CurrentSplitPos() []int {
+	zapret2State.mu.RLock()
+	defer zapret2State.mu.RUnlock()
+	return append([]int(nil), zapret2State.splitPos...)
+}
+
 type zapret2Conn struct {
 	C.Conn
 	wroteFirst atomic.Bool
@@ -116,7 +127,7 @@ type zapret2Conn struct {
 
 func (c *zapret2Conn) Write(p []byte) (int, error) {
 	if c.wroteFirst.CompareAndSwap(false, true) && zapret2LooksLikeTLSClientHello(p) {
-		if err := zapret2SplitWrite(c.Conn, p); err != nil {
+		if err := zapret2SplitWrite(c.Conn, p, zapret2CurrentSplitPos()); err != nil {
 			return 0, err
 		}
 		return len(p), nil
@@ -141,16 +152,83 @@ func zapret2LooksLikeTLSClientHello(p []byte) bool {
 	return len(p) > 6 && p[0] == 0x16 && p[1] == 0x03 && p[5] == 0x01
 }
 
-func zapret2SplitWrite(conn net.Conn, p []byte) error {
-	// ponytail: one-byte split; add strategy-specific split positions when this
-	// userspace backend proves useful enough to tune per network.
-	if len(p) < 2 {
+func zapret2ParseSplitPositions(strategy string, args []string) []int {
+	var positions []int
+	for _, arg := range args {
+		if value, ok := strings.CutPrefix(arg, "--dpi-desync-split-pos="); ok {
+			positions = append(positions, zapret2ParsePosList(value)...)
+		}
+		if value, ok := strings.CutPrefix(arg, "--stream-split-pos="); ok {
+			positions = append(positions, zapret2ParsePosList(value)...)
+		}
+	}
+	if len(positions) > 0 {
+		return positions
+	}
+	switch {
+	case strings.Contains(strategy, "tlsrec"):
+		return []int{5}
+	case strings.Contains(strategy, "multisplit"):
+		return []int{1, 5, 16}
+	case strings.Contains(strategy, "split2"):
+		return []int{1}
+	case strings.Contains(strategy, "split_5"):
+		return []int{5}
+	case strings.Contains(strategy, "split_16"):
+		return []int{16}
+	case strings.Contains(strategy, "split_32"):
+		return []int{32}
+	default:
+		return []int{1}
+	}
+}
+
+func zapret2ParsePosList(value string) []int {
+	var positions []int
+	for _, part := range strings.Split(value, ",") {
+		pos, err := strconv.Atoi(strings.TrimSpace(part))
+		if err == nil {
+			positions = append(positions, pos)
+		}
+	}
+	return positions
+}
+
+func zapret2SplitWrite(conn net.Conn, p []byte, positions []int) error {
+	// ponytail: stream backend only supports split positions; fake/TTL/QUIC need
+	// a lower packet hook if this still fails on a network.
+	positions = zapret2NormalizeSplitPositions(positions, len(p))
+	if len(positions) == 0 {
 		_, err := conn.Write(p)
 		return err
 	}
-	if _, err := conn.Write(p[:1]); err != nil {
-		return err
+	start := 0
+	for _, pos := range positions {
+		if _, err := conn.Write(p[start:pos]); err != nil {
+			return err
+		}
+		start = pos
 	}
-	_, err := conn.Write(p[1:])
+	_, err := conn.Write(p[start:])
 	return err
+}
+
+func zapret2NormalizeSplitPositions(positions []int, size int) []int {
+	if size < 2 {
+		return nil
+	}
+	out := make([]int, 0, len(positions))
+	seen := map[int]struct{}{}
+	for _, pos := range positions {
+		if pos <= 0 || pos >= size {
+			continue
+		}
+		if _, ok := seen[pos]; ok {
+			continue
+		}
+		seen[pos] = struct{}{}
+		out = append(out, pos)
+	}
+	sort.Ints(out)
+	return out
 }

@@ -26,6 +26,7 @@ class Zapret2View extends ConsumerWidget {
             _Zapret2EnableItem(),
             _Zapret2StatusItem(),
             _Zapret2TargetsItem(),
+            _Zapret2ManualStrategyItem(),
             _Zapret2RescanItem(),
           ],
         ),
@@ -94,6 +95,33 @@ class _Zapret2TargetsItem extends ConsumerWidget {
             );
           },
         ),
+      ),
+    );
+  }
+}
+
+class _Zapret2ManualStrategyItem extends ConsumerWidget {
+  const _Zapret2ManualStrategyItem();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final value = ref.watch(
+      zapret2SettingProvider.select((s) => s.manualStrategyArgs),
+    );
+    return ListItem.input(
+      title: const Text("Custom strategy"),
+      subtitle: Text(value.isEmpty ? appLocalizations.defaultText : value),
+      delegate: InputDelegate(
+        title: "Custom strategy",
+        value: value,
+        resetValue: "",
+        onChanged: (value) {
+          ref.read(zapret2SettingProvider.notifier).updateState(
+                (state) => state.copyWith(
+                  manualStrategyArgs: value?.trim() ?? "",
+                ),
+              );
+        },
       ),
     );
   }

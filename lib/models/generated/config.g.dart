@@ -170,6 +170,7 @@ _$Zapret2PropsImpl _$$Zapret2PropsImplFromJson(Map<String, dynamic> json) =>
               .toList() ??
           defaultZapret2Targets,
       acceptThreshold: (json['acceptThreshold'] as num?)?.toDouble() ?? 0.6,
+      manualStrategyArgs: json['manualStrategyArgs'] as String? ?? "",
       customEnginePath: json['customEnginePath'] as String? ?? "",
     );
 
@@ -178,6 +179,7 @@ Map<String, dynamic> _$$Zapret2PropsImplToJson(_$Zapret2PropsImpl instance) =>
       'enable': instance.enable,
       'targets': instance.targets,
       'acceptThreshold': instance.acceptThreshold,
+      'manualStrategyArgs': instance.manualStrategyArgs,
       'customEnginePath': instance.customEnginePath,
     };
 

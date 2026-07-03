@@ -182,6 +182,9 @@ class Zapret2Props with _$Zapret2Props {
     /// before the UCB1 selector accepts it and stops probing.
     @Default(0.6) double acceptThreshold,
 
+    /// Raw strategy args to try first. Empty = use the built-in catalogue.
+    @Default("") String manualStrategyArgs,
+
     /// Absolute path to a user-provided engine binary. Empty means "use the
     /// bundled binary" (resolved per-platform by the backend).
     @Default("") String customEnginePath,

@@ -100,6 +100,38 @@ class DefaultZapret2StrategyProvider extends Zapret2StrategyProvider {
           ],
         ),
         Zapret2Strategy(
+          id: "stream_split_1",
+          label: "Stream split @ 1",
+          args: [
+            "--stream-split-pos=1",
+          ],
+          platforms: [SupportPlatform.Android, SupportPlatform.MacOS],
+        ),
+        Zapret2Strategy(
+          id: "stream_split_5",
+          label: "Stream split @ 5",
+          args: [
+            "--stream-split-pos=5",
+          ],
+          platforms: [SupportPlatform.Android, SupportPlatform.MacOS],
+        ),
+        Zapret2Strategy(
+          id: "stream_split_16",
+          label: "Stream split @ 16",
+          args: [
+            "--stream-split-pos=16",
+          ],
+          platforms: [SupportPlatform.Android, SupportPlatform.MacOS],
+        ),
+        Zapret2Strategy(
+          id: "stream_multisplit",
+          label: "Stream multisplit",
+          args: [
+            "--stream-split-pos=1,5,16",
+          ],
+          platforms: [SupportPlatform.Android, SupportPlatform.MacOS],
+        ),
+        Zapret2Strategy(
           id: "fake_split2",
           label: "Fake + split2 (TLS)",
           args: [

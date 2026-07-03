@@ -24,6 +24,22 @@ void main() {
     );
   });
 
+  test('default strategy catalog adds stream strategies for Android/macOS', () {
+    const provider = DefaultZapret2StrategyProvider();
+    expect(
+      provider.forPlatform(SupportPlatform.Android).map((s) => s.id),
+      contains('stream_multisplit'),
+    );
+    expect(
+      provider.forPlatform(SupportPlatform.MacOS).map((s) => s.id),
+      contains('stream_multisplit'),
+    );
+    expect(
+      provider.forPlatform(SupportPlatform.Windows).map((s) => s.id),
+      isNot(contains('stream_multisplit')),
+    );
+  });
+
   group('UCB1 score', () {
     test('an unexplored strategy scores infinity (always tried first)', () {
       final selector = Zapret2AutoSelector(

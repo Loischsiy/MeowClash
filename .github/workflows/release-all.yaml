@@ -192,12 +192,6 @@ jobs:
           flutter clean
           flutter pub get
 
-      - name: Prepare zapret2 bundle
-        shell: bash
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        run: bash .github/scripts/prepare-zapret2-bundle.sh windows
-
       - name: Build
         shell: bash
         run: |
@@ -265,12 +259,6 @@ jobs:
           flutter --version
           flutter clean
           flutter pub get
-
-      - name: Prepare zapret2 bundle
-        shell: bash
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        run: bash .github/scripts/prepare-zapret2-bundle.sh linux
 
       - name: Build
         shell: bash
@@ -351,12 +339,6 @@ jobs:
           flutter --version
           flutter clean
           flutter pub get
-
-      - name: Prepare zapret2 bundle
-        shell: bash
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        run: bash .github/scripts/prepare-zapret2-bundle.sh linux
 
       - name: Build
         shell: bash

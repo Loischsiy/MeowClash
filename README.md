@@ -215,7 +215,7 @@ version pattern).
 
 | Platform | Source | License |
 |----------|--------|---------|
-| Windows (`winws.exe`, `WinDivert.dll`/`.sys`) | [bol-van/zapret-win-bundle](https://github.com/bol-van/zapret-win-bundle) | zapret2: see repo; WinDivert: LGPLv3 / GPLv3 (dual) |
+| Windows (`winws.exe`, `WinDivert.dll`/`.sys`) | [bol-van/zapret2](https://github.com/bol-van/zapret2) releases | zapret2: see repo; WinDivert: LGPLv3 / GPLv3 (dual) |
 | Linux (`nfqws`) | [bol-van/zapret2](https://github.com/bol-van/zapret2) releases | see the zapret2 repository |
 | macOS (stream split) | built into the Go core | part of this project |
 | Android (stream split) | built into the Go core (`libclash.so`) | part of this project |

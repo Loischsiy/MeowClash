@@ -99,7 +99,7 @@ case "$target" in
   windows)
     assets="${RUNNER_TEMP:-/tmp}/zapret2-windows-assets"
     extracted="${RUNNER_TEMP:-/tmp}/zapret2-windows"
-    download bol-van/zapret-win-bundle "$version" "$assets" || download bol-van/zapret-win-bundle latest "$assets"
+    download bol-van/zapret2 "$version" "$assets"
     extract_all "$assets" "$extracted"
     winws="$(find "$extracted" -type f \( -iname winws.exe -o -iname winws2.exe \) | grep -Ei 'x86_64|amd64|x64|win64|64' | head -n 1 || true)"
     if [ -z "$winws" ]; then

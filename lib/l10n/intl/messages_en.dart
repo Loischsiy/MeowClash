@@ -57,11 +57,6 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m14(count) =>
       "${Intl.plural(count, one: '1 year ago', other: '${count} years ago')}";
 
-  static String m15(strategy, current, total) =>
-      "Testing ${strategy} (${current}/${total})";
-
-  static String m16(strategy) => "Running: ${strategy}";
-
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
     "about": MessageLookupByLibrary.simpleMessage("About"),
@@ -87,7 +82,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "Scan QR code with phone",
     ),
     "addFromPhoneTitle": MessageLookupByLibrary.simpleMessage("Add from Phone"),
-    "addHop": MessageLookupByLibrary.simpleMessage("Add hop"),
     "addProfile": MessageLookupByLibrary.simpleMessage("Add profile"),
     "addRule": MessageLookupByLibrary.simpleMessage("Add rule"),
     "addedOriginRules": MessageLookupByLibrary.simpleMessage(
@@ -187,11 +181,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "cancelSelectAll": MessageLookupByLibrary.simpleMessage(
       "Cancel select all",
     ),
-    "chainHopsRequired": MessageLookupByLibrary.simpleMessage(
-      "Select at least two hops",
-    ),
-    "chainMode": MessageLookupByLibrary.simpleMessage("Chain mode"),
-    "chainName": MessageLookupByLibrary.simpleMessage("Chain name"),
     "changeServer": MessageLookupByLibrary.simpleMessage("Change Server"),
     "checkError": MessageLookupByLibrary.simpleMessage("Check error"),
     "checkUpdate": MessageLookupByLibrary.simpleMessage("Check for updates"),
@@ -336,7 +325,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "findProcessModeDesc": MessageLookupByLibrary.simpleMessage(
       "There is a certain performance loss after opening",
     ),
-    "firstHop": MessageLookupByLibrary.simpleMessage("First hop (entry)"),
     "fontFamily": MessageLookupByLibrary.simpleMessage("FontFamily"),
     "fourColumns": MessageLookupByLibrary.simpleMessage("Four columns"),
     "fruitSaladScheme": MessageLookupByLibrary.simpleMessage("FruitSalad"),
@@ -362,7 +350,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "hasCacheChange": MessageLookupByLibrary.simpleMessage(
       "Do you want to cache the changes?",
     ),
-    "hop": MessageLookupByLibrary.simpleMessage("Hop"),
     "hostsDesc": MessageLookupByLibrary.simpleMessage("Add Hosts"),
     "hotkeyConflict": MessageLookupByLibrary.simpleMessage("Hotkey conflict"),
     "hotkeyManagement": MessageLookupByLibrary.simpleMessage(
@@ -647,10 +634,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "providers": MessageLookupByLibrary.simpleMessage("Providers"),
     "proxies": MessageLookupByLibrary.simpleMessage("Proxies"),
     "proxiesSetting": MessageLookupByLibrary.simpleMessage("Proxies setting"),
-    "proxyChains": MessageLookupByLibrary.simpleMessage("Proxy chains"),
-    "proxyChainsDesc": MessageLookupByLibrary.simpleMessage(
-      "Chain proxies together: entry → exit",
-    ),
     "proxyGroup": MessageLookupByLibrary.simpleMessage("Proxy group"),
     "proxyNameserver": MessageLookupByLibrary.simpleMessage("Proxy nameserver"),
     "proxyNameserverDesc": MessageLookupByLibrary.simpleMessage(
@@ -752,7 +735,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "script": MessageLookupByLibrary.simpleMessage("Script"),
     "search": MessageLookupByLibrary.simpleMessage("Search"),
-    "secondHop": MessageLookupByLibrary.simpleMessage("Second hop (exit)"),
     "seconds": MessageLookupByLibrary.simpleMessage("Seconds"),
     "selectAll": MessageLookupByLibrary.simpleMessage("Select all"),
     "selectProfile": MessageLookupByLibrary.simpleMessage("Select Profile"),
@@ -905,47 +887,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "whitelistMode": MessageLookupByLibrary.simpleMessage("Whitelist mode"),
     "years": MessageLookupByLibrary.simpleMessage("Years"),
     "yearsAgo": m14,
-    "zapret2": MessageLookupByLibrary.simpleMessage("zapret2 (DPI bypass)"),
-    "zapret2AntivirusWarning": MessageLookupByLibrary.simpleMessage(
-      "On Windows, WinDivert (the packet-filter driver) may trigger antivirus software. It is not a virus — add an exception if needed.",
-    ),
-    "zapret2Desc": MessageLookupByLibrary.simpleMessage(
-      "Automatically find and apply a working DPI-bypass strategy",
-    ),
-    "zapret2Enable": MessageLookupByLibrary.simpleMessage("Enable zapret2"),
-    "zapret2EnableDesc": MessageLookupByLibrary.simpleMessage(
-      "Additive mode, independent of the proxy. Off by default.",
-    ),
-    "zapret2MissingBinary": MessageLookupByLibrary.simpleMessage(
-      "Engine binary is not bundled for this platform",
-    ),
-    "zapret2MissingNative": MessageLookupByLibrary.simpleMessage(
-      "Native support is not built into this app",
-    ),
-    "zapret2MissingPrivileges": MessageLookupByLibrary.simpleMessage(
-      "Requires elevated privileges (admin/root)",
-    ),
-    "zapret2NoTelemetry": MessageLookupByLibrary.simpleMessage(
-      "Fully local and open-source. No telemetry or hidden network activity.",
-    ),
-    "zapret2Progress": m15,
-    "zapret2Rescan": MessageLookupByLibrary.simpleMessage(
-      "Re-check / reset strategy",
-    ),
-    "zapret2RescanDesc": MessageLookupByLibrary.simpleMessage(
-      "Clear the cached strategy and search again",
-    ),
-    "zapret2StatusFailed": MessageLookupByLibrary.simpleMessage(
-      "No working strategy found",
-    ),
-    "zapret2StatusOff": MessageLookupByLibrary.simpleMessage("Off"),
-    "zapret2StatusRunning": m16,
-    "zapret2StatusSelecting": MessageLookupByLibrary.simpleMessage(
-      "Searching for a working strategy…",
-    ),
-    "zapret2Unsupported": MessageLookupByLibrary.simpleMessage(
-      "Not supported on this platform yet",
-    ),
     "zh_CN": MessageLookupByLibrary.simpleMessage("Simplified Chinese"),
   };
 }

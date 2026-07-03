@@ -52,22 +52,6 @@ final vpnSettingProvider =
 );
 
 typedef _$VpnSetting = AutoDisposeNotifier<VpnProps>;
-String _$zapret2SettingHash() => r'2bfab1af33acc82d8be70e6b1452b7f913700bf9';
-
-/// See also [Zapret2Setting].
-@ProviderFor(Zapret2Setting)
-final zapret2SettingProvider =
-    AutoDisposeNotifierProvider<Zapret2Setting, Zapret2Props>.internal(
-  Zapret2Setting.new,
-  name: r'zapret2SettingProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$zapret2SettingHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-typedef _$Zapret2Setting = AutoDisposeNotifier<Zapret2Props>;
 String _$networkSettingHash() => r'2ff25bb6f4bc2050c0ac1aa07dcd3c78ee6325bd';
 
 /// See also [NetworkSetting].

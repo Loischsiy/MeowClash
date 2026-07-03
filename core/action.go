@@ -142,17 +142,6 @@ func handleAction(action *Action, result ActionResult) {
 	case getCoreVersionMethod:
 		result.success(constant.Version)
 		return
-	case zapret2ApplyMethod:
-		if !dataIsStr {
-			result.error("invalid data type")
-			return
-		}
-		result.success(zapret2ApplyJSON(dataStr))
-		return
-	case zapret2ClearMethod:
-		zapret2Clear()
-		result.success(true)
-		return
 	case closeConnectionMethod:
 		if !dataIsStr {
 			result.error("invalid data type")

@@ -5,7 +5,6 @@ import androidx.lifecycle.MutableLiveData
 import com.meowclash.app.plugins.AppPlugin
 import com.meowclash.app.plugins.TilePlugin
 import com.meowclash.app.plugins.VpnPlugin
-import com.meowclash.app.plugins.Zapret2Plugin
 import io.flutter.FlutterInjector
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.engine.dart.DartExecutor
@@ -215,7 +214,6 @@ object GlobalState {
             VpnPlugin.attachingServiceEngine = false
             serviceEngine?.plugins?.add(AppPlugin())
             serviceEngine?.plugins?.add(TilePlugin())
-            serviceEngine?.plugins?.add(Zapret2Plugin())
             val vpnService = DartExecutor.DartEntrypoint(
                 FlutterInjector.instance().flutterLoader().findAppBundlePath(),
                 "_service"
@@ -230,4 +228,5 @@ object GlobalState {
         }
     }
 }
+
 

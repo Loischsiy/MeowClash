@@ -34,20 +34,6 @@ const defaultAppSettingProps = AppSettingProps(
   autoCheckUpdate: true,
   minimizeOnExit: true,
 );
-
-/// Default blockcheck targets for the zapret2 auto-selector. Discord and
-/// YouTube are the canonical throttled/blocked services; users can add their
-/// own domains/IPs on top of these.
-const defaultZapret2Targets = [
-  Zapret2Target(host: "discord.com"),
-  Zapret2Target(host: "discord.gg"),
-  Zapret2Target(host: "gateway.discord.gg"),
-  Zapret2Target(host: "cdn.discordapp.com"),
-  Zapret2Target(host: "www.youtube.com"),
-  Zapret2Target(host: "youtube.com"),
-  Zapret2Target(host: "googlevideo.com"),
-];
-const defaultZapret2Props = Zapret2Props();
 const defaultVpnProps = VpnProps();
 const defaultNetworkProps = NetworkProps();
 const defaultProxiesStyle = ProxiesStyle();
@@ -114,8 +100,9 @@ class AppSettingProps with _$AppSettingProps {
   factory AppSettingProps.fromJson(Map<String, Object?> json) =>
       _$AppSettingPropsFromJson(json);
 
-  factory AppSettingProps.safeFromJson(Map<String, Object?>? json) =>
-      json == null ? defaultAppSettingProps : AppSettingProps.fromJson(json);
+  factory AppSettingProps.safeFromJson(Map<String, Object?>? json) => json == null
+        ? defaultAppSettingProps
+        : AppSettingProps.fromJson(json);
 }
 
 @freezed
@@ -166,32 +153,6 @@ class VpnProps with _$VpnProps {
 
   factory VpnProps.fromJson(Map<String, Object?> json) =>
       _$VpnPropsFromJson(json);
-}
-
-@freezed
-class Zapret2Props with _$Zapret2Props {
-  const factory Zapret2Props({
-    /// Master switch for the additive zapret2 DPI-bypass mode. Off by default
-    /// so the feature never changes behaviour unless explicitly enabled.
-    @Default(false) bool enable,
-
-    /// Blockcheck targets the auto-selector probes when picking a strategy.
-    @Default(defaultZapret2Targets) List<Zapret2Target> targets,
-
-    /// Minimum success ratio (0..1) a strategy must reach across the targets
-    /// before the UCB1 selector accepts it and stops probing.
-    @Default(0.6) double acceptThreshold,
-
-    /// Raw strategy args to try first. Empty = use the built-in catalogue.
-    @Default("") String manualStrategyArgs,
-
-    /// Absolute path to a user-provided engine binary. Empty means "use the
-    /// bundled binary" (resolved per-platform by the backend).
-    @Default("") String customEnginePath,
-  }) = _Zapret2Props;
-
-  factory Zapret2Props.fromJson(Map<String, Object?>? json) =>
-      json == null ? const Zapret2Props() : _$Zapret2PropsFromJson(json);
 }
 
 @freezed
@@ -303,9 +264,6 @@ class Config with _$Config {
     DAV? dav,
     @Default(defaultNetworkProps) NetworkProps networkProps,
     @Default(defaultVpnProps) VpnProps vpnProps,
-    @JsonKey(fromJson: Zapret2Props.fromJson)
-    @Default(defaultZapret2Props)
-    Zapret2Props zapret2Props,
     @JsonKey(fromJson: ThemeProps.safeFromJson) required ThemeProps themeProps,
     @Default(defaultProxiesStyle) ProxiesStyle proxiesStyle,
     @Default(defaultWindowProps) WindowProps windowProps,
@@ -325,7 +283,7 @@ class Config with _$Config {
           (json["vpnProps"]! as Map)["accessControl"] = accessControlMap;
         }
       }
-
+      
       // Migration: Replace deprecated "standard" iconStyle with "icon"
       final proxiesStyle = json["proxiesStyle"];
       if (proxiesStyle is Map) {

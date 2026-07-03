@@ -162,27 +162,6 @@ Map<String, dynamic> _$$VpnPropsImplToJson(_$VpnPropsImpl instance) =>
       'accessControl': instance.accessControl,
     };
 
-_$Zapret2PropsImpl _$$Zapret2PropsImplFromJson(Map<String, dynamic> json) =>
-    _$Zapret2PropsImpl(
-      enable: json['enable'] as bool? ?? false,
-      targets: (json['targets'] as List<dynamic>?)
-              ?.map((e) => Zapret2Target.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          defaultZapret2Targets,
-      acceptThreshold: (json['acceptThreshold'] as num?)?.toDouble() ?? 0.6,
-      manualStrategyArgs: json['manualStrategyArgs'] as String? ?? "",
-      customEnginePath: json['customEnginePath'] as String? ?? "",
-    );
-
-Map<String, dynamic> _$$Zapret2PropsImplToJson(_$Zapret2PropsImpl instance) =>
-    <String, dynamic>{
-      'enable': instance.enable,
-      'targets': instance.targets,
-      'acceptThreshold': instance.acceptThreshold,
-      'manualStrategyArgs': instance.manualStrategyArgs,
-      'customEnginePath': instance.customEnginePath,
-    };
-
 _$NetworkPropsImpl _$$NetworkPropsImplFromJson(Map<String, dynamic> json) =>
     _$NetworkPropsImpl(
       systemProxy: json['systemProxy'] as bool? ?? false,
@@ -366,10 +345,6 @@ _$ConfigImpl _$$ConfigImplFromJson(Map<String, dynamic> json) => _$ConfigImpl(
       vpnProps: json['vpnProps'] == null
           ? defaultVpnProps
           : VpnProps.fromJson(json['vpnProps'] as Map<String, dynamic>),
-      zapret2Props: json['zapret2Props'] == null
-          ? defaultZapret2Props
-          : Zapret2Props.fromJson(
-              json['zapret2Props'] as Map<String, Object?>?),
       themeProps:
           ThemeProps.safeFromJson(json['themeProps'] as Map<String, Object?>?),
       proxiesStyle: json['proxiesStyle'] == null
@@ -398,7 +373,6 @@ Map<String, dynamic> _$$ConfigImplToJson(_$ConfigImpl instance) =>
       'dav': instance.dav,
       'networkProps': instance.networkProps,
       'vpnProps': instance.vpnProps,
-      'zapret2Props': instance.zapret2Props,
       'themeProps': instance.themeProps,
       'proxiesStyle': instance.proxiesStyle,
       'windowProps': instance.windowProps,

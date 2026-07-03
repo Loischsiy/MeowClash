@@ -14,7 +14,6 @@ import com.meowclash.app.plugins.CryptoPlugin
 import com.meowclash.app.plugins.ServicePlugin
 import com.meowclash.app.plugins.TilePlugin
 import com.meowclash.app.plugins.VpnPlugin
-import com.meowclash.app.plugins.Zapret2Plugin
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -123,7 +122,6 @@ class MainActivity : FlutterActivity() {
         flutterEngine.plugins.add(ServicePlugin)
         flutterEngine.plugins.add(TilePlugin())
         flutterEngine.plugins.add(VpnPlugin)
-        flutterEngine.plugins.add(Zapret2Plugin())
         GlobalState.flutterEngine = flutterEngine
         
         maybeRequestBatteryExemption()

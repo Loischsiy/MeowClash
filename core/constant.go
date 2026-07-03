@@ -102,8 +102,6 @@ const (
 	getAndroidVpnOptionsMethod     Method = "getAndroidVpnOptions"
 	getRunTimeMethod               Method = "getRunTime"
 	getCurrentProfileNameMethod    Method = "getCurrentProfileName"
-	zapret2ApplyMethod             Method = "zapret2Apply"
-	zapret2ClearMethod             Method = "zapret2Clear"
 	crashMethod                    Method = "crash"
 	setupConfigMethod              Method = "setupConfig"
 	getConfigMethod                Method = "getConfig"

@@ -17,36 +17,6 @@ Java_com_meowclash_app_core_Core_stopTun(JNIEnv *) {
     stopTun();
 }
 
-extern "C"
-JNIEXPORT jboolean JNICALL
-Java_com_meowclash_app_core_Core_zapret2Apply(
-        JNIEnv *env,
-        jobject,
-        jstring strategy,
-        jstring args_json,
-        jstring hosts_json) {
-    char *strategy_c = jni_get_string(env, strategy);
-    char *args_c = jni_get_string(env, args_json);
-    char *hosts_c = jni_get_string(env, hosts_json);
-    if (strategy_c == nullptr || args_c == nullptr || hosts_c == nullptr) {
-        release_string(&strategy_c);
-        release_string(&args_c);
-        release_string(&hosts_c);
-        return JNI_FALSE;
-    }
-    const bool ok = zapret2ApplyNative(strategy_c, args_c, hosts_c);
-    release_string(&strategy_c);
-    release_string(&args_c);
-    release_string(&hosts_c);
-    return ok ? JNI_TRUE : JNI_FALSE;
-}
-
-extern "C"
-JNIEXPORT void JNICALL
-Java_com_meowclash_app_core_Core_zapret2Clear(JNIEnv *) {
-    zapret2ClearNative();
-}
-
 
 static jmethodID m_tun_interface_protect;
 static jmethodID m_tun_interface_resolve_process;

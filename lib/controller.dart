@@ -890,14 +890,6 @@ class AppController {
     try {
       await savePreferences();
       await system.setMacOSDns(true);
-      // Tear down the additive zapret2 engine (independent of the clash core)
-      // before shutting the core down, so its native process / packet hook is
-      // always released on exit even if the core teardown throws.
-      try {
-        await _ref.read(zapret2ServiceProvider).disable();
-      } catch (e) {
-        commonPrint.log('zapret2 teardown error: $e');
-      }
       await proxy?.stopProxy();
       await clashCore.shutdown();
       await clashService?.destroy();
@@ -1147,9 +1139,6 @@ class AppController {
       
       commonPrint.log("AppController: Starting auto-check update...");
       unawaited(autoCheckUpdate());
-
-      commonPrint.log("AppController: Restoring zapret2 mode if enabled...");
-      unawaited(_restoreZapret2());
       
       if (!Platform.isMacOS) {
         commonPrint.log("AppController: Handling window visibility...");
@@ -1173,22 +1162,6 @@ class AppController {
       commonPrint.log("=== AppController: init FATAL ERROR ===");
       commonPrint.log("Error: $e");
       commonPrint.log("StackTrace: $stackTrace");
-    }
-  }
-
-  /// Restores the zapret2 mode on launch if it was left enabled. Runs
-  /// unawaited and reuses the cached strategy (no rescan), so a slow probe
-  /// never blocks startup. Independent of the clash core lifecycle.
-  Future<void> _restoreZapret2() async {
-    if (!_ref.read(zapret2SettingProvider).enable) {
-      return;
-    }
-    try {
-      await _ref.read(zapret2ServiceProvider).enable(
-            props: _ref.read(zapret2SettingProvider),
-          );
-    } catch (e) {
-      commonPrint.log("zapret2 restore error: $e");
     }
   }
 

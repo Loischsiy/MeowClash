@@ -60,6 +60,19 @@ class MessageLookup extends MessageLookupByLibrary {
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
     "about": MessageLookupByLibrary.simpleMessage("Про програму"),
+    "addHop": MessageLookupByLibrary.simpleMessage("Додати ланку"),
+    "chainHopsRequired": MessageLookupByLibrary.simpleMessage(
+      "Виберіть щонайменше дві ланки",
+    ),
+    "chainMode": MessageLookupByLibrary.simpleMessage("Режим ланцюжків"),
+    "chainName": MessageLookupByLibrary.simpleMessage("Назва ланцюжка"),
+    "firstHop": MessageLookupByLibrary.simpleMessage("Перша ланка (вхід)"),
+    "hop": MessageLookupByLibrary.simpleMessage("Ланка"),
+    "proxyChains": MessageLookupByLibrary.simpleMessage("Ланцюжки проксі"),
+    "proxyChainsDesc": MessageLookupByLibrary.simpleMessage(
+      "Об'єднання проксі в ланцюжок: вхід → вихід",
+    ),
+    "secondHop": MessageLookupByLibrary.simpleMessage("Друга ланка (вихід)"),
     "accessControl": MessageLookupByLibrary.simpleMessage("Контроль доступу"),
     "accessControlAllowDesc": MessageLookupByLibrary.simpleMessage(
       "Лише вибрані застосунки використовуватимуть VPN",
@@ -84,7 +97,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "addFromPhoneTitle": MessageLookupByLibrary.simpleMessage(
       "Додати з телефону",
     ),
-    "addHop": MessageLookupByLibrary.simpleMessage("Додати ланку"),
     "addProfile": MessageLookupByLibrary.simpleMessage("Додати профіль"),
     "addRule": MessageLookupByLibrary.simpleMessage("Додати правило"),
     "addedOriginRules": MessageLookupByLibrary.simpleMessage(
@@ -188,11 +200,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "cancelSelectAll": MessageLookupByLibrary.simpleMessage(
       "Скасувати вибір усього",
     ),
-    "chainHopsRequired": MessageLookupByLibrary.simpleMessage(
-      "Виберіть щонайменше дві ланки",
-    ),
-    "chainMode": MessageLookupByLibrary.simpleMessage("Режим ланцюжків"),
-    "chainName": MessageLookupByLibrary.simpleMessage("Назва ланцюжка"),
     "changeServer": MessageLookupByLibrary.simpleMessage("Змінити сервер"),
     "checkError": MessageLookupByLibrary.simpleMessage("Помилка перевірки"),
     "checkUpdate": MessageLookupByLibrary.simpleMessage("Перевірити оновлення"),
@@ -355,7 +362,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "findProcessModeDesc": MessageLookupByLibrary.simpleMessage(
       "Може незначно знизити продуктивність",
     ),
-    "firstHop": MessageLookupByLibrary.simpleMessage("Перша ланка (вхід)"),
     "fontFamily": MessageLookupByLibrary.simpleMessage("Сімейство шрифтів"),
     "fourColumns": MessageLookupByLibrary.simpleMessage("Чотири стовпці"),
     "fruitSaladScheme": MessageLookupByLibrary.simpleMessage("Фруктовий мікс"),
@@ -383,7 +389,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "hasCacheChange": MessageLookupByLibrary.simpleMessage(
       "Зберегти зміни в кеші?",
     ),
-    "hop": MessageLookupByLibrary.simpleMessage("Ланка"),
     "hostsDesc": MessageLookupByLibrary.simpleMessage("Додати Hosts"),
     "hotkeyConflict": MessageLookupByLibrary.simpleMessage(
       "Конфлікт гарячих клавіш",
@@ -682,10 +687,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "proxiesSetting": MessageLookupByLibrary.simpleMessage(
       "Налаштування проксі",
     ),
-    "proxyChains": MessageLookupByLibrary.simpleMessage("Ланцюжки проксі"),
-    "proxyChainsDesc": MessageLookupByLibrary.simpleMessage(
-      "Об\'єднання проксі в ланцюжок: вхід → вихід",
-    ),
     "proxyGroup": MessageLookupByLibrary.simpleMessage("Група проксі"),
     "proxyNameserver": MessageLookupByLibrary.simpleMessage(
       "Проксі-сервер імен",
@@ -795,7 +796,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "saveTip": MessageLookupByLibrary.simpleMessage("Зберегти зміни?"),
     "script": MessageLookupByLibrary.simpleMessage("Скрипт"),
     "search": MessageLookupByLibrary.simpleMessage("Пошук"),
-    "secondHop": MessageLookupByLibrary.simpleMessage("Друга ланка (вихід)"),
     "seconds": MessageLookupByLibrary.simpleMessage("Секунд"),
     "selectAll": MessageLookupByLibrary.simpleMessage("Вибрати все"),
     "selectProfile": MessageLookupByLibrary.simpleMessage("Вибрати профіль"),

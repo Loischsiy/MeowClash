@@ -565,7 +565,6 @@ func handleUpdateExternalProvider(providerName string, fn func(value string)) {
 			fn(err.Error())
 			return
 		}
-		zapret2InstallProxyWrappers()
 		fn("")
 	}()
 }

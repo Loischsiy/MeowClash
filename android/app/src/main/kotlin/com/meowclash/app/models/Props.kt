@@ -7,10 +7,10 @@ enum class AccessControlMode {
 }
 
 data class AccessControl(
-    val enable: Boolean = false,
-    val mode: AccessControlMode = AccessControlMode.rejectSelected,
-    val acceptList: List<String>? = null,
-    val rejectList: List<String>? = null,
+    val enable: Boolean,
+    val mode: AccessControlMode,
+    val acceptList: List<String>,
+    val rejectList: List<String>,
 )
 
 data class CIDR(val address: InetAddress, val prefixLength: Int)
@@ -18,11 +18,11 @@ data class CIDR(val address: InetAddress, val prefixLength: Int)
 data class VpnOptions(
     val enable: Boolean,
     val port: Int,
-    val accessControl: AccessControl? = null,
+    val accessControl: AccessControl,
     val allowBypass: Boolean,
     val systemProxy: Boolean,
-    val bypassDomain: List<String>? = null,
-    val routeAddress: List<String>? = null,
+    val bypassDomain: List<String>,
+    val routeAddress: List<String>,
     val ipv4Address: String,
     val ipv6Address: String,
     val dnsServerAddress: String,

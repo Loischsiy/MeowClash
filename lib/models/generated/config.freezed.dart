@@ -1388,297 +1388,6 @@ abstract class _VpnProps implements VpnProps {
       throw _privateConstructorUsedError;
 }
 
-Zapret2Props _$Zapret2PropsFromJson(Map<String, dynamic> json) {
-  return _Zapret2Props.fromJson(json);
-}
-
-/// @nodoc
-mixin _$Zapret2Props {
-  /// Master switch for the additive zapret2 DPI-bypass mode. Off by default
-  /// so the feature never changes behaviour unless explicitly enabled.
-  bool get enable => throw _privateConstructorUsedError;
-
-  /// Blockcheck targets the auto-selector probes when picking a strategy.
-  List<Zapret2Target> get targets => throw _privateConstructorUsedError;
-
-  /// Minimum success ratio (0..1) a strategy must reach across the targets
-  /// before the UCB1 selector accepts it and stops probing.
-  double get acceptThreshold => throw _privateConstructorUsedError;
-
-  /// Raw strategy args to try first. Empty = use the built-in catalogue.
-  String get manualStrategyArgs => throw _privateConstructorUsedError;
-
-  /// Absolute path to a user-provided engine binary. Empty means "use the
-  /// bundled binary" (resolved per-platform by the backend).
-  String get customEnginePath => throw _privateConstructorUsedError;
-
-  /// Serializes this Zapret2Props to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of Zapret2Props
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  $Zapret2PropsCopyWith<Zapret2Props> get copyWith =>
-      throw _privateConstructorUsedError;
-}
-
-/// @nodoc
-abstract class $Zapret2PropsCopyWith<$Res> {
-  factory $Zapret2PropsCopyWith(
-          Zapret2Props value, $Res Function(Zapret2Props) then) =
-      _$Zapret2PropsCopyWithImpl<$Res, Zapret2Props>;
-  @useResult
-  $Res call(
-      {bool enable,
-      List<Zapret2Target> targets,
-      double acceptThreshold,
-      String manualStrategyArgs,
-      String customEnginePath});
-}
-
-/// @nodoc
-class _$Zapret2PropsCopyWithImpl<$Res, $Val extends Zapret2Props>
-    implements $Zapret2PropsCopyWith<$Res> {
-  _$Zapret2PropsCopyWithImpl(this._value, this._then);
-
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
-
-  /// Create a copy of Zapret2Props
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? enable = null,
-    Object? targets = null,
-    Object? acceptThreshold = null,
-    Object? manualStrategyArgs = null,
-    Object? customEnginePath = null,
-  }) {
-    return _then(_value.copyWith(
-      enable: null == enable
-          ? _value.enable
-          : enable // ignore: cast_nullable_to_non_nullable
-              as bool,
-      targets: null == targets
-          ? _value.targets
-          : targets // ignore: cast_nullable_to_non_nullable
-              as List<Zapret2Target>,
-      acceptThreshold: null == acceptThreshold
-          ? _value.acceptThreshold
-          : acceptThreshold // ignore: cast_nullable_to_non_nullable
-              as double,
-      manualStrategyArgs: null == manualStrategyArgs
-          ? _value.manualStrategyArgs
-          : manualStrategyArgs // ignore: cast_nullable_to_non_nullable
-              as String,
-      customEnginePath: null == customEnginePath
-          ? _value.customEnginePath
-          : customEnginePath // ignore: cast_nullable_to_non_nullable
-              as String,
-    ) as $Val);
-  }
-}
-
-/// @nodoc
-abstract class _$$Zapret2PropsImplCopyWith<$Res>
-    implements $Zapret2PropsCopyWith<$Res> {
-  factory _$$Zapret2PropsImplCopyWith(
-          _$Zapret2PropsImpl value, $Res Function(_$Zapret2PropsImpl) then) =
-      __$$Zapret2PropsImplCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call(
-      {bool enable,
-      List<Zapret2Target> targets,
-      double acceptThreshold,
-      String manualStrategyArgs,
-      String customEnginePath});
-}
-
-/// @nodoc
-class __$$Zapret2PropsImplCopyWithImpl<$Res>
-    extends _$Zapret2PropsCopyWithImpl<$Res, _$Zapret2PropsImpl>
-    implements _$$Zapret2PropsImplCopyWith<$Res> {
-  __$$Zapret2PropsImplCopyWithImpl(
-      _$Zapret2PropsImpl _value, $Res Function(_$Zapret2PropsImpl) _then)
-      : super(_value, _then);
-
-  /// Create a copy of Zapret2Props
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? enable = null,
-    Object? targets = null,
-    Object? acceptThreshold = null,
-    Object? manualStrategyArgs = null,
-    Object? customEnginePath = null,
-  }) {
-    return _then(_$Zapret2PropsImpl(
-      enable: null == enable
-          ? _value.enable
-          : enable // ignore: cast_nullable_to_non_nullable
-              as bool,
-      targets: null == targets
-          ? _value._targets
-          : targets // ignore: cast_nullable_to_non_nullable
-              as List<Zapret2Target>,
-      acceptThreshold: null == acceptThreshold
-          ? _value.acceptThreshold
-          : acceptThreshold // ignore: cast_nullable_to_non_nullable
-              as double,
-      manualStrategyArgs: null == manualStrategyArgs
-          ? _value.manualStrategyArgs
-          : manualStrategyArgs // ignore: cast_nullable_to_non_nullable
-              as String,
-      customEnginePath: null == customEnginePath
-          ? _value.customEnginePath
-          : customEnginePath // ignore: cast_nullable_to_non_nullable
-              as String,
-    ));
-  }
-}
-
-/// @nodoc
-@JsonSerializable()
-class _$Zapret2PropsImpl implements _Zapret2Props {
-  const _$Zapret2PropsImpl(
-      {this.enable = false,
-      final List<Zapret2Target> targets = defaultZapret2Targets,
-      this.acceptThreshold = 0.6,
-      this.manualStrategyArgs = "",
-      this.customEnginePath = ""})
-      : _targets = targets;
-
-  factory _$Zapret2PropsImpl.fromJson(Map<String, dynamic> json) =>
-      _$$Zapret2PropsImplFromJson(json);
-
-  /// Master switch for the additive zapret2 DPI-bypass mode. Off by default
-  /// so the feature never changes behaviour unless explicitly enabled.
-  @override
-  @JsonKey()
-  final bool enable;
-
-  /// Blockcheck targets the auto-selector probes when picking a strategy.
-  final List<Zapret2Target> _targets;
-
-  /// Blockcheck targets the auto-selector probes when picking a strategy.
-  @override
-  @JsonKey()
-  List<Zapret2Target> get targets {
-    if (_targets is EqualUnmodifiableListView) return _targets;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_targets);
-  }
-
-  /// Minimum success ratio (0..1) a strategy must reach across the targets
-  /// before the UCB1 selector accepts it and stops probing.
-  @override
-  @JsonKey()
-  final double acceptThreshold;
-
-  /// Raw strategy args to try first. Empty = use the built-in catalogue.
-  @override
-  @JsonKey()
-  final String manualStrategyArgs;
-
-  /// Absolute path to a user-provided engine binary. Empty means "use the
-  /// bundled binary" (resolved per-platform by the backend).
-  @override
-  @JsonKey()
-  final String customEnginePath;
-
-  @override
-  String toString() {
-    return 'Zapret2Props(enable: $enable, targets: $targets, acceptThreshold: $acceptThreshold, manualStrategyArgs: $manualStrategyArgs, customEnginePath: $customEnginePath)';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$Zapret2PropsImpl &&
-            (identical(other.enable, enable) || other.enable == enable) &&
-            const DeepCollectionEquality().equals(other._targets, _targets) &&
-            (identical(other.acceptThreshold, acceptThreshold) ||
-                other.acceptThreshold == acceptThreshold) &&
-            (identical(other.manualStrategyArgs, manualStrategyArgs) ||
-                other.manualStrategyArgs == manualStrategyArgs) &&
-            (identical(other.customEnginePath, customEnginePath) ||
-                other.customEnginePath == customEnginePath));
-  }
-
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      enable,
-      const DeepCollectionEquality().hash(_targets),
-      acceptThreshold,
-      manualStrategyArgs,
-      customEnginePath);
-
-  /// Create a copy of Zapret2Props
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$Zapret2PropsImplCopyWith<_$Zapret2PropsImpl> get copyWith =>
-      __$$Zapret2PropsImplCopyWithImpl<_$Zapret2PropsImpl>(this, _$identity);
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$Zapret2PropsImplToJson(
-      this,
-    );
-  }
-}
-
-abstract class _Zapret2Props implements Zapret2Props {
-  const factory _Zapret2Props(
-      {final bool enable,
-      final List<Zapret2Target> targets,
-      final double acceptThreshold,
-      final String manualStrategyArgs,
-      final String customEnginePath}) = _$Zapret2PropsImpl;
-
-  factory _Zapret2Props.fromJson(Map<String, dynamic> json) =
-      _$Zapret2PropsImpl.fromJson;
-
-  /// Master switch for the additive zapret2 DPI-bypass mode. Off by default
-  /// so the feature never changes behaviour unless explicitly enabled.
-  @override
-  bool get enable;
-
-  /// Blockcheck targets the auto-selector probes when picking a strategy.
-  @override
-  List<Zapret2Target> get targets;
-
-  /// Minimum success ratio (0..1) a strategy must reach across the targets
-  /// before the UCB1 selector accepts it and stops probing.
-  @override
-  double get acceptThreshold;
-
-  /// Raw strategy args to try first. Empty = use the built-in catalogue.
-  @override
-  String get manualStrategyArgs;
-
-  /// Absolute path to a user-provided engine binary. Empty means "use the
-  /// bundled binary" (resolved per-platform by the backend).
-  @override
-  String get customEnginePath;
-
-  /// Create a copy of Zapret2Props
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$Zapret2PropsImplCopyWith<_$Zapret2PropsImpl> get copyWith =>
-      throw _privateConstructorUsedError;
-}
-
 NetworkProps _$NetworkPropsFromJson(Map<String, dynamic> json) {
   return _NetworkProps.fromJson(json);
 }
@@ -2836,8 +2545,6 @@ mixin _$Config {
   DAV? get dav => throw _privateConstructorUsedError;
   NetworkProps get networkProps => throw _privateConstructorUsedError;
   VpnProps get vpnProps => throw _privateConstructorUsedError;
-  @JsonKey(fromJson: Zapret2Props.fromJson)
-  Zapret2Props get zapret2Props => throw _privateConstructorUsedError;
   @JsonKey(fromJson: ThemeProps.safeFromJson)
   ThemeProps get themeProps => throw _privateConstructorUsedError;
   ProxiesStyle get proxiesStyle => throw _privateConstructorUsedError;
@@ -2869,7 +2576,6 @@ abstract class $ConfigCopyWith<$Res> {
       DAV? dav,
       NetworkProps networkProps,
       VpnProps vpnProps,
-      @JsonKey(fromJson: Zapret2Props.fromJson) Zapret2Props zapret2Props,
       @JsonKey(fromJson: ThemeProps.safeFromJson) ThemeProps themeProps,
       ProxiesStyle proxiesStyle,
       WindowProps windowProps,
@@ -2880,7 +2586,6 @@ abstract class $ConfigCopyWith<$Res> {
   $DAVCopyWith<$Res>? get dav;
   $NetworkPropsCopyWith<$Res> get networkProps;
   $VpnPropsCopyWith<$Res> get vpnProps;
-  $Zapret2PropsCopyWith<$Res> get zapret2Props;
   $ThemePropsCopyWith<$Res> get themeProps;
   $ProxiesStyleCopyWith<$Res> get proxiesStyle;
   $WindowPropsCopyWith<$Res> get windowProps;
@@ -2911,7 +2616,6 @@ class _$ConfigCopyWithImpl<$Res, $Val extends Config>
     Object? dav = freezed,
     Object? networkProps = null,
     Object? vpnProps = null,
-    Object? zapret2Props = null,
     Object? themeProps = null,
     Object? proxiesStyle = null,
     Object? windowProps = null,
@@ -2951,10 +2655,6 @@ class _$ConfigCopyWithImpl<$Res, $Val extends Config>
           ? _value.vpnProps
           : vpnProps // ignore: cast_nullable_to_non_nullable
               as VpnProps,
-      zapret2Props: null == zapret2Props
-          ? _value.zapret2Props
-          : zapret2Props // ignore: cast_nullable_to_non_nullable
-              as Zapret2Props,
       themeProps: null == themeProps
           ? _value.themeProps
           : themeProps // ignore: cast_nullable_to_non_nullable
@@ -3026,16 +2726,6 @@ class _$ConfigCopyWithImpl<$Res, $Val extends Config>
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
-  $Zapret2PropsCopyWith<$Res> get zapret2Props {
-    return $Zapret2PropsCopyWith<$Res>(_value.zapret2Props, (value) {
-      return _then(_value.copyWith(zapret2Props: value) as $Val);
-    });
-  }
-
-  /// Create a copy of Config
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @pragma('vm:prefer-inline')
   $ThemePropsCopyWith<$Res> get themeProps {
     return $ThemePropsCopyWith<$Res>(_value.themeProps, (value) {
       return _then(_value.copyWith(themeProps: value) as $Val);
@@ -3100,7 +2790,6 @@ abstract class _$$ConfigImplCopyWith<$Res> implements $ConfigCopyWith<$Res> {
       DAV? dav,
       NetworkProps networkProps,
       VpnProps vpnProps,
-      @JsonKey(fromJson: Zapret2Props.fromJson) Zapret2Props zapret2Props,
       @JsonKey(fromJson: ThemeProps.safeFromJson) ThemeProps themeProps,
       ProxiesStyle proxiesStyle,
       WindowProps windowProps,
@@ -3115,8 +2804,6 @@ abstract class _$$ConfigImplCopyWith<$Res> implements $ConfigCopyWith<$Res> {
   $NetworkPropsCopyWith<$Res> get networkProps;
   @override
   $VpnPropsCopyWith<$Res> get vpnProps;
-  @override
-  $Zapret2PropsCopyWith<$Res> get zapret2Props;
   @override
   $ThemePropsCopyWith<$Res> get themeProps;
   @override
@@ -3150,7 +2837,6 @@ class __$$ConfigImplCopyWithImpl<$Res>
     Object? dav = freezed,
     Object? networkProps = null,
     Object? vpnProps = null,
-    Object? zapret2Props = null,
     Object? themeProps = null,
     Object? proxiesStyle = null,
     Object? windowProps = null,
@@ -3190,10 +2876,6 @@ class __$$ConfigImplCopyWithImpl<$Res>
           ? _value.vpnProps
           : vpnProps // ignore: cast_nullable_to_non_nullable
               as VpnProps,
-      zapret2Props: null == zapret2Props
-          ? _value.zapret2Props
-          : zapret2Props // ignore: cast_nullable_to_non_nullable
-              as Zapret2Props,
       themeProps: null == themeProps
           ? _value.themeProps
           : themeProps // ignore: cast_nullable_to_non_nullable
@@ -3231,8 +2913,6 @@ class _$ConfigImpl implements _Config {
       this.dav,
       this.networkProps = defaultNetworkProps,
       this.vpnProps = defaultVpnProps,
-      @JsonKey(fromJson: Zapret2Props.fromJson)
-      this.zapret2Props = defaultZapret2Props,
       @JsonKey(fromJson: ThemeProps.safeFromJson) required this.themeProps,
       this.proxiesStyle = defaultProxiesStyle,
       this.windowProps = defaultWindowProps,
@@ -3279,9 +2959,6 @@ class _$ConfigImpl implements _Config {
   @JsonKey()
   final VpnProps vpnProps;
   @override
-  @JsonKey(fromJson: Zapret2Props.fromJson)
-  final Zapret2Props zapret2Props;
-  @override
   @JsonKey(fromJson: ThemeProps.safeFromJson)
   final ThemeProps themeProps;
   @override
@@ -3299,7 +2976,7 @@ class _$ConfigImpl implements _Config {
 
   @override
   String toString() {
-    return 'Config(appSetting: $appSetting, profiles: $profiles, hotKeyActions: $hotKeyActions, currentProfileId: $currentProfileId, overrideDns: $overrideDns, dav: $dav, networkProps: $networkProps, vpnProps: $vpnProps, zapret2Props: $zapret2Props, themeProps: $themeProps, proxiesStyle: $proxiesStyle, windowProps: $windowProps, patchClashConfig: $patchClashConfig, scriptProps: $scriptProps)';
+    return 'Config(appSetting: $appSetting, profiles: $profiles, hotKeyActions: $hotKeyActions, currentProfileId: $currentProfileId, overrideDns: $overrideDns, dav: $dav, networkProps: $networkProps, vpnProps: $vpnProps, themeProps: $themeProps, proxiesStyle: $proxiesStyle, windowProps: $windowProps, patchClashConfig: $patchClashConfig, scriptProps: $scriptProps)';
   }
 
   @override
@@ -3321,8 +2998,6 @@ class _$ConfigImpl implements _Config {
                 other.networkProps == networkProps) &&
             (identical(other.vpnProps, vpnProps) ||
                 other.vpnProps == vpnProps) &&
-            (identical(other.zapret2Props, zapret2Props) ||
-                other.zapret2Props == zapret2Props) &&
             (identical(other.themeProps, themeProps) ||
                 other.themeProps == themeProps) &&
             (identical(other.proxiesStyle, proxiesStyle) ||
@@ -3347,7 +3022,6 @@ class _$ConfigImpl implements _Config {
       dav,
       networkProps,
       vpnProps,
-      zapret2Props,
       themeProps,
       proxiesStyle,
       windowProps,
@@ -3381,7 +3055,6 @@ abstract class _Config implements Config {
       final DAV? dav,
       final NetworkProps networkProps,
       final VpnProps vpnProps,
-      @JsonKey(fromJson: Zapret2Props.fromJson) final Zapret2Props zapret2Props,
       @JsonKey(fromJson: ThemeProps.safeFromJson)
       required final ThemeProps themeProps,
       final ProxiesStyle proxiesStyle,
@@ -3408,9 +3081,6 @@ abstract class _Config implements Config {
   NetworkProps get networkProps;
   @override
   VpnProps get vpnProps;
-  @override
-  @JsonKey(fromJson: Zapret2Props.fromJson)
-  Zapret2Props get zapret2Props;
   @override
   @JsonKey(fromJson: ThemeProps.safeFromJson)
   ThemeProps get themeProps;

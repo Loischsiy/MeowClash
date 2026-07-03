@@ -20,7 +20,7 @@ download() {
   mkdir -p "$out"
   if command -v gh >/dev/null 2>&1; then
     if [ "$tag" = "latest" ]; then
-      GH_TOKEN="${GH_TOKEN:-${GITHUB_TOKEN:-}}" gh release download --repo "$repo" --dir "$out" --clobber
+      GH_TOKEN="${GH_TOKEN:-${GITHUB_TOKEN:-}}" gh release download --repo "$repo" --pattern '*' --dir "$out" --clobber
     else
       GH_TOKEN="${GH_TOKEN:-${GITHUB_TOKEN:-}}" gh release download "$tag" --repo "$repo" --dir "$out" --clobber
     fi

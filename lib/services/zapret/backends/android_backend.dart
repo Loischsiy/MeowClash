@@ -7,12 +7,9 @@ import 'package:meowclash/services/zapret/zapret_logger.dart';
 import 'package:flutter/services.dart';
 
 /// Android backend: because a non-root device cannot run nfqws (there is no
-/// userspace NFQUEUE), DPI bypass is applied as **userspace packet mutation
-/// inside the Go core**, on the sing-tun read path (see AGENTS.md / core
-/// changes and README "Android: packet mutation in the Go core"). This Dart
-/// side just drives that native seam over a dedicated method channel; the
-/// strategy args are forwarded to the core, which interprets a supported subset
-/// (TTL, split, fake) on outbound TLS/QUIC flows.
+/// userspace NFQUEUE), DPI bypass is applied inside the Go core by wrapping
+/// mihomo outbound streams. This Dart side just drives that native stream
+/// backend over a dedicated method channel.
 ///
 /// The channel is optional: on an app build where the native seam is not
 /// compiled in, [checkAvailability] reports [missingNativeSupport] and the UI
@@ -35,7 +32,7 @@ class AndroidZapret2Backend extends Zapret2Backend {
       }
       return const Zapret2Availability.unavailable(
         Zapret2UnavailableReason.missingNativeSupport,
-        detail: "core packet-mutation seam not enabled",
+        detail: "core stream backend not enabled",
       );
     } on MissingPluginException {
       return const Zapret2Availability.unavailable(

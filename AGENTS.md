@@ -235,15 +235,15 @@ Headers no longer handled: `meowclash-settings`, `meowclash-hex`, `meowclash-wid
 
 ## zapret2 mode — additive DPI bypass (2026-07)
 
-Additive, **off-by-default**, **independent of the Clash proxy** mode that embeds the [zapret2](https://github.com/bol-van/zapret2) engine, auto-selects a working DPI-bypass strategy via a **UCB1 multi-armed bandit**, caches it, and reuses it. Toggling it never changes proxy behaviour. User-facing docs (per-platform support, antivirus disclaimer, binary provenance/license, build paths) live in the README "zapret2 Mode" section.
+Additive, **off-by-default** DPI bypass mode that embeds/ports [zapret2](https://github.com/bol-van/zapret2) behavior, auto-selects a working strategy via a **UCB1 multi-armed bandit**, caches it, and reuses it. User-facing docs (per-platform support, antivirus disclaimer, binary provenance/license, build paths) live in the README "zapret2 Mode" section.
 
 ### Where it lives
 
 - `lib/services/zapret/` — the whole engine, all behind interfaces (fully unit-testable):
   - `backend.dart` — `Zapret2Backend` interface + `Zapret2Availability`/`Zapret2Session`/`Zapret2BackendException` (structured `Zapret2UnavailableReason` → explicit UI messages, never silent).
-  - `backends/{windows,linux,macos,android}_backend.dart` + `backend_factory.dart` (`createZapret2Backend`). Windows/Linux extend `process_backend.dart` (spawn `winws.exe`/`nfqws`, mirrors `lib/clash/service.dart` process handling). Android uses the `zapret2` MethodChannel (`isSupported`/`apply`/`clear`) bridged through `Zapret2Plugin` → `Core.zapret2Apply/Clear` → `libclash.so`. macOS is now an explicit local-TUN TODO, not a fake `nfqws-darwin` process backend.
+  - `backends/{windows,linux,macos,android}_backend.dart` + `backend_factory.dart` (`createZapret2Backend`). Windows/Linux extend `process_backend.dart` (spawn `winws.exe`/`nfqws`, mirrors `lib/clash/service.dart` process handling). Android uses the `zapret2` MethodChannel (`isSupported`/`apply`/`clear`) bridged through `Zapret2Plugin` → `Core.zapret2Apply/Clear` → `libclash.so`. macOS calls the same core stream backend directly; do not reintroduce a fake `nfqws-darwin` process path.
   - `binary_resolver.dart` — resolves bundled engine path (no hardcoded paths; `ZAPRET2_BIN_DIR`/custom override).
-  - `strategy_provider.dart` — 8 candidate desync strategies (`--dpi-desync=...`).
+  - `strategy_provider.dart` — candidate desync strategies; zapret2 Lua presets (`--lua-init=@zapret-lib.lua`, `--lua-init=@zapret-antidpi.lua`, `--lua-desync=...`) are tried before legacy `--dpi-desync=...` fallbacks.
   - `strategy_tester.dart` — applies a strategy, probes targets (injectable `TargetProber`; default = TLS connect + latency), stops the session.
   - `auto_selector.dart` — **`Zapret2AutoSelector`**: UCB1 `score = mean + sqrt(2·ln N / nᵢ)`, unexplored → ∞ (tried first), early stop on first strategy clearing `acceptThreshold`, warm-start from cached stats. Emits `Zapret2SelectionProgress`.
   - `strategy_cache.dart` — `Zapret2StrategyCache` over a `Zapret2CacheStore` (file store = `<app-data>/zapret2/strategy_cache.json`; tolerant load; `loadValid`/`invalidate`).
@@ -254,7 +254,7 @@ Additive, **off-by-default**, **independent of the Clash proxy** mode that embed
 - `lib/providers/zapret.dart` — `zapret2ServiceProvider` (keepAlive) + `Zapret2Runtime` notifier (mirrors service status stream; `enable`/`disable`/`rescan`). Added to `lib/providers/providers.dart` barrel.
 - `lib/views/config/zapret2.dart` — `Zapret2View` (toggle, live progress, re-check/reset, antivirus + no-telemetry info box, explicit unavailable messages). Opened from `lib/views/tools.dart` `_Zapret2Item` (Settings section).
 - `zapret/version.go` → generated `lib/zapret_version.dart` (`kZapret2VersionFromSource`), via `setup.dart`.
-- `core/zapret_android.go` (`//go:build android && cgo`) — Android userspace packet-mutation **seam**: strategy state + `zapret2Apply/Clear/ShouldMutate/MutateOutbound`. **R&D remaining:** wire `zapret2MutateOutbound` into the sing-tun read path in `core/lib_android.go` (marked `TODO(zapret2-android)`); currently identity pass-through, so the tun path is unchanged/inert.
+- `core/zapret_stream.go` — shared Go core stream backend. It wraps mihomo proxy adapters and splits the first TLS ClientHello write for configured hosts. `core/zapret_android.go` is only the Android MethodChannel bridge; `zapret2MutateOutbound` is a future packet-level hook, currently identity.
 
 ### Config & lifecycle wiring
 
@@ -263,13 +263,14 @@ Additive, **off-by-default**, **independent of the Clash proxy** mode that embed
 
 ### Build / bundling
 
-- `setup.dart`: `syncZapret2VersionDartFile()`, `bundleZapret2Binaries(target)` stage binaries into `zapret/<target>/` (mirrors `libclash`; opt-in via `ZAPRET2_BUNDLE_DIR`). Both called from `run()`. Binaries are NOT committed; CMake/gradle install wiring is documented in README (per-platform + per-ABI for Android inside `libclash.so`).
+- `setup.dart`: `syncZapret2VersionDartFile()`, `bundleZapret2Binaries(target)` stage binaries into `zapret/<target>/` (mirrors `libclash`; opt-in via `ZAPRET2_BUNDLE_DIR`). Both called from `run()`. Binaries are NOT committed; `.github/scripts/prepare-zapret2-bundle.sh` prepares the Windows/Linux CI bundle before `setup.dart`. CMake/gradle install wiring is documented in README (per-platform + per-ABI for Android inside `libclash.so`).
 
 ### Per-platform status
 
-- Windows (winws+WinDivert), Linux (nfqws): supported (need elevation/root). Android has the native `zapret2` channel wired into the Go core, but packet mutation remains experimental. macOS should use a future local TUN/NetworkExtension backend; do not reintroduce the fake `nfqws-darwin` process path. Never fail silently.
+- Windows (winws+WinDivert), Linux (nfqws): supported (need elevation/root). Android/macOS: experimental Go core stream split backend. Packet-level TUN/NetworkExtension mutation is future work only if stream splitting is insufficient. Never fail silently.
 
 ### Tests & gotchas
 
 - `test/zapret_auto_selector_test.dart`, `test/zapret_cache_test.dart`, `test/zapret_mocks.dart`. See the Testing section for the `re_editor` `dependency_overrides` requirement.
+- The zapret2 settings view has a `Domain` item backed by `Zapret2Props.targets`; these are both the probe targets and the backend host filter inputs.
 - No telemetry: only network activity is reachability probes to user-configured targets.

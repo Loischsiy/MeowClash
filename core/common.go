@@ -185,6 +185,7 @@ func sideUpdateExternalProvider(p cp.Provider, bytes []byte) error {
 		if err != nil {
 			return err
 		}
+		zapret2InstallProxyWrappers()
 		return nil
 	case *rp.RuleSetProvider:
 		_, _, err := pp.SideUpdate(bytes)
@@ -377,6 +378,7 @@ func setupConfig(params *SetupParams) error {
 	// Parse and cache config only. Full runtime apply happens on Start.
 	applyStart := time.Now()
 	executor.ApplyConfig(currentConfig, false)
+	zapret2InstallProxyWrappers()
 	log.Infoln("[Setup] executor.ApplyConfig took %s", time.Since(applyStart))
 	currentConfig.General.Tun.Enable = pendingTunEnable
 	// External-controller lifecycle is independent from TUN start/stop.

@@ -1,11 +1,12 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meowclash/common/common.dart';
 import 'package:meowclash/l10n/l10n.dart';
+import 'package:meowclash/models/models.dart';
 import 'package:meowclash/providers/providers.dart';
 import 'package:meowclash/services/zapret/zapret.dart';
 import 'package:meowclash/state.dart';
 import 'package:meowclash/widgets/widgets.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Settings view for the additive zapret2 DPI-bypass mode: enable toggle, live
 /// auto-selection progress, a re-check/reset action, and the required trust
@@ -24,6 +25,7 @@ class Zapret2View extends ConsumerWidget {
           items: const [
             _Zapret2EnableItem(),
             _Zapret2StatusItem(),
+            _Zapret2TargetsItem(),
             _Zapret2RescanItem(),
           ],
         ),
@@ -52,6 +54,46 @@ class _Zapret2EnableItem extends ConsumerWidget {
             await globalState.safeRun(runtime.disable);
           }
         },
+      ),
+    );
+  }
+}
+
+class _Zapret2TargetsItem extends ConsumerWidget {
+  const _Zapret2TargetsItem();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final targets = ref.watch(zapret2SettingProvider.select((s) => s.targets));
+    final hosts = targets.map((t) => t.host).toList();
+    return ListItem.open(
+      title: Text(appLocalizations.domain),
+      subtitle: Text(hosts.join(", ")),
+      delegate: OpenDelegate(
+        blur: false,
+        title: appLocalizations.domain,
+        widget: Consumer(
+          builder: (_, ref, __) {
+            final targets = ref.watch(
+              zapret2SettingProvider.select((s) => s.targets),
+            );
+            return ListInputPage(
+              title: appLocalizations.domain,
+              items: targets.map((t) => t.host).toList(),
+              titleBuilder: Text.new,
+              onChange: (items) {
+                ref.read(zapret2SettingProvider.notifier).updateState(
+                      (state) => state.copyWith(
+                        targets: items
+                            .where((item) => item.trim().isNotEmpty)
+                            .map((item) => Zapret2Target(host: item.trim()))
+                            .toList(),
+                      ),
+                    );
+              },
+            );
+          },
+        ),
       ),
     );
   }

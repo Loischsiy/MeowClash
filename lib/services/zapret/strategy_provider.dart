@@ -28,6 +28,78 @@ class DefaultZapret2StrategyProvider extends Zapret2StrategyProvider {
   @override
   List<Zapret2Strategy> all() => const [
         Zapret2Strategy(
+          id: "lua_disorder_fake_http",
+          label: "Lua disorder fake HTTP",
+          args: [
+            "--lua-init=@zapret-lib.lua",
+            "--lua-init=@zapret-antidpi.lua",
+            "--lua-desync=disorder_fake_http",
+          ],
+        ),
+        Zapret2Strategy(
+          id: "lua_tlsrec",
+          label: "Lua TLS record split",
+          args: [
+            "--lua-init=@zapret-lib.lua",
+            "--lua-init=@zapret-antidpi.lua",
+            "--lua-desync=tlsrec",
+          ],
+        ),
+        Zapret2Strategy(
+          id: "lua_fake_tls",
+          label: "Lua fake TLS",
+          args: [
+            "--lua-init=@zapret-lib.lua",
+            "--lua-init=@zapret-antidpi.lua",
+            "--lua-desync=fake_tls",
+          ],
+        ),
+        Zapret2Strategy(
+          id: "lua_fake_unknown_udp",
+          label: "Lua fake unknown UDP",
+          args: [
+            "--lua-init=@zapret-lib.lua",
+            "--lua-init=@zapret-antidpi.lua",
+            "--lua-desync=fake_unknown_udp",
+          ],
+        ),
+        Zapret2Strategy(
+          id: "lua_syndata",
+          label: "Lua syndata",
+          args: [
+            "--lua-init=@zapret-lib.lua",
+            "--lua-init=@zapret-antidpi.lua",
+            "--lua-desync=syndata",
+          ],
+        ),
+        Zapret2Strategy(
+          id: "lua_multisplit",
+          label: "Lua multisplit",
+          args: [
+            "--lua-init=@zapret-lib.lua",
+            "--lua-init=@zapret-antidpi.lua",
+            "--lua-desync=multisplit",
+          ],
+        ),
+        Zapret2Strategy(
+          id: "lua_fakedsplit",
+          label: "Lua fake split",
+          args: [
+            "--lua-init=@zapret-lib.lua",
+            "--lua-init=@zapret-antidpi.lua",
+            "--lua-desync=fakedsplit",
+          ],
+        ),
+        Zapret2Strategy(
+          id: "lua_split2",
+          label: "Lua split2",
+          args: [
+            "--lua-init=@zapret-lib.lua",
+            "--lua-init=@zapret-antidpi.lua",
+            "--lua-desync=split2",
+          ],
+        ),
+        Zapret2Strategy(
           id: "fake_split2",
           label: "Fake + split2 (TLS)",
           args: [

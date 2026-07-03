@@ -111,7 +111,11 @@ abstract class ProcessZapret2Backend extends Zapret2Backend {
     final args = buildArgs(strategy: strategy, targets: targets);
     await zapretLogger.log("starting $binaryName ${args.join(' ')}");
     try {
-      final process = await Process.start(path, args);
+      final process = await Process.start(
+        path,
+        args,
+        workingDirectory: File(path).parent.path,
+      );
       // A crash-on-start (bad WinDivert driver, missing caps) exits almost
       // immediately; surface that as a start failure rather than a false start.
       final earlyExit = await Future.any([

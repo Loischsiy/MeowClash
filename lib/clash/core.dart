@@ -99,6 +99,11 @@ class ClashCore {
 
   Future<bool> setState(CoreState state) => clashInterface.setState(state);
 
+  Future<bool> zapret2Apply(Map<String, dynamic> payload) =>
+      clashInterface.zapret2Apply(payload);
+
+  Future<bool> zapret2Clear() => clashInterface.zapret2Clear();
+
   Future<void> shutdown() async {
     await clashInterface.shutdown();
   }

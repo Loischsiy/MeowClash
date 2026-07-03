@@ -152,10 +152,12 @@ network, caches it, and reuses it on the next launch.
 ### How to enable
 
 1. Open **Settings → zapret2 (DPI bypass)**.
-2. Toggle **Enable zapret2**. On first enable it runs an auto-selection search
+2. Add or edit target domains in the **Domain** item if the defaults do not
+   match your blocked services.
+3. Toggle **Enable zapret2**. On first enable it runs an auto-selection search
    (see below); progress is shown live (which strategy is being tested, how many
    remain). This can take a while.
-3. Once a working strategy is found it is applied and cached. Use
+4. Once a working strategy is found it is applied and cached. Use
    **Re-check / reset strategy** to drop the cache and search again (e.g. after
    switching networks).
 
@@ -184,8 +186,8 @@ network, caches it, and reuses it on the next launch.
 |----------|---------|--------|--------------|
 | **Windows** | `winws.exe` + WinDivert | ✅ Supported | Elevated (admin) to load the WinDivert driver |
 | **Linux** | `nfqws` (NFQUEUE) | ✅ Supported | Root or `cap_net_admin` on the binary |
-| **macOS** | local TUN backend | 🚧 Not built yet | NetworkExtension/utun packet path needed |
-| **Android** | userspace packet mutation in the Go core | ⚙️ Experimental — native channel is built in | Android VPN permission |
+| **macOS** | Go core stream split | ⚙️ Experimental | TCP/TLS traffic through the mihomo core |
+| **Android** | Go core stream split | ⚙️ Experimental | Android VPN permission |
 
 On any platform where the backend is not available, the UI shows an **explicit
 message** (missing binary, missing privileges, or platform unsupported) instead
@@ -215,8 +217,8 @@ version pattern).
 |----------|--------|---------|
 | Windows (`winws.exe`, `WinDivert.dll`/`.sys`) | [bol-van/zapret-win-bundle](https://github.com/bol-van/zapret-win-bundle) | zapret2: see repo; WinDivert: LGPLv3 / GPLv3 (dual) |
 | Linux (`nfqws`) | [bol-van/zapret2](https://github.com/bol-van/zapret2) releases | see the zapret2 repository |
-| macOS (local TUN backend) | planned in this project | part of this project |
-| Android (packet mutation) | built into the Go core (`libclash.so`) | part of this project |
+| macOS (stream split) | built into the Go core | part of this project |
+| Android (stream split) | built into the Go core (`libclash.so`) | part of this project |
 
 > Verify licensing of the upstream binaries before redistribution. The Windows
 > bundle in particular ships no explicit top-level LICENSE at time of writing —
@@ -228,25 +230,20 @@ Binaries are staged next to the app by `setup.dart` (`bundleZapret2Binaries`),
 mirroring how `libclash` is bundled. Point the build at a directory of staged
 assets with `ZAPRET2_BUNDLE_DIR` (layout: `<dir>/<windows|linux|macos|android>/…`),
 or drop a binary next to the executable / set `ZAPRET2_BIN_DIR` at runtime.
+GitHub Actions prepares that directory for Windows/Linux via
+`.github/scripts/prepare-zapret2-bundle.sh` before running `setup.dart`.
 
 - **Windows / Linux:** take the prebuilt `winws.exe` + `WinDivert*` / `nfqws`
   from the upstream releases above and stage them under
-  `zapret/windows/` / `zapret/linux/`.
-- **macOS:** upstream zapret2 does not provide a macOS packet-capture backend.
-  MeowClash no longer pretends that a standalone `nfqws-darwin` binary is enough;
-  the supported direction is a local TUN/NetworkExtension path inside the app.
-  Until that native path lands, the mode reports "native support is not built
-  into this app".
-- **Android (packet mutation in the Go core):** because a non-root device cannot
-  run `nfqws` (no userspace NFQUEUE), DPI bypass is applied as **userspace packet
-  mutation on the sing-tun read path inside the Go core**, driven from Dart over
-  the `zapret2` method channel (`isSupported` / `apply` / `clear`). See
-  [`core/zapret_android.go`](core/zapret_android.go) for the seam and
-  `lib/services/zapret/backends/android_backend.dart` for the Dart side. The
-  per-ABI native code ships inside `libclash.so` (same `setup.dart` per-ABI
-  pipeline as the core — `armeabi-v7a`, `arm64-v8a`, `x86_64`). The Android app
-  registers the `zapret2` channel in `Zapret2Plugin`; `apply`/`clear` are bridged
-  into `libclash.so`.
+  `zapret/windows/` / `zapret/linux/`. For zapret2 Lua presets, stage
+  `zapret-lib.lua` and `zapret-antidpi.lua` next to the binary; the app starts
+  the engine from that directory so relative `--lua-init=...` paths resolve.
+- **macOS / Android:** upstream zapret2 does not provide a portable userspace
+  packet-capture backend for these platforms, so MeowClash uses a lightweight
+  stream-split backend inside the Go core. It wraps mihomo outbound TCP streams
+  and currently splits the first TLS ClientHello write for configured domains.
+  Packet-level TUN/NetworkExtension mutation remains future work if this is not
+  enough on a target network.
 
 ---
 

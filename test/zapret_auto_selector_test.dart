@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:meowclash/models/models.dart';
 import 'package:meowclash/enum/enum.dart';
+import 'package:meowclash/models/models.dart';
 import 'package:meowclash/services/zapret/zapret.dart';
 
 import 'zapret_mocks.dart';
@@ -13,6 +13,16 @@ import 'zapret_mocks.dart';
 void main() {
   Zapret2AutoSelector selectorFor(ScriptedTester tester) =>
       Zapret2AutoSelector(tester: tester);
+
+  test('default strategy catalog starts with zapret2 Lua presets', () {
+    final strategies = const DefaultZapret2StrategyProvider().all();
+    expect(strategies.length, greaterThan(8));
+    expect(strategies.first.id, 'lua_disorder_fake_http');
+    expect(
+      strategies.take(8).expand((s) => s.args),
+      contains('--lua-init=@zapret-antidpi.lua'),
+    );
+  });
 
   group('UCB1 score', () {
     test('an unexplored strategy scores infinity (always tried first)', () {

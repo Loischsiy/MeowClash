@@ -76,6 +76,10 @@ mixin ClashInterface {
   FutureOr<bool> resetConnections();
 
   Future<bool> setState(CoreState state);
+
+  Future<bool> zapret2Apply(Map<String, dynamic> payload);
+
+  Future<bool> zapret2Clear();
 }
 
 mixin AndroidClashInterface {
@@ -171,6 +175,17 @@ abstract class ClashHandlerInterface with ClashInterface {
       method: ActionMethod.setState,
       data: json.encode(state),
     );
+
+  @override
+  Future<bool> zapret2Apply(Map<String, dynamic> payload) => invoke<bool>(
+        method: ActionMethod.zapret2Apply,
+        data: json.encode(payload),
+      );
+
+  @override
+  Future<bool> zapret2Clear() => invoke<bool>(
+        method: ActionMethod.zapret2Clear,
+      );
 
   @override
   @override

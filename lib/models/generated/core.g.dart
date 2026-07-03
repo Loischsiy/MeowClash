@@ -331,6 +331,8 @@ const _$ActionMethodEnumMap = {
   ActionMethod.updateDns: 'updateDns',
   ActionMethod.getAndroidVpnOptions: 'getAndroidVpnOptions',
   ActionMethod.getCurrentProfileName: 'getCurrentProfileName',
+  ActionMethod.zapret2Apply: 'zapret2Apply',
+  ActionMethod.zapret2Clear: 'zapret2Clear',
 };
 
 _$ActionResultImpl _$$ActionResultImplFromJson(Map<String, dynamic> json) =>

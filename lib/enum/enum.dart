@@ -286,6 +286,8 @@ enum ActionMethod {
   updateDns,
   getAndroidVpnOptions,
   getCurrentProfileName,
+  zapret2Apply,
+  zapret2Clear,
 }
 
 enum AuthorizeCode { none, success, error }

@@ -684,16 +684,44 @@ class GlobalState {
     if (config.scriptProps.currentScript == null) {
       final existingProxies = (rawConfig["proxies"] as List?) ?? <dynamic>[];
       // Index inline proxy node definitions by name so a chain can clone its
-      // exit hop. Groups and provider-backed nodes aren't here, so they can't
-      // be used as an exit hop (the chain builder UI enforces this).
+      // exit hop. Provider-backed nodes aren't here, so they still can't be
+      // cloned; group hops are resolved to their selected inline node below.
       final proxyDefsByName = <String, Map<String, dynamic>>{};
       for (final p in existingProxies) {
         if (p is Map && p["name"] is String) {
           proxyDefsByName[p["name"] as String] = Map<String, dynamic>.from(p);
         }
       }
+      final existingGroups =
+          (rawConfig["proxy-groups"] as List?) ?? <dynamic>[];
+      final groupDefsByName = <String, Map<String, dynamic>>{};
+      for (final g in existingGroups) {
+        if (g is Map && g["name"] is String) {
+          groupDefsByName[g["name"] as String] = Map<String, dynamic>.from(g);
+        }
+      }
+      String resolveChainHopName(String name) {
+        var current = name;
+        final seen = <String>{};
+        while (seen.add(current)) {
+          final group = groupDefsByName[current];
+          if (group == null) {
+            return current;
+          }
+          final selected = profile.selectedMap[current];
+          final proxies =
+              (group["proxies"] as List?)?.whereType<String>().toList() ??
+                  const <String>[];
+          current = selected?.isNotEmpty == true
+              ? selected!
+              : proxies.firstOrNull ?? current;
+        }
+        return current;
+      }
+
       final chainConfig = overrideData.buildRunningChainConfig(
         (name) => proxyDefsByName[name],
+        resolveProxyName: resolveChainHopName,
       );
       if (chainConfig.proxies.isNotEmpty) {
         final existingProxyNames = <String>{
@@ -711,8 +739,6 @@ class GlobalState {
         rawConfig["proxies"] = mergedProxies;
       }
       if (chainConfig.proxyGroups.isNotEmpty) {
-        final existingGroups =
-            (rawConfig["proxy-groups"] as List?) ?? <dynamic>[];
         final existingNames = <String>{
           for (final g in existingGroups)
             if (g is Map && g["name"] is String) g["name"] as String,

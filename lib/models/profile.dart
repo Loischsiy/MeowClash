@@ -125,10 +125,11 @@ extension OverrideDataExt on OverrideData {
   /// while staying hidden from the proxies page (mihomo's `hidden` flag).
   ///
   /// [resolveProxyNode] returns the raw definition of a concrete proxy node by
-  /// name, or null when the name is not an inline node (e.g. a proxy-group or a
-  /// provider-backed node that cannot be cloned). Because the exit hop must be
-  /// cloned, every hop after the entry must resolve to a concrete node;
-  /// otherwise the whole chain is skipped.
+  /// name, or null when the name is not an inline node (e.g. a provider-backed
+  /// node that cannot be cloned). [resolveProxyName] may map a non-entry group
+  /// hop to its selected concrete node. Because the exit hop must be cloned,
+  /// every hop after the entry must resolve to a concrete node; otherwise the
+  /// whole chain is skipped.
   ///
   /// The result is injected on top of the parsed profile config right before
   /// it is handed to the core (see GlobalState.patchRawConfig), so chains live
@@ -137,8 +138,9 @@ extension OverrideDataExt on OverrideData {
     List<Map<String, dynamic>> proxies,
     List<Map<String, dynamic>> proxyGroups,
   }) buildRunningChainConfig(
-    Map<String, dynamic>? Function(String name) resolveProxyNode,
-  ) {
+    Map<String, dynamic>? Function(String name) resolveProxyNode, {
+    String Function(String name)? resolveProxyName,
+  }) {
     final proxies = <Map<String, dynamic>>[];
     final groups = <Map<String, dynamic>>[];
     for (final chain in enabledChains) {
@@ -150,7 +152,8 @@ extension OverrideDataExt on OverrideData {
       String? exitName;
       var isValid = true;
       for (var i = 1; i < hops.length; i++) {
-        final def = resolveProxyNode(hops[i]);
+        final hopName = resolveProxyName?.call(hops[i]) ?? hops[i];
+        final def = resolveProxyNode(hopName);
         if (def == null) {
           // A non-entry hop that isn't a concrete node can't carry
           // `dialer-proxy`, so the chain can't be built — skip it entirely.
@@ -210,8 +213,8 @@ List<String> withChainSelectorMatch(List<String> rules, String selector) {
 /// group). The chain is realized by cloning each hop after the entry into a
 /// proxy node carrying `dialer-proxy`; the exit clone is wrapped in a `select`
 /// group named [name] so it can be selected on the proxies page and used as a
-/// rule target like any other group. The entry hop may be a node or a group,
-/// but every later hop (including the exit) must be a concrete node.
+/// rule target like any other group. The entry hop may be a node or a group.
+/// Later group hops are resolved to their selected concrete node before cloning.
 @freezed
 class ProxyChain with _$ProxyChain {
   const factory ProxyChain({

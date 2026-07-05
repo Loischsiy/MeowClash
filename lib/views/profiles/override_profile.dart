@@ -1210,8 +1210,8 @@ class _AddChainDialogState extends State<AddChainDialog> {
   // Candidates for the entry hop: it is only used as a `dialer-proxy` value,
   // which may reference a group or a node, so any name is allowed.
   List<DropdownMenuEntry<String>> _entryHopItems = [];
-  // Candidates for every later hop (including the exit): each is cloned into a
-  // proxy node that carries `dialer-proxy`, so it must be a concrete node.
+  // Candidates for every later hop: concrete nodes are cloned directly; groups
+  // are resolved to their selected concrete node when the config is built.
   List<DropdownMenuEntry<String>> _nodeHopItems = [];
 
   @override
@@ -1229,15 +1229,13 @@ class _AddChainDialogState extends State<AddChainDialog> {
         memberNames.add(proxy);
       }
     }
-    // Entry hop: any group or node. Later hops: concrete nodes only (a member
-    // name that isn't itself a group), since they must be cloneable to carry
-    // `dialer-proxy` (mihomo only honors it on nodes, not groups).
+    // Any hop may be a group or node. Non-entry groups are resolved to their
+    // selected concrete node before cloning.
     final entryNames = <String>{...groupNames, ...memberNames};
-    final nodeNames = memberNames.difference(groupNames);
     _entryHopItems = entryNames
         .map((name) => DropdownMenuEntry<String>(value: name, label: name))
         .toList();
-    _nodeHopItems = nodeNames
+    _nodeHopItems = entryNames
         .map((name) => DropdownMenuEntry<String>(value: name, label: name))
         .toList();
     final chain = widget.chain;

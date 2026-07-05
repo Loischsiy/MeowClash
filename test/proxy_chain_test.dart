@@ -134,6 +134,32 @@ void main() {
       expect(built.proxies.map((p) => p['name']), ['Good \u00b7 2']);
     });
 
+    test('buildRunningChainConfig resolves a group hop to its selected node',
+        () {
+      const data = OverrideData(
+        chains: [
+          ProxyChain(id: '1', name: 'Chain', hops: ['Entry', 'Auto']),
+        ],
+      );
+      final defs = <String, Map<String, dynamic>>{
+        'Server': {'name': 'Server', 'type': 'ss', 'server': 's.example'},
+      };
+      final built = data.buildRunningChainConfig(
+        (name) => defs[name],
+        resolveProxyName: (name) => name == 'Auto' ? 'Server' : name,
+      );
+
+      expect(built.proxies, [
+        {
+          'name': 'Chain \u00b7 2',
+          'type': 'ss',
+          'server': 's.example',
+          'dialer-proxy': 'Entry',
+        },
+      ]);
+      expect(built.proxyGroups.single['proxies'], ['Chain \u00b7 2']);
+    });
+
     test('withChainSelectorMatch repoints the final MATCH', () {
       final rules = withChainSelectorMatch(
         ['DOMAIN-SUFFIX,cn,DIRECT', 'MATCH,Proxy'],

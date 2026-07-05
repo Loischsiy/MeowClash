@@ -33,8 +33,7 @@ class ProxyCard extends StatelessWidget {
     );
   }
 
-  bool _canDrillDown(Group? group) =>
-      group?.hidden == true && group?.type == GroupType.URLTest;
+  bool _canDrillDown(Group? group) => group != null && group.name != groupName;
 
   void _openProxyGroup(BuildContext context, Group group) {
     showExtend(

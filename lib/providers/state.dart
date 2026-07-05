@@ -62,7 +62,7 @@ GroupsState currentGroupsState(Ref ref) {
   return GroupsState(
     value: switch (mode) {
       Mode.direct => [],
-      Mode.global => groups.toList(),
+      Mode.global => groups.where((item) => item.hidden == false).toList(),
       Mode.rule => groups
           .where((item) => item.hidden == false)
           .where((element) => element.name != GroupName.GLOBAL.name)
@@ -512,9 +512,12 @@ int getProxiesColumns(Ref ref) {
 ProxyCardState _getProxyCardState(
   List<Group> groups,
   SelectedMap selectedMap,
-  ProxyCardState proxyDelayState,
-) {
+  ProxyCardState proxyDelayState, [
+  Set<String>? seen,
+]) {
   if (proxyDelayState.proxyName.isEmpty) return proxyDelayState;
+  final seenProxyNames = seen ?? <String>{};
+  if (!seenProxyNames.add(proxyDelayState.proxyName)) return proxyDelayState;
   final index =
       groups.indexWhere((element) => element.name == proxyDelayState.proxyName);
   if (index == -1) return proxyDelayState;
@@ -531,6 +534,7 @@ ProxyCardState _getProxyCardState(
       proxyName: currentSelectedName,
       testUrl: group.testUrl,
     ),
+    seenProxyNames,
   );
 }
 

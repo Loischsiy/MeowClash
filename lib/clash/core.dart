@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:isolate';
 
 import 'package:meowclash/clash/clash.dart';
 import 'package:meowclash/clash/interface.dart';
@@ -116,7 +115,7 @@ class ClashCore {
   Future<List<Group>> getProxiesGroups() async {
     final proxies = await clashInterface.getProxies();
     if (proxies.isEmpty) return [];
-    final groupNames = [
+    final visibleGroupNames = [
       UsedProxy.GLOBAL.name,
       ...(proxies[UsedProxy.GLOBAL.name]["all"] as List).where((e) {
         final proxy = proxies[e] ?? {};
@@ -130,8 +129,19 @@ class ClashCore {
         return GroupTypeExtension.valueList.contains(proxy['type']);
       })
     ];
+    final visibleGroupNameSet = visibleGroupNames.toSet();
+    final groupNames = [
+      ...visibleGroupNames,
+      ...proxies.entries
+          .where((entry) =>
+              !visibleGroupNameSet.contains(entry.key) &&
+              GroupTypeExtension.valueList.contains(entry.value['type']))
+          .map((entry) => entry.key)
+    ];
     final groupsRaw = groupNames.map((groupName) {
-      final group = proxies[groupName];
+      final group = Map<String, dynamic>.from(proxies[groupName]);
+      group["hidden"] =
+          group["hidden"] == true || !visibleGroupNameSet.contains(groupName);
       group["all"] = ((group["all"] ?? []) as List)
           .map(
             (name) => proxies[name],
@@ -142,7 +152,7 @@ class ClashCore {
     }).toList();
     return groupsRaw
         .map(
-          (e) => Group.fromJson(e),
+          Group.fromJson,
         )
         .toList();
   }

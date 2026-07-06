@@ -508,6 +508,8 @@ class AppController {
   List<Group> getCurrentGroups() =>
       _ref.read(currentGroupsStateProvider.select((state) => state.value));
 
+  List<Group> getGroups() => _ref.read(groupsProvider);
+
   String getRealTestUrl(String? url) => _ref.read(getRealTestUrlProvider(url));
 
   int getProxiesColumns() => _ref.read(getProxiesColumnsProvider);
@@ -1111,35 +1113,35 @@ class AppController {
         commonPrint.log(details.exception.toString());
         commonPrint.log(details.stack.toString());
       };
-      
+
       commonPrint.log("AppController: Updating tray...");
       updateTray(true);
-      
+
       commonPrint.log("AppController: Initializing core...");
       await _initCore();
-      
+
       commonPrint.log("AppController: Initializing status...");
       await _initStatus();
-      
+
       commonPrint.log("AppController: Updating auto-launch status...");
       autoLaunch?.updateStatus(
         _ref.read(appSettingProvider).autoLaunch,
       );
-      
+
       commonPrint.log("AppController: Scheduling subscription update...");
       // Delay subscription update to ensure network is ready after app initialization
       Future.delayed(
           const Duration(seconds: 1), _updateCurrentProfileSubscription);
-      
+
       commonPrint.log("AppController: Starting auto-update profiles...");
       unawaited(autoUpdateProfiles());
-      
+
       commonPrint.log("AppController: Starting auto-update providers...");
       unawaited(autoUpdateProviders());
-      
+
       commonPrint.log("AppController: Starting auto-check update...");
       unawaited(autoCheckUpdate());
-      
+
       if (!Platform.isMacOS) {
         commonPrint.log("AppController: Handling window visibility...");
         if (!_ref.read(appSettingProvider).silentLaunch) {
@@ -1148,13 +1150,13 @@ class AppController {
           window?.hide();
         }
       }
-      
+
       commonPrint.log("AppController: Handling preferences...");
       await _handlePreference();
-      
+
       commonPrint.log("AppController: Handling disclaimer...");
       await _handlerDisclaimer();
-      
+
       commonPrint.log("AppController: Setting initProvider to true");
       _ref.read(initProvider.notifier).value = true;
       commonPrint.log("AppController: init completed successfully");

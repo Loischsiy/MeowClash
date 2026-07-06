@@ -704,21 +704,32 @@ class GlobalState {
           groupDefsByName[g["name"] as String] = Map<String, dynamic>.from(g);
         }
       }
+      final runtimeGroupsByName = isAppControllerReady
+          ? {
+              for (final group in appController.getGroups()) group.name: group,
+            }
+          : const <String, Group>{};
       String resolveChainHopName(String name) {
         var current = name;
         final seen = <String>{};
         while (seen.add(current)) {
           final group = groupDefsByName[current];
-          if (group == null) {
+          final runtimeGroup = runtimeGroupsByName[current];
+          if (group == null && runtimeGroup == null) {
             return current;
           }
           final selected = profile.selectedMap[current];
           final proxies =
-              (group["proxies"] as List?)?.whereType<String>().toList() ??
+              (group?["proxies"] as List?)?.whereType<String>().toList() ??
                   const <String>[];
+          final runtimeSelected =
+              runtimeGroup?.getCurrentSelectedName(selected ?? "");
+          final runtimeFirst = runtimeGroup?.all.firstOrNull?.name;
           current = selected?.isNotEmpty == true
               ? selected!
-              : proxies.firstOrNull ?? current;
+              : runtimeSelected?.isNotEmpty == true
+                  ? runtimeSelected!
+                  : proxies.firstOrNull ?? runtimeFirst ?? current;
         }
         return current;
       }

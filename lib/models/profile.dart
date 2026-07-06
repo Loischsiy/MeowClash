@@ -126,9 +126,8 @@ extension OverrideDataExt on OverrideData {
   /// [resolveProxyNode] returns the raw definition of a concrete proxy node by
   /// name, or null when the name is not an inline node (e.g. a provider-backed
   /// node that cannot be cloned). [resolveProxyName] may map a non-entry group
-  /// hop to its selected concrete node. Because the exit hop must be cloned,
-  /// every hop after the entry must resolve to a concrete node; otherwise the
-  /// whole chain is skipped.
+  /// hop to its selected concrete node. [resolveProxyGroup] returns an inline
+  /// group definition by name so group hops can be cloned as hidden groups.
   ///
   /// The result is injected on top of the parsed profile config right before
   /// it is handed to the core (see GlobalState.patchRawConfig), so chains live
@@ -139,6 +138,7 @@ extension OverrideDataExt on OverrideData {
   }) buildRunningChainConfig(
     Map<String, dynamic>? Function(String name) resolveProxyNode, {
     String Function(String name)? resolveProxyName,
+    Map<String, dynamic>? Function(String name)? resolveProxyGroup,
   }) {
     final proxies = <Map<String, dynamic>>[];
     final groups = <Map<String, dynamic>>[];
@@ -148,16 +148,50 @@ extension OverrideDataExt on OverrideData {
       // group). Every later hop is cloned into a node carrying `dialer-proxy`.
       var dialerProxy = hops.first;
       final clonedNodes = <Map<String, dynamic>>[];
+      final clonedGroups = <Map<String, dynamic>>[];
       String? exitName;
       var isValid = true;
       for (var i = 1; i < hops.length; i++) {
         final hopName = resolveProxyName?.call(hops[i]) ?? hops[i];
         final def = resolveProxyNode(hopName);
         if (def == null) {
-          // A non-entry hop that isn't a concrete node can't carry
-          // `dialer-proxy`, so the chain can't be built — skip it entirely.
-          isValid = false;
-          break;
+          final group = resolveProxyGroup?.call(hops[i]);
+          final groupProxies =
+              (group?["proxies"] as List?)?.whereType<String>().toList() ??
+                  const <String>[];
+          if (group == null || groupProxies.isEmpty) {
+            isValid = false;
+            break;
+          }
+          final groupName = "${chain.name} \u00b7 ${i + 1}";
+          final groupCloneNames = <String>[];
+          for (var j = 0; j < groupProxies.length; j++) {
+            final memberName =
+                resolveProxyName?.call(groupProxies[j]) ?? groupProxies[j];
+            final memberDef = resolveProxyNode(memberName);
+            if (memberDef == null) {
+              isValid = false;
+              break;
+            }
+            final cloneName = "$groupName.${j + 1}";
+            final clone = Map<String, dynamic>.from(memberDef);
+            clone["name"] = cloneName;
+            clone["dialer-proxy"] = dialerProxy;
+            clonedNodes.add(clone);
+            groupCloneNames.add(cloneName);
+          }
+          if (!isValid) {
+            break;
+          }
+          final groupClone = Map<String, dynamic>.from(group);
+          groupClone["name"] = groupName;
+          groupClone["hidden"] = true;
+          groupClone["proxies"] = groupCloneNames;
+          groupClone.remove("use");
+          clonedGroups.add(groupClone);
+          dialerProxy = groupName;
+          exitName = groupName;
+          continue;
         }
         final cloneName = "${chain.name} \u00b7 ${i + 1}";
         final clone = Map<String, dynamic>.from(def);
@@ -171,6 +205,7 @@ extension OverrideDataExt on OverrideData {
         continue;
       }
       proxies.addAll(clonedNodes);
+      groups.addAll(clonedGroups);
       // Expose the chain only as a hidden `select` group: it stays a valid rule
       // target (rules reference it by name) but is filtered out of the proxies
       // page, so traffic is routed to it via rules instead of being picked

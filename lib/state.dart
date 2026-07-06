@@ -737,6 +737,7 @@ class GlobalState {
       final chainConfig = overrideData.buildRunningChainConfig(
         (name) => proxyDefsByName[name],
         resolveProxyName: resolveChainHopName,
+        resolveProxyGroup: (name) => groupDefsByName[name],
       );
       if (chainConfig.proxies.isNotEmpty) {
         final existingProxyNames = <String>{
@@ -777,9 +778,14 @@ class GlobalState {
       // picks. The proxies page is narrowed to just this group (see
       // currentGroupsState). Inert unless the user enabled chain mode AND at
       // least one chain actually built.
+      final enabledChainNames = overrideData.enabledChains
+          .map((chain) => chain.name)
+          .where((name) => name.isNotEmpty)
+          .toSet();
       final builtChainNames = chainConfig.proxyGroups
           .map((group) => group["name"])
           .whereType<String>()
+          .where(enabledChainNames.contains)
           .toList();
       if (config.appSetting.chainMode && builtChainNames.isNotEmpty) {
         final groups = (rawConfig["proxy-groups"] as List?) ?? <dynamic>[];

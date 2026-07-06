@@ -154,7 +154,7 @@ extension OverrideDataExt on OverrideData {
       for (var i = 1; i < hops.length; i++) {
         final hopName = resolveProxyName?.call(hops[i]) ?? hops[i];
         final def = resolveProxyNode(hopName);
-        if (def == null) {
+        if (def == null || def["type"] is! String) {
           final group = resolveProxyGroup?.call(hops[i]);
           final groupProxies =
               (group?["proxies"] as List?)?.whereType<String>().toList() ??
@@ -169,7 +169,7 @@ extension OverrideDataExt on OverrideData {
             final memberName =
                 resolveProxyName?.call(groupProxies[j]) ?? groupProxies[j];
             final memberDef = resolveProxyNode(memberName);
-            if (memberDef == null) {
+            if (memberDef == null || memberDef["type"] is! String) {
               isValid = false;
               break;
             }

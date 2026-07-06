@@ -706,7 +706,7 @@ class GlobalState {
       // cloned; group hops are resolved to their selected inline node below.
       final proxyDefsByName = <String, Map<String, dynamic>>{};
       for (final p in existingProxies) {
-        if (p is Map && p["name"] is String) {
+        if (p is Map && p["name"] is String && p["type"] is String) {
           proxyDefsByName[p["name"] as String] = Map<String, dynamic>.from(p);
         }
       }
@@ -732,7 +732,9 @@ class GlobalState {
               continue;
             }
             for (final proxy in providerProxies) {
-              if (proxy is Map && proxy["name"] is String) {
+              if (proxy is Map &&
+                  proxy["name"] is String &&
+                  proxy["type"] is String) {
                 proxyDefsByName[proxy["name"] as String] =
                     Map<String, dynamic>.from(proxy);
               }

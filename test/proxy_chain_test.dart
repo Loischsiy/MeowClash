@@ -195,6 +195,30 @@ void main() {
       expect(built.proxyGroups[1]['proxies'], ['Chain \u00b7 2']);
     });
 
+    test('buildRunningChainConfig skips group members without type', () {
+      const data = OverrideData(
+        chains: [
+          ProxyChain(id: '1', name: 'Chain', hops: ['Entry', 'Auto']),
+        ],
+      );
+      final defs = <String, Map<String, dynamic>>{
+        'Broken': {'name': 'Broken', 'server': 'broken.example'},
+      };
+      final built = data.buildRunningChainConfig(
+        (name) => defs[name],
+        resolveProxyGroup: (name) => name == 'Auto'
+            ? {
+                'name': 'Auto',
+                'type': 'url-test',
+                'proxies': ['Broken'],
+              }
+            : null,
+      );
+
+      expect(built.proxies, isEmpty);
+      expect(built.proxyGroups, isEmpty);
+    });
+
     test('withChainSelectorMatch repoints the final MATCH', () {
       final rules = withChainSelectorMatch(
         ['DOMAIN-SUFFIX,cn,DIRECT', 'MATCH,Proxy'],

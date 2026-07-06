@@ -1,7 +1,6 @@
 // ignore_for_file: invalid_annotation_target
 import 'dart:convert';
 import 'dart:io';
-import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:meowclash/clash/core.dart';
@@ -330,6 +329,10 @@ extension ProfileExtension on Profile {
     if (responseData == null) {
       throw Exception("Failed to get profile data from response.");
     }
+    ensureCoreInputHeaderFits(
+      response.headers.value(HttpHeaders.contentLengthHeader),
+      name: 'Profile ${label ?? url}',
+    );
 
     final profileData = await _maybeDecrypt(
       responseData,
@@ -339,6 +342,7 @@ extension ProfileExtension on Profile {
               providerHeaders['meowclash-password-iterations'] ?? '') ??
           kDefaultPbkdf2Iterations,
     );
+    ensureCoreInputBytes(profileData, name: 'Profile ${label ?? url}');
 
     final newProviderHeaders = <String, String>{};
 

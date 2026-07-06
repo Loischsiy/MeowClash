@@ -571,6 +571,8 @@ class GlobalState {
                 type: "proxies",
                 providerPath: path,
               );
+            } on CoreInputTooLargeException {
+              rethrow;
             } catch (e) {
               commonPrint.log("Pre-download proxy provider $key failed: $e");
             }
@@ -603,6 +605,8 @@ class GlobalState {
                 type: "rules",
                 providerPath: path,
               );
+            } on CoreInputTooLargeException {
+              rethrow;
             } catch (e) {
               commonPrint.log("Pre-download rule provider $key failed: $e");
             }
@@ -790,6 +794,8 @@ class GlobalState {
   }
 
   Future<Map<String, dynamic>> getProfileConfig(String profileId) async {
+    final profilePath = await appPath.getProfilePath(profileId);
+    ensureCoreInputFileFits(File(profilePath), name: 'Profile $profileId');
     final configMap = await switch (clashLibHandler != null) {
       true => clashLibHandler!.getConfig(profileId),
       false => clashCore.getConfig(profileId),

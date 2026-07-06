@@ -104,13 +104,25 @@ class ClashCore {
 
   FutureOr<bool> get isInit => clashInterface.isInit;
 
-  FutureOr<String> validateConfig(String data) => clashInterface.validateConfig(data);
+  FutureOr<String> validateConfig(String data) {
+    ensureCoreInputSize(utf8.encode(data).length, name: 'Config');
+    return clashInterface.validateConfig(data);
+  }
 
-  FutureOr<String> convertSubscription(String data) => clashInterface.convertSubscription(data);
+  FutureOr<String> convertSubscription(String data) {
+    ensureCoreInputSize(utf8.encode(data).length, name: 'Subscription');
+    return clashInterface.convertSubscription(data);
+  }
 
   Future<String> updateConfig(UpdateParams updateParams) => clashInterface.updateConfig(updateParams);
 
-  Future<String> setupConfig(SetupParams setupParams) => clashInterface.setupConfig(setupParams);
+  Future<String> setupConfig(SetupParams setupParams) {
+    ensureCoreInputSize(
+      utf8.encode(json.encode(setupParams)).length,
+      name: 'Setup config',
+    );
+    return clashInterface.setupConfig(setupParams);
+  }
 
   Future<List<Group>> getProxiesGroups() async {
     final proxies = await clashInterface.getProxies();
@@ -211,8 +223,14 @@ class ClashCore {
   Future<String> sideLoadExternalProvider({
     required String providerName,
     required String data,
-  }) => clashInterface.sideLoadExternalProvider(
+  }) {
+    ensureCoreInputSize(
+      utf8.encode(data).length,
+      name: 'Provider $providerName',
+    );
+    return clashInterface.sideLoadExternalProvider(
         providerName: providerName, data: data);
+  }
 
   static Future<Uint8List> maybeDecryptProvider(
     Uint8List data, {
@@ -252,6 +270,10 @@ class ClashCore {
     if (responseData == null) {
       throw Exception("Failed to download provider data");
     }
+    ensureCoreInputHeaderFits(
+      response.headers.value(HttpHeaders.contentLengthHeader),
+      name: 'Provider $providerName',
+    );
 
     final password = profile.providerHeaders['meowclash-password'];
     final iterations = int.tryParse(profile.providerHeaders['meowclash-password-iterations'] ?? '') ?? kDefaultPbkdf2Iterations;
@@ -261,6 +283,7 @@ class ClashCore {
       password: password,
       iterations: iterations,
     );
+    ensureCoreInputBytes(decryptedData, name: 'Provider $providerName');
 
     final file = File(providerPath);
     await file.create(recursive: true);
@@ -304,11 +327,14 @@ class ClashCore {
           );
 
           final text = await File(providerPath).readAsString();
-          return clashInterface.sideLoadExternalProvider(
+          return sideLoadExternalProvider(
             providerName: providerName,
             data: text,
           );
         }
+      } on CoreInputTooLargeException catch (e) {
+        commonPrint.log("updateExternalProvider blocked: $e");
+        return e.toString();
       } catch (e) {
         commonPrint.log("Custom updateExternalProvider failed: $e");
         // Fallback to default Clash update if anything fails
@@ -332,6 +358,7 @@ class ClashCore {
 
   Future<Map<String, dynamic>> getConfig(String id) async {
     final profilePath = await appPath.getProfilePath(id);
+    ensureCoreInputFileFits(File(profilePath), name: 'Profile $id');
     final res = await clashInterface.getConfig(profilePath);
     if (res.isSuccess) {
       return res.data as Map<String, dynamic>;

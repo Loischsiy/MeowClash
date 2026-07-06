@@ -108,11 +108,13 @@ void main() {
       expect(built.proxyGroups[0], {
         'name': 'Chain1',
         'type': 'select',
+        'hidden': true,
         'proxies': ['Chain1 \u00b7 2'],
       });
       expect(built.proxyGroups[1], {
         'name': 'Chain2',
         'type': 'select',
+        'hidden': true,
         'proxies': ['Chain2 \u00b7 3'],
       });
     });
@@ -186,6 +188,42 @@ void main() {
         'Chain \u00b7 2.2',
       ]);
       expect(built.proxies.every((p) => p['dialer-proxy'] == 'Entry'), isTrue);
+      expect(built.proxyGroups[0], {
+        'name': 'Chain \u00b7 2',
+        'type': 'url-test',
+        'hidden': true,
+        'proxies': ['Chain \u00b7 2.1', 'Chain \u00b7 2.2'],
+      });
+      expect(built.proxyGroups[1]['proxies'], ['Chain \u00b7 2']);
+    });
+
+    test('buildRunningChainConfig clones a provider-backed group hop', () {
+      const data = OverrideData(
+        chains: [
+          ProxyChain(id: '1', name: 'Chain', hops: ['Entry', 'Auto']),
+        ],
+      );
+      final defs = <String, Map<String, dynamic>>{
+        'W1': {'name': 'W1', 'type': 'wireguard', 'server': 'w1.example'},
+        'W2': {'name': 'W2', 'type': 'wireguard', 'server': 'w2.example'},
+      };
+      final built = data.buildRunningChainConfig(
+        (name) => defs[name],
+        resolveProxyGroup: (name) => name == 'Auto'
+            ? {
+                'name': 'Auto',
+                'type': 'url-test',
+                'use': ['WARP'],
+              }
+            : null,
+        resolveProviderProxyNames: (name) =>
+            name == 'WARP' ? ['W1', 'W2'] : const <String>[],
+      );
+
+      expect(built.proxies.map((p) => p['name']), [
+        'Chain \u00b7 2.1',
+        'Chain \u00b7 2.2',
+      ]);
       expect(built.proxyGroups[0], {
         'name': 'Chain \u00b7 2',
         'type': 'url-test',

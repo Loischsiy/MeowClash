@@ -406,7 +406,7 @@ class GlobalState {
     final profileId = profile.id;
     final configMap = await getProfileConfig(profileId);
     final rawConfig = await handleEvaluate(configMap);
-    
+
     final realPatchConfig = patchConfig.copyWith(
       tun: patchConfig.tun.getRealTun(config.networkProps.routeMode),
     );
@@ -489,7 +489,7 @@ class GlobalState {
     rawConfig["redir-port"] = realPatchConfig.redirPort;
     rawConfig["tproxy-port"] = realPatchConfig.tproxyPort;
     rawConfig["mode"] = realPatchConfig.mode.name;
-    
+
     // Set network settings: use patchConfig if overriding, otherwise keep provider values
     if (config.appSetting.overrideNetworkSettings) {
       // User wants to override - use values from UI (always write)
@@ -527,14 +527,14 @@ class GlobalState {
         rawConfig["mixed-port"] = 0;
       }
     }
-    
+
     if (rawConfig["tun"] == null) {
       rawConfig["tun"] = {};
     }
     rawConfig["tun"]["enable"] = realPatchConfig.tun.enable;
     rawConfig["tun"]["device"] = realPatchConfig.tun.device;
     rawConfig["tun"]["dns-hijack"] = realPatchConfig.tun.dnsHijack;
-    
+
     // Set TUN stack
     if (config.appSetting.overrideNetworkSettings) {
       // User wants to override - use value from UI (always write)
@@ -546,7 +546,7 @@ class GlobalState {
         rawConfig["tun"]["stack"] = realPatchConfig.tun.stack.name;
       }
     }
-    
+
     rawConfig["tun"]["route-address"] = realPatchConfig.tun.routeAddress;
     rawConfig["tun"]["auto-route"] = realPatchConfig.tun.autoRoute;
     rawConfig["geodata-loader"] = realPatchConfig.geodataLoader.name;
@@ -639,7 +639,7 @@ class GlobalState {
     mergedGeoXUrl['mmdb'] = patchGeoX['mmdb'];
     mergedGeoXUrl['asn'] = patchGeoX['asn'];
     mergedGeoXUrl['geosite'] = patchGeoX['geosite'];
-    
+
     if (profileGeoX != null && profileGeoX is Map) {
       if (profileGeoX['geoip'] != null) mergedGeoXUrl['geoip'] = profileGeoX['geoip'];
       if (profileGeoX['mmdb'] != null) mergedGeoXUrl['mmdb'] = profileGeoX['mmdb'];
@@ -701,10 +701,9 @@ class GlobalState {
     // the script owns the whole config.
     if (config.scriptProps.currentScript == null) {
       final existingProxies = (rawConfig["proxies"] as List?) ?? <dynamic>[];
-      // Index inline proxy node definitions by name so a chain can clone its
-      // exit hop. Provider-backed nodes aren't here, so they still can't be
-      // cloned; group hops are resolved to their selected inline node below.
+      // Index proxy node definitions by name so a chain can clone its exit hop.
       final proxyDefsByName = <String, Map<String, dynamic>>{};
+      final providerProxyNamesByProvider = <String, List<String>>{};
       for (final p in existingProxies) {
         if (p is Map && p["name"] is String && p["type"] is String) {
           proxyDefsByName[p["name"] as String] = Map<String, dynamic>.from(p);
@@ -712,7 +711,9 @@ class GlobalState {
       }
       final proxyProviders = rawConfig["proxy-providers"];
       if (proxyProviders is Map) {
-        for (final provider in proxyProviders.values) {
+        for (final entry in proxyProviders.entries) {
+          final providerName = entry.key.toString();
+          final provider = entry.value;
           final path = provider is Map ? provider["path"] : null;
           if (path is! String) {
             continue;
@@ -731,13 +732,18 @@ class GlobalState {
             if (providerProxies is! List) {
               continue;
             }
+            final providerProxyNames = <String>[];
             for (final proxy in providerProxies) {
               if (proxy is Map &&
                   proxy["name"] is String &&
                   proxy["type"] is String) {
-                proxyDefsByName[proxy["name"] as String] =
-                    Map<String, dynamic>.from(proxy);
+                final proxyName = proxy["name"] as String;
+                proxyDefsByName[proxyName] = Map<String, dynamic>.from(proxy);
+                providerProxyNames.add(proxyName);
               }
+            }
+            if (providerProxyNames.isNotEmpty) {
+              providerProxyNamesByProvider[providerName] = providerProxyNames;
             }
           } catch (e) {
             commonPrint.log("Read proxy provider for chains failed: $e");
@@ -781,6 +787,7 @@ class GlobalState {
         }
         return current;
       }
+
       Map<String, dynamic>? resolveChainGroup(String name) {
         final group = groupDefsByName[name];
         if (group == null) {
@@ -810,6 +817,8 @@ class GlobalState {
         (name) => proxyDefsByName[name],
         resolveProxyName: resolveChainHopName,
         resolveProxyGroup: resolveChainGroup,
+        resolveProviderProxyNames: (name) =>
+            providerProxyNamesByProvider[name] ?? const <String>[],
       );
       if (chainConfig.proxies.isNotEmpty) {
         final existingProxyNames = <String>{

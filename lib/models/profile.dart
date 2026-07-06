@@ -128,6 +128,8 @@ extension OverrideDataExt on OverrideData {
   /// node that cannot be cloned). [resolveProxyName] may map a non-entry group
   /// hop to its selected concrete node. [resolveProxyGroup] returns an inline
   /// group definition by name so group hops can be cloned as hidden groups.
+  /// [resolveProviderProxyNames] expands a group's `use` providers to their
+  /// concrete proxy names.
   ///
   /// The result is injected on top of the parsed profile config right before
   /// it is handed to the core (see GlobalState.patchRawConfig), so chains live
@@ -139,6 +141,7 @@ extension OverrideDataExt on OverrideData {
     Map<String, dynamic>? Function(String name) resolveProxyNode, {
     String Function(String name)? resolveProxyName,
     Map<String, dynamic>? Function(String name)? resolveProxyGroup,
+    List<String> Function(String providerName)? resolveProviderProxyNames,
   }) {
     final proxies = <Map<String, dynamic>>[];
     final groups = <Map<String, dynamic>>[];
@@ -158,7 +161,14 @@ extension OverrideDataExt on OverrideData {
           final group = resolveProxyGroup?.call(hops[i]);
           final groupProxies =
               (group?["proxies"] as List?)?.whereType<String>().toList() ??
-                  const <String>[];
+                  <String>[];
+          if (group != null && resolveProviderProxyNames != null) {
+            final providers =
+                (group["use"] as List?)?.whereType<String>() ?? const [];
+            for (final providerName in providers) {
+              groupProxies.addAll(resolveProviderProxyNames(providerName));
+            }
+          }
           if (group == null || groupProxies.isEmpty) {
             isValid = false;
             break;

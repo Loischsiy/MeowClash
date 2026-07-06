@@ -18,6 +18,7 @@ import 'package:flutter_js/flutter_js.dart';
 import 'package:material_color_utilities/palettes/core_palette.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:yaml/yaml.dart';
 
 import 'common/common.dart';
 import 'controller.dart';
@@ -25,6 +26,19 @@ import 'core_version.dart';
 import 'models/models.dart';
 
 typedef UpdateTasks = List<FutureOr Function()>;
+
+dynamic _yamlToDart(dynamic value) {
+  if (value is YamlMap) {
+    return {
+      for (final entry in value.entries)
+        entry.key.toString(): _yamlToDart(entry.value),
+    };
+  }
+  if (value is YamlList) {
+    return value.map(_yamlToDart).toList();
+  }
+  return value;
+}
 
 class GlobalState {
 
@@ -696,6 +710,38 @@ class GlobalState {
           proxyDefsByName[p["name"] as String] = Map<String, dynamic>.from(p);
         }
       }
+      final proxyProviders = rawConfig["proxy-providers"];
+      if (proxyProviders is Map) {
+        for (final provider in proxyProviders.values) {
+          final path = provider is Map ? provider["path"] : null;
+          if (path is! String) {
+            continue;
+          }
+          try {
+            final file = File(path);
+            if (!await file.exists()) {
+              continue;
+            }
+            final data = _yamlToDart(loadYaml(await file.readAsString()));
+            final providerProxies = data is Map
+                ? data["proxies"]
+                : data is List
+                    ? data
+                    : null;
+            if (providerProxies is! List) {
+              continue;
+            }
+            for (final proxy in providerProxies) {
+              if (proxy is Map && proxy["name"] is String) {
+                proxyDefsByName[proxy["name"] as String] =
+                    Map<String, dynamic>.from(proxy);
+              }
+            }
+          } catch (e) {
+            commonPrint.log("Read proxy provider for chains failed: $e");
+          }
+        }
+      }
       final existingGroups =
           (rawConfig["proxy-groups"] as List?) ?? <dynamic>[];
       final groupDefsByName = <String, Map<String, dynamic>>{};
@@ -733,11 +779,35 @@ class GlobalState {
         }
         return current;
       }
+      Map<String, dynamic>? resolveChainGroup(String name) {
+        final group = groupDefsByName[name];
+        if (group == null) {
+          return null;
+        }
+        final proxies =
+            (group["proxies"] as List?)?.whereType<String>().toList() ??
+                const <String>[];
+        if (proxies.isNotEmpty) {
+          return group;
+        }
+        final runtimeProxies = runtimeGroupsByName[name]
+            ?.all
+            .map((proxy) => proxy.name)
+            .where((name) => name.isNotEmpty)
+            .toList();
+        if (runtimeProxies == null || runtimeProxies.isEmpty) {
+          return group;
+        }
+        return {
+          ...group,
+          "proxies": runtimeProxies,
+        };
+      }
 
       final chainConfig = overrideData.buildRunningChainConfig(
         (name) => proxyDefsByName[name],
         resolveProxyName: resolveChainHopName,
-        resolveProxyGroup: (name) => groupDefsByName[name],
+        resolveProxyGroup: resolveChainGroup,
       );
       if (chainConfig.proxies.isNotEmpty) {
         final existingProxyNames = <String>{

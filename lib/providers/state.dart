@@ -55,9 +55,11 @@ GroupsState currentGroupsState(Ref ref) {
   final hasChains = ref.watch(currentProfileProvider
       .select((p) => p?.overrideData.enabledChains.isNotEmpty ?? false));
   if (chainMode && hasChains) {
-    return GroupsState(
-      value: groups.where((g) => g.name == kChainSelectorGroup).toList(),
-    );
+    final chainGroups =
+        groups.where((g) => g.name == kChainSelectorGroup).toList();
+    if (chainGroups.isNotEmpty) {
+      return GroupsState(value: chainGroups);
+    }
   }
   return GroupsState(
     value: switch (mode) {

@@ -29,10 +29,32 @@ typedef UpdateTasks = List<FutureOr Function()>;
 
 dynamic _yamlToDart(dynamic value) {
   if (value is YamlMap) {
-    return {
-      for (final entry in value.entries)
-        entry.key.toString(): _yamlToDart(entry.value),
-    };
+    final result = <String, dynamic>{};
+    void merge(dynamic source) {
+      final converted = _yamlToDart(source);
+      if (converted is Map) {
+        result.addAll(Map<String, dynamic>.from(converted));
+      }
+    }
+
+    for (final entry in value.entries) {
+      if (entry.key == "<<") {
+        final mergeValue = entry.value;
+        if (mergeValue is YamlList) {
+          for (final item in mergeValue) {
+            merge(item);
+          }
+        } else {
+          merge(mergeValue);
+        }
+      }
+    }
+    for (final entry in value.entries) {
+      if (entry.key != "<<") {
+        result[entry.key.toString()] = _yamlToDart(entry.value);
+      }
+    }
+    return result;
   }
   if (value is YamlList) {
     return value.map(_yamlToDart).toList();

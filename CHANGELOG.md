@@ -2,6 +2,24 @@
 
 All notable changes to **MeowClash** will be documented in this file.
 
+## [v1.0.6]
+
+### ✨ New Features
+- **Proxy Chains**: Added support for group hops in chains, including inline groups, runtime-selected groups, and provider-backed groups.
+- **Sync**: Added token authentication for Send to TV profile transfer.
+- **Profiles**: Added YAML merge key (`<<`) support when reading profile and provider data.
+
+### 🐛 Bug Fixes
+- **Security**: Hardened backup recovery so archives can restore only safe profile entries and cannot write outside the profiles directory.
+- **Core**: Added a 16 MiB input guard for profiles, providers, subscriptions, and core config operations.
+- **Proxies**: Fixed proxy group drill-down behavior, hidden group visibility, and selection cycle handling.
+- **Proxy Chains**: Skipped invalid proxy definitions without a valid `type` field instead of building broken chains.
+
+### 🚀 Improvements
+- **Core**: Updated mihomo proxy engine to version 1.19.28 and refreshed Go dependencies.
+- **Release**: Added GitLab release publishing and updated download links to GitHub/GitLab release pages.
+- **Internal**: Improved shell command handling safety and added focused tests for backup recovery, core input limits, and proxy chains.
+
 ## [v1.0.5]
 
 ### ✨ New Features

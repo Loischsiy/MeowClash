@@ -419,8 +419,8 @@ jobs:
               range="${prev:+$prev..}$curr"
           
               echo -e "## $curr\n" >> "$temp"
-              git log --no-merges --pretty=format:"%B" "$range" | \
-              awk '!/Update changelog/ && NF {print "- " $0 "\n"}' >> "$temp"
+              git log --no-merges --pretty=format:"- %s" "$range" | \
+              grep -v 'Update changelog' >> "$temp" || true
           done
           [ -f CHANGELOG.md ] && cat CHANGELOG.md >> "$temp"
           
@@ -467,29 +467,8 @@ jobs:
 
       - name: Generate release.md
         run: |
-          tags=($(git tag --merged HEAD --sort=-creatordate))
-          preTag=$(curl -s "https://api.github.com/repos/Loischsiy/MeowClash/releases/latest" | \
-          sed -nE 's/.*"tag_name": "([^"]+)".*/\1/p')
-          
-          [ -z "$preTag" ] && preTag=""
-          
-          out="release.md" > "$out"
-          
-          for i in "${!tags[@]}"; do
-            curr="${tags[i]}"
-            [[ "$curr" == "$preTag" ]] && break
-          
-            prev="${tags[i+1]}"
-            range="${prev:+$prev..}$curr"
-          
-            git log --no-merges --pretty=format:"%B" "$range" | \
-            awk '!/Update changelog/ && NF {print "- " $0 "\n"}' >> "$out"
-          done
-
-      - name: Patch release.md
-        run: |
           version=$(echo "${{ github.ref_name }}" | sed 's/^v//')
-          sed "s|VERSION|$version|g" ./.github/release_template.md >> release.md
+          sed "s|VERSION|$version|g" ./.github/release_template.md > release.md
 
       - name: Rename release assets
         run: |
@@ -574,25 +553,3 @@ jobs:
         with:
           files: ./dist/**/*
           body_path: './release.md'
-
-      - name: Create Fdroid Source Dir
-        if: ${{ env.IS_STABLE == 'true' }}
-        run: |
-          mkdir -p ./tmp
-          find ./dist -type f -name '*android-arm64-v8a*' -exec cp {} ./tmp/ \; || true
-          echo "Files copied successfully"
-
-      - name: Push to fdroid repo
-        if: ${{ env.IS_STABLE == 'true' }}
-        uses: cpina/github-action-push-to-another-repository@v1.7.2
-        env:
-          SSH_DEPLOY_KEY: ${{ secrets.SSH_DEPLOY_KEY }}
-        with:
-          source-directory: ./tmp/
-          destination-github-username: Loischsiy
-          destination-repository-name: MeowClash-fdroid-repo
-          user-name: 'github-actions[bot]'
-          user-email: 'github-actions[bot]@users.noreply.github.com'
-          target-branch: main
-          commit-message: Update from ${{ github.ref_name }}
-          target-directory: /tmp/

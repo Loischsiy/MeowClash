@@ -525,13 +525,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          {
-            echo "Release $RELEASE_TAG"
-            echo
-            echo "Built from $GITHUB_SHA."
-            echo
-            sed "s|VERSION|$APP_VERSION|g" ./.github/release_template.md
-          } > release.md
+          sed "s|VERSION|$APP_VERSION|g" ./.github/release_template.md > release.md
 
       - name: Rename release assets
         shell: bash

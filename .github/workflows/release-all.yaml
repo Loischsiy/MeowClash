@@ -1,7 +1,10 @@
 name: release all platforms
-run-name: Release ${{ inputs.version }} (${{ inputs.app_env }})
+run-name: Release ${{ inputs.version || github.ref_name }} (${{ inputs.app_env || 'stable' }})
 
 on:
+  push:
+    tags:
+      - 'v*'
   workflow_dispatch:
     inputs:
       version:
@@ -21,7 +24,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: release-all-${{ github.event.inputs.version }}
+  group: release-all-${{ inputs.version || github.ref_name }}
   cancel-in-progress: false
 
 jobs:
@@ -31,12 +34,14 @@ jobs:
       app_version: ${{ steps.version.outputs.app_version }}
       pubspec_version: ${{ steps.version.outputs.pubspec_version }}
       release_tag: ${{ steps.version.outputs.release_tag }}
+      app_env: ${{ steps.version.outputs.app_env }}
     steps:
       - name: Normalize release version
         id: version
         shell: bash
         env:
-          INPUT_VERSION: ${{ inputs.version }}
+          INPUT_VERSION: ${{ inputs.version || github.ref_name }}
+          INPUT_APP_ENV: ${{ inputs.app_env || 'stable' }}
         run: |
           set -euo pipefail
           version="${INPUT_VERSION#v}"
@@ -46,16 +51,22 @@ jobs:
             exit 1
           fi
 
+          if [[ "$INPUT_APP_ENV" != "stable" && "$INPUT_APP_ENV" != "pre" ]]; then
+            echo "::error::Application environment must be stable or pre"
+            exit 1
+          fi
+
           build_number="$(date -u +%Y%m%d%H)"
           echo "app_version=$version" >> "$GITHUB_OUTPUT"
           echo "pubspec_version=$version+$build_number" >> "$GITHUB_OUTPUT"
           echo "release_tag=v$version" >> "$GITHUB_OUTPUT"
+          echo "app_env=$INPUT_APP_ENV" >> "$GITHUB_OUTPUT"
 
   build-android:
     needs: prepare
     runs-on: ubuntu-22.04
     env:
-      APP_ENV: ${{ inputs.app_env }}
+      APP_ENV: ${{ needs.prepare.outputs.app_env }}
       PUBSPEC_VERSION: ${{ needs.prepare.outputs.pubspec_version }}
     steps:
       - name: Checkout
@@ -149,7 +160,7 @@ jobs:
     needs: prepare
     runs-on: windows-2022
     env:
-      APP_ENV: ${{ inputs.app_env }}
+      APP_ENV: ${{ needs.prepare.outputs.app_env }}
       PUBSPEC_VERSION: ${{ needs.prepare.outputs.pubspec_version }}
     steps:
       - name: Checkout
@@ -217,7 +228,7 @@ jobs:
     needs: prepare
     runs-on: ubuntu-22.04
     env:
-      APP_ENV: ${{ inputs.app_env }}
+      APP_ENV: ${{ needs.prepare.outputs.app_env }}
       PUBSPEC_VERSION: ${{ needs.prepare.outputs.pubspec_version }}
     steps:
       - name: Checkout
@@ -297,7 +308,7 @@ jobs:
     needs: prepare
     runs-on: ubuntu-24.04-arm
     env:
-      APP_ENV: ${{ inputs.app_env }}
+      APP_ENV: ${{ needs.prepare.outputs.app_env }}
       PUBSPEC_VERSION: ${{ needs.prepare.outputs.pubspec_version }}
     steps:
       - name: Checkout
@@ -365,7 +376,7 @@ jobs:
     needs: prepare
     runs-on: macos-15-intel
     env:
-      APP_ENV: ${{ inputs.app_env }}
+      APP_ENV: ${{ needs.prepare.outputs.app_env }}
       PUBSPEC_VERSION: ${{ needs.prepare.outputs.pubspec_version }}
     steps:
       - name: Checkout
@@ -433,7 +444,7 @@ jobs:
     needs: prepare
     runs-on: macos-latest
     env:
-      APP_ENV: ${{ inputs.app_env }}
+      APP_ENV: ${{ needs.prepare.outputs.app_env }}
       PUBSPEC_VERSION: ${{ needs.prepare.outputs.pubspec_version }}
     steps:
       - name: Checkout
@@ -615,7 +626,7 @@ jobs:
           target_commitish: ${{ github.sha }}
           files: ./dist/**/*
           body_path: ./release.md
-          prerelease: ${{ inputs.app_env != 'stable' }}
+          prerelease: ${{ needs.prepare.outputs.app_env != 'stable' }}
           fail_on_unmatched_files: true
           overwrite_files: true
 

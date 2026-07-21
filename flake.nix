@@ -18,7 +18,7 @@
         pkgs:
         pkgs.callPackage ./nix/package.nix {
           buildGoModule = pkgs.buildGo124Module or pkgs.buildGoModule;
-          flutter = pkgs.flutter335 or pkgs.flutter;
+          flutter = pkgs.flutter;
         };
     in
     {
@@ -43,7 +43,7 @@
         {
           default = pkgs.mkShell {
             packages = [
-              (pkgs.flutter335 or pkgs.flutter)
+              pkgs.flutter
               (pkgs.go_1_24 or pkgs.go)
               pkgs.pkg-config
               pkgs.cmake

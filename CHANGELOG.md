@@ -2,6 +2,21 @@
 
 All notable changes to **MeowClash** will be documented in this file.
 
+## [v1.0.7]
+
+### ✨ New Features
+- **Localization**: Added complete Finnish language support for the app and documentation.
+- **Android**: Added permission handling and short-lived caching when reading installed applications.
+
+### 🐛 Bug Fixes
+- **Core Input**: Added file-size validation when selecting core input files.
+
+### 🚀 Improvements
+- **Core**: Updated mihomo proxy engine to version 1.19.29 and refreshed Go dependencies.
+- **Subscriptions**: Removed the legacy `meowclash-*` provider-override system while preserving subscription decryption.
+- **Notifications**: Simplified foreground notification handling and removed obsolete server-name caching.
+- **Docs**: Added an Obtainium badge and switched the GitLab badge to the bundled asset.
+
 ## [v1.0.6]
 
 ### ✨ New Features

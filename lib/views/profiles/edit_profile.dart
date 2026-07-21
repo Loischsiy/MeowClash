@@ -35,6 +35,7 @@ class _EditProfileViewState extends State<EditProfileView> {
   late bool autoUpdate;
   bool _showDecryptPassword = false;
   bool _isDecrypting = false;
+  Profile? _updatedProfile;
   String? rawText;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final fileInfoNotifier = ValueNotifier<FileInfo?>(null);
@@ -78,21 +79,21 @@ class _EditProfileViewState extends State<EditProfileView> {
     final appController = globalState.appController;
     final password = decryptPasswordController.text;
     final iterationsText = decryptIterationsController.text.trim();
-    
+
     final newProviderHeaders = Map<String, String>.from(this.profile.providerHeaders);
     if (password.isNotEmpty) {
       newProviderHeaders['meowclash-password'] = password;
     } else {
       newProviderHeaders.remove('meowclash-password');
     }
-    
+
     if (iterationsText.isNotEmpty) {
       newProviderHeaders['meowclash-password-iterations'] = iterationsText;
     } else {
       newProviderHeaders.remove('meowclash-password-iterations');
     }
 
-    var profile = this.profile.copyWith(
+    var profile = (_updatedProfile ?? this.profile).copyWith(
           url: urlController.text,
           label: labelController.text,
           autoUpdate: autoUpdate,
@@ -281,6 +282,27 @@ class _EditProfileViewState extends State<EditProfileView> {
       _isDecrypting = true;
     });
     try {
+      if (profile.type == ProfileType.url) {
+        final updatedProfile = await globalState.safeRun<Profile>(
+          () => globalState.appController.updateProfile(
+            profile,
+            decryptionPassword: password,
+            decryptionIterations: iterations,
+          ),
+          silence: false,
+          title: appLocalizations.profileDecryptFailed,
+        );
+        if (updatedProfile == null || !mounted) return;
+        _updatedProfile = updatedProfile;
+        fileInfoNotifier.value = await _getFileInfo(
+          await appPath.getProfilePath(profile.id),
+        );
+        globalState.showNotifier(
+          appLocalizations.profileDecryptSuccess,
+        );
+        return;
+      }
+
       final encoded = await _readCurrentProfileText();
       if (encoded == null || encoded.isEmpty) {
         globalState.showNotifier(

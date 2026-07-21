@@ -175,11 +175,17 @@ class AppController {
     _ref.read(localIpProvider.notifier).value = await utils.getLocalIpAddress();
   }
 
-  Future<void> updateProfile(Profile profile) async {
+  Future<Profile> updateProfile(
+    Profile profile, {
+    String? decryptionPassword,
+    int? decryptionIterations,
+  }) async {
     final prefs = await SharedPreferences.getInstance();
     final shouldSend = prefs.getBool('sendDeviceHeaders') ?? true;
     final newProfile = await profile.update(
       shouldSendHeaders: shouldSend,
+      decryptionPassword: decryptionPassword,
+      decryptionIterations: decryptionIterations,
     );
 
     final headers = newProfile.providerHeaders;
@@ -206,6 +212,8 @@ class AppController {
         .catchError((e) {
       commonPrint.log("Error checking subscription: $e");
     }));
+
+    return newProfile;
   }
 
   void _showHwidLimitNotice(String encodedText, String? supportUrl) {

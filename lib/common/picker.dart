@@ -2,18 +2,33 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
-import 'package:meowclash/common/common.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:meowclash/common/common.dart';
+import 'package:meowclash/state.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 class Picker {
   Future<PlatformFile?> pickerFile() async {
     final filePickerResult = await FilePicker.platform.pickFiles(
-      withData: true,
+      withData: false,
       allowMultiple: false,
       initialDirectory: await appPath.downloadDirPath,
     );
-    return filePickerResult?.files.first;
+    final file = filePickerResult?.files.first;
+    if (file == null) return null;
+    if (file.size > maxCoreInputBytes) {
+      globalState.showNotifier(
+        CoreInputTooLargeException('Selected file', file.size).toString(),
+      );
+      return null;
+    }
+    if (file.path == null) return file;
+    return PlatformFile(
+      name: file.name,
+      size: file.size,
+      path: file.path,
+      bytes: await File(file.path!).readAsBytes(),
+    );
   }
 
   Future<String?> saveFile(String fileName, Uint8List bytes) async {

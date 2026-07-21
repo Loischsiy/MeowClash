@@ -17,9 +17,7 @@ import com.meowclash.app.RunState
 /**
  * Home-screen widget: three mode buttons (Rule/Global/Direct) and a
  * toggle button showing the app logo (colored when the tunnel is up,
- * monochrome otherwise). When the current subscription disables global
- * mode (`meowclash-globalmode: false`), the mode column is hidden and a
- * start/stop label appears under the logo.
+ * monochrome otherwise).
  *
  * Widget redraws are driven by LiveData in GlobalState; observers are
  * attached lazily on the first widget event and live with the process.
@@ -82,8 +80,7 @@ class ModeWidgetProvider : AppWidgetProvider() {
             views.setOnClickPendingIntent(R.id.widget_btn_global, pending(context, ACTION_MODE_GLOBAL))
             views.setOnClickPendingIntent(R.id.widget_btn_direct, pending(context, ACTION_MODE_DIRECT))
 
-            // When subscription disables global mode we drop the whole mode
-            // column and leave just the logo toggle.
+            // Hide the mode controls only when the app explicitly disables them.
             val globalEnabled = GlobalState.globalModeEnabled.value ?: true
             views.setViewVisibility(
                 R.id.widget_mode_col,

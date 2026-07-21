@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:meowclash/common/app_localizations.dart';
@@ -101,17 +100,7 @@ class SubscriptionNotificationService {
     final supportUrl = profile.providerHeaders['support-url'] ?? '';
     commonPrint.log('[SubscriptionNotification] supportUrl: $supportUrl');
 
-    // Get title from meowclash-servicename header or fallback to profile label
-    String title = profile.label ?? profile.id;
-    final svc = profile.providerHeaders['meowclash-servicename'];
-    if (svc != null && svc.isNotEmpty) {
-      try {
-        final normalized = base64.normalize(svc);
-        title = utf8.decode(base64.decode(normalized)).trim();
-      } catch (_) {
-        title = svc.trim();
-      }
-    }
+    final title = profile.label ?? profile.id;
 
     final String message;
     if (notificationThreshold < 0) {

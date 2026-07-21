@@ -22,7 +22,6 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'common/common.dart';
 import 'models/models.dart';
-import 'plugins/vpn.dart';
 import 'services/subscription_crypto.dart';
 import 'views/profiles/override_profile.dart';
 
@@ -77,34 +76,7 @@ class AppController {
         proxyName: proxyName,
       );
       await updateGroups();
-      // Update cached server name for foreground notification
-      _updateForegroundServerName(groupName, proxyName);
     }, args: [groupName, proxyName]);
-  }
-
-  /// Update cached server name in VPN plugin for foreground notification
-  /// Also sends IPC message to service isolate to update selectedMap
-  void _updateForegroundServerName(String groupName, String serverName) {
-    vpn?.updateServerName(serverName);
-    // Send IPC message to service isolate (Android only)
-    clashLib?.sendIpcMessage({
-      'action': 'updateForegroundServer',
-      'groupName': groupName,
-      'serverName': serverName,
-    });
-  }
-
-  /// Initialize foreground notification cache with current profile and server
-  void initForegroundCache() {
-    final profile = globalState.config.currentProfile;
-    if (profile == null) return;
-
-    final profileName = profile.label ?? profile.id;
-
-    vpn?.updateProfileInfo(
-      profileName: profileName,
-      serviceName: "",
-    );
   }
 
   Future<void> restartCore() async {
@@ -120,8 +92,6 @@ class AppController {
     await StatusBarManager.updateIcon(isConnected: isStart);
 
     if (isStart) {
-      // Initialize foreground notification cache before starting
-      initForegroundCache();
       final started = await globalState.handleStart([
         updateRunTime,
         updateTraffic,
@@ -204,7 +174,6 @@ class AppController {
     await Future.delayed(commonDuration);
     _ref.read(localIpProvider.notifier).value = await utils.getLocalIpAddress();
   }
-
 
   Future<void> updateProfile(Profile profile) async {
     final prefs = await SharedPreferences.getInstance();
@@ -706,8 +675,12 @@ class AppController {
       if (providers.isEmpty) return;
 
       final configMap = await globalState.getProfileConfig(profileId);
-      final proxyProviders = configMap['proxy-providers'] is Map ? configMap['proxy-providers'] as Map : null;
-      final ruleProviders = configMap['rule-providers'] is Map ? configMap['rule-providers'] as Map : null;
+      final proxyProviders = configMap['proxy-providers'] is Map
+          ? configMap['proxy-providers'] as Map
+          : null;
+      final ruleProviders = configMap['rule-providers'] is Map
+          ? configMap['rule-providers'] as Map
+          : null;
 
       final List<Future<bool>> updateFutures = [];
 
@@ -729,15 +702,19 @@ class AppController {
         final interval = int.tryParse(intervalVal.toString());
         if (interval == null || interval <= 0) continue;
 
-        final timeSinceLastUpdate = DateTime.now().toUtc().difference(provider.updateAt.toUtc());
+        final timeSinceLastUpdate =
+            DateTime.now().toUtc().difference(provider.updateAt.toUtc());
         if (timeSinceLastUpdate >= Duration(seconds: interval)) {
-          commonPrint.log("Auto-updating provider: ${provider.name} (interval: $interval s, last update: ${provider.updateAt})");
+          commonPrint.log(
+              "Auto-updating provider: ${provider.name} (interval: $interval s, last update: ${provider.updateAt})");
           updateFutures.add(() async {
             try {
-              await clashCore.updateExternalProvider(providerName: provider.name);
+              await clashCore.updateExternalProvider(
+                  providerName: provider.name);
               return true;
             } catch (e) {
-              commonPrint.log("Auto-updating provider ${provider.name} failed: $e");
+              commonPrint
+                  .log("Auto-updating provider ${provider.name} failed: $e");
               return false;
             }
           }());
@@ -1070,7 +1047,8 @@ class AppController {
       commonPrint.log("AppController: preferences.isInit is true");
       return;
     }
-    commonPrint.log("AppController: preferences.isInit is FALSE, handling corruption...");
+    commonPrint.log(
+        "AppController: preferences.isInit is FALSE, handling corruption...");
     final res = await globalState.showMessage(
       title: appLocalizations.tip,
       message: TextSpan(text: appLocalizations.cacheCorrupt),
@@ -1283,13 +1261,12 @@ class AppController {
         () async {
           final prefs = await SharedPreferences.getInstance();
           final shouldSend = prefs.getBool('sendDeviceHeaders') ?? true;
-          return Profile.normal(url: url)
-              .update(
-                shouldSendHeaders: shouldSend,
-                decryptionPassword: decryptionPassword,
-                decryptionIterations:
-                    decryptionIterations ?? kDefaultPbkdf2Iterations,
-              );
+          return Profile.normal(url: url).update(
+            shouldSendHeaders: shouldSend,
+            decryptionPassword: decryptionPassword,
+            decryptionIterations:
+                decryptionIterations ?? kDefaultPbkdf2Iterations,
+          );
         },
         title: appLocalizations.addProfile,
       );

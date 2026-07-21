@@ -9,6 +9,7 @@ import android.content.pm.ComponentInfo
 import android.content.pm.PackageManager
 import android.net.VpnService
 import android.os.Build
+import android.os.SystemClock
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -42,6 +43,9 @@ import java.io.File
 import java.lang.ref.WeakReference
 import java.util.zip.ZipFile
 
+private const val GET_INSTALLED_APPS_PERMISSION = "com.android.permission.GET_INSTALLED_APPS"
+private const val PACKAGES_CACHE_TTL_MS = 30_000L
+
 class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware {
 
     private var activityRef: WeakReference<Activity>? = null
@@ -55,6 +59,8 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
     private val iconMap = mutableMapOf<String, String?>()
 
     private val packages = mutableListOf<Package>()
+    private var packagesLoadedAt = 0L
+    private val installedAppsCallbacks = mutableListOf<() -> Unit>()
 
     private val skipPrefixList = listOf(
         "com.google",
@@ -114,6 +120,7 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
     val VPN_PERMISSION_REQUEST_CODE = 1001
 
     val NOTIFICATION_PERMISSION_REQUEST_CODE = 1002
+    val GET_INSTALLED_APPS_PERMISSION_REQUEST_CODE = 1003
 
     private var isBlockNotification: Boolean = false
 
@@ -170,14 +177,18 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
             }
 
             "getPackages" -> {
-                scope.launch {
-                    result.success(getPackagesToJson())
+                withInstalledAppsPermission {
+                    scope.launch {
+                        result.success(getPackagesToJson())
+                    }
                 }
             }
 
             "getChinaPackageNames" -> {
-                scope.launch {
-                    result.success(getChinaPackageNames())
+                withInstalledAppsPermission {
+                    scope.launch {
+                        result.success(getChinaPackageNames())
+                    }
                 }
             }
 
@@ -288,9 +299,41 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
         return iconMap[packageName]
     }
 
+    private fun withInstalledAppsPermission(onReady: () -> Unit) {
+        val context = MeowClashApplication.getAppContext()
+        val activity = activityRef?.get()
+        val permissionExists = try {
+            context.packageManager.getPermissionInfo(GET_INSTALLED_APPS_PERMISSION, 0)
+            true
+        } catch (_: Exception) {
+            false
+        }
+        if (!permissionExists || activity == null ||
+            ContextCompat.checkSelfPermission(context, GET_INSTALLED_APPS_PERMISSION) ==
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            onReady()
+            return
+        }
+        val alreadyInFlight = installedAppsCallbacks.isNotEmpty()
+        installedAppsCallbacks.add(onReady)
+        if (!alreadyInFlight) {
+            ActivityCompat.requestPermissions(
+                activity,
+                arrayOf(GET_INSTALLED_APPS_PERMISSION),
+                GET_INSTALLED_APPS_PERMISSION_REQUEST_CODE,
+            )
+        }
+    }
+
+    @Synchronized
     private fun getPackages(): List<Package> {
         val packageManager = MeowClashApplication.getAppContext().packageManager
-        if (packages.isNotEmpty()) return packages
+        val now = SystemClock.elapsedRealtime()
+        if (packages.isNotEmpty() && now - packagesLoadedAt < PACKAGES_CACHE_TTL_MS) {
+            return packages.toList()
+        }
+        packages.clear()
         packageManager?.getInstalledPackages(PackageManager.GET_META_DATA or PackageManager.GET_PERMISSIONS)
             ?.filter {
                 it.packageName != MeowClashApplication.getAppContext().packageName || it.packageName == "android"
@@ -304,7 +347,8 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
                     internet = it.requestedPermissions?.contains(Manifest.permission.INTERNET) == true
                 )
             }?.let { packages.addAll(it) }
-        return packages
+        packagesLoadedAt = now
+        return packages.toList()
     }
 
     private suspend fun getPackagesToJson(): String {
@@ -455,6 +499,9 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
         val pending = vpnCallBacks.toList()
         vpnCallBacks.clear()
         pending.forEach { it.invoke(false) }
+        val pendingApps = installedAppsCallbacks.toList()
+        installedAppsCallbacks.clear()
+        pendingApps.forEach { it.invoke() }
     }
 
     private fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean {
@@ -477,6 +524,17 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
     ): Boolean {
         if (requestCode == NOTIFICATION_PERMISSION_REQUEST_CODE) {
             isBlockNotification = true
+        }
+        if (requestCode == GET_INSTALLED_APPS_PERMISSION_REQUEST_CODE) {
+            if (grantResults.any { it == PackageManager.PERMISSION_GRANTED }) {
+                synchronized(this) {
+                    packages.clear()
+                    packagesLoadedAt = 0L
+                }
+            }
+            val pendingApps = installedAppsCallbacks.toList()
+            installedAppsCallbacks.clear()
+            pendingApps.forEach { it.invoke() }
         }
         return true
     }

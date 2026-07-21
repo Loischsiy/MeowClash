@@ -95,12 +95,6 @@ class ClashLib extends ClashHandlerInterface with AndroidClashInterface {
     sendPort?.send(message);
   }
 
-  /// Send a custom IPC message to service (for foreground notification updates)
-  Future<void> sendIpcMessage(Map<String, dynamic> message) async {
-    await _canSendCompleter.future;
-    sendPort?.send(message);
-  }
-
   // @override
   // Future<bool> stopTun() {
   //   return invoke<bool>(

@@ -63,7 +63,6 @@ dynamic _yamlToDart(dynamic value) {
 }
 
 class GlobalState {
-
   factory GlobalState() {
     _instance ??= GlobalState._internal();
     return _instance!;
@@ -166,7 +165,9 @@ class GlobalState {
     );
   }
 
-  String get ua => config.patchClashConfig.globalUa ?? packageInfo.ua;
+  String get ua =>
+      config.patchClashConfig.globalUa ??
+      packageInfo.ua(coreVersion: coreVersion);
 
   Future<void> startUpdateTasks([UpdateTasks? tasks]) async {
     if (timer != null && timer!.isActive == true) return;
@@ -222,9 +223,10 @@ class GlobalState {
     required InlineSpan message,
     String? confirmText,
     bool cancelable = true,
-  }) async => showCommonDialog<bool>(
-      child: Builder(
-        builder: (context) => CommonDialog(
+  }) async =>
+      showCommonDialog<bool>(
+        child: Builder(
+          builder: (context) => CommonDialog(
             title: title ?? appLocalizations.tip,
             actions: [
               if (cancelable)
@@ -257,8 +259,8 @@ class GlobalState {
               ),
             ),
           ),
-      ),
-    );
+        ),
+      );
 
   // Future<Map<String, dynamic>> getProfileMap(String id) async {
   //   final profilePath = await appPath.getProfilePath(id);
@@ -284,15 +286,16 @@ class GlobalState {
   Future<T?> showCommonDialog<T>({
     required Widget child,
     bool dismissible = true,
-  }) async => showModal<T>(
-      context: navigatorKey.currentState!.context,
-      configuration: FadeScaleTransitionConfiguration(
-        barrierColor: Colors.black38,
-        barrierDismissible: dismissible,
-      ),
-      builder: (_) => child,
-      filter: commonFilter,
-    );
+  }) async =>
+      showModal<T>(
+        context: navigatorKey.currentState!.context,
+        configuration: FadeScaleTransitionConfiguration(
+          barrierColor: Colors.black38,
+          barrierDismissible: dismissible,
+        ),
+        builder: (_) => child,
+        filter: commonFilter,
+      );
 
   Future<T?> safeRun<T>(
     FutureOr<T> Function() futureFunction, {
@@ -372,7 +375,8 @@ class GlobalState {
     return params;
   }
 
-  Future<ClashConfig> syncNetworkSettingsFromProvider(ClashConfig patchConfig) async {
+  Future<ClashConfig> syncNetworkSettingsFromProvider(
+      ClashConfig patchConfig) async {
     if (config.appSetting.overrideNetworkSettings) {
       return patchConfig; // User wants to override, keep current settings
     }
@@ -388,16 +392,21 @@ class GlobalState {
       final rawConfig = await handleEvaluate(configMap);
 
       final providerIpv6 = rawConfig['ipv6'] as bool? ?? patchConfig.ipv6;
-      final providerAllowLan = rawConfig['allow-lan'] as bool? ?? patchConfig.allowLan;
-      final providerMixedPort = rawConfig['mixed-port'] as int? ?? patchConfig.mixedPort;
-      final providerFindProcessModeStr = rawConfig['find-process-mode'] as String?;
-      final providerFindProcessMode = providerFindProcessModeStr != null 
+      final providerAllowLan =
+          rawConfig['allow-lan'] as bool? ?? patchConfig.allowLan;
+      final providerMixedPort =
+          rawConfig['mixed-port'] as int? ?? patchConfig.mixedPort;
+      final providerFindProcessModeStr =
+          rawConfig['find-process-mode'] as String?;
+      final providerFindProcessMode = providerFindProcessModeStr != null
           ? FindProcessMode.values.firstWhere(
-              (e) => e.name.toLowerCase() == providerFindProcessModeStr.toLowerCase(),
+              (e) =>
+                  e.name.toLowerCase() ==
+                  providerFindProcessModeStr.toLowerCase(),
               orElse: () => patchConfig.findProcessMode,
             )
           : patchConfig.findProcessMode;
-      
+
       final providerTunStackStr = rawConfig['tun']?['stack'] as String?;
       final providerTunStack = providerTunStackStr != null
           ? TunStack.values.firstWhere(
@@ -406,12 +415,15 @@ class GlobalState {
             )
           : patchConfig.tun.stack;
 
-      return patchConfig.copyWith(
-        ipv6: providerIpv6,
-        allowLan: providerAllowLan,
-        mixedPort: providerMixedPort,
-        findProcessMode: providerFindProcessMode,
-      ).copyWith.tun(stack: providerTunStack);
+      return patchConfig
+          .copyWith(
+            ipv6: providerIpv6,
+            allowLan: providerAllowLan,
+            mixedPort: providerMixedPort,
+            findProcessMode: providerFindProcessMode,
+          )
+          .copyWith
+          .tun(stack: providerTunStack);
     } catch (e) {
       commonPrint.log("Error syncing network settings from provider: $e");
       return patchConfig;
@@ -455,9 +467,10 @@ class GlobalState {
     // here — users who set external-controller in their profile mean it.
     final providerExternalController =
         (rawConfig["external-controller"] as String?)?.trim() ?? "";
-    final effectiveExternalControllerValue = providerExternalController.isNotEmpty
-        ? providerExternalController
-        : realPatchConfig.externalController.value;
+    final effectiveExternalControllerValue =
+        providerExternalController.isNotEmpty
+            ? providerExternalController
+            : realPatchConfig.externalController.value;
     rawConfig["external-controller"] = effectiveExternalControllerValue;
     effectiveExternalController.value = effectiveExternalControllerValue;
     if (rawConfig["external-ui"] == null || rawConfig["external-ui"] == "") {
@@ -471,7 +484,8 @@ class GlobalState {
     // all; the Proxy-tab delay test works without it because it isn't affected
     // by the TUN default route, which is why only TUN mode timed out.
     rawConfig["auto-detect-interface"] = true;
-    if (rawConfig["external-ui-url"] == null || rawConfig["external-ui-url"] == "") {
+    if (rawConfig["external-ui-url"] == null ||
+        rawConfig["external-ui-url"] == "") {
       rawConfig["external-ui-url"] = "";
     }
     // These follow the same overrideNetworkSettings gate as other fields:
@@ -482,7 +496,8 @@ class GlobalState {
     final profileTcpConcurrent = rawConfig["tcp-concurrent"] as bool?;
     final profileUnifiedDelay = rawConfig["unified-delay"] as bool?;
     final profileLogLevel = rawConfig["log-level"] as String?;
-    final profileKeepAlive = (rawConfig["keep-alive-interval"] as num?)?.toInt();
+    final profileKeepAlive =
+        (rawConfig["keep-alive-interval"] as num?)?.toInt();
     final isOverride = config.appSetting.overrideNetworkSettings;
     final effTcpConcurrent = isOverride
         ? realPatchConfig.tcpConcurrent
@@ -543,8 +558,9 @@ class GlobalState {
     // that should not be overridable from the app side. No-op on other
     // platforms — desktop TUN gating is handled separately.
     if (Platform.isAndroid) {
-      final secureHeader =
-          profile.providerHeaders['meowclash-androidsecure']?.trim().toLowerCase();
+      final secureHeader = profile.providerHeaders['meowclash-androidsecure']
+          ?.trim()
+          .toLowerCase();
       if (secureHeader == 'true') {
         rawConfig["mixed-port"] = 0;
       }
@@ -652,23 +668,26 @@ class GlobalState {
     }
 
     rawConfig["profile"]["store-selected"] = false;
-    
+
     final mergedGeoXUrl = <String, dynamic>{};
     final patchGeoX = realPatchConfig.geoXUrl.toJson();
     final profileGeoX = rawConfig["geox-url"];
-    
+
     mergedGeoXUrl['geoip'] = patchGeoX['geoip'];
     mergedGeoXUrl['mmdb'] = patchGeoX['mmdb'];
     mergedGeoXUrl['asn'] = patchGeoX['asn'];
     mergedGeoXUrl['geosite'] = patchGeoX['geosite'];
 
     if (profileGeoX != null && profileGeoX is Map) {
-      if (profileGeoX['geoip'] != null) mergedGeoXUrl['geoip'] = profileGeoX['geoip'];
-      if (profileGeoX['mmdb'] != null) mergedGeoXUrl['mmdb'] = profileGeoX['mmdb'];
+      if (profileGeoX['geoip'] != null)
+        mergedGeoXUrl['geoip'] = profileGeoX['geoip'];
+      if (profileGeoX['mmdb'] != null)
+        mergedGeoXUrl['mmdb'] = profileGeoX['mmdb'];
       if (profileGeoX['asn'] != null) mergedGeoXUrl['asn'] = profileGeoX['asn'];
-      if (profileGeoX['geosite'] != null) mergedGeoXUrl['geosite'] = profileGeoX['geosite'];
+      if (profileGeoX['geosite'] != null)
+        mergedGeoXUrl['geosite'] = profileGeoX['geosite'];
     }
-    
+
     rawConfig["geox-url"] = mergedGeoXUrl;
     rawConfig["global-ua"] = realPatchConfig.globalUa;
     if (rawConfig["hosts"] == null) {
@@ -892,8 +911,8 @@ class GlobalState {
           .toList();
       if (config.appSetting.chainMode && builtChainNames.isNotEmpty) {
         final groups = (rawConfig["proxy-groups"] as List?) ?? <dynamic>[];
-        final hasSelector = groups
-            .any((g) => g is Map && g["name"] == kChainSelectorGroup);
+        final hasSelector =
+            groups.any((g) => g is Map && g["name"] == kChainSelectorGroup);
         if (!hasSelector) {
           groups.add(<String, dynamic>{
             "name": kChainSelectorGroup,
@@ -955,7 +974,6 @@ class GlobalState {
 final globalState = GlobalState();
 
 class DetectionState {
-
   factory DetectionState() {
     _instance ??= DetectionState._internal();
     return _instance!;

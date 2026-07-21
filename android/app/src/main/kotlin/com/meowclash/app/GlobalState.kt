@@ -37,7 +37,6 @@ object GlobalState {
     // active button without duplicating state.
     val currentMode: MutableLiveData<String> = MutableLiveData<String>("rule")
     // Whether the Global mode button should be shown in the widget.
-    // Reflects the `meowclash-globalmode` subscription header — pushed from Dart.
     val globalModeEnabled: MutableLiveData<Boolean> = MutableLiveData<Boolean>(true)
     var flutterEngine: FlutterEngine? = null
     private var serviceEngine: FlutterEngine? = null
@@ -228,5 +227,4 @@ object GlobalState {
         }
     }
 }
-
 

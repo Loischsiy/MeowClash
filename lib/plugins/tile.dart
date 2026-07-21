@@ -89,8 +89,7 @@ class Tile {
   }
 
   /// Tell the native side whether the Global-mode button should be shown
-  /// in the home-screen widget. Driven by the `meowclash-globalmode`
-  /// subscription header.
+  /// in the home-screen widget.
   Future<void> updateGlobalModeEnabled(bool enabled) async {
     try {
       await _channel.invokeMethod('updateGlobalModeEnabled', enabled);

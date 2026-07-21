@@ -43,7 +43,7 @@ dependencies:
   dio: ^5.9.0
   win32: ^5.15.0
   ffi: ^2.1.5
-  re_editor: 0.8.0
+  re_editor: ^0.10.0
   re_highlight: ^0.0.3
   archive: ^4.0.7
   lpinyin: ^2.0.3

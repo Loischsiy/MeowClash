@@ -59,19 +59,6 @@ class MessageLookup extends MessageLookupByLibrary {
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
     "about": MessageLookupByLibrary.simpleMessage("О программе"),
-    "addHop": MessageLookupByLibrary.simpleMessage("Добавить звено"),
-    "chainHopsRequired": MessageLookupByLibrary.simpleMessage(
-      "Выберите минимум два звена",
-    ),
-    "chainMode": MessageLookupByLibrary.simpleMessage("Режим цепочек"),
-    "chainName": MessageLookupByLibrary.simpleMessage("Название цепочки"),
-    "firstHop": MessageLookupByLibrary.simpleMessage("Первое звено (вход)"),
-    "hop": MessageLookupByLibrary.simpleMessage("Звено"),
-    "proxyChains": MessageLookupByLibrary.simpleMessage("Прокси-цепочки"),
-    "proxyChainsDesc": MessageLookupByLibrary.simpleMessage(
-      "Объединение прокси в цепочку: вход → выход",
-    ),
-    "secondHop": MessageLookupByLibrary.simpleMessage("Второе звено (выход)"),
     "accessControl": MessageLookupByLibrary.simpleMessage("Контроль доступа"),
     "accessControlAllowDesc": MessageLookupByLibrary.simpleMessage(
       "Только выбранные приложения будут использовать VPN",
@@ -96,6 +83,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "addFromPhoneTitle": MessageLookupByLibrary.simpleMessage(
       "Добавить с телефона",
     ),
+    "addHop": MessageLookupByLibrary.simpleMessage("Добавить звено"),
     "addProfile": MessageLookupByLibrary.simpleMessage("Добавить профиль"),
     "addRule": MessageLookupByLibrary.simpleMessage("Добавить правило"),
     "addedOriginRules": MessageLookupByLibrary.simpleMessage(
@@ -195,6 +183,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "cancelSelectAll": MessageLookupByLibrary.simpleMessage(
       "Отменить выбор всего",
     ),
+    "chainHopsRequired": MessageLookupByLibrary.simpleMessage(
+      "Выберите минимум два звена",
+    ),
+    "chainMode": MessageLookupByLibrary.simpleMessage("Режим цепочек"),
+    "chainName": MessageLookupByLibrary.simpleMessage("Название цепочки"),
     "changeServer": MessageLookupByLibrary.simpleMessage("Изменить сервер"),
     "checkError": MessageLookupByLibrary.simpleMessage("Ошибка проверки"),
     "checkUpdate": MessageLookupByLibrary.simpleMessage("Проверить обновления"),
@@ -340,6 +333,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "fallbackFilter": MessageLookupByLibrary.simpleMessage(
       "Фильтр резервного DNS",
     ),
+    "fi": MessageLookupByLibrary.simpleMessage("Финский"),
     "fidelityScheme": MessageLookupByLibrary.simpleMessage("Точная передача"),
     "file": MessageLookupByLibrary.simpleMessage("Файл"),
     "fileDesc": MessageLookupByLibrary.simpleMessage(
@@ -357,6 +351,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "findProcessModeDesc": MessageLookupByLibrary.simpleMessage(
       "Может незначительно снизить производительность",
     ),
+    "firstHop": MessageLookupByLibrary.simpleMessage("Первое звено (вход)"),
     "fontFamily": MessageLookupByLibrary.simpleMessage("Семейство шрифтов"),
     "fourColumns": MessageLookupByLibrary.simpleMessage("Четыре столбца"),
     "fruitSaladScheme": MessageLookupByLibrary.simpleMessage("Фруктовый микс"),
@@ -382,6 +377,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "hasCacheChange": MessageLookupByLibrary.simpleMessage(
       "Сохранить изменения в кэше?",
     ),
+    "hop": MessageLookupByLibrary.simpleMessage("Звено"),
     "hostsDesc": MessageLookupByLibrary.simpleMessage("Добавить Hosts"),
     "hotkeyConflict": MessageLookupByLibrary.simpleMessage(
       "Конфликт горячих клавиш",
@@ -678,6 +674,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "providers": MessageLookupByLibrary.simpleMessage("Провайдеры"),
     "proxies": MessageLookupByLibrary.simpleMessage("Прокси"),
     "proxiesSetting": MessageLookupByLibrary.simpleMessage("Настройка прокси"),
+    "proxyChains": MessageLookupByLibrary.simpleMessage("Прокси-цепочки"),
+    "proxyChainsDesc": MessageLookupByLibrary.simpleMessage(
+      "Объединение прокси в цепочку: вход → выход",
+    ),
     "proxyGroup": MessageLookupByLibrary.simpleMessage("Группа прокси"),
     "proxyNameserver": MessageLookupByLibrary.simpleMessage(
       "Прокси-сервер имен",
@@ -787,6 +787,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "saveTip": MessageLookupByLibrary.simpleMessage("Сохранить изменения?"),
     "script": MessageLookupByLibrary.simpleMessage("Скрипт"),
     "search": MessageLookupByLibrary.simpleMessage("Поиск"),
+    "secondHop": MessageLookupByLibrary.simpleMessage("Второе звено (выход)"),
     "seconds": MessageLookupByLibrary.simpleMessage("Секунд"),
     "selectAll": MessageLookupByLibrary.simpleMessage("Выбрать все"),
     "selectProfile": MessageLookupByLibrary.simpleMessage("Выбрать профиль"),

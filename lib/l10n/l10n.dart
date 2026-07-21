@@ -249,6 +249,11 @@ class AppLocalizations {
     return Intl.message('English', name: 'en', desc: '', args: []);
   }
 
+  /// `Finnish`
+  String get fi {
+    return Intl.message('Finnish', name: 'fi', desc: '', args: []);
+  }
+
   /// `Japanese`
   String get ja {
     return Intl.message('Japanese', name: 'ja', desc: '', args: []);
@@ -3881,14 +3886,22 @@ class AppLocalizations {
 
   /// `Proxy chains`
   String get proxyChains {
-    return Intl.message('Proxy chains',
-        name: 'proxyChains', desc: '', args: []);
+    return Intl.message(
+      'Proxy chains',
+      name: 'proxyChains',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Chain proxies together: entry → exit`
   String get proxyChainsDesc {
-    return Intl.message('Chain proxies together: entry → exit',
-        name: 'proxyChainsDesc', desc: '', args: []);
+    return Intl.message(
+      'Chain proxies together: entry → exit',
+      name: 'proxyChainsDesc',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Chain mode`
@@ -3908,14 +3921,22 @@ class AppLocalizations {
 
   /// `First hop (entry)`
   String get firstHop {
-    return Intl.message('First hop (entry)',
-        name: 'firstHop', desc: '', args: []);
+    return Intl.message(
+      'First hop (entry)',
+      name: 'firstHop',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Second hop (exit)`
   String get secondHop {
-    return Intl.message('Second hop (exit)',
-        name: 'secondHop', desc: '', args: []);
+    return Intl.message(
+      'Second hop (exit)',
+      name: 'secondHop',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Add hop`
@@ -3925,8 +3946,12 @@ class AppLocalizations {
 
   /// `Select at least two hops`
   String get chainHopsRequired {
-    return Intl.message('Select at least two hops',
-        name: 'chainHopsRequired', desc: '', args: []);
+    return Intl.message(
+      'Select at least two hops',
+      name: 'chainHopsRequired',
+      desc: '',
+      args: [],
+    );
   }
 }
 
@@ -3936,6 +3961,7 @@ class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {
   List<Locale> get supportedLocales {
     return const <Locale>[
       Locale.fromSubtags(languageCode: 'en'),
+      Locale.fromSubtags(languageCode: 'fi'),
       Locale.fromSubtags(languageCode: 'ja'),
       Locale.fromSubtags(languageCode: 'ru'),
       Locale.fromSubtags(languageCode: 'uk'),

@@ -82,6 +82,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Scan QR code with phone",
     ),
     "addFromPhoneTitle": MessageLookupByLibrary.simpleMessage("Add from Phone"),
+    "addHop": MessageLookupByLibrary.simpleMessage("Add hop"),
     "addProfile": MessageLookupByLibrary.simpleMessage("Add profile"),
     "addRule": MessageLookupByLibrary.simpleMessage("Add rule"),
     "addedOriginRules": MessageLookupByLibrary.simpleMessage(
@@ -181,6 +182,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "cancelSelectAll": MessageLookupByLibrary.simpleMessage(
       "Cancel select all",
     ),
+    "chainHopsRequired": MessageLookupByLibrary.simpleMessage(
+      "Select at least two hops",
+    ),
+    "chainMode": MessageLookupByLibrary.simpleMessage("Chain mode"),
+    "chainName": MessageLookupByLibrary.simpleMessage("Chain name"),
     "changeServer": MessageLookupByLibrary.simpleMessage("Change Server"),
     "checkError": MessageLookupByLibrary.simpleMessage("Check error"),
     "checkUpdate": MessageLookupByLibrary.simpleMessage("Check for updates"),
@@ -312,6 +318,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Generally use offshore DNS",
     ),
     "fallbackFilter": MessageLookupByLibrary.simpleMessage("Fallback filter"),
+    "fi": MessageLookupByLibrary.simpleMessage("Finnish"),
     "fidelityScheme": MessageLookupByLibrary.simpleMessage("Fidelity"),
     "file": MessageLookupByLibrary.simpleMessage("File"),
     "fileDesc": MessageLookupByLibrary.simpleMessage("Directly upload profile"),
@@ -325,6 +332,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "findProcessModeDesc": MessageLookupByLibrary.simpleMessage(
       "There is a certain performance loss after opening",
     ),
+    "firstHop": MessageLookupByLibrary.simpleMessage("First hop (entry)"),
     "fontFamily": MessageLookupByLibrary.simpleMessage("FontFamily"),
     "fourColumns": MessageLookupByLibrary.simpleMessage("Four columns"),
     "fruitSaladScheme": MessageLookupByLibrary.simpleMessage("FruitSalad"),
@@ -350,6 +358,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "hasCacheChange": MessageLookupByLibrary.simpleMessage(
       "Do you want to cache the changes?",
     ),
+    "hop": MessageLookupByLibrary.simpleMessage("Hop"),
     "hostsDesc": MessageLookupByLibrary.simpleMessage("Add Hosts"),
     "hotkeyConflict": MessageLookupByLibrary.simpleMessage("Hotkey conflict"),
     "hotkeyManagement": MessageLookupByLibrary.simpleMessage(
@@ -634,6 +643,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "providers": MessageLookupByLibrary.simpleMessage("Providers"),
     "proxies": MessageLookupByLibrary.simpleMessage("Proxies"),
     "proxiesSetting": MessageLookupByLibrary.simpleMessage("Proxies setting"),
+    "proxyChains": MessageLookupByLibrary.simpleMessage("Proxy chains"),
+    "proxyChainsDesc": MessageLookupByLibrary.simpleMessage(
+      "Chain proxies together: entry → exit",
+    ),
     "proxyGroup": MessageLookupByLibrary.simpleMessage("Proxy group"),
     "proxyNameserver": MessageLookupByLibrary.simpleMessage("Proxy nameserver"),
     "proxyNameserverDesc": MessageLookupByLibrary.simpleMessage(
@@ -735,6 +748,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "script": MessageLookupByLibrary.simpleMessage("Script"),
     "search": MessageLookupByLibrary.simpleMessage("Search"),
+    "secondHop": MessageLookupByLibrary.simpleMessage("Second hop (exit)"),
     "seconds": MessageLookupByLibrary.simpleMessage("Seconds"),
     "selectAll": MessageLookupByLibrary.simpleMessage("Select all"),
     "selectProfile": MessageLookupByLibrary.simpleMessage("Select Profile"),

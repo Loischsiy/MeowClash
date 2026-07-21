@@ -53,17 +53,6 @@ class MessageLookup extends MessageLookupByLibrary {
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
     "about": MessageLookupByLibrary.simpleMessage("について"),
-    "addHop": MessageLookupByLibrary.simpleMessage("ホップを追加"),
-    "chainHopsRequired": MessageLookupByLibrary.simpleMessage(
-      "ホップを2つ以上選択してください",
-    ),
-    "chainMode": MessageLookupByLibrary.simpleMessage("チェーンモード"),
-    "chainName": MessageLookupByLibrary.simpleMessage("チェーン名"),
-    "firstHop": MessageLookupByLibrary.simpleMessage("最初のホップ（入口）"),
-    "hop": MessageLookupByLibrary.simpleMessage("ホップ"),
-    "proxyChains": MessageLookupByLibrary.simpleMessage("プロキシチェーン"),
-    "proxyChainsDesc": MessageLookupByLibrary.simpleMessage("プロキシを連鎖: 入口 → 出口"),
-    "secondHop": MessageLookupByLibrary.simpleMessage("2番目のホップ（出口）"),
     "accessControl": MessageLookupByLibrary.simpleMessage("アクセス制御"),
     "accessControlAllowDesc": MessageLookupByLibrary.simpleMessage(
       "選択したアプリのみVPNを許可",
@@ -82,6 +71,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "action_tun": MessageLookupByLibrary.simpleMessage("TUN"),
     "action_view": MessageLookupByLibrary.simpleMessage("表示/非表示"),
     "add": MessageLookupByLibrary.simpleMessage("追加"),
+    "addHop": MessageLookupByLibrary.simpleMessage("ホップを追加"),
     "addProfile": MessageLookupByLibrary.simpleMessage("プロファイルを追加"),
     "addRule": MessageLookupByLibrary.simpleMessage("ルールを追加"),
     "addedOriginRules": MessageLookupByLibrary.simpleMessage("元のルールに追加"),
@@ -141,6 +131,11 @@ class MessageLookup extends MessageLookupByLibrary {
       "システムアプリの除外を解除",
     ),
     "cancelSelectAll": MessageLookupByLibrary.simpleMessage("全選択解除"),
+    "chainHopsRequired": MessageLookupByLibrary.simpleMessage(
+      "ホップを2つ以上選択してください",
+    ),
+    "chainMode": MessageLookupByLibrary.simpleMessage("チェーンモード"),
+    "chainName": MessageLookupByLibrary.simpleMessage("チェーン名"),
     "changeServer": MessageLookupByLibrary.simpleMessage("サーバーを変更"),
     "checkError": MessageLookupByLibrary.simpleMessage("確認エラー"),
     "checkUpdate": MessageLookupByLibrary.simpleMessage("更新を確認"),
@@ -242,6 +237,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "fallback": MessageLookupByLibrary.simpleMessage("フォールバック"),
     "fallbackDesc": MessageLookupByLibrary.simpleMessage("通常はオフショアDNSを使用"),
     "fallbackFilter": MessageLookupByLibrary.simpleMessage("フォールバックフィルター"),
+    "fi": MessageLookupByLibrary.simpleMessage("フィンランド語"),
     "fidelityScheme": MessageLookupByLibrary.simpleMessage("ハイファイデリティー"),
     "file": MessageLookupByLibrary.simpleMessage("ファイル"),
     "fileDesc": MessageLookupByLibrary.simpleMessage("プロファイルを直接アップロード"),
@@ -253,6 +249,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "findProcessModeDesc": MessageLookupByLibrary.simpleMessage(
       "有効化するとパフォーマンスが若干低下します",
     ),
+    "firstHop": MessageLookupByLibrary.simpleMessage("最初のホップ（入口）"),
     "fontFamily": MessageLookupByLibrary.simpleMessage("フォントファミリー"),
     "fourColumns": MessageLookupByLibrary.simpleMessage("4列"),
     "fruitSaladScheme": MessageLookupByLibrary.simpleMessage("フルーツサラダ"),
@@ -270,6 +267,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "goDownload": MessageLookupByLibrary.simpleMessage("ダウンロードへ"),
     "gratitude": MessageLookupByLibrary.simpleMessage("感謝"),
     "hasCacheChange": MessageLookupByLibrary.simpleMessage("変更をキャッシュしますか？"),
+    "hop": MessageLookupByLibrary.simpleMessage("ホップ"),
     "hostsDesc": MessageLookupByLibrary.simpleMessage("ホストを追加"),
     "hotkeyConflict": MessageLookupByLibrary.simpleMessage("ホットキー競合"),
     "hotkeyManagement": MessageLookupByLibrary.simpleMessage("ホットキー管理"),
@@ -495,6 +493,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "providers": MessageLookupByLibrary.simpleMessage("プロバイダー"),
     "proxies": MessageLookupByLibrary.simpleMessage("プロキシ"),
     "proxiesSetting": MessageLookupByLibrary.simpleMessage("プロキシ設定"),
+    "proxyChains": MessageLookupByLibrary.simpleMessage("プロキシチェーン"),
+    "proxyChainsDesc": MessageLookupByLibrary.simpleMessage("プロキシを連鎖: 入口 → 出口"),
     "proxyGroup": MessageLookupByLibrary.simpleMessage("プロキシグループ"),
     "proxyNameserver": MessageLookupByLibrary.simpleMessage("プロキシネームサーバー"),
     "proxyNameserverDesc": MessageLookupByLibrary.simpleMessage(
@@ -567,6 +567,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "saveTip": MessageLookupByLibrary.simpleMessage("保存してもよろしいですか？"),
     "script": MessageLookupByLibrary.simpleMessage("スクリプト"),
     "search": MessageLookupByLibrary.simpleMessage("検索"),
+    "secondHop": MessageLookupByLibrary.simpleMessage("2番目のホップ（出口）"),
     "seconds": MessageLookupByLibrary.simpleMessage("秒"),
     "selectAll": MessageLookupByLibrary.simpleMessage("すべて選択"),
     "selected": MessageLookupByLibrary.simpleMessage("選択済み"),

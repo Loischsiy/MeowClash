@@ -7,7 +7,7 @@
 [![License](https://img.shields.io/github/license/Loischsiy/MeowClash?style=flat-square&color=4296f4)](LICENSE)
 [![Platform Support](https://img.shields.io/badge/platform-Android%20%7C%20Windows%20%7C%20macOS%20%7C%20Linux-e84393?style=flat-square)](#ダウンロード)
 
-[**English**](README.md) | [**Русский**](README_RU.md) | [**Українська**](README_UK.md) | **日本語** | [**简体中文**](README_ZH.md)
+[**English**](README.md) | [**Suomi**](README_FI.md) | [**Русский**](README_RU.md) | [**Українська**](README_UK.md) | **日本語** | [**简体中文**](README_ZH.md)
 
 </div>
 

@@ -269,7 +269,7 @@ class Windows {
       "sc",
       "create",
       appHelperService,
-      'binPath= "${appPath.helperPath}"',
+      'binPath= "\\"${appPath.helperPath}\\""',
       'start= auto',
       "&&",
       "sc",

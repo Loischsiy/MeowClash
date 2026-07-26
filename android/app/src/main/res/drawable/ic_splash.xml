@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Splash screen icon (Android 12+): the system masks
+     windowSplashScreenAnimatedIcon to a circle covering the central 2/3 of
+     the drawable, so the raw ic_launcher_foreground (near full-bleed art)
+     gets cropped. The 15% inset keeps the whole paw inside that circle. -->
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/ic_launcher_foreground"
+    android:inset="15%" />

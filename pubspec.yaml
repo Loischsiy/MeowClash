@@ -76,7 +76,6 @@ dev_dependencies:
   freezed: ^2.5.7
   json_serializable: ^6.8.0
   riverpod_generator: ^2.4.3
-  flutter_launcher_icons: ^0.14.4
 
 dependency_overrides:
   # The codegen stack resolves analyzer 7.6.0, which everything compiles
@@ -129,11 +128,3 @@ flutter_intl:
   class_name: AppLocalizations
   arb_dir: arb
   output_dir: lib/l10n
-
-flutter_launcher_icons:
-  android: true
-  ios: false
-  image_path: "assets/images/icon.png"
-  adaptive_icon_background: "#202020"
-  adaptive_icon_foreground: "assets/images/icon.png"
-  adaptive_icon_monochrome: "assets/images/icon_white.png"

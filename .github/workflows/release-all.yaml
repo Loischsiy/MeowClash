@@ -18,6 +18,7 @@ on:
         options:
           - stable
           - pre
+          - test
         default: stable
 
 permissions:
@@ -51,8 +52,8 @@ jobs:
             exit 1
           fi
 
-          if [[ "$INPUT_APP_ENV" != "stable" && "$INPUT_APP_ENV" != "pre" ]]; then
-            echo "::error::Application environment must be stable or pre"
+          if [[ "$INPUT_APP_ENV" != "stable" && "$INPUT_APP_ENV" != "pre" && "$INPUT_APP_ENV" != "test" ]]; then
+            echo "::error::Application environment must be stable, pre, or test"
             exit 1
           fi
 
@@ -509,6 +510,7 @@ jobs:
           overwrite: true
 
   publish-release:
+    if: needs.prepare.outputs.app_env != 'test'
     needs:
       - prepare
       - build-android

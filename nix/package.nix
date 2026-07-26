@@ -48,7 +48,7 @@ let
 
     src = lib.cleanSource ../core;
 
-    vendorHash = "sha256-eF2K7dWl4HOuvgyVLtSdEzMrjh5seISzuMMgr6Z5ZME=";
+    vendorHash = "sha256-ZVHwB3yygtQy/0Xm3tj3fL7AyYpu+cz7IHat2z5Sfx8=";
 
     env.CGO_ENABLED = "0";
 

@@ -201,7 +201,11 @@ class _ProxiesListViewState extends State<ProxiesListView> {
                     child: ScrollConfiguration(
                       behavior: HiddenBarScrollBehavior(),
                       child: FocusTraversalGroup(
-                        policy: WidgetOrderTraversalPolicy(),
+                        // ReadingOrder, not WidgetOrder: it sorts focus nodes
+                        // geometrically (top-to-bottom, left-to-right), so the
+                        // proxy grid gets a stable tab/D-pad order that matches
+                        // what's on screen regardless of how rows are built.
+                        policy: ReadingOrderTraversalPolicy(),
                         child: ListView.builder(
                           padding: const EdgeInsets.all(16),
                           controller: _controller,
@@ -406,15 +410,24 @@ class _ProxyGroupCardState extends State<ProxyGroupCard>
                 ),
               ),
             ),
-            bodyBuilder: (context, animation) => RepaintBoundary(
-              child: SizeTransition(
-                sizeFactor: animation,
-                axisAlignment: -1.0,
-                child: FadeTransition(
-                  opacity: animation,
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(vertical: 4.0),
-                    child: Column(children: widget.proxies),
+            bodyBuilder: (context, animation) => ExcludeFocus(
+              // A collapsed group keeps its proxy cards mounted — SizeTransition
+              // only clips them to zero height — and every card is a focusable
+              // OutlinedButton. On Android TV the D-pad would otherwise dive
+              // into these invisible cards, so the highlight jitters and looks
+              // like it skips whole groups. Drop the folded body from focus
+              // traversal.
+              excluding: !shouldExpand,
+              child: RepaintBoundary(
+                child: SizeTransition(
+                  sizeFactor: animation,
+                  axisAlignment: -1.0,
+                  child: FadeTransition(
+                    opacity: animation,
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(vertical: 4.0),
+                      child: Column(children: widget.proxies),
+                    ),
                   ),
                 ),
               ),

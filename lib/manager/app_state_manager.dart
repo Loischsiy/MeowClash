@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:meowclash/common/common.dart';
 import 'package:meowclash/enum/enum.dart';
@@ -114,11 +115,44 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
   @override
   Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
     commonPrint.log("$state");
-    if (state == AppLifecycleState.paused ||
-        state == AppLifecycleState.inactive) {
-      globalState.appController.savePreferences();
-    } else {
-      render?.resume();
+    switch (state) {
+      case AppLifecycleState.inactive:
+        unawaited(globalState.appController.savePreferences());
+      case AppLifecycleState.paused:
+        unawaited(globalState.appController.savePreferences());
+        if (Platform.isAndroid) {
+          // The VPN foreground service keeps this process alive (and unfrozen)
+          // while backgrounded, so the 1-second UI polling loop (traffic +
+          // runtime via FFI into the core) would otherwise run forever for a
+          // UI nobody is looking at — a straight battery drain. The service
+          // engine keeps its own notification updates; this only pauses the
+          // in-app dashboard polling.
+          globalState.stopUpdateTasks();
+        }
+      case AppLifecycleState.hidden:
+        // Desktop window hidden (tray/minimize). Falling through to the
+        // generic resume branch cancelled the render pause armed by
+        // window.hide(), so the engine kept rasterizing dashboard animations
+        // in an invisible window.
+        render?.pause();
+      case AppLifecycleState.resumed:
+        render?.resume();
+        if (Platform.isAndroid) {
+          // The proxy may have been started/stopped from the tile or the
+          // persistent notification while the UI was backgrounded — re-read
+          // the native truth before deciding whether to restart the polling
+          // loop paused above.
+          await globalState.updateStartTime();
+          if (globalState.isStart) {
+            unawaited(globalState.startUpdateTasks());
+          } else {
+            // Stopped while backgrounded — reflect it instead of leaving the
+            // last polled runtime on screen.
+            globalState.appController.updateRunTime();
+          }
+        }
+      case AppLifecycleState.detached:
+        break;
     }
   }
 

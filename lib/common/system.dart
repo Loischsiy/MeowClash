@@ -381,12 +381,14 @@ class System {
     final currentServiceNameLine = currentService.split("\n").firstWhere(
         (line) => RegExp(r'^\(\d+\).*').hasMatch(line),
         orElse: () => "");
-    final currentServiceNameLineSplits =
-        currentServiceNameLine.trim().split(' ');
-    if (currentServiceNameLineSplits.length < 2) {
-      return null;
-    }
-    return currentServiceNameLineSplits[1];
+    // Strip the leading "(N) " index; the rest is the full service name, which
+    // can contain spaces ("Thunderbolt Ethernet", "USB 10/100/1000 LAN"). The
+    // old split(' ')[1] truncated multi-word names, silently breaking auto
+    // system-DNS (and poisoning originDns with networksetup's error text) on
+    // wired/USB adapters.
+    final name =
+        currentServiceNameLine.trim().replaceFirst(RegExp(r'^\(\d+\)\s*'), '');
+    return name.isEmpty ? null : name;
   }
 
   Future<List<String>?> getMacOSOriginDns() async {
@@ -418,19 +420,32 @@ class System {
     if (serviceName == null) {
       return;
     }
+    final prefs = await preferences.sharedPreferencesCompleter.future;
+    const originKey = "macos_origin_dns";
+    const needAddDns = "1.1.1.1"; // Cloudflare DNS
     List<String>? nextDns;
     if (restore) {
-      nextDns = originDns;
+      // Prefer the persisted true origin over the in-memory snapshot (which is
+      // lost on crash/restart), then clear it so the next session starts clean.
+      nextDns = prefs?.getStringList(originKey) ?? originDns;
+      await prefs?.remove(originKey);
     } else {
-      final originDns = await system.getMacOSOriginDns();
-      if (originDns == null) {
+      final saved = prefs?.getStringList(originKey);
+      final origin = saved ?? await system.getMacOSOriginDns();
+      if (origin == null) {
         return;
       }
-      const needAddDns = "1.1.1.1"; // Cloudflare DNS
-      if (originDns.contains(needAddDns)) {
-        return;
+      // Persist the TRUE pre-injection DNS exactly once. Preferring a persisted
+      // snapshot over the live read means a crash-polluted live value (already
+      // carrying 1.1.1.1 from a prior unclean exit) can never become the
+      // "origin" and get baked in permanently. A genuine 1.1.1.1 user keeps
+      // their value because we never strip it from the saved snapshot.
+      if (saved == null) {
+        await prefs?.setStringList(originKey, origin);
       }
-      nextDns = List.from(originDns)..add(needAddDns);
+      nextDns = origin.contains(needAddDns)
+          ? List<String>.from(origin)
+          : (List<String>.from(origin)..add(needAddDns));
     }
     if (nextDns == null) {
       return;

@@ -31,13 +31,13 @@ static void set_window_icon(GtkWindow* window) {
   if (exe_dir == nullptr) {
     return;
   }
-  
+
   g_autofree gchar* icon_path = g_build_filename(
     exe_dir, "data", "flutter_assets", "assets", "images", "icon.png", nullptr);
-  
+
   g_autoptr(GError) error = nullptr;
   g_autoptr(GdkPixbuf) icon = gdk_pixbuf_new_from_file(icon_path, &error);
-  
+
   if (icon != nullptr) {
     gtk_window_set_icon(window, icon);
   }
@@ -69,7 +69,7 @@ static void set_linux_graphics_defaults() {
 // Implements GApplication::activate.
 static void my_application_activate(GApplication* application) {
   MyApplication* self = MY_APPLICATION(application);
-  
+
   // Check if a window already exists
   GList* windows = gtk_application_get_windows(GTK_APPLICATION(application));
   if (windows) {
@@ -77,7 +77,7 @@ static void my_application_activate(GApplication* application) {
     gtk_window_present(GTK_WINDOW(windows->data));
     return;
   }
-  
+
   GtkWindow* window =
       GTK_WINDOW(gtk_application_window_new(GTK_APPLICATION(application)));
 
@@ -119,10 +119,14 @@ static void my_application_activate(GApplication* application) {
   FlView* view = fl_view_new(project);
   gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(view));
 
-  // Show widgets after the view has been added to the window to avoid
-  // early exposes without a ready EGL/GL surface on low-power GPUs.
+  // Show the view after it has been added to the window to avoid early
+  // exposes without a ready EGL/GL surface on low-power GPUs, but keep the
+  // window itself hidden: Dart startup logic decides whether to show it
+  // (window?.show()) or keep it hidden (Silent Launch). Showing it natively
+  // here made the window flash on every silent/autostart launch. Realize the
+  // view so Flutter can start rendering while the window stays hidden.
   gtk_widget_show(GTK_WIDGET(view));
-  gtk_widget_show(GTK_WIDGET(window));
+  gtk_widget_realize(GTK_WIDGET(view));
 
   fl_register_plugins(FL_PLUGIN_REGISTRY(view));
 

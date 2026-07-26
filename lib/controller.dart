@@ -1150,6 +1150,12 @@ class AppController {
       commonPrint.log("=== AppController: init FATAL ERROR ===");
       commonPrint.log("Error: $e");
       commonPrint.log("StackTrace: $stackTrace");
+      // The Linux runner no longer shows the window natively at startup (see
+      // linux/my_application.cc) — visibility is decided here in Dart. Make
+      // sure a failed init doesn't leave the app invisible.
+      if (!Platform.isMacOS && !_ref.read(appSettingProvider).silentLaunch) {
+        window?.show();
+      }
     }
   }
 

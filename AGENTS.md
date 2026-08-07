@@ -56,6 +56,7 @@ plugins/
   window_ext/       macOS/Windows window management plugin
   flutter_distributor/  NOT in repo; cloned at build time from leanflutter/flutter_distributor
 nix/                Nix package/module support; includes pubspec.lock.json for nixpkgs Flutter builder
+  tests/            NixOS VM integration test, wired into `nix flake check`
 services/helper/    Rust binary (Windows service helper)
 ```
 
@@ -88,8 +89,11 @@ The main build script is **`setup.dart`** (not raw `flutter build`). It cross-co
 | macOS (arm64) local | `make macLocal` (cleans `dist/` + `build/` first) |
 | macOS (amd64) local | `make macLocal_amd64` |
 | Core only (skip app) | `dart setup.dart <platform> --arch <arch> --out core` |
-| Nix Linux package | `nix build .#meowclash` |
-| Nix Linux core only | `nix build .#core` |
+| Nix Linux package | `nix build .#meowclash` or `make nixBuild` |
+| Nix Linux core only | `nix build .#core` or `make nixCore` |
+| NixOS checks (fast, eval only) | `nix flake check --no-build` or `make nixCheck` |
+| NixOS VM integration test | `nix build .#checks.x86_64-linux.nixos-vm -L` or `make nixTest` |
+| Everything NixOS | `make nixAll` |
 
 ### Important build behaviors
 
@@ -99,6 +103,31 @@ The main build script is **`setup.dart`** (not raw `flutter build`). It cross-co
 - **macOS**: uses `create-dmg` to produce a DMG in `dist/`.
 - **Linux**: installs `libayatana-appindicator3-dev`, `libkeybinder-3.0-dev`, etc. For amd64 also produces AppImage + RPM.
 - **Nix/NixOS**: `flake.nix` builds the Go core with `buildGoModule` and the Flutter app with nixpkgs `buildFlutterApplication`; it does not use `setup.dart` or `flutter_distributor`. Current app package support is `x86_64-linux` because `flutter_js` ships an x86-64 Linux `libquickjs_c_bridge_plugin.so`.
+
+### NixOS build verification
+
+`flake.nix` exposes a `checks` output so NixOS support cannot silently rot.
+
+| Check | Cost | What it proves |
+|-------|------|----------------|
+| `nixos-module-eval` | seconds, no build | The NixOS module still evaluates and `programs.meowclash` installs the package, wires `corePackage` to `package.core`, and declares the `cap_net_admin+ep` wrapper on the core binary. |
+| `core` | Go build | The mihomo core compiles with `buildGoModule`. |
+| `package` | Flutter build | The app compiles with `buildFlutterApplication` (this is where `nix/pubspec.lock.json` drift shows up). |
+| `nixos-vm` | boots 2 VMs, needs KVM | On a real NixOS system: the launcher, desktop entry and icon are installed; the wrapper exports `MEOWCLASH_NIX_PACKAGE`/`MEOWCLASH_CORE_PATH` and puts `/run/wrappers/bin` on PATH; `/run/wrappers/bin/MeowClashCore` carries `cap_net_admin` and actually executes; and with `tunMode.enable = false` no capability wrapper is created. |
+
+The VM test lives in `nix/tests/nixos-module.nix`. It calls the core with no
+arguments and expects the `Arguments error` exit — that is the cheapest way to
+prove the ELF loads and links on NixOS. If you change how the core parses
+`os.Args`, update that assertion.
+
+Regenerate `nix/pubspec.lock.json` (see Code generation) whenever `pubspec.lock`
+changes, otherwise `checks.package` fails.
+
+> **No `flake.lock` is committed.** Every evaluation re-resolves
+> `nixpkgs-unstable`, so a green run today can break tomorrow with no code
+> change. Run `nix flake lock` and commit the result to make NixOS builds
+> reproducible; CI emits a warning while it is missing and runs the full check
+> weekly on a schedule to catch upstream drift.
 
 ### NixOS TUN mode
 
@@ -164,8 +193,12 @@ On macOS you may need to codesign or disable gatekeeper for the local core binar
 ## CI / release
 
 - `.github/workflows/build.yaml` triggers on tags `v*` or manual `workflow_dispatch`.
-- `.github/workflows/test.yaml` — test workflow.
 - `.github/workflows/release-all.yaml` — release-all workflow.
+- `.github/workflows/nixos.yaml` — NixOS verification. Runs on pushes/PRs touching Nix-relevant paths, weekly on a schedule, and on manual dispatch.
+  - Job `eval`: `nix flake check --no-build` + `checks.x86_64-linux.nixos-module-eval`. Fast, should always be green.
+  - Job `build`: frees runner disk space, enables KVM, builds `.#core` and `.#meowclash`, then runs `checks.x86_64-linux.nixos-vm`. Dispatch with `skip_vm_test: true` to skip the VM stage.
+  - There is no binary cache configured, so the `build` job compiles Flutter and Go from source and is slow. Adding a Cachix cache is the obvious speedup.
+- There is no `test.yaml` workflow despite older notes; `flutter test` is currently run locally only.
 - It clones `flutter_distributor` fresh each run (`plugins/flutter_distributor` is gitignored).
 - Artifacts are uploaded to GitHub Releases and GitLab Releases.
 - Changelog is auto-generated from commits between tags.
@@ -195,8 +228,12 @@ flutter test
 For Nix packaging changes, additionally evaluate/build on NixOS or a Linux Nix host:
 
 ```bash
-nix flake check
-nix build .#meowclash
+nix flake check --no-build                     # fast: flake + NixOS module evaluation
+nix build .#core -L                            # Go core only
+nix build .#meowclash -L                       # full Flutter app
+nix build .#checks.x86_64-linux.nixos-vm -L    # boots real NixOS VMs (needs KVM)
+# or simply:
+make nixAll
 ```
 
 ## Fork changes — `meowclash-*` provider-override system removed (2026-05)

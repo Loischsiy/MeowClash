@@ -1,0 +1,138 @@
+name: nixos
+
+# Verifies that MeowClash actually builds and works on NixOS.
+#
+#   eval  - fast, runs on every relevant push/PR: evaluates the whole flake and
+#           the NixOS module without building anything.
+#   build - heavy: builds the Go core and the Flutter app with Nix, then boots
+#           real NixOS VMs to exercise the NixOS module end to end.
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - '.github/workflows/nixos.yaml'
+      - 'flake.nix'
+      - 'flake.lock'
+      - 'nix/**'
+      - 'core/**'
+      - 'lib/**'
+      - 'linux/**'
+      - 'assets/**'
+      - 'pubspec.yaml'
+      - 'pubspec.lock'
+  pull_request:
+    paths:
+      - '.github/workflows/nixos.yaml'
+      - 'flake.nix'
+      - 'flake.lock'
+      - 'nix/**'
+      - 'core/**'
+      - 'lib/**'
+      - 'linux/**'
+      - 'assets/**'
+      - 'pubspec.yaml'
+      - 'pubspec.lock'
+  # nixpkgs-unstable moves fast and this flake has no committed flake.lock yet,
+  # so re-verify weekly even when nobody touches the Nix files.
+  schedule:
+    - cron: '0 4 * * 1'
+  workflow_dispatch:
+    inputs:
+      skip_vm_test:
+        description: 'Skip the NixOS VM integration test'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nixos-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  eval:
+    name: Evaluate flake and NixOS module
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+            accept-flake-config = true
+
+      - name: Report flake.lock status
+        run: |
+          if [ -f flake.lock ]; then
+            echo "flake.lock is committed - NixOS builds are reproducible."
+          else
+            echo "::warning title=No flake.lock::This flake has no committed flake.lock, so every run re-resolves nixpkgs-unstable. Run 'nix flake lock' and commit the result to pin NixOS builds."
+          fi
+
+      - name: Show resolved flake inputs
+        run: nix flake metadata
+
+      - name: Evaluate every flake output
+        run: nix flake check --no-build --show-trace
+
+      - name: Check the NixOS module definition
+        run: nix build .#checks.x86_64-linux.nixos-module-eval -L --show-trace --no-link
+
+  build:
+    name: Build with Nix and run the NixOS VM test
+    runs-on: ubuntu-24.04
+    needs: eval
+    timeout-minutes: 180
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc \
+            /opt/hostedtoolcache/CodeQL /usr/local/share/boost
+          sudo docker image prune --all --force || true
+          df -h /
+
+      - name: Enable KVM for the NixOS VM test
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+            accept-flake-config = true
+            max-jobs = auto
+            cores = 0
+
+      - name: Build the mihomo core
+        run: nix build .#core -L --show-trace --out-link result-core
+
+      - name: Build the MeowClash package
+        run: nix build .#meowclash -L --show-trace --out-link result-app
+
+      - name: Inspect the built closure
+        run: |
+          nix path-info --closure-size --human-readable ./result-app
+          ls -l ./result-app/bin
+          test -x ./result-app/bin/meowclash
+          test -x ./result-core/bin/MeowClashCore
+          test -f ./result-app/share/applications/meowclash.desktop
+
+      - name: Run the NixOS VM integration test
+        if: github.event.inputs.skip_vm_test != 'true'
+        run: nix build .#checks.x86_64-linux.nixos-vm -L --show-trace --no-link

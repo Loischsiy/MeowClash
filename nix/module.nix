@@ -19,7 +19,7 @@ in
 
     corePackage = lib.mkOption {
       type = lib.types.package;
-      default = defaultPackage.core;
+      default = cfg.package.core;
       defaultText = lib.literalExpression "config.programs.meowclash.package.core";
       description = "MeowClash core package used for the NixOS capability wrapper.";
     };

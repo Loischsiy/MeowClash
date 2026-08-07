@@ -31,3 +31,20 @@ notarizeLocal:
 cleanLocal:
 	rm -rf dist
 	rm -rf build
+
+
+# ---- NixOS verification ----
+# nixCheck is fast (evaluation only); nixTest boots real NixOS VMs and needs KVM.
+nixCheck:
+	nix flake check --no-build --show-trace
+
+nixCore:
+	nix build .#core -L
+
+nixBuild:
+	nix build .#meowclash -L
+
+nixTest:
+	nix build .#checks.x86_64-linux.nixos-vm -L
+
+nixAll: nixCheck nixCore nixBuild nixTest

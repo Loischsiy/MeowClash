@@ -20,6 +20,31 @@
   nixosModule,
 }:
 
+let
+  # Pin an LTS kernel for both nodes.
+  #
+  # No `flake.lock` is committed, so every run re-resolves `nixpkgs-unstable` and
+  # picks up whatever kernel happens to be there. On 2026-08-17 that was 6.18.44,
+  # which dies in the initrd while loading `virtio_net`:
+  #
+  #   kernel BUG at arch/x86/kernel/alternative.c:2531!
+  #   RIP: __text_poke+0x29f/0x400
+  #   Call Trace: virtnet_validate+0x11c/0x1b0 [virtio_net]
+  #
+  # That kills the udev worker for `virtio0`; udev then wedges, `virtio_blk` never
+  # probes, `/dev/disk/by-label/nixos` never appears, and the machine drops to
+  # `emergency.target` after the 300 s device timeout. Only the 1-vCPU `plain`
+  # node was hit, so it looks like a UP-specific path in the alternatives code.
+  #
+  # The kernel is not what this test exercises, so pin it instead of riding the
+  # unstable channel. If this attribute ever disappears from nixpkgs, move it to
+  # whichever LTS series is current — do not "upgrade" it to the default kernel.
+  ltsKernel =
+    { pkgs, ... }:
+    {
+      boot.kernelPackages = pkgs.linuxPackages_6_12;
+    };
+in
 pkgs.testers.runNixOSTest {
   name = "meowclash-nixos";
 
@@ -29,7 +54,10 @@ pkgs.testers.runNixOSTest {
     tun =
       { pkgs, ... }:
       {
-        imports = [ nixosModule ];
+        imports = [
+          nixosModule
+          ltsKernel
+        ];
 
         programs.meowclash = {
           enable = true;
@@ -52,7 +80,10 @@ pkgs.testers.runNixOSTest {
     plain =
       { ... }:
       {
-        imports = [ nixosModule ];
+        imports = [
+          nixosModule
+          ltsKernel
+        ];
 
         programs.meowclash = {
           enable = true;

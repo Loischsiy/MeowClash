@@ -170,6 +170,37 @@ changes, otherwise `checks.package` fails.
 > reproducible; CI emits a warning while it is missing and runs the full check
 > weekly on a schedule to catch upstream drift.
 
+#### The VM nodes pin an LTS kernel
+
+Both nodes import a small `ltsKernel` module that sets
+`boot.kernelPackages = pkgs.linuxPackages_6_12`. **Do not remove it to "use a newer
+kernel".** Because no `flake.lock` is committed, the test otherwise boots whatever
+kernel `nixpkgs-unstable` shipped that day, and on 2026-08-17 that was 6.18.44,
+which hits `kernel BUG at arch/x86/kernel/alternative.c:2531` in `__text_poke`
+while `udev` loads `virtio_net`. The udev worker dies with SIGSEGV, udev wedges,
+`virtio_blk` never probes, `/dev/disk/by-label/nixos` never appears, and the VM
+sits in the initrd until the 300 s device timeout drops it to `emergency.target`.
+The kernel is not what this check exercises, so it is pinned rather than tracked.
+If that attribute is ever dropped from nixpkgs, move the pin to the current LTS
+series — do not fall back to the default kernel.
+
+When a VM test fails, **ignore the Python traceback**: `RuntimeError: Shell
+disconnected` only means the machine stopped answering. NixOS test instrumentation
+ships `panic-on-fail.service` (`wantedBy = [ "emergency.target" ]`), which runs
+`echo c > /proc/sysrq-trigger`, so any boot failure ends as a deliberate kernel
+panic and the traceback always blames whichever `wait_for_unit` was in flight. The
+real cause is in the serial console above it:
+
+```bash
+nix log /nix/store/<hash>-vm-test-run-meowclash-nixos.drv \
+  | grep -E '^(plain|tun) #' \
+  | grep -iE 'BUG|Oops|SEGV|Failed to start|Dependency failed|timed out|Out of memory'
+```
+
+A `initrd-*` prefix on the failed units means the machine died **before**
+`pivot_root`, so nothing about `programs.meowclash` was ever evaluated — look at
+the kernel and the virtio devices, not at this repo.
+
 ### NixOS TUN mode
 
 Use the flake module when TUN mode is needed on NixOS:

@@ -2,6 +2,25 @@
 
 All notable changes to **MeowClash** will be documented in this file.
 
+## [v1.0.8]
+
+### ✨ New Features
+- **Android**: Added boot receiver for VPN auto-start on boot/update.
+- **Profiles**: Added decryption support when updating URL profiles.
+
+### 🐛 Bug Fixes
+- **Windows**: Properly quote helper path in service binPath to avoid path parsing issues.
+- **NixOS**: Pinned kernel to 6.12 LTS for VM test stability.
+
+### 🚀 Improvements
+- **Core**: Updated mihomo proxy engine to version 1.19.30 and refreshed Go dependencies.
+- **Core**: Updated utls for newer browser fingerprints (Firefox 148, Safari 26.3).
+- **Android**: Replaced flutter_launcher_icons with manual adaptive icon and splash setup; replaced FlClashX art with MeowClash paw logo.
+- **Dependencies**: Updated re_editor to 0.10.0.
+- **Build**: Use default Flutter package from nixpkgs for Nix builds.
+- **CI**: Added NixOS verification workflow with integration tests; added test environment option to release workflow.
+- **Docs**: Added mihomo version bump checklist and vendorHash update guide.
+
 ## [v1.0.7]
 
 ### ✨ New Features

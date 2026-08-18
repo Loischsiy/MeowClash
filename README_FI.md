@@ -143,18 +143,12 @@ Tukee hallintaa kolmansien osapuolten automatisointityökaluilla (kuten Tasker) 
 
 Lataa uusimmat esikäännetyt binäärit julkaisusivuilta:
 
-<a href="https://github.com/Loischsiy/MeowClash/releases">
-  <img alt="Hae GitHubista" src="snapshots/get-it-on-github.svg" width="220px"/>
-</a>
-<a href="obtainium://add/https://github.com/Loischsiy/MeowClash">
-  <img alt="Get it on Obtainium" src="snapshots/get-it-on-obtainium.svg" width="220px"/>
-</a>
-<a href="https://gitlab.com/Loischsiy/MeowClash/-/releases">
-  <img alt="Hae GitLabista" src="snapshots/get-it-on-gitlab.svg" width="220px"/>
-</a>
-<a href="https://gitverse.ru/Loischsiy/meowclash/releases">
-  <img alt="Hae GitVersestä" src="snapshots/get-it-on-gitverse.svg" width="220px"/>
-</a>
+<div>
+  <a href="https://github.com/Loischsiy/MeowClash/releases"><img alt="Hae GitHubista" src="snapshots/get-it-on-github.svg" width="220px"/></a>
+  <a href="obtainium://add/https://github.com/Loischsiy/MeowClash"><img alt="Get it on Obtainium" src="snapshots/get-it-on-obtainium.svg" width="220px"/></a><br>
+  <a href="https://gitlab.com/Loischsiy/MeowClash/-/releases"><img alt="Hae GitLabista" src="snapshots/get-it-on-gitlab.svg" width="220px"/></a>
+  <a href="https://gitverse.ru/Loischsiy/meowclash/releases"><img alt="Hae GitVersestä" src="snapshots/get-it-on-gitverse.svg" width="220px"/></a>
+</div>
 
 ---
 

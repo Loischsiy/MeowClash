@@ -143,18 +143,12 @@ sudo apk add libayatana-appindicator-dev keybinder3-dev
 
 Скачайте последние скомпилированные версии на страницах релизов:
 
-<a href="https://github.com/Loischsiy/MeowClash/releases">
-  <img alt="Get it on GitHub" src="snapshots/get-it-on-github.svg" width="220px"/>
-</a>
-<a href="obtainium://add/https://github.com/Loischsiy/MeowClash">
-  <img alt="Get it on Obtainium" src="snapshots/get-it-on-obtainium.svg" width="220px"/>
-</a>
-<a href="https://gitlab.com/Loischsiy/MeowClash/-/releases">
-  <img alt="Get it on GitLab" src="snapshots/get-it-on-gitlab.svg" width="220px"/>
-</a>
-<a href="https://gitverse.ru/Loischsiy/meowclash/releases">
-  <img alt="Get it on GitVerse" src="snapshots/get-it-on-gitverse.svg" width="220px"/>
-</a>
+<div>
+  <a href="https://github.com/Loischsiy/MeowClash/releases"><img alt="Get it on GitHub" src="snapshots/get-it-on-github.svg" width="220px"/></a>
+  <a href="obtainium://add/https://github.com/Loischsiy/MeowClash"><img alt="Get it on Obtainium" src="snapshots/get-it-on-obtainium.svg" width="220px"/></a><br>
+  <a href="https://gitlab.com/Loischsiy/MeowClash/-/releases"><img alt="Get it on GitLab" src="snapshots/get-it-on-gitlab.svg" width="220px"/></a>
+  <a href="https://gitverse.ru/Loischsiy/meowclash/releases"><img alt="Get it on GitVerse" src="snapshots/get-it-on-gitverse.svg" width="220px"/></a>
+</div>
 
 ---
 

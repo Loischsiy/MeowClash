@@ -273,6 +273,10 @@ On macOS you may need to codesign or disable gatekeeper for the local core binar
 - There is no `test.yaml` workflow despite older notes; `flutter test` is currently run locally only.
 - It clones `flutter_distributor` fresh each run (`plugins/flutter_distributor` is gitignored).
 - Artifacts are uploaded to GitHub Releases and GitLab Releases.
+  The READMEs also advertise a **GitVerse** page
+  (`https://gitverse.ru/Loischsiy/meowclash/releases`), but **no workflow
+  publishes there** — it is a manual mirror. If you automate it, add the step
+  next to `Publish GitLab release` in `release-all.yaml`.
 - Changelog is auto-generated from commits between tags.
 
 ## Common gotchas
@@ -282,6 +286,7 @@ On macOS you may need to codesign or disable gatekeeper for the local core binar
 - **No `.gitmodules` file exists**, despite README mentioning `git submodule update --init --recursive`. The Go dependency on mihomo is fetched via `go mod` (see `core/go.mod`). That submodule instruction may be stale.
 - **Windows helper cross-compilation**: `services/helper` uses `cargo build --release --features windows-service`. For `aarch64-pc-windows-msvc`, `setup.dart` adds `--target aarch64-pc-windows-msvc`.
 - **ffigen header path** is hardcoded in `pubspec.yaml` to `libclash/android/arm64-v8a/libclash.h`. Regenerating FFI bindings requires the Android core to have been built first.
+- **Download badges live in six READMEs.** `README.md`, `README_RU.md`, `README_UK.md`, `README_FI.md`, `README_JA.md` and `README_ZH.md` each carry the same badge block under their `📥` download heading: consecutive `<a>` tags wrapping `snapshots/get-it-on-*.svg` at `width="220px"`, with no blank lines between them. Adding, removing or reordering a download channel means editing **all six** — they are not generated from a shared source. `README_FI.md` localizes the `alt` text (`Hae GitHubista`, `Hae GitLabista`), the others keep English `Get it on X`. These SVGs are referenced only from the READMEs; nothing in `lib/` or `setup.dart` reads them.
 
 ## Quick verification checklist (before committing)
 

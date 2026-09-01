@@ -31,13 +31,11 @@ class Request {
   Future<Response<Uint8List>> getFileResponseForUrl(
     String url, {
     Map<String, dynamic>? headers,
-  }) async {
-    return guardTlsErrors<Response<Uint8List>>(
-      url,
-      () => _getFileResponseForUrl(url, headers: headers),
-      action: "profile download",
-    );
-  }
+  }) => guardTlsErrors<Response<Uint8List>>(
+    url,
+    () => _getFileResponseForUrl(url, headers: headers),
+    action: "profile download",
+  );
 
   Future<Response<Uint8List>> _getFileResponseForUrl(
     String url, {
@@ -62,7 +60,14 @@ class Request {
         throw Exception('Redirect detected, but no location header was found.');
       }
 
-      print('↪️ Redirecting to: $newUrl');
+      final redirectUri = Uri.tryParse(newUrl);
+      final redirectPort = redirectUri != null && redirectUri.hasPort
+          ? ':${redirectUri.port}'
+          : '';
+      final redirectTarget = redirectUri == null
+          ? 'an unparsable Location header'
+          : '${redirectUri.scheme}://${redirectUri.host}$redirectPort';
+      commonPrint.log('[HTTP] profile download redirected to $redirectTarget');
       final finalResponse = await _dio.get<Uint8List>(
         newUrl,
         options: Options(
@@ -78,16 +83,15 @@ class Request {
     return firstResponse;
   }
 
-  Future<Response> getTextResponseForUrl(String url) async {
-    return guardTlsErrors<Response>(
-      url,
-      () => _clashDio.get(
+  Future<Response> getTextResponseForUrl(String url) =>
+      guardTlsErrors<Response>(
         url,
-        options: Options(responseType: ResponseType.plain),
-      ),
-      action: "config download",
-    );
-  }
+        () => _clashDio.get(
+          url,
+          options: Options(responseType: ResponseType.plain),
+        ),
+        action: "config download",
+      );
 
   Future<MemoryImage?> getImage(String url) async {
     if (url.isEmpty) return null;
@@ -105,7 +109,7 @@ class Request {
   }
 
   Future<Map<String, dynamic>?> checkForUpdate() async {
-    final url = "https://api.github.com/repos/$repository/releases/latest";
+    const url = "https://api.github.com/repos/$repository/releases/latest";
     final response = await guardTlsErrors<Response<dynamic>>(
       url,
       () => _dio.get(

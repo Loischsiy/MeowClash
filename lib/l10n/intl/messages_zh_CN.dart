@@ -554,6 +554,19 @@ class MessageLookup extends MessageLookupByLibrary {
     "toggle": MessageLookupByLibrary.simpleMessage("切换"),
     "tonalSpotScheme": MessageLookupByLibrary.simpleMessage("调性点缀"),
     "tooFrequentOperation": MessageLookupByLibrary.simpleMessage("请等待15秒后再次刷新"),
+    "tlsCertificateExpiredHint": MessageLookupByLibrary.simpleMessage(
+        "服务器证书已过期或尚未生效。请检查设备的日期和时间。"),
+    "tlsErrorDetails": MessageLookupByLibrary.simpleMessage("技术细节"),
+    "tlsGenericHint":
+        MessageLookupByLibrary.simpleMessage("与服务器的 TLS 握手失败。"),
+    "tlsHandshakeFailed":
+        MessageLookupByLibrary.simpleMessage("无法建立安全连接 (TLS)"),
+    "tlsHostMismatchHint":
+        MessageLookupByLibrary.simpleMessage("服务器证书是为其他域名签发的。"),
+    "tlsSelfSignedHint": MessageLookupByLibrary.simpleMessage(
+        "服务器提供了自签名证书。连接很可能被杀毒软件、企业代理或强制门户拦截。"),
+    "tlsUntrustedChainHint": MessageLookupByLibrary.simpleMessage(
+        "服务器证书验证失败：证书链不完整，或其根证书未被此设备信任。如果订阅服务器由你维护，请确认它下发了完整证书链 (fullchain.pem)；否则请安装系统更新后重试。"),
     "tools": MessageLookupByLibrary.simpleMessage("设置"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("Tproxy端口"),
     "trafficUsage": MessageLookupByLibrary.simpleMessage("流量统计"),

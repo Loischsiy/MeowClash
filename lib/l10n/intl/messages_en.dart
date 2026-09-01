@@ -844,6 +844,19 @@ class MessageLookup extends MessageLookupByLibrary {
     "tooFrequentOperation": MessageLookupByLibrary.simpleMessage(
       "Please wait 15 seconds before refreshing again",
     ),
+    "tlsCertificateExpiredHint": MessageLookupByLibrary.simpleMessage(
+        "The server certificate has expired or is not valid yet. Check the date and time on this device."),
+    "tlsErrorDetails": MessageLookupByLibrary.simpleMessage("Technical details"),
+    "tlsGenericHint": MessageLookupByLibrary.simpleMessage(
+        "The TLS handshake with the server failed."),
+    "tlsHandshakeFailed": MessageLookupByLibrary.simpleMessage(
+        "Secure connection failed (TLS)"),
+    "tlsHostMismatchHint": MessageLookupByLibrary.simpleMessage(
+        "The server certificate was issued for a different domain."),
+    "tlsSelfSignedHint": MessageLookupByLibrary.simpleMessage(
+        "The server presented a self-signed certificate. The connection is most likely being intercepted by an antivirus, a corporate proxy, or a captive portal."),
+    "tlsUntrustedChainHint": MessageLookupByLibrary.simpleMessage(
+        "The server certificate could not be verified. The certificate chain is incomplete, or its root is not trusted on this device. If the subscription server is yours, make sure it serves the full chain (fullchain.pem); otherwise install the pending system updates and try again."),
     "tools": MessageLookupByLibrary.simpleMessage("Settings"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("Tproxy Port"),
     "traffic": MessageLookupByLibrary.simpleMessage("Traffic"),

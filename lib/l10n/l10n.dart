@@ -3953,6 +3953,76 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `Secure connection failed (TLS)`
+  String get tlsHandshakeFailed {
+    return Intl.message(
+      'Secure connection failed (TLS)',
+      name: 'tlsHandshakeFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The server certificate could not be verified. The certificate chain is incomplete, or its root is not trusted on this device. If the subscription server is yours, make sure it serves the full chain (fullchain.pem); otherwise install the pending system updates and try again.`
+  String get tlsUntrustedChainHint {
+    return Intl.message(
+      'The server certificate could not be verified. The certificate chain is incomplete, or its root is not trusted on this device. If the subscription server is yours, make sure it serves the full chain (fullchain.pem); otherwise install the pending system updates and try again.',
+      name: 'tlsUntrustedChainHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The server certificate has expired or is not valid yet. Check the date and time on this device.`
+  String get tlsCertificateExpiredHint {
+    return Intl.message(
+      'The server certificate has expired or is not valid yet. Check the date and time on this device.',
+      name: 'tlsCertificateExpiredHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The server certificate was issued for a different domain.`
+  String get tlsHostMismatchHint {
+    return Intl.message(
+      'The server certificate was issued for a different domain.',
+      name: 'tlsHostMismatchHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The server presented a self-signed certificate. The connection is most likely being intercepted by an antivirus, a corporate proxy, or a captive portal.`
+  String get tlsSelfSignedHint {
+    return Intl.message(
+      'The server presented a self-signed certificate. The connection is most likely being intercepted by an antivirus, a corporate proxy, or a captive portal.',
+      name: 'tlsSelfSignedHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The TLS handshake with the server failed.`
+  String get tlsGenericHint {
+    return Intl.message(
+      'The TLS handshake with the server failed.',
+      name: 'tlsGenericHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Technical details`
+  String get tlsErrorDetails {
+    return Intl.message(
+      'Technical details',
+      name: 'tlsErrorDetails',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

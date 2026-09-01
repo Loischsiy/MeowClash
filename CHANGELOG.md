@@ -2,6 +2,11 @@
 
 All notable changes to **MeowClash** will be documented in this file.
 
+## [Unreleased]
+
+### 🚀 Improvements
+- **Diagnostics**: TLS failures while downloading a subscription, provider or update are now reported with an explicit reason (untrusted/incomplete certificate chain, expired certificate, hostname mismatch, self-signed certificate) instead of a generic update error. The log records the failing host, the OS error string, the platform version and the certificate the server actually presented, so a certificate report can be diagnosed from the log alone.
+
 ## [v1.0.8]
 
 ### ✨ New Features

@@ -634,6 +634,19 @@ class MessageLookup extends MessageLookupByLibrary {
     "tooFrequentOperation": MessageLookupByLibrary.simpleMessage(
       "再度更新する前に15秒お待ちください",
     ),
+    "tlsCertificateExpiredHint": MessageLookupByLibrary.simpleMessage(
+        "サーバー証明書の有効期限が切れているか、まだ有効になっていません。端末の日付と時刻を確認してください。"),
+    "tlsErrorDetails": MessageLookupByLibrary.simpleMessage("技術的な詳細"),
+    "tlsGenericHint": MessageLookupByLibrary.simpleMessage(
+        "サーバーとの TLS ハンドシェイクに失敗しました。"),
+    "tlsHandshakeFailed": MessageLookupByLibrary.simpleMessage(
+        "安全な接続を確立できませんでした (TLS)"),
+    "tlsHostMismatchHint": MessageLookupByLibrary.simpleMessage(
+        "サーバー証明書は別のドメイン向けに発行されています。"),
+    "tlsSelfSignedHint": MessageLookupByLibrary.simpleMessage(
+        "サーバーが自己署名証明書を提示しました。ウイルス対策ソフト、社内プロキシ、またはキャプティブポータルが接続を傍受している可能性があります。"),
+    "tlsUntrustedChainHint": MessageLookupByLibrary.simpleMessage(
+        "サーバー証明書を検証できませんでした。証明書チェーンが不完全であるか、そのルート証明書がこの端末で信頼されていません。購読サーバーがご自身のものであれば、完全なチェーン (fullchain.pem) を配信しているか確認してください。そうでない場合は、システム更新を適用してから再試行してください。"),
     "tools": MessageLookupByLibrary.simpleMessage("設定"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("Tproxyポート"),
     "trafficUsage": MessageLookupByLibrary.simpleMessage("トラフィック使用量"),

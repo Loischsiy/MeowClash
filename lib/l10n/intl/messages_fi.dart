@@ -344,6 +344,19 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "themeMode": MessageLookupByLibrary.simpleMessage("Teematila"),
     "tip": MessageLookupByLibrary.simpleMessage("vihje"),
+    "tlsCertificateExpiredHint": MessageLookupByLibrary.simpleMessage(
+        "Palvelimen varmenne on vanhentunut tai ei ole vielä voimassa. Tarkista laitteen päivämäärä ja kellonaika."),
+    "tlsErrorDetails": MessageLookupByLibrary.simpleMessage("Tekniset tiedot"),
+    "tlsGenericHint": MessageLookupByLibrary.simpleMessage(
+        "TLS-kättely palvelimen kanssa epäonnistui."),
+    "tlsHandshakeFailed": MessageLookupByLibrary.simpleMessage(
+        "Suojatun yhteyden muodostaminen epäonnistui (TLS)"),
+    "tlsHostMismatchHint": MessageLookupByLibrary.simpleMessage(
+        "Palvelimen varmenne on myönnetty toiselle verkkotunnukselle."),
+    "tlsSelfSignedHint": MessageLookupByLibrary.simpleMessage(
+        "Palvelin esitti itse allekirjoitetun varmenteen. Yhteyttä sieppaa todennäköisesti virustorjunta, yrityksen välityspalvelin tai kirjautumisportaali."),
+    "tlsUntrustedChainHint": MessageLookupByLibrary.simpleMessage(
+        "Palvelimen varmennetta ei voitu vahvistaa: varmenneketju on puutteellinen tai sen juurivarmenteeseen ei luoteta tällä laitteella. Jos tilauspalvelin on sinun, varmista että se lähettää koko ketjun (fullchain.pem). Muussa tapauksessa asenna järjestelmäpäivitykset ja yritä uudelleen."),
     "tools": MessageLookupByLibrary.simpleMessage("Asetukset"),
     "traffic": MessageLookupByLibrary.simpleMessage("Liikenne"),
     "trafficUnlimited": MessageLookupByLibrary.simpleMessage(

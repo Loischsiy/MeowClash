@@ -892,6 +892,20 @@ class MessageLookup extends MessageLookupByLibrary {
     "tooFrequentOperation": MessageLookupByLibrary.simpleMessage(
       "Будь ласка, зачекайте 15 секунд перед повторним оновленням",
     ),
+    "tlsCertificateExpiredHint": MessageLookupByLibrary.simpleMessage(
+        "Термін дії сертифіката сервера минув або ще не почався. Перевірте дату й час на пристрої."),
+    "tlsErrorDetails":
+        MessageLookupByLibrary.simpleMessage("Технічні подробиці"),
+    "tlsGenericHint": MessageLookupByLibrary.simpleMessage(
+        "Не вдалося завершити TLS-рукостискання із сервером."),
+    "tlsHandshakeFailed": MessageLookupByLibrary.simpleMessage(
+        "Не вдалося встановити захищене з'єднання (TLS)"),
+    "tlsHostMismatchHint": MessageLookupByLibrary.simpleMessage(
+        "Сертифікат сервера видано для іншого домену."),
+    "tlsSelfSignedHint": MessageLookupByLibrary.simpleMessage(
+        "Сервер надіслав самопідписаний сертифікат. Найімовірніше, з'єднання перехоплює антивірус, корпоративний проксі або captive-портал."),
+    "tlsUntrustedChainHint": MessageLookupByLibrary.simpleMessage(
+        "Сертифікат сервера не пройшов перевірку: ланцюжок сертифікатів неповний або його корінь не є довіреним на цьому пристрої. Якщо сервер підписки ваш — переконайтеся, що він віддає повний ланцюжок (fullchain.pem). Інакше встановіть оновлення системи та спробуйте ще раз."),
     "tools": MessageLookupByLibrary.simpleMessage("Налаштування"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("Tproxy-порт"),
     "traffic": MessageLookupByLibrary.simpleMessage("Трафік"),

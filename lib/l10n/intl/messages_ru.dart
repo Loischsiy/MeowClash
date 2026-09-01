@@ -883,6 +883,20 @@ class MessageLookup extends MessageLookupByLibrary {
     "tooFrequentOperation": MessageLookupByLibrary.simpleMessage(
       "Пожалуйста, подождите 15 секунд перед повторным обновлением",
     ),
+    "tlsCertificateExpiredHint": MessageLookupByLibrary.simpleMessage(
+        "Срок действия сертификата сервера истёк или ещё не начался. Проверьте дату и время на устройстве."),
+    "tlsErrorDetails":
+        MessageLookupByLibrary.simpleMessage("Технические подробности"),
+    "tlsGenericHint": MessageLookupByLibrary.simpleMessage(
+        "Не удалось завершить TLS-рукопожатие с сервером."),
+    "tlsHandshakeFailed": MessageLookupByLibrary.simpleMessage(
+        "Не удалось установить защищённое соединение (TLS)"),
+    "tlsHostMismatchHint": MessageLookupByLibrary.simpleMessage(
+        "Сертификат сервера выдан для другого домена."),
+    "tlsSelfSignedHint": MessageLookupByLibrary.simpleMessage(
+        "Сервер прислал самоподписанный сертификат. Скорее всего, соединение перехватывает антивирус, корпоративный прокси или captive-портал."),
+    "tlsUntrustedChainHint": MessageLookupByLibrary.simpleMessage(
+        "Сертификат сервера не прошёл проверку: цепочка сертификатов неполная или её корень не является доверенным на этом устройстве. Если сервер подписки ваш — убедитесь, что он отдаёт полную цепочку (fullchain.pem). Иначе установите обновления системы и попробуйте снова."),
     "tools": MessageLookupByLibrary.simpleMessage("Настройки"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("Tproxy-порт"),
     "traffic": MessageLookupByLibrary.simpleMessage("Трафик"),

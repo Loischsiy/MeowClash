@@ -508,5 +508,12 @@
   "firstHop": "第一跳点（入口）",
   "secondHop": "第二跳点（出口）",
   "addHop": "添加跳点",
-  "chainHopsRequired": "请至少选择两个跳点"
+  "chainHopsRequired": "请至少选择两个跳点",
+  "tlsHandshakeFailed": "无法建立安全连接 (TLS)",
+  "tlsUntrustedChainHint": "服务器证书验证失败：证书链不完整，或其根证书未被此设备信任。如果订阅服务器由你维护，请确认它下发了完整证书链 (fullchain.pem)；否则请安装系统更新后重试。",
+  "tlsCertificateExpiredHint": "服务器证书已过期或尚未生效。请检查设备的日期和时间。",
+  "tlsHostMismatchHint": "服务器证书是为其他域名签发的。",
+  "tlsSelfSignedHint": "服务器提供了自签名证书。连接很可能被杀毒软件、企业代理或强制门户拦截。",
+  "tlsGenericHint": "与服务器的 TLS 握手失败。",
+  "tlsErrorDetails": "技术细节"
 }

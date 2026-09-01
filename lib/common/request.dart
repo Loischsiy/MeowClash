@@ -32,6 +32,17 @@ class Request {
     String url, {
     Map<String, dynamic>? headers,
   }) async {
+    return guardTlsErrors<Response<Uint8List>>(
+      url,
+      () => _getFileResponseForUrl(url, headers: headers),
+      action: "profile download",
+    );
+  }
+
+  Future<Response<Uint8List>> _getFileResponseForUrl(
+    String url, {
+    Map<String, dynamic>? headers,
+  }) async {
     final requestHeaders = headers ?? {};
     requestHeaders['User-Agent'] = globalState.ua;
 
@@ -68,18 +79,25 @@ class Request {
   }
 
   Future<Response> getTextResponseForUrl(String url) async {
-    final response = await _clashDio.get(
+    return guardTlsErrors<Response>(
       url,
-      options: Options(responseType: ResponseType.plain),
+      () => _clashDio.get(
+        url,
+        options: Options(responseType: ResponseType.plain),
+      ),
+      action: "config download",
     );
-    return response;
   }
 
   Future<MemoryImage?> getImage(String url) async {
     if (url.isEmpty) return null;
-    final response = await _dio.get<Uint8List>(
+    final response = await guardTlsErrors<Response<Uint8List>>(
       url,
-      options: Options(responseType: ResponseType.bytes),
+      () => _dio.get<Uint8List>(
+        url,
+        options: Options(responseType: ResponseType.bytes),
+      ),
+      action: "image download",
     );
     final data = response.data;
     if (data == null) return null;
@@ -87,9 +105,14 @@ class Request {
   }
 
   Future<Map<String, dynamic>?> checkForUpdate() async {
-    final response = await _dio.get(
-      "https://api.github.com/repos/$repository/releases/latest",
-      options: Options(responseType: ResponseType.json),
+    final url = "https://api.github.com/repos/$repository/releases/latest";
+    final response = await guardTlsErrors<Response<dynamic>>(
+      url,
+      () => _dio.get(
+        url,
+        options: Options(responseType: ResponseType.json),
+      ),
+      action: "update check",
     );
     if (response.statusCode != 200) return null;
     final data = response.data as Map<String, dynamic>;

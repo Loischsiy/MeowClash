@@ -1,21 +1,21 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:ffi' show Pointer;
 import 'dart:io' show Platform, File;
 
 import 'package:animations/animations.dart';
 import 'package:dio/dio.dart';
 import 'package:dynamic_color/dynamic_color.dart';
+import 'package:flutter/material.dart';
+import 'package:material_color_utilities/palettes/core_palette.dart';
 import 'package:meowclash/clash/clash.dart';
 import 'package:meowclash/common/theme.dart';
 import 'package:meowclash/enum/enum.dart';
 import 'package:meowclash/l10n/l10n.dart';
 import 'package:meowclash/plugins/service.dart';
+import 'package:meowclash/services/async_polling_loop.dart';
+import 'package:meowclash/services/profile_script_evaluator.dart';
 import 'package:meowclash/widgets/dialog.dart';
 import 'package:meowclash/widgets/scaffold.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_js/flutter_js.dart';
-import 'package:material_color_utilities/palettes/core_palette.dart';
+import 'package:meowclash/widgets/visibility_polling.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:yaml/yaml.dart';
@@ -73,7 +73,6 @@ class GlobalState {
   Map<CacheTag, double> cacheScrollPosition = {};
   Map<CacheTag, FixedMap<String, double>> cacheHeightMap = {};
   bool isService = false;
-  Timer? timer;
   Timer? groupsUpdateTimer;
   late Config config;
   late AppState appState;
@@ -169,29 +168,31 @@ class GlobalState {
       config.patchClashConfig.globalUa ??
       packageInfo.ua(coreVersion: coreVersion);
 
+  late final _updateLoop = AsyncPollingLoop(
+    interval: const Duration(seconds: 1),
+    onTick: (token) async {
+      for (final task in List.of(tasks)) {
+        if (!token.isCurrent) return;
+        try {
+          await task();
+        } catch (error) {
+          commonPrint.log('Dashboard update failed: $error');
+        }
+      }
+    },
+  );
+
   Future<void> startUpdateTasks([UpdateTasks? tasks]) async {
-    if (timer != null && timer!.isActive == true) return;
-    if (tasks != null) {
-      this.tasks = tasks;
+    if (tasks != null) this.tasks = tasks;
+    // The Android service isolate owns notification updates independently.
+    if (!isService && Platform.isAndroid && !isUiForeground) {
+      _updateLoop.stop();
+      return;
     }
-    await executorUpdateTask();
-    timer = Timer(const Duration(seconds: 1), () async {
-      startUpdateTasks();
-    });
+    await _updateLoop.start();
   }
 
-  Future<void> executorUpdateTask() async {
-    for (final task in tasks) {
-      await task();
-    }
-    timer = null;
-  }
-
-  void stopUpdateTasks() {
-    if (timer == null || timer?.isActive == false) return;
-    timer?.cancel();
-    timer = null;
-  }
+  void stopUpdateTasks() => _updateLoop.stop();
 
   Future<bool> handleStart([UpdateTasks? tasks]) async {
     startTime ??= DateTime.now();
@@ -954,20 +955,12 @@ class GlobalState {
     if (config["proxy-providers"] == null) {
       config["proxy-providers"] = {};
     }
-    final configJs = json.encode(config);
-    final runtime = getJavascriptRuntime();
-    final res = await runtime.evaluateAsync("""
-      ${currentScript.content}
-      main($configJs)
-    """);
-    if (res.isError) {
-      throw res.stringResult;
-    }
-    final value = switch (res.rawResult is Pointer) {
-      true => runtime.convertValue<Map<String, dynamic>>(res),
-      false => Map<String, dynamic>.from(res.rawResult),
-    };
-    return value ?? config;
+    return evaluateProfileScript(
+      currentScript.content,
+      config,
+      httpProxy: MeowClashHttpOverrides.currentProxy,
+      proxyBypassHost: localhost,
+    );
   }
 }
 

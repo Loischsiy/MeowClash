@@ -101,11 +101,10 @@ func handleGetIsInit() bool {
 }
 
 func handleForceGc() {
-	go func() {
+	memoryReclaims.request(func() {
 		log.Infoln("[APP] request force GC")
-		runtime.GC()
 		debug.FreeOSMemory()
-	}()
+	})
 }
 
 func handleShutdown() bool {
@@ -116,7 +115,6 @@ func handleShutdown() bool {
 	requestSeen = nil
 	healthCheckSeen = nil
 	externalProviders = nil
-	runtime.GC()
 	debug.FreeOSMemory()
 	isInit = false
 	return true
@@ -159,7 +157,8 @@ func forwardHealthCheckDelays() {
 		runLock.Unlock()
 		return
 	}
-	touchProviders()
+	// Observing delay history must not mark every provider as used. Doing so
+	// defeats mihomo's lazy health checks even when the VPN is idle/off.
 	proxies := proxiesWithProviders()
 	runLock.Unlock()
 
@@ -183,22 +182,6 @@ func runInitialProviderHealthChecks() {
 			continue
 		}
 		go pp.HealthCheck()
-	}
-}
-
-// touchProviders marks all proxy providers as recently used so that their
-// internal lazy health-check goroutines actually execute on the next tick.
-// Unlike the previous triggerProviderHealthChecks which called HealthCheck()
-// (blocking until every URL test finishes), Touch() returns immediately and
-// lets the provider's own background goroutine perform the checks without
-// holding runLock for seconds.
-func touchProviders() {
-	for _, p := range tunnel.Providers() {
-		pp, ok := p.(*provider.ProxySetProvider)
-		if !ok {
-			continue
-		}
-		pp.Touch()
 	}
 }
 

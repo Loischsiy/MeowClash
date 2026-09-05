@@ -2,6 +2,10 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meowclash/clash/clash.dart';
 import 'package:meowclash/common/common.dart';
 import 'package:meowclash/l10n/l10n.dart';
@@ -9,11 +13,9 @@ import 'package:meowclash/manager/hotkey_manager.dart';
 import 'package:meowclash/manager/manager.dart';
 import 'package:meowclash/plugins/app.dart';
 import 'package:meowclash/providers/providers.dart';
+import 'package:meowclash/services/async_polling_loop.dart';
 import 'package:meowclash/state.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:meowclash/widgets/visibility_polling.dart';
 
 import 'controller.dart';
 import 'pages/pages.dart';
@@ -28,7 +30,16 @@ class Application extends ConsumerStatefulWidget {
 }
 
 class ApplicationState extends ConsumerState<Application> {
-  Timer? _autoUpdateGroupTaskTimer;
+  late final AppLifecycleListener _groupLifecycle;
+  late final _groupPolling = AsyncPollingLoop(
+    interval: const Duration(seconds: 20),
+    onTick: (_) {
+      if (mounted && globalState.appState.isInit) {
+        globalState.appController.updateGroupsDebounce();
+      }
+    },
+    onError: (error, stack) => commonPrint.log('Group refresh failed: $error'),
+  );
   Timer? _autoUpdateProfilesTaskTimer;
   Timer? _autoUpdateProvidersTaskTimer;
 
@@ -55,10 +66,13 @@ class ApplicationState extends ConsumerState<Application> {
       windows?.enableDarkModeForApp();
     }
 
-    _autoUpdateGroupTask();
+    globalState.appController = AppController(context, ref);
+    _groupLifecycle = AppLifecycleListener(
+      onStateChange: (_) => _syncGroupPolling(),
+    );
+    _syncGroupPolling();
     _autoUpdateProfilesTask();
     _autoUpdateProvidersTask();
-    globalState.appController = AppController(context, ref);
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       final currentContext = globalState.navigatorKey.currentContext;
       if (currentContext != null) {
@@ -70,26 +84,27 @@ class ApplicationState extends ConsumerState<Application> {
     });
   }
 
-  void _autoUpdateGroupTask() {
-    _autoUpdateGroupTaskTimer = Timer(const Duration(milliseconds: 20000), () {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        globalState.appController.updateGroupsDebounce();
-        _autoUpdateGroupTask();
-      });
-    });
+  void _syncGroupPolling() {
+    if (isUiForeground) {
+      unawaited(_groupPolling.start());
+    } else {
+      _groupPolling.stop();
+    }
   }
 
   void _autoUpdateProfilesTask() {
     _autoUpdateProfilesTaskTimer = Timer(const Duration(minutes: 20), () async {
+      if (!mounted) return;
       await globalState.appController.autoUpdateProfiles();
-      _autoUpdateProfilesTask();
+      if (mounted) _autoUpdateProfilesTask();
     });
   }
 
   void _autoUpdateProvidersTask() {
     _autoUpdateProvidersTaskTimer = Timer(const Duration(minutes: 1), () async {
+      if (!mounted) return;
       await globalState.appController.autoUpdateProviders();
-      _autoUpdateProvidersTask();
+      if (mounted) _autoUpdateProvidersTask();
     });
   }
 
@@ -229,7 +244,8 @@ class ApplicationState extends ConsumerState<Application> {
   @override
   Future<void> dispose() async {
     linkManager.destroy();
-    _autoUpdateGroupTaskTimer?.cancel();
+    _groupPolling.dispose();
+    _groupLifecycle.dispose();
     _autoUpdateProfilesTaskTimer?.cancel();
     _autoUpdateProvidersTaskTimer?.cancel();
     globalState.appController.delayTests.cancel();

@@ -1,17 +1,16 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meowclash/common/common.dart';
 import 'package:meowclash/enum/enum.dart';
 import 'package:meowclash/plugins/tile.dart';
 import 'package:meowclash/providers/providers.dart';
 import 'package:meowclash/state.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class AppStateManager extends ConsumerStatefulWidget {
-
   const AppStateManager({
     super.key,
     required this.child,
@@ -25,6 +24,7 @@ class AppStateManager extends ConsumerStatefulWidget {
 class _AppStateManagerState extends ConsumerState<AppStateManager>
     with WidgetsBindingObserver {
   Future<void> _dnsOp = Future.value();
+  int _lifecycleGeneration = 0;
 
   @override
   void initState() {
@@ -58,9 +58,8 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
           return;
         }
         final restore = !(next.a == true && next.b == true);
-        _dnsOp = _dnsOp
-            .then((_) => system.setMacOSDns(restore))
-            .catchError((_) {});
+        _dnsOp =
+            _dnsOp.then((_) => system.setMacOSDns(restore)).catchError((_) {});
       },
     );
     ref.listenManual(
@@ -108,13 +107,19 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
 
   @override
   void dispose() {
+    _lifecycleGeneration++;
+    globalState.stopUpdateTasks();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
   @override
   Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
+    final generation = ++_lifecycleGeneration;
     commonPrint.log("$state");
+    if (Platform.isAndroid && state != AppLifecycleState.resumed) {
+      globalState.stopUpdateTasks();
+    }
     switch (state) {
       case AppLifecycleState.inactive:
         unawaited(globalState.appController.savePreferences());
@@ -143,6 +148,12 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
           // the native truth before deciding whether to restart the polling
           // loop paused above.
           await globalState.updateStartTime();
+          if (!mounted ||
+              generation != _lifecycleGeneration ||
+              WidgetsBinding.instance.lifecycleState !=
+                  AppLifecycleState.resumed) {
+            return;
+          }
           if (globalState.isStart) {
             unawaited(globalState.startUpdateTasks());
           } else {
@@ -165,15 +176,14 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
 
   @override
   Widget build(BuildContext context) => Listener(
-      onPointerHover: (_) {
-        render?.resume();
-      },
-      child: widget.child,
-    );
+        onPointerHover: (_) {
+          render?.resume();
+        },
+        child: widget.child,
+      );
 }
 
 class AppEnvManager extends StatelessWidget {
-
   const AppEnvManager({
     super.key,
     required this.child,

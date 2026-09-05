@@ -156,9 +156,11 @@ class AppController {
 
   Future<void> updateTraffic() async {
     final traffic = await clashCore.getTraffic();
+    if (!context.mounted) return;
     _ref.read(trafficsProvider.notifier).addTraffic(traffic);
-    _ref.read(totalTrafficProvider.notifier).value =
-        await clashCore.getTotalTraffic();
+    final totalTraffic = await clashCore.getTotalTraffic();
+    if (!context.mounted) return;
+    _ref.read(totalTrafficProvider.notifier).value = totalTraffic;
   }
 
   Future<void> addProfile(Profile profile) async {

@@ -1,25 +1,27 @@
-import 'dart:async';
-
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meowclash/clash/clash.dart';
 import 'package:meowclash/common/common.dart';
 import 'package:meowclash/enum/enum.dart';
 import 'package:meowclash/models/models.dart';
 import 'package:meowclash/providers/providers.dart';
+import 'package:meowclash/services/async_polling_loop.dart';
+import 'package:meowclash/widgets/visibility_polling.dart';
 import 'package:meowclash/widgets/widgets.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'item.dart';
 
 class ConnectionsView extends ConsumerStatefulWidget {
-  const ConnectionsView({super.key});
+  const ConnectionsView({super.key, this.loadConnections});
+
+  final Future<List<Connection>> Function()? loadConnections;
 
   @override
   ConsumerState<ConnectionsView> createState() => _ConnectionsViewState();
 }
 
 class _ConnectionsViewState extends ConsumerState<ConnectionsView>
-    with PageMixin {
+    with PageMixin, VisibilityPollingMixin<ConnectionsView> {
   final _connectionsStateNotifier = ValueNotifier<ConnectionsState>(
     const ConnectionsState(),
   );
@@ -27,17 +29,15 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
     keepScrollOffset: false,
   );
 
-  Timer? timer;
+  @override
+  Duration get pollingInterval => const Duration(seconds: 1);
 
   @override
   List<Widget> get actions => [
         IconButton(
           onPressed: () async {
             clashCore.closeConnections();
-            _connectionsStateNotifier.value =
-                _connectionsStateNotifier.value.copyWith(
-              connections: await clashCore.getConnections(),
-            );
+            await polling.refresh();
           },
           icon: const Icon(Icons.delete_sweep_outlined),
         ),
@@ -57,18 +57,13 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
             _connectionsStateNotifier.value.copyWith(keywords: keywords);
       };
 
-  Future<void> _updateConnections() async {
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (mounted) {
-        _connectionsStateNotifier.value =
-            _connectionsStateNotifier.value.copyWith(
-          connections: await clashCore.getConnections(),
-        );
-        timer = Timer(const Duration(seconds: 1), () async {
-          _updateConnections();
-        });
-      }
-    });
+  @override
+  Future<void> poll(PollingToken token) async {
+    final connections =
+        await (widget.loadConnections?.call() ?? clashCore.getConnections());
+    if (!mounted || !token.isCurrent) return;
+    _connectionsStateNotifier.value =
+        _connectionsStateNotifier.value.copyWith(connections: connections);
   }
 
   @override
@@ -87,61 +82,57 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
       },
       fireImmediately: true,
     );
-    _updateConnections();
   }
 
   Future<void> _handleBlockConnection(String id) async {
     clashCore.closeConnection(id);
-    _connectionsStateNotifier.value = _connectionsStateNotifier.value.copyWith(
-      connections: await clashCore.getConnections(),
-    );
+    await polling.refresh();
   }
 
   @override
   void dispose() {
-    timer?.cancel();
     _connectionsStateNotifier.dispose();
     _scrollController.dispose();
-    timer = null;
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) => ValueListenableBuilder<ConnectionsState>(
-      valueListenable: _connectionsStateNotifier,
-      builder: (_, state, __) {
-        final connections = state.list;
-        if (connections.isEmpty) {
-          return NullStatus(
-            label: appLocalizations.nullTip(appLocalizations.connections),
-          );
-        }
-        return CommonScrollBar(
-          controller: _scrollController,
-          child: ListView.separated(
+  Widget build(BuildContext context) =>
+      ValueListenableBuilder<ConnectionsState>(
+        valueListenable: _connectionsStateNotifier,
+        builder: (_, state, __) {
+          final connections = state.list;
+          if (connections.isEmpty) {
+            return NullStatus(
+              label: appLocalizations.nullTip(appLocalizations.connections),
+            );
+          }
+          return CommonScrollBar(
             controller: _scrollController,
-            itemBuilder: (_, index) {
-              final connection = connections[index];
-              return ConnectionItem(
-                key: Key(connection.id),
-                connection: connection,
-                onClickKeyword: (value) {
-                  context.commonScaffoldState?.addKeyword(value);
-                },
-                trailing: IconButton(
-                  icon: const Icon(Icons.block),
-                  onPressed: () {
-                    _handleBlockConnection(connection.id);
+            child: ListView.separated(
+              controller: _scrollController,
+              itemBuilder: (_, index) {
+                final connection = connections[index];
+                return ConnectionItem(
+                  key: Key(connection.id),
+                  connection: connection,
+                  onClickKeyword: (value) {
+                    context.commonScaffoldState?.addKeyword(value);
                   },
-                ),
-              );
-            },
-            separatorBuilder: (context, index) => const Divider(
+                  trailing: IconButton(
+                    icon: const Icon(Icons.block),
+                    onPressed: () {
+                      _handleBlockConnection(connection.id);
+                    },
+                  ),
+                );
+              },
+              separatorBuilder: (context, index) => const Divider(
                 height: 0,
               ),
-            itemCount: connections.length,
-          ),
-        );
-      },
-    );
+              itemCount: connections.length,
+            ),
+          );
+        },
+      );
 }

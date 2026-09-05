@@ -1,74 +1,69 @@
-import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:meowclash/clash/clash.dart';
 import 'package:meowclash/common/common.dart';
 import 'package:meowclash/models/common.dart';
+import 'package:meowclash/services/async_polling_loop.dart';
 import 'package:meowclash/state.dart';
+import 'package:meowclash/widgets/visibility_polling.dart';
 import 'package:meowclash/widgets/widgets.dart';
-import 'package:flutter/material.dart';
 
 final _memoryInfoStateNotifier = ValueNotifier<TrafficValue>(
   const TrafficValue(value: 0),
 );
 
 class MemoryInfo extends StatefulWidget {
-  const MemoryInfo({super.key});
+  const MemoryInfo({super.key, this.readMemory});
+
+  final Future<int> Function()? readMemory;
 
   @override
   State<MemoryInfo> createState() => _MemoryInfoState();
 }
 
-class _MemoryInfoState extends State<MemoryInfo> {
-  Timer? timer;
+class _MemoryInfoState extends State<MemoryInfo>
+    with VisibilityPollingMixin<MemoryInfo> {
+  @override
+  Duration get pollingInterval => const Duration(seconds: 2);
 
   @override
-  void initState() {
-    super.initState();
-    _updateMemory();
-  }
-
-  @override
-  void dispose() {
-    timer?.cancel();
-    super.dispose();
-  }
-
-  Future<void> _updateMemory() async {
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
+  Future<void> poll(PollingToken token) async {
+    final reader = widget.readMemory;
+    final int memory;
+    if (reader != null) {
+      memory = await reader();
+    } else {
       final rss = ProcessInfo.currentRss;
-      _memoryInfoStateNotifier.value = TrafficValue(
-        value: clashLib != null ? rss : await clashCore.getMemory() + rss,
-      );
-      timer = Timer(const Duration(seconds: 2), () async {
-        _updateMemory();
-      });
-    });
+      memory = clashLib != null ? rss : await clashCore.getMemory() + rss;
+    }
+    if (!mounted || !token.isCurrent) return;
+    _memoryInfoStateNotifier.value = TrafficValue(value: memory);
   }
 
   @override
   Widget build(BuildContext context) => SizedBox(
-      height: getWidgetHeight(1),
-      child: CommonCard(
-        info: Info(
-          iconData: Icons.memory,
-          label: appLocalizations.memoryInfo,
-        ),
-        onPressed: clashCore.requestGc,
-        child: Container(
-          padding: baseInfoEdgeInsets.copyWith(
-            top: 0,
+        height: getWidgetHeight(1),
+        child: CommonCard(
+          info: Info(
+            iconData: Icons.memory,
+            label: appLocalizations.memoryInfo,
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(
-                height: globalState.measure.bodyMediumHeight + 2,
-                child: ValueListenableBuilder(
-                  valueListenable: _memoryInfoStateNotifier,
-                  builder: (_, trafficValue, __) => Row(
+          onPressed: clashCore.requestGc,
+          child: Container(
+            padding: baseInfoEdgeInsets.copyWith(
+              top: 0,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  height: globalState.measure.bodyMediumHeight + 2,
+                  child: ValueListenableBuilder(
+                    valueListenable: _memoryInfoStateNotifier,
+                    builder: (_, trafficValue, __) => Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Text(
@@ -86,13 +81,13 @@ class _MemoryInfoState extends State<MemoryInfo> {
                         )
                       ],
                     ),
-                ),
-              )
-            ],
+                  ),
+                )
+              ],
+            ),
           ),
         ),
-      ),
-    );
+      );
 }
 
 // class AnimatedCounter extends StatefulWidget {

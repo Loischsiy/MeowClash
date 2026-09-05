@@ -8,8 +8,13 @@ class MeowClashHttpOverrides extends HttpOverrides {
     if ([localhost].contains(url.host)) {
       return "DIRECT";
     }
+    commonPrint.log("find $url proxy:${globalState.appState.runTime != null}");
+    return currentProxy;
+  }
+
+  /// A serializable routing snapshot for short-lived profile script isolates.
+  static String get currentProxy {
     final isStart = globalState.appState.runTime != null;
-    commonPrint.log("find $url proxy:$isStart");
     if (!isStart) return "DIRECT";
     // When TUN is handling traffic, let the OS network stack send the request
     // so it gets captured by TUN and processed by the core via rules. This

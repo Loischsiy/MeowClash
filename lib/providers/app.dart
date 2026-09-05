@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:meowclash/common/common.dart';
 import 'package:meowclash/enum/enum.dart';
 import 'package:meowclash/models/models.dart';
 import 'package:meowclash/state.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -295,6 +298,17 @@ class Groups extends _$Groups with AutoDisposeNotifierMixin {
   @override
   List<Group> build() => globalState.appState.groups;
 
+  bool setGroups(List<Group> groups) {
+    final previous = {for (final group in state) group.name: group};
+    final next = [
+      for (final group in groups)
+        if (previous[group.name] == group) previous[group.name]! else group,
+    ];
+    if (listEquals(state, next)) return false;
+    state = next;
+    return true;
+  }
+
   @override
   void onUpdate(List<Group> value) {
     globalState.appState = globalState.appState.copyWith(
@@ -305,25 +319,73 @@ class Groups extends _$Groups with AutoDisposeNotifierMixin {
 
 @riverpod
 class DelayDataSource extends _$DelayDataSource with AutoDisposeNotifierMixin {
+  static const updateInterval = Duration(milliseconds: 50);
+  final _pending = <String, Map<String, int?>>{};
+  Timer? _timer;
+  KeepAliveLink? _pendingKeepAlive;
+
   @override
-  DelayMap build() => globalState.appState.delayMap;
+  DelayMap build() {
+    ref.onDispose(() {
+      _timer?.cancel();
+      _pending.clear();
+    });
+    return globalState.appState.delayMap;
+  }
 
   @override
   void onUpdate(DelayMap value) {
-    globalState.appState = globalState.appState.copyWith(
-      delayMap: value,
-    );
+    globalState.appState = globalState.appState.copyWith(delayMap: value);
   }
 
   void setDelay(Delay delay) {
-    if (state[delay.url]?[delay.name] != delay.value) {
-      final newDelayMap = Map<String, Map<String, int?>>.from(state);
-      if (newDelayMap[delay.url] == null) {
-        newDelayMap[delay.url] = <String, int?>{};
+    final pending = _pending[delay.url];
+    final previous = pending != null && pending.containsKey(delay.name)
+        ? pending[delay.name]
+        : state[delay.url]?[delay.name];
+    if (previous == delay.value) return;
+    (_pending[delay.url] ??= {})[delay.name] = delay.value;
+    // A read-only consumer (e.g. a hidden page) must not lose pending updates
+    // when the auto-dispose provider reaches the end of a frame.
+    _pendingKeepAlive ??= ref.keepAlive();
+    _timer ??= Timer(updateInterval, flush);
+  }
+
+  void flush() {
+    _timer?.cancel();
+    _timer = null;
+    if (_pending.isNotEmpty) {
+      final next = Map<String, Map<String, int?>>.of(state);
+      var changed = false;
+      for (final entry in _pending.entries) {
+        final previous = state[entry.key] ?? const <String, int?>{};
+        final updates = Map<String, int?>.of(previous);
+        var bucketChanged = false;
+        for (final delay in entry.value.entries) {
+          if (previous[delay.key] != delay.value) {
+            updates[delay.key] = delay.value;
+            bucketChanged = true;
+          }
+        }
+        if (bucketChanged) {
+          next[entry.key] = updates;
+          changed = true;
+        }
       }
-      newDelayMap[delay.url]![delay.name] = delay.value;
-      state = newDelayMap;
+      _pending.clear();
+      if (changed) state = next;
     }
+    _pendingKeepAlive?.close();
+    _pendingKeepAlive = null;
+  }
+
+  void clear() {
+    _timer?.cancel();
+    _timer = null;
+    _pending.clear();
+    _pendingKeepAlive?.close();
+    _pendingKeepAlive = null;
+    state = {};
   }
 }
 

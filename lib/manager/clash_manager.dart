@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:meowclash/clash/clash.dart';
 import 'package:meowclash/common/common.dart';
 import 'package:meowclash/common/file_logger.dart';
@@ -24,6 +26,8 @@ class ClashManager extends ConsumerStatefulWidget {
 
 class _ClashContainerState extends ConsumerState<ClashManager>
     with AppMessageListener {
+  Timer? _delayRefreshTimer;
+
   @override
   Widget build(BuildContext context) => widget.child;
 
@@ -60,7 +64,8 @@ class _ClashContainerState extends ConsumerState<ClashManager>
   }
 
   @override
-  Future<void> dispose() async {
+  void dispose() {
+    _delayRefreshTimer?.cancel();
     clashMessage.removeListener(this);
     super.dispose();
   }
@@ -70,13 +75,10 @@ class _ClashContainerState extends ConsumerState<ClashManager>
     super.onDelay(delay);
     final appController = globalState.appController;
     appController.setDelay(delay);
-    debouncer.call(
-      FunctionTag.updateDelay,
-      () async {
-        appController.updateGroupsDebounce();
-      },
-      duration: const Duration(milliseconds: 5000),
-    );
+    _delayRefreshTimer ??= Timer(const Duration(seconds: 5), () {
+      _delayRefreshTimer = null;
+      if (mounted) appController.updateGroupsDebounce();
+    });
   }
 
   @override

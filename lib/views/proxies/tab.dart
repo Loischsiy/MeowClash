@@ -34,6 +34,7 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
 
   @override
   void dispose() {
+    _hasMoreButtonNotifier.dispose();
     _destroyTabController();
     super.dispose();
   }
@@ -125,11 +126,12 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
       groupIndex = currentIndex;
     }
     final currentGroups = appController.getCurrentGroups();
-    if (groupIndex == null || groupIndex > currentGroups.length) {
+    if (groupIndex == null || groupIndex >= currentGroups.length) {
       return;
     }
     final currentGroup = currentGroups[groupIndex];
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       globalState.appController.updateCurrentGroupName(
         currentGroup.name,
       );
@@ -293,7 +295,7 @@ class ProxyGroupViewState extends ConsumerState<ProxyGroupView> {
   }
 
   void scrollToSelected() {
-    if (_controller.position.maxScrollExtent == 0) {
+    if (!_controller.hasClients || _controller.position.maxScrollExtent == 0) {
       return;
     }
     _controller.animateTo(
@@ -375,15 +377,17 @@ class _DelayTestButtonState extends State<DelayTestButton>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scale;
+  bool _running = false;
 
   Future<void> _healthcheck() async {
-    if (_controller.isAnimating) {
-      return;
-    }
+    if (_running) return;
+    _running = true;
     _controller.forward();
-    await widget.onClick();
-    if (mounted) {
-      _controller.reverse();
+    try {
+      await widget.onClick();
+    } finally {
+      _running = false;
+      if (mounted) _controller.reverse();
     }
   }
 

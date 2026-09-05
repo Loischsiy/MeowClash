@@ -1,14 +1,15 @@
 import 'dart:io';
 
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:meowclash/common/common.dart';
 import 'package:meowclash/enum/enum.dart';
 import 'package:meowclash/models/models.dart';
 import 'package:meowclash/providers/providers.dart';
 import 'package:meowclash/state.dart';
+import 'package:meowclash/widgets/navigation_page_view.dart';
 import 'package:meowclash/widgets/widgets.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
 typedef OnSelected = void Function(int index);
 
@@ -51,104 +52,22 @@ class HomePage extends StatelessWidget {
       );
 }
 
-class _HomePageView extends ConsumerStatefulWidget {
+class _HomePageView extends ConsumerWidget {
   const _HomePageView();
 
   @override
-  ConsumerState createState() => _HomePageViewState();
-}
-
-class _HomePageViewState extends ConsumerState<_HomePageView> {
-  late PageController _pageController;
-
-  @override
-  void initState() {
-    super.initState();
-    _pageController = PageController(
-      initialPage: _pageIndex,
-      keepPage: true,
-    );
-    ref.listenManual(currentPageLabelProvider, (prev, next) {
-      if (prev != next) {
-        _toPage(next);
-      }
-    });
-    ref.listenManual(currentNavigationsStateProvider, (prev, next) {
-      if (prev?.value.length != next.value.length) {
-        _updatePageController();
-      }
-    });
-  }
-
-  int get _pageIndex {
-    final navigationItems = ref.read(currentNavigationsStateProvider).value;
-    return navigationItems.indexWhere(
-      (item) => item.label == globalState.appState.pageLabel,
-    );
-  }
-
-  _toPage(PageLabel pageLabel, [bool ignoreAnimateTo = false]) async {
-    if (!mounted) {
-      return;
-    }
-    final navigationItems = ref.read(currentNavigationsStateProvider).value;
-    final index = navigationItems.indexWhere((item) => item.label == pageLabel);
-    if (index == -1) {
-      return;
-    }
-    final isAnimateToPage = ref.read(appSettingProvider).isAnimateToPage;
-    final isMobile = ref.read(isMobileViewProvider);
-    if (isAnimateToPage && isMobile && !ignoreAnimateTo) {
-      await _pageController.animateToPage(
-        index,
-        duration: kTabScrollDuration,
-        curve: Curves.easeOut,
-      );
-    } else {
-      _pageController.jumpToPage(index);
-    }
-    if (!mounted) {
-      return;
-    }
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) {
-        return;
-      }
-      FocusManager.instance.primaryFocus?.unfocus();
-    });
-  }
-
-  _updatePageController() {
-    final pageLabel = globalState.appState.pageLabel;
-    _toPage(pageLabel, true);
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final navigationItems = ref.watch(currentNavigationsStateProvider).value;
-    final currentLabel = ref.watch(currentPageLabelProvider);
-    return PageView.builder(
-      controller: _pageController,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: navigationItems.length,
-      itemBuilder: (_, index) {
-        final navigationItem = navigationItems[index];
-        final isActive = navigationItem.label == currentLabel;
-        return ExcludeFocus(
-          excluding: !isActive,
-          child: KeepScope(
-            keep: navigationItem.keep,
-            key: Key(navigationItem.label.name),
-            child: navigationItem.view,
-          ),
-        );
-      },
+  Widget build(BuildContext context, WidgetRef ref) {
+    final items = ref.watch(currentNavigationsStateProvider).value;
+    final label = ref.watch(currentPageLabelProvider);
+    final animate = ref.watch(appSettingProvider.select((s) => s.isAnimateToPage));
+    final isMobile = ref.watch(isMobileViewProvider);
+    return NavigationPageView(
+      selectedIndex: items.indexWhere((item) => item.label == label),
+      itemCount: items.length,
+      animate: animate && isMobile,
+      itemKey: (index) => ValueKey(items[index].label),
+      keepAlive: (index) => items[index].keep,
+      itemBuilder: (context, index) => items[index].view,
     );
   }
 }

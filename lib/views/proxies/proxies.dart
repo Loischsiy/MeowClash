@@ -24,23 +24,15 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> with PageMixin {
   final GlobalKey<ProxiesTabViewState> _proxiesTabKey = GlobalKey();
   bool _hasProviders = false;
   bool _isTab = false;
+  bool _pingingAll = false;
 
   Future<void> _pingAllGroups() async {
-    final groups = ref.read(currentGroupsStateProvider).value;
-    final allProxies = <Proxy>[];
-    final seenNames = <String>{};
-    
-    for (final group in groups) {
-      for (final proxy in group.all) {
-        if (!seenNames.contains(proxy.name)) {
-          seenNames.add(proxy.name);
-          allProxies.add(proxy);
-        }
-      }
-    }
-    
-    if (allProxies.isNotEmpty) {
-      await delayTest(allProxies, null);
+    if (_pingingAll) return;
+    _pingingAll = true;
+    try {
+      await delayTestGroups(ref.read(currentGroupsStateProvider).value);
+    } finally {
+      _pingingAll = false;
     }
   }
 
@@ -232,6 +224,7 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> with PageMixin {
   @override
   void initPageState() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       final commonScaffoldState = context.commonScaffoldState;
       commonScaffoldState?.actions = actions;
       commonScaffoldState?.floatingActionButton = floatingActionButton;

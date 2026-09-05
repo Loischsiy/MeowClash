@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"core/state"
 	"encoding/json"
 	"fmt"
@@ -16,7 +15,6 @@ import (
 	"github.com/metacubex/mihomo/adapter/outboundgroup"
 	"github.com/metacubex/mihomo/adapter/provider"
 	"github.com/metacubex/mihomo/common/observable"
-	"github.com/metacubex/mihomo/common/utils"
 	"github.com/metacubex/mihomo/component/mmdb"
 	"github.com/metacubex/mihomo/component/resolver"
 	"github.com/metacubex/mihomo/component/updater"
@@ -384,67 +382,6 @@ func handleGetTotalTraffic() string {
 
 func handleResetTraffic() {
 	statistic.DefaultManager.ResetStatistic()
-}
-
-func handleAsyncTestDelay(paramsString string, fn func(string)) {
-	mBatch.Go(paramsString, func() (bool, error) {
-		var params = &TestDelayParams{}
-		err := json.Unmarshal([]byte(paramsString), params)
-		if err != nil {
-			fn("")
-			return false, nil
-		}
-
-		expectedStatus, err := utils.NewUnsignedRanges[uint16]("")
-		if err != nil {
-			fn("")
-			return false, nil
-		}
-
-		ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*time.Duration(params.Timeout))
-		defer cancel()
-
-		proxies := proxiesWithProviders()
-		proxy := proxies[params.ProxyName]
-
-		delayData := &Delay{
-			Name: params.ProxyName,
-		}
-
-		if proxy == nil {
-			delayData.Value = -1
-			data, _ := json.Marshal(delayData)
-			fn(string(data))
-			return false, nil
-		}
-
-		testUrl := "https://www.gstatic.com/generate_204"
-
-		if params.TestUrl != "" {
-			testUrl = params.TestUrl
-		}
-		delayData.Url = testUrl
-
-		delay, err := proxy.URLTest(ctx, testUrl, expectedStatus)
-		if err != nil || delay == 0 {
-			delayData.Value = -1
-			data, _ := json.Marshal(delayData)
-			fn(string(data))
-			return false, nil
-		}
-
-		delayData.Value = int32(delay)
-		data, _ := json.Marshal(delayData)
-		fn(string(data))
-
-		// Push delay update via message
-		sendMessage(Message{
-			Type: DelayMessage,
-			Data: delayData,
-		})
-
-		return false, nil
-	})
 }
 
 func handleGetConnections() string {

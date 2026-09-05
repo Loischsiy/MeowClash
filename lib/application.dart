@@ -232,6 +232,7 @@ class ApplicationState extends ConsumerState<Application> {
     _autoUpdateGroupTaskTimer?.cancel();
     _autoUpdateProfilesTaskTimer?.cancel();
     _autoUpdateProvidersTaskTimer?.cancel();
+    globalState.appController.delayTests.cancel();
     await clashCore.destroy();
     await globalState.appController.savePreferences();
     await globalState.appController.handleExit();

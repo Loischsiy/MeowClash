@@ -320,7 +320,7 @@ final versionProvider = AutoDisposeNotifierProvider<Version, int>.internal(
 );
 
 typedef _$Version = AutoDisposeNotifier<int>;
-String _$groupsHash() => r'46619cdd7d12f5e6f0b07f7843a82e568d2522f1';
+String _$groupsHash() => r'40b5b45b4dcf7e1e3a741552278146afc32a10ce';
 
 /// See also [Groups].
 @ProviderFor(Groups)
@@ -335,7 +335,7 @@ final groupsProvider =
 );
 
 typedef _$Groups = AutoDisposeNotifier<List<Group>>;
-String _$delayDataSourceHash() => r'91666223d2df243096ee164d0eab64a2393dca3b';
+String _$delayDataSourceHash() => r'57d092ba9ab2216fbdf3c16d267a573a5bc02067';
 
 /// See also [DelayDataSource].
 @ProviderFor(DelayDataSource)

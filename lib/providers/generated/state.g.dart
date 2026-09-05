@@ -23,7 +23,7 @@ final configStateProvider = AutoDisposeProvider<Config>.internal(
 // ignore: unused_element
 typedef ConfigStateRef = AutoDisposeProviderRef<Config>;
 String _$currentGroupsStateHash() =>
-    r'c0c145f5d78489f1f4863ab6cc0327771da83c7b';
+    r'71ec36d7c8f7a8d1eb9db61f2b89b4c2054b2bcf';
 
 /// See also [currentGroupsState].
 @ProviderFor(currentGroupsState)
@@ -251,7 +251,7 @@ final profilesSelectorStateProvider =
 typedef ProfilesSelectorStateRef
     = AutoDisposeProviderRef<ProfilesSelectorState>;
 String _$proxiesListSelectorStateHash() =>
-    r'91caade26c6fdfd28c8dc173dc9416f3544a1113';
+    r'2c586f3fc03785c50a2f8d17e7fe13221b653f47';
 
 /// See also [proxiesListSelectorState].
 @ProviderFor(proxiesListSelectorState)
@@ -307,7 +307,7 @@ final groupNamesStateProvider = AutoDisposeProvider<GroupNamesState>.internal(
 // ignore: unused_element
 typedef GroupNamesStateRef = AutoDisposeProviderRef<GroupNamesState>;
 String _$proxyGroupSelectorStateHash() =>
-    r'ab32d582cf61e59b0c6cf7325aba559ab47e7aa7';
+    r'09392af90da03d0e05aeed18ca9269a158999d79';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -651,7 +651,7 @@ class _IsCurrentPageProviderElement extends AutoDisposeProviderElement<bool>
       (origin as IsCurrentPageProvider).handler;
 }
 
-String _$getRealTestUrlHash() => r'5c6513cabb53e5e6689cba5919f49aeaeff90247';
+String _$getRealTestUrlHash() => r'4120669a194d5726d42e6185f57a4b2caf7cb84e';
 
 /// See also [getRealTestUrl].
 @ProviderFor(getRealTestUrl)
@@ -1209,7 +1209,25 @@ final getProxiesColumnsProvider = AutoDisposeProvider<int>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef GetProxiesColumnsRef = AutoDisposeProviderRef<int>;
-String _$getProxyCardStateHash() => r'0f131148cb5ed60c9c4c4f31fbe32f114ac346bb';
+String _$proxyGroupsByNameHash() => r'5d5588c61f383b93962094d9e31d4e63196b116f';
+
+/// See also [proxyGroupsByName].
+@ProviderFor(proxyGroupsByName)
+final proxyGroupsByNameProvider =
+    AutoDisposeProvider<Map<String, Group>>.internal(
+  proxyGroupsByName,
+  name: r'proxyGroupsByNameProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$proxyGroupsByNameHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef ProxyGroupsByNameRef = AutoDisposeProviderRef<Map<String, Group>>;
+String _$getProxyCardStateHash() => r'1fc9b4cf8bce49ba11878cefa16352015f2ad3a3';
 
 /// See also [getProxyCardState].
 @ProviderFor(getProxyCardState)

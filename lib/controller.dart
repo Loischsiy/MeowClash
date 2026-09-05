@@ -6,6 +6,8 @@ import 'dart:isolate';
 import 'package:archive/archive.dart';
 import 'package:meowclash/clash/clash.dart';
 import 'package:meowclash/common/archive.dart';
+import 'package:meowclash/common/proxy_delay.dart';
+import 'package:meowclash/services/delay_test_runner.dart';
 import 'package:meowclash/services/subscription_notification_service.dart';
 import 'package:meowclash/enum/enum.dart';
 import 'package:meowclash/plugins/app.dart';
@@ -33,6 +35,24 @@ class AppController {
   Timer? _changeModeDebounce;
   final BuildContext context;
   final WidgetRef _ref;
+  Future<void>? _groupsRefresh;
+  int _profileGeneration = 0;
+  late final delayTests = DelayTestRunner(
+    concurrency: Platform.isAndroid ? 4 : 12,
+    probe: (target) => clashCore.getDelay(target.url, target.name),
+    onDelay: (delay) {
+      if (context.mounted) setDelay(delay);
+    },
+  );
+
+  ProxyDelaySnapshot getProxyDelaySnapshot() => ProxyDelaySnapshot(
+        groups: _ref.read(proxyGroupsByNameProvider),
+        selectedMap: _ref.read(selectedMapProvider),
+        delays: _ref.read(delayDataSourceProvider),
+        defaultTestUrl: _ref.read(appSettingProvider).testUrl,
+      );
+
+  void flushDelays() => _ref.read(delayDataSourceProvider.notifier).flush();
 
   void setupClashConfigDebounce() {
     debouncer.call(FunctionTag.setupClashConfig, () async {
@@ -80,6 +100,7 @@ class AppController {
   }
 
   Future<void> restartCore() async {
+    delayTests.cancel();
     commonPrint.log("restart core");
     await clashService?.reStart();
     await _initCore();
@@ -630,7 +651,10 @@ class AppController {
   }
 
   void handleChangeProfile() {
-    _ref.read(delayDataSourceProvider.notifier).value = {};
+    _profileGeneration++;
+    _groupsRefresh = null;
+    delayTests.cancel();
+    _ref.read(delayDataSourceProvider.notifier).clear();
 
     final currentProfileId = _ref.read(currentProfileIdProvider);
 
@@ -787,17 +811,30 @@ class AppController {
     }
   }
 
-  Future<void> updateGroups() async {
+  Future<void> updateGroups() {
+    final existing = _groupsRefresh;
+    if (existing != null) return existing;
+    late final Future<void> refresh;
+    refresh = _refreshGroups(_profileGeneration).whenComplete(() {
+      if (identical(_groupsRefresh, refresh)) _groupsRefresh = null;
+    });
+    _groupsRefresh = refresh;
+    return refresh;
+  }
+
+  Future<void> _refreshGroups(int generation) async {
     try {
       final newGroups = await retry(
         task: () async => clashCore.getProxiesGroups(),
         retryIf: (res) => res.isEmpty,
       );
 
+      if (!context.mounted || generation != _profileGeneration) return;
       if (newGroups.isNotEmpty) {
-        _ref.read(groupsProvider.notifier).value = newGroups;
-        _ref.read(versionProvider.notifier).value =
-            _ref.read(versionProvider) + 1;
+        if (_ref.read(groupsProvider.notifier).setGroups(newGroups)) {
+          _ref.read(versionProvider.notifier).value =
+              _ref.read(versionProvider) + 1;
+        }
       } else {
         commonPrint
             .log("updateGroups: received empty groups, keeping old state");
@@ -872,6 +909,7 @@ class AppController {
     final completer = Completer<void>();
     _exitLock = completer;
 
+    delayTests.cancel();
     _profileUpdateTimer?.cancel();
     _changeModeDebounce?.cancel();
     try {
@@ -1333,6 +1371,7 @@ class AppController {
 
   void updateViewSize(Size size) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!context.mounted) return;
       _ref.read(viewSizeProvider.notifier).value = size;
     });
   }
@@ -1341,56 +1380,21 @@ class AppController {
     _ref.read(providersProvider.notifier).setProvider(provider);
   }
 
-  List<Proxy> _sortOfName(List<Proxy> proxies) => List.of(proxies)
-    ..sort(
-      (a, b) => utils.sortByChar(
-        utils.getPinyin(a.name),
-        utils.getPinyin(b.name),
-      ),
-    );
+  List<Proxy> _sortOfName(List<Proxy> proxies) {
+    final ranked = [
+      for (var i = 0; i < proxies.length; i++)
+        (proxy: proxies[i], index: i, name: utils.getPinyin(proxies[i].name)),
+    ]..sort((a, b) {
+        final comparison = utils.sortByChar(a.name, b.name);
+        return comparison != 0 ? comparison : a.index.compareTo(b.index);
+      });
+    return ranked.map((item) => item.proxy).toList();
+  }
 
   List<Proxy> _sortOfDelay({
     required List<Proxy> proxies,
     String? testUrl,
-  }) {
-    // Resolve each proxy's delay exactly once, instead of doing two
-    // `ref.read(getDelayProvider(...))` calls per comparator invocation
-    // (which yields O(N log N) family-provider lookups per sort). On large
-    // groups this was a measurable contributor to scroll jank.
-    final delays = <String, int?>{};
-    int? delayOf(String name) {
-      final cached = delays[name];
-      if (cached != null || delays.containsKey(name)) {
-        return cached;
-      }
-      final value = _ref.read(
-        getDelayProvider(
-          proxyName: name,
-          testUrl: testUrl,
-        ),
-      );
-      delays[name] = value;
-      return value;
-    }
-
-    return List.of(proxies)
-      ..sort(
-        (a, b) {
-          final aDelay = delayOf(a.name);
-          final bDelay = delayOf(b.name);
-          if (aDelay == null && bDelay == null) {
-            return 0;
-          }
-          if (aDelay == null || aDelay == -1) {
-            return 1;
-          }
-          if (bDelay == null || bDelay == -1) {
-            return -1;
-          }
-          return aDelay.compareTo(bDelay);
-        },
-      );
-  }
+  }) => getProxyDelaySnapshot().sort(proxies, testUrl);
 
   List<Proxy> getSortProxies(List<Proxy> proxies, [String? url]) =>
       switch (_ref.read(proxiesStyleSettingProvider).sortType) {

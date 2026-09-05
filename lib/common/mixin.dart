@@ -27,6 +27,7 @@ mixin PageMixin<T extends StatefulWidget> on State<T> {
 
   void initPageState() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       final commonScaffoldState = context.commonScaffoldState;
       commonScaffoldState?.actions = actions;
       commonScaffoldState?.floatingActionButton = floatingActionButton;

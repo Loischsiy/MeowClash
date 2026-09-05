@@ -2,7 +2,6 @@ package main
 
 import (
 	b "bytes"
-	"context"
 	"encoding/json"
 	"errors"
 	"os"
@@ -14,7 +13,6 @@ import (
 	"github.com/metacubex/mihomo/adapter/inbound"
 	"github.com/metacubex/mihomo/adapter/outboundgroup"
 	"github.com/metacubex/mihomo/adapter/provider"
-	"github.com/metacubex/mihomo/common/batch"
 	"github.com/metacubex/mihomo/component/dialer"
 	"github.com/metacubex/mihomo/component/resolver"
 	"github.com/metacubex/mihomo/config"
@@ -35,7 +33,6 @@ var (
 	isRunning         = false
 	runLock           sync.Mutex
 	proxyDescLock     sync.RWMutex
-	mBatch, _         = batch.New[bool](context.Background(), batch.WithConcurrencyNum[bool](50))
 	proxyDescriptions = map[string]string{}
 	pendingTunEnable  = false
 )
@@ -364,6 +361,7 @@ func setupConfig(params *SetupParams) error {
 
 	extractProxyDescriptionsFromRaw(params.Config)
 	resetHealthCheckForwarderState()
+	manualDelayProxies = proxyLookupCache{}
 
 	parseStart := time.Now()
 	currentConfig, err = config.ParseRawConfig(params.Config)

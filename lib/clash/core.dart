@@ -2,15 +2,16 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:meowclash/clash/clash.dart';
 import 'package:meowclash/clash/interface.dart';
+import 'package:meowclash/clash/proxy_groups.dart';
 import 'package:meowclash/common/common.dart';
-import 'package:meowclash/enum/enum.dart';
-import 'package:meowclash/models/models.dart';
-import 'package:meowclash/state.dart';
-import 'package:meowclash/services/subscription_crypto.dart';
 import 'package:meowclash/l10n/l10n.dart';
-import 'package:flutter/services.dart';
+import 'package:meowclash/models/models.dart';
+import 'package:meowclash/services/subscription_crypto.dart';
+import 'package:meowclash/state.dart';
 import 'package:path/path.dart';
 
 class ClashCore {
@@ -126,47 +127,7 @@ class ClashCore {
 
   Future<List<Group>> getProxiesGroups() async {
     final proxies = await clashInterface.getProxies();
-    if (proxies.isEmpty) return [];
-    final visibleGroupNames = [
-      UsedProxy.GLOBAL.name,
-      ...(proxies[UsedProxy.GLOBAL.name]["all"] as List).where((e) {
-        final proxy = proxies[e] ?? {};
-        // Hide groups flagged `hidden: true` (e.g. proxy-chain groups injected
-        // by the override editor). mihomo forwards the flag through its API;
-        // such groups stay usable via rules but must not appear on the
-        // proxies page.
-        if (proxy['hidden'] == true) {
-          return false;
-        }
-        return GroupTypeExtension.valueList.contains(proxy['type']);
-      })
-    ];
-    final visibleGroupNameSet = visibleGroupNames.toSet();
-    final groupNames = [
-      ...visibleGroupNames,
-      ...proxies.entries
-          .where((entry) =>
-              !visibleGroupNameSet.contains(entry.key) &&
-              GroupTypeExtension.valueList.contains(entry.value['type']))
-          .map((entry) => entry.key)
-    ];
-    final groupsRaw = groupNames.map((groupName) {
-      final group = Map<String, dynamic>.from(proxies[groupName]);
-      group["hidden"] =
-          group["hidden"] == true || !visibleGroupNameSet.contains(groupName);
-      group["all"] = ((group["all"] ?? []) as List)
-          .map(
-            (name) => proxies[name],
-          )
-          .where((proxy) => proxy != null)
-          .toList();
-      return group;
-    }).toList();
-    return groupsRaw
-        .map(
-          Group.fromJson,
-        )
-        .toList();
+    return compute(parseProxyGroups, proxies);
   }
 
   FutureOr<String> changeProxy(ChangeProxyParams changeProxyParams) async => await clashInterface.changeProxy(changeProxyParams);

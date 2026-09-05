@@ -1,5 +1,6 @@
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:meowclash/common/common.dart';
+import 'package:meowclash/common/proxy_delay.dart';
 import 'package:meowclash/enum/enum.dart';
 import 'package:meowclash/models/models.dart';
 import 'package:meowclash/state.dart';
@@ -299,7 +300,9 @@ ProxiesListSelectorState proxiesListSelectorState(Ref ref) {
   final groupNames = ref.watch(currentGroupsStateProvider.select((state) => state.value.map((e) => e.name).toList()));
   final currentUnfoldSet = ref.watch(unfoldSetProvider);
   final proxiesStyle = ref.watch(proxiesStyleSettingProvider);
-  final sortNum = ref.watch(sortNumProvider);
+  final sortNum = proxiesStyle.sortType == ProxiesSortType.delay
+      ? ref.watch(sortNumProvider)
+      : 0;
   final columns = ref.watch(getProxiesColumnsProvider);
   final query = ref.watch(
     proxiesQueryProvider.select(
@@ -352,7 +355,9 @@ ProxyGroupSelectorState proxyGroupSelectorState(Ref ref, String groupName) {
       (state) => state.value.getGroup(groupName),
     ),
   );
-  final sortNum = ref.watch(sortNumProvider);
+  final sortNum = proxiesStyle.sortType == ProxiesSortType.delay
+      ? ref.watch(sortNumProvider)
+      : 0;
   final columns = ref.watch(getProxiesColumnsProvider);
   final query =
       ref.watch(proxiesQueryProvider.select((state) => state.toLowerCase()));
@@ -415,7 +420,7 @@ bool isCurrentPage(
 
 @riverpod
 String getRealTestUrl(Ref ref, [String? testUrl]) {
-  final currentTestUrl = ref.watch(appSettingProvider).testUrl;
+  final currentTestUrl = ref.watch(appSettingProvider.select((state) => state.testUrl));
   return testUrl.getSafeValue(currentTestUrl);
 }
 
@@ -511,42 +516,18 @@ int getProxiesColumns(Ref ref) {
   return utils.getProxiesColumns(viewWidth, proxiesLayout);
 }
 
-ProxyCardState _getProxyCardState(
-  List<Group> groups,
-  SelectedMap selectedMap,
-  ProxyCardState proxyDelayState, [
-  Set<String>? seen,
-]) {
-  if (proxyDelayState.proxyName.isEmpty) return proxyDelayState;
-  final seenProxyNames = seen ?? <String>{};
-  if (!seenProxyNames.add(proxyDelayState.proxyName)) return proxyDelayState;
-  final index =
-      groups.indexWhere((element) => element.name == proxyDelayState.proxyName);
-  if (index == -1) return proxyDelayState;
-  final group = groups[index];
-  final currentSelectedName = group
-      .getCurrentSelectedName(selectedMap[proxyDelayState.proxyName] ?? '');
-  if (currentSelectedName.isEmpty) {
-    return proxyDelayState;
-  }
-  return _getProxyCardState(
-    groups,
-    selectedMap,
-    proxyDelayState.copyWith(
-      proxyName: currentSelectedName,
-      testUrl: group.testUrl,
-    ),
-    seenProxyNames,
-  );
-}
+@riverpod
+Map<String, Group> proxyGroupsByName(Ref ref) => {
+      for (final group in ref.watch(groupsProvider)) group.name: group,
+    };
 
 @riverpod
-ProxyCardState getProxyCardState(Ref ref, String proxyName) {
-  final groups = ref.watch(groupsProvider);
-  final selectedMap = ref.watch(selectedMapProvider);
-  return _getProxyCardState(
-      groups, selectedMap, ProxyCardState(proxyName: proxyName));
-}
+ProxyCardState getProxyCardState(Ref ref, String proxyName) =>
+    resolveProxyCardState(
+      ref.watch(proxyGroupsByNameProvider),
+      ref.watch(selectedMapProvider),
+      proxyName,
+    );
 
 @riverpod
 String? getProxyName(Ref ref, String groupName) {

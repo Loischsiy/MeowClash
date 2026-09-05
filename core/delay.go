@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"runtime"
 	"time"
 
 	"github.com/metacubex/mihomo/common/utils"
@@ -13,14 +12,10 @@ import (
 	"github.com/metacubex/mihomo/tunnel"
 )
 
-func manualDelayConcurrency() int {
-	if runtime.GOOS == "android" {
-		return 4
-	}
-	return 12
-}
+// Keep in sync with DelayTestRunner.defaultConcurrency in Flutter.
+const manualDelayConcurrency = 10
 
-var manualDelaySlots = make(chan struct{}, manualDelayConcurrency())
+var manualDelaySlots = make(chan struct{}, manualDelayConcurrency)
 var manualDelayProxies proxyLookupCache // guarded by runLock
 
 func delayTimeout(milliseconds int64) time.Duration {

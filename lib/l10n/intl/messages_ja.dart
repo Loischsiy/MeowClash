@@ -290,6 +290,29 @@ class MessageLookup extends MessageLookupByLibrary {
     "internet": MessageLookupByLibrary.simpleMessage("インターネット"),
     "interval": MessageLookupByLibrary.simpleMessage("インターバル"),
     "intranetIP": MessageLookupByLibrary.simpleMessage("イントラネットIP"),
+    "ipDetailsAddress": MessageLookupByLibrary.simpleMessage("IPアドレス"),
+    "ipDetailsCountry": MessageLookupByLibrary.simpleMessage("国 / 地域"),
+    "ipDetailsDomain": MessageLookupByLibrary.simpleMessage("ドメイン"),
+    "ipDetailsEnglishFallback": MessageLookupByLibrary.simpleMessage(
+      "この言語では、位置情報サービスが地域名と都市名を英語で提供します。",
+    ),
+    "ipDetailsLoadFailed": MessageLookupByLibrary.simpleMessage(
+      "追加情報を読み込めませんでした。IPアドレスは引き続き表示されています。",
+    ),
+    "ipDetailsLoading": MessageLookupByLibrary.simpleMessage(
+      "IPアドレスの詳細を読み込み中…",
+    ),
+    "ipDetailsOpenFailed": MessageLookupByLibrary.simpleMessage(
+      "ブラウザを開けませんでした。",
+    ),
+    "ipDetailsOpenInBrowser": MessageLookupByLibrary.simpleMessage(
+      "IPアドレスの詳細をブラウザで開く",
+    ),
+    "ipDetailsRefresh": MessageLookupByLibrary.simpleMessage("IPを更新"),
+    "ipDetailsRegionCity": MessageLookupByLibrary.simpleMessage("都道府県 / 都市"),
+    "ipDetailsRetry": MessageLookupByLibrary.simpleMessage("再試行"),
+    "ipDetailsTitle": MessageLookupByLibrary.simpleMessage("IPアドレスの詳細"),
+    "ipDetailsUnavailable": MessageLookupByLibrary.simpleMessage("情報なし"),
     "ipcidr": MessageLookupByLibrary.simpleMessage("IPCIDR"),
     "ipv6Desc": MessageLookupByLibrary.simpleMessage("有効化するとIPv6トラフィックを受信可能"),
     "ipv6InboundDesc": MessageLookupByLibrary.simpleMessage("IPv6インバウンドを許可"),
@@ -629,24 +652,30 @@ class MessageLookup extends MessageLookupByLibrary {
     "tight": MessageLookupByLibrary.simpleMessage("密"),
     "time": MessageLookupByLibrary.simpleMessage("時間"),
     "tip": MessageLookupByLibrary.simpleMessage("ヒント"),
+    "tlsCertificateExpiredHint": MessageLookupByLibrary.simpleMessage(
+      "サーバー証明書の有効期限が切れているか、まだ有効になっていません。端末の日付と時刻を確認してください。",
+    ),
+    "tlsErrorDetails": MessageLookupByLibrary.simpleMessage("技術的な詳細"),
+    "tlsGenericHint": MessageLookupByLibrary.simpleMessage(
+      "サーバーとの TLS ハンドシェイクに失敗しました。",
+    ),
+    "tlsHandshakeFailed": MessageLookupByLibrary.simpleMessage(
+      "安全な接続を確立できませんでした (TLS)",
+    ),
+    "tlsHostMismatchHint": MessageLookupByLibrary.simpleMessage(
+      "サーバー証明書は別のドメイン向けに発行されています。",
+    ),
+    "tlsSelfSignedHint": MessageLookupByLibrary.simpleMessage(
+      "サーバーが自己署名証明書を提示しました。ウイルス対策ソフト、社内プロキシ、またはキャプティブポータルが接続を傍受している可能性があります。",
+    ),
+    "tlsUntrustedChainHint": MessageLookupByLibrary.simpleMessage(
+      "サーバー証明書を検証できませんでした。証明書チェーンが不完全であるか、そのルート証明書がこの端末で信頼されていません。購読サーバーがご自身のものであれば、完全なチェーン (fullchain.pem) を配信しているか確認してください。そうでない場合は、システム更新を適用してから再試行してください。",
+    ),
     "toggle": MessageLookupByLibrary.simpleMessage("トグル"),
     "tonalSpotScheme": MessageLookupByLibrary.simpleMessage("トーンスポット"),
     "tooFrequentOperation": MessageLookupByLibrary.simpleMessage(
       "再度更新する前に15秒お待ちください",
     ),
-    "tlsCertificateExpiredHint": MessageLookupByLibrary.simpleMessage(
-        "サーバー証明書の有効期限が切れているか、まだ有効になっていません。端末の日付と時刻を確認してください。"),
-    "tlsErrorDetails": MessageLookupByLibrary.simpleMessage("技術的な詳細"),
-    "tlsGenericHint": MessageLookupByLibrary.simpleMessage(
-        "サーバーとの TLS ハンドシェイクに失敗しました。"),
-    "tlsHandshakeFailed": MessageLookupByLibrary.simpleMessage(
-        "安全な接続を確立できませんでした (TLS)"),
-    "tlsHostMismatchHint": MessageLookupByLibrary.simpleMessage(
-        "サーバー証明書は別のドメイン向けに発行されています。"),
-    "tlsSelfSignedHint": MessageLookupByLibrary.simpleMessage(
-        "サーバーが自己署名証明書を提示しました。ウイルス対策ソフト、社内プロキシ、またはキャプティブポータルが接続を傍受している可能性があります。"),
-    "tlsUntrustedChainHint": MessageLookupByLibrary.simpleMessage(
-        "サーバー証明書を検証できませんでした。証明書チェーンが不完全であるか、そのルート証明書がこの端末で信頼されていません。購読サーバーがご自身のものであれば、完全なチェーン (fullchain.pem) を配信しているか確認してください。そうでない場合は、システム更新を適用してから再試行してください。"),
     "tools": MessageLookupByLibrary.simpleMessage("設定"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("Tproxyポート"),
     "trafficUsage": MessageLookupByLibrary.simpleMessage("トラフィック使用量"),

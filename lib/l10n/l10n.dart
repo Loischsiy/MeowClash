@@ -4023,6 +4023,126 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `IP details`
+  String get ipDetailsTitle {
+    return Intl.message(
+      'IP details',
+      name: 'ipDetailsTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `IP address`
+  String get ipDetailsAddress {
+    return Intl.message(
+      'IP address',
+      name: 'ipDetailsAddress',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Country / Region`
+  String get ipDetailsCountry {
+    return Intl.message(
+      'Country / Region',
+      name: 'ipDetailsCountry',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Region / City`
+  String get ipDetailsRegionCity {
+    return Intl.message(
+      'Region / City',
+      name: 'ipDetailsRegionCity',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Domain`
+  String get ipDetailsDomain {
+    return Intl.message('Domain', name: 'ipDetailsDomain', desc: '', args: []);
+  }
+
+  /// `Not available`
+  String get ipDetailsUnavailable {
+    return Intl.message(
+      'Not available',
+      name: 'ipDetailsUnavailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Loading IP details…`
+  String get ipDetailsLoading {
+    return Intl.message(
+      'Loading IP details…',
+      name: 'ipDetailsLoading',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Could not load additional details. Your IP address is still shown.`
+  String get ipDetailsLoadFailed {
+    return Intl.message(
+      'Could not load additional details. Your IP address is still shown.',
+      name: 'ipDetailsLoadFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Retry`
+  String get ipDetailsRetry {
+    return Intl.message('Retry', name: 'ipDetailsRetry', desc: '', args: []);
+  }
+
+  /// `Refresh IP`
+  String get ipDetailsRefresh {
+    return Intl.message(
+      'Refresh IP',
+      name: 'ipDetailsRefresh',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Open IP details in browser`
+  String get ipDetailsOpenInBrowser {
+    return Intl.message(
+      'Open IP details in browser',
+      name: 'ipDetailsOpenInBrowser',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Could not open the browser.`
+  String get ipDetailsOpenFailed {
+    return Intl.message(
+      'Could not open the browser.',
+      name: 'ipDetailsOpenFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The location service provides region and city names in English for this language.`
+  String get ipDetailsEnglishFallback {
+    return Intl.message(
+      'The location service provides region and city names in English for this language.',
+      name: 'ipDetailsEnglishFallback',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

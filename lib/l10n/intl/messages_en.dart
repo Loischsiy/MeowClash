@@ -393,6 +393,35 @@ class MessageLookup extends MessageLookupByLibrary {
     "interval": MessageLookupByLibrary.simpleMessage("Interval"),
     "intranetIP": MessageLookupByLibrary.simpleMessage("Intranet IP"),
     "invalidQrMessage": MessageLookupByLibrary.simpleMessage("Invalid QR code"),
+    "ipDetailsAddress": MessageLookupByLibrary.simpleMessage("IP address"),
+    "ipDetailsCountry": MessageLookupByLibrary.simpleMessage(
+      "Country / Region",
+    ),
+    "ipDetailsDomain": MessageLookupByLibrary.simpleMessage("Domain"),
+    "ipDetailsEnglishFallback": MessageLookupByLibrary.simpleMessage(
+      "The location service provides region and city names in English for this language.",
+    ),
+    "ipDetailsLoadFailed": MessageLookupByLibrary.simpleMessage(
+      "Could not load additional details. Your IP address is still shown.",
+    ),
+    "ipDetailsLoading": MessageLookupByLibrary.simpleMessage(
+      "Loading IP details…",
+    ),
+    "ipDetailsOpenFailed": MessageLookupByLibrary.simpleMessage(
+      "Could not open the browser.",
+    ),
+    "ipDetailsOpenInBrowser": MessageLookupByLibrary.simpleMessage(
+      "Open IP details in browser",
+    ),
+    "ipDetailsRefresh": MessageLookupByLibrary.simpleMessage("Refresh IP"),
+    "ipDetailsRegionCity": MessageLookupByLibrary.simpleMessage(
+      "Region / City",
+    ),
+    "ipDetailsRetry": MessageLookupByLibrary.simpleMessage("Retry"),
+    "ipDetailsTitle": MessageLookupByLibrary.simpleMessage("IP details"),
+    "ipDetailsUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Not available",
+    ),
     "ipcidr": MessageLookupByLibrary.simpleMessage("Ipcidr"),
     "ipv6Desc": MessageLookupByLibrary.simpleMessage(
       "When turned on it will be able to receive IPv6 traffic",
@@ -839,24 +868,32 @@ class MessageLookup extends MessageLookupByLibrary {
     "tight": MessageLookupByLibrary.simpleMessage("Tight"),
     "time": MessageLookupByLibrary.simpleMessage("Time"),
     "tip": MessageLookupByLibrary.simpleMessage("tip"),
+    "tlsCertificateExpiredHint": MessageLookupByLibrary.simpleMessage(
+      "The server certificate has expired or is not valid yet. Check the date and time on this device.",
+    ),
+    "tlsErrorDetails": MessageLookupByLibrary.simpleMessage(
+      "Technical details",
+    ),
+    "tlsGenericHint": MessageLookupByLibrary.simpleMessage(
+      "The TLS handshake with the server failed.",
+    ),
+    "tlsHandshakeFailed": MessageLookupByLibrary.simpleMessage(
+      "Secure connection failed (TLS)",
+    ),
+    "tlsHostMismatchHint": MessageLookupByLibrary.simpleMessage(
+      "The server certificate was issued for a different domain.",
+    ),
+    "tlsSelfSignedHint": MessageLookupByLibrary.simpleMessage(
+      "The server presented a self-signed certificate. The connection is most likely being intercepted by an antivirus, a corporate proxy, or a captive portal.",
+    ),
+    "tlsUntrustedChainHint": MessageLookupByLibrary.simpleMessage(
+      "The server certificate could not be verified. The certificate chain is incomplete, or its root is not trusted on this device. If the subscription server is yours, make sure it serves the full chain (fullchain.pem); otherwise install the pending system updates and try again.",
+    ),
     "toggle": MessageLookupByLibrary.simpleMessage("Toggle"),
     "tonalSpotScheme": MessageLookupByLibrary.simpleMessage("TonalSpot"),
     "tooFrequentOperation": MessageLookupByLibrary.simpleMessage(
       "Please wait 15 seconds before refreshing again",
     ),
-    "tlsCertificateExpiredHint": MessageLookupByLibrary.simpleMessage(
-        "The server certificate has expired or is not valid yet. Check the date and time on this device."),
-    "tlsErrorDetails": MessageLookupByLibrary.simpleMessage("Technical details"),
-    "tlsGenericHint": MessageLookupByLibrary.simpleMessage(
-        "The TLS handshake with the server failed."),
-    "tlsHandshakeFailed": MessageLookupByLibrary.simpleMessage(
-        "Secure connection failed (TLS)"),
-    "tlsHostMismatchHint": MessageLookupByLibrary.simpleMessage(
-        "The server certificate was issued for a different domain."),
-    "tlsSelfSignedHint": MessageLookupByLibrary.simpleMessage(
-        "The server presented a self-signed certificate. The connection is most likely being intercepted by an antivirus, a corporate proxy, or a captive portal."),
-    "tlsUntrustedChainHint": MessageLookupByLibrary.simpleMessage(
-        "The server certificate could not be verified. The certificate chain is incomplete, or its root is not trusted on this device. If the subscription server is yours, make sure it serves the full chain (fullchain.pem); otherwise install the pending system updates and try again."),
     "tools": MessageLookupByLibrary.simpleMessage("Settings"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("Tproxy Port"),
     "traffic": MessageLookupByLibrary.simpleMessage("Traffic"),

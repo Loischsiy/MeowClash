@@ -264,6 +264,25 @@ class MessageLookup extends MessageLookupByLibrary {
     "internet": MessageLookupByLibrary.simpleMessage("互联网"),
     "interval": MessageLookupByLibrary.simpleMessage("间隔"),
     "intranetIP": MessageLookupByLibrary.simpleMessage("内网 IP"),
+    "ipDetailsAddress": MessageLookupByLibrary.simpleMessage("IP 地址"),
+    "ipDetailsCountry": MessageLookupByLibrary.simpleMessage("国家 / 地区"),
+    "ipDetailsDomain": MessageLookupByLibrary.simpleMessage("域名"),
+    "ipDetailsEnglishFallback": MessageLookupByLibrary.simpleMessage(
+      "位置信息服务暂不支持此语言的地区和城市名称，将显示英文名称。",
+    ),
+    "ipDetailsLoadFailed": MessageLookupByLibrary.simpleMessage(
+      "无法加载更多信息，IP 地址仍可查看。",
+    ),
+    "ipDetailsLoading": MessageLookupByLibrary.simpleMessage("正在加载 IP 详细信息…"),
+    "ipDetailsOpenFailed": MessageLookupByLibrary.simpleMessage("无法打开浏览器。"),
+    "ipDetailsOpenInBrowser": MessageLookupByLibrary.simpleMessage(
+      "在浏览器中打开 IP 详细信息",
+    ),
+    "ipDetailsRefresh": MessageLookupByLibrary.simpleMessage("刷新 IP"),
+    "ipDetailsRegionCity": MessageLookupByLibrary.simpleMessage("省份 / 城市"),
+    "ipDetailsRetry": MessageLookupByLibrary.simpleMessage("重试"),
+    "ipDetailsTitle": MessageLookupByLibrary.simpleMessage("IP 详细信息"),
+    "ipDetailsUnavailable": MessageLookupByLibrary.simpleMessage("暂无数据"),
     "ipcidr": MessageLookupByLibrary.simpleMessage("IP/掩码"),
     "ipv6Desc": MessageLookupByLibrary.simpleMessage("开启后将可以接收IPv6流量"),
     "ipv6InboundDesc": MessageLookupByLibrary.simpleMessage("允许IPv6入站"),
@@ -551,22 +570,26 @@ class MessageLookup extends MessageLookupByLibrary {
     "tight": MessageLookupByLibrary.simpleMessage("紧凑"),
     "time": MessageLookupByLibrary.simpleMessage("时间"),
     "tip": MessageLookupByLibrary.simpleMessage("提示"),
+    "tlsCertificateExpiredHint": MessageLookupByLibrary.simpleMessage(
+      "服务器证书已过期或尚未生效。请检查设备的日期和时间。",
+    ),
+    "tlsErrorDetails": MessageLookupByLibrary.simpleMessage("技术细节"),
+    "tlsGenericHint": MessageLookupByLibrary.simpleMessage("与服务器的 TLS 握手失败。"),
+    "tlsHandshakeFailed": MessageLookupByLibrary.simpleMessage(
+      "无法建立安全连接 (TLS)",
+    ),
+    "tlsHostMismatchHint": MessageLookupByLibrary.simpleMessage(
+      "服务器证书是为其他域名签发的。",
+    ),
+    "tlsSelfSignedHint": MessageLookupByLibrary.simpleMessage(
+      "服务器提供了自签名证书。连接很可能被杀毒软件、企业代理或强制门户拦截。",
+    ),
+    "tlsUntrustedChainHint": MessageLookupByLibrary.simpleMessage(
+      "服务器证书验证失败：证书链不完整，或其根证书未被此设备信任。如果订阅服务器由你维护，请确认它下发了完整证书链 (fullchain.pem)；否则请安装系统更新后重试。",
+    ),
     "toggle": MessageLookupByLibrary.simpleMessage("切换"),
     "tonalSpotScheme": MessageLookupByLibrary.simpleMessage("调性点缀"),
     "tooFrequentOperation": MessageLookupByLibrary.simpleMessage("请等待15秒后再次刷新"),
-    "tlsCertificateExpiredHint": MessageLookupByLibrary.simpleMessage(
-        "服务器证书已过期或尚未生效。请检查设备的日期和时间。"),
-    "tlsErrorDetails": MessageLookupByLibrary.simpleMessage("技术细节"),
-    "tlsGenericHint":
-        MessageLookupByLibrary.simpleMessage("与服务器的 TLS 握手失败。"),
-    "tlsHandshakeFailed":
-        MessageLookupByLibrary.simpleMessage("无法建立安全连接 (TLS)"),
-    "tlsHostMismatchHint":
-        MessageLookupByLibrary.simpleMessage("服务器证书是为其他域名签发的。"),
-    "tlsSelfSignedHint": MessageLookupByLibrary.simpleMessage(
-        "服务器提供了自签名证书。连接很可能被杀毒软件、企业代理或强制门户拦截。"),
-    "tlsUntrustedChainHint": MessageLookupByLibrary.simpleMessage(
-        "服务器证书验证失败：证书链不完整，或其根证书未被此设备信任。如果订阅服务器由你维护，请确认它下发了完整证书链 (fullchain.pem)；否则请安装系统更新后重试。"),
     "tools": MessageLookupByLibrary.simpleMessage("设置"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("Tproxy端口"),
     "trafficUsage": MessageLookupByLibrary.simpleMessage("流量统计"),

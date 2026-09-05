@@ -141,6 +141,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Lajittele viiveen mukaan",
     ),
     "delete": MessageLookupByLibrary.simpleMessage("Poista"),
+    "detectionTip": MessageLookupByLibrary.simpleMessage(
+      "Tiedot perustuvat kolmannen osapuolen palveluun ja ovat suuntaa antavia.",
+    ),
     "direct": MessageLookupByLibrary.simpleMessage("Suora"),
     "disclaimer": MessageLookupByLibrary.simpleMessage("Vastuuvapauslauseke"),
     "download": MessageLookupByLibrary.simpleMessage("Lataus"),
@@ -174,6 +177,35 @@ class MessageLookup extends MessageLookupByLibrary {
       "Tuo URL-osoitteesta",
     ),
     "importUrl": MessageLookupByLibrary.simpleMessage("Tuo URL-osoitteesta"),
+    "ipDetailsAddress": MessageLookupByLibrary.simpleMessage("IP-osoite"),
+    "ipDetailsCountry": MessageLookupByLibrary.simpleMessage("Maa / Alue"),
+    "ipDetailsDomain": MessageLookupByLibrary.simpleMessage("Verkkotunnus"),
+    "ipDetailsEnglishFallback": MessageLookupByLibrary.simpleMessage(
+      "Sijaintipalvelu tarjoaa alueiden ja kaupunkien nimet tällä kielellä vain englanniksi.",
+    ),
+    "ipDetailsLoadFailed": MessageLookupByLibrary.simpleMessage(
+      "Lisätietojen lataaminen epäonnistui. IP-osoite on edelleen näkyvissä.",
+    ),
+    "ipDetailsLoading": MessageLookupByLibrary.simpleMessage(
+      "Ladataan IP-osoitteen tietoja…",
+    ),
+    "ipDetailsOpenFailed": MessageLookupByLibrary.simpleMessage(
+      "Selaimen avaaminen epäonnistui.",
+    ),
+    "ipDetailsOpenInBrowser": MessageLookupByLibrary.simpleMessage(
+      "Avaa IP-osoitteen tiedot selaimessa",
+    ),
+    "ipDetailsRefresh": MessageLookupByLibrary.simpleMessage("Päivitä IP"),
+    "ipDetailsRegionCity": MessageLookupByLibrary.simpleMessage(
+      "Maakunta / Kaupunki",
+    ),
+    "ipDetailsRetry": MessageLookupByLibrary.simpleMessage("Yritä uudelleen"),
+    "ipDetailsTitle": MessageLookupByLibrary.simpleMessage(
+      "IP-osoitteen tiedot",
+    ),
+    "ipDetailsUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Ei saatavilla",
+    ),
     "ja": MessageLookupByLibrary.simpleMessage("Japani"),
     "just": MessageLookupByLibrary.simpleMessage("Juuri"),
     "justNow": MessageLookupByLibrary.simpleMessage("Juuri nyt"),
@@ -345,18 +377,24 @@ class MessageLookup extends MessageLookupByLibrary {
     "themeMode": MessageLookupByLibrary.simpleMessage("Teematila"),
     "tip": MessageLookupByLibrary.simpleMessage("vihje"),
     "tlsCertificateExpiredHint": MessageLookupByLibrary.simpleMessage(
-        "Palvelimen varmenne on vanhentunut tai ei ole vielä voimassa. Tarkista laitteen päivämäärä ja kellonaika."),
+      "Palvelimen varmenne on vanhentunut tai ei ole vielä voimassa. Tarkista laitteen päivämäärä ja kellonaika.",
+    ),
     "tlsErrorDetails": MessageLookupByLibrary.simpleMessage("Tekniset tiedot"),
     "tlsGenericHint": MessageLookupByLibrary.simpleMessage(
-        "TLS-kättely palvelimen kanssa epäonnistui."),
+      "TLS-kättely palvelimen kanssa epäonnistui.",
+    ),
     "tlsHandshakeFailed": MessageLookupByLibrary.simpleMessage(
-        "Suojatun yhteyden muodostaminen epäonnistui (TLS)"),
+      "Suojatun yhteyden muodostaminen epäonnistui (TLS)",
+    ),
     "tlsHostMismatchHint": MessageLookupByLibrary.simpleMessage(
-        "Palvelimen varmenne on myönnetty toiselle verkkotunnukselle."),
+      "Palvelimen varmenne on myönnetty toiselle verkkotunnukselle.",
+    ),
     "tlsSelfSignedHint": MessageLookupByLibrary.simpleMessage(
-        "Palvelin esitti itse allekirjoitetun varmenteen. Yhteyttä sieppaa todennäköisesti virustorjunta, yrityksen välityspalvelin tai kirjautumisportaali."),
+      "Palvelin esitti itse allekirjoitetun varmenteen. Yhteyttä sieppaa todennäköisesti virustorjunta, yrityksen välityspalvelin tai kirjautumisportaali.",
+    ),
     "tlsUntrustedChainHint": MessageLookupByLibrary.simpleMessage(
-        "Palvelimen varmennetta ei voitu vahvistaa: varmenneketju on puutteellinen tai sen juurivarmenteeseen ei luoteta tällä laitteella. Jos tilauspalvelin on sinun, varmista että se lähettää koko ketjun (fullchain.pem). Muussa tapauksessa asenna järjestelmäpäivitykset ja yritä uudelleen."),
+      "Palvelimen varmennetta ei voitu vahvistaa: varmenneketju on puutteellinen tai sen juurivarmenteeseen ei luoteta tällä laitteella. Jos tilauspalvelin on sinun, varmista että se lähettää koko ketjun (fullchain.pem). Muussa tapauksessa asenna järjestelmäpäivitykset ja yritä uudelleen.",
+    ),
     "tools": MessageLookupByLibrary.simpleMessage("Asetukset"),
     "traffic": MessageLookupByLibrary.simpleMessage("Liikenne"),
     "trafficUnlimited": MessageLookupByLibrary.simpleMessage(

@@ -515,5 +515,18 @@
   "tlsHostMismatchHint": "服务器证书是为其他域名签发的。",
   "tlsSelfSignedHint": "服务器提供了自签名证书。连接很可能被杀毒软件、企业代理或强制门户拦截。",
   "tlsGenericHint": "与服务器的 TLS 握手失败。",
-  "tlsErrorDetails": "技术细节"
+  "tlsErrorDetails": "技术细节",
+  "ipDetailsTitle": "IP 详细信息",
+  "ipDetailsAddress": "IP 地址",
+  "ipDetailsCountry": "国家 / 地区",
+  "ipDetailsRegionCity": "省份 / 城市",
+  "ipDetailsDomain": "域名",
+  "ipDetailsUnavailable": "暂无数据",
+  "ipDetailsLoading": "正在加载 IP 详细信息…",
+  "ipDetailsLoadFailed": "无法加载更多信息，IP 地址仍可查看。",
+  "ipDetailsRetry": "重试",
+  "ipDetailsRefresh": "刷新 IP",
+  "ipDetailsOpenInBrowser": "在浏览器中打开 IP 详细信息",
+  "ipDetailsOpenFailed": "无法打开浏览器。",
+  "ipDetailsEnglishFallback": "位置信息服务暂不支持此语言的地区和城市名称，将显示英文名称。"
 }

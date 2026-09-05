@@ -13,8 +13,14 @@ import (
 	P "github.com/metacubex/mihomo/constant/provider"
 )
 
+func TestManualDelayConcurrency(t *testing.T) {
+	if manualDelayConcurrency != 10 || cap(manualDelaySlots) != 10 {
+		t.Fatalf("manual delay limit=%d, slots=%d; want 10", manualDelayConcurrency, cap(manualDelaySlots))
+	}
+}
+
 func TestDelaySlotsBoundConcurrency(t *testing.T) {
-	slots := make(chan struct{}, 4)
+	slots := make(chan struct{}, manualDelayConcurrency)
 	var active, maximum atomic.Int32
 	var workers sync.WaitGroup
 	for i := 0; i < 100; i++ {
@@ -34,7 +40,7 @@ func TestDelaySlotsBoundConcurrency(t *testing.T) {
 		}()
 	}
 	workers.Wait()
-	if maximum.Load() > 4 || len(slots) != 0 {
+	if maximum.Load() > int32(manualDelayConcurrency) || len(slots) != 0 {
 		t.Fatalf("max=%d slots=%d", maximum.Load(), len(slots))
 	}
 }

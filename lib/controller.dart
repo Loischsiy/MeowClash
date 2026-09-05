@@ -38,7 +38,6 @@ class AppController {
   Future<void>? _groupsRefresh;
   int _profileGeneration = 0;
   late final delayTests = DelayTestRunner(
-    concurrency: Platform.isAndroid ? 4 : 12,
     probe: (target) => clashCore.getDelay(target.url, target.name),
     onDelay: (delay) {
       if (context.mounted) setDelay(delay);

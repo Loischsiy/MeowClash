@@ -2,7 +2,7 @@
 
 ## Changes
 
-- One shared manual URL-test queue; Android concurrency is 4, desktop is 12.
+- One shared manual URL-test queue; concurrency is capped at 10 on every platform.
   Single-node, group and all-group checks share the limit. Inputs are consumed
   lazily, duplicate effective `(proxy, URL)` targets share in-flight work, and
   the loop yields between requests. Distinct group test URLs are preserved.

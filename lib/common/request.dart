@@ -2,11 +2,14 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:meowclash/common/common.dart';
+import 'package:meowclash/models/ip_details.dart';
 import 'package:meowclash/models/models.dart';
+import 'package:meowclash/services/ip_details_service.dart';
 import 'package:meowclash/state.dart';
 
 class Request {
@@ -27,6 +30,17 @@ class Request {
   late final Dio _dio;
   late final Dio _clashDio;
   String? userAgent;
+  late final _ipDetailsService = IpDetailsService(_clashDio);
+
+  Future<IpDetails?> getIpDetails({
+    required String ip,
+    required String languageCode,
+    CancelToken? cancelToken,
+  }) => _ipDetailsService.lookup(
+    ip: ip,
+    languageCode: languageCode,
+    cancelToken: cancelToken,
+  );
 
   Future<Response<Uint8List>> getFileResponseForUrl(
     String url, {

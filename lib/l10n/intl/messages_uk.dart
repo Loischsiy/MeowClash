@@ -419,6 +419,33 @@ class MessageLookup extends MessageLookupByLibrary {
     "interval": MessageLookupByLibrary.simpleMessage("Інтервал"),
     "intranetIP": MessageLookupByLibrary.simpleMessage("Внутрішній IP"),
     "invalidQrMessage": MessageLookupByLibrary.simpleMessage("Невірний QR-код"),
+    "ipDetailsAddress": MessageLookupByLibrary.simpleMessage("IP-адреса"),
+    "ipDetailsCountry": MessageLookupByLibrary.simpleMessage("Країна / Регіон"),
+    "ipDetailsDomain": MessageLookupByLibrary.simpleMessage("Домен"),
+    "ipDetailsEnglishFallback": MessageLookupByLibrary.simpleMessage(
+      "Для цієї мови сервіс надає назви регіонів і міст англійською.",
+    ),
+    "ipDetailsLoadFailed": MessageLookupByLibrary.simpleMessage(
+      "Не вдалося завантажити додаткові відомості. IP-адреса залишається доступною.",
+    ),
+    "ipDetailsLoading": MessageLookupByLibrary.simpleMessage(
+      "Завантаження відомостей про IP…",
+    ),
+    "ipDetailsOpenFailed": MessageLookupByLibrary.simpleMessage(
+      "Не вдалося відкрити браузер.",
+    ),
+    "ipDetailsOpenInBrowser": MessageLookupByLibrary.simpleMessage(
+      "Відкрити відомості про IP у браузері",
+    ),
+    "ipDetailsRefresh": MessageLookupByLibrary.simpleMessage("Оновити IP"),
+    "ipDetailsRegionCity": MessageLookupByLibrary.simpleMessage(
+      "Область / Місто",
+    ),
+    "ipDetailsRetry": MessageLookupByLibrary.simpleMessage("Повторити"),
+    "ipDetailsTitle": MessageLookupByLibrary.simpleMessage(
+      "Докладна інформація про IP",
+    ),
+    "ipDetailsUnavailable": MessageLookupByLibrary.simpleMessage("Немає даних"),
     "ipcidr": MessageLookupByLibrary.simpleMessage("IPCIDR"),
     "ipv6Desc": MessageLookupByLibrary.simpleMessage(
       "Після увімкнення стане можливим отримувати трафік IPv6",
@@ -887,25 +914,32 @@ class MessageLookup extends MessageLookupByLibrary {
     "tight": MessageLookupByLibrary.simpleMessage("Щільний"),
     "time": MessageLookupByLibrary.simpleMessage("Час"),
     "tip": MessageLookupByLibrary.simpleMessage("Підказка"),
+    "tlsCertificateExpiredHint": MessageLookupByLibrary.simpleMessage(
+      "Термін дії сертифіката сервера минув або ще не почався. Перевірте дату й час на пристрої.",
+    ),
+    "tlsErrorDetails": MessageLookupByLibrary.simpleMessage(
+      "Технічні подробиці",
+    ),
+    "tlsGenericHint": MessageLookupByLibrary.simpleMessage(
+      "Не вдалося завершити TLS-рукостискання із сервером.",
+    ),
+    "tlsHandshakeFailed": MessageLookupByLibrary.simpleMessage(
+      "Не вдалося встановити захищене з\'єднання (TLS)",
+    ),
+    "tlsHostMismatchHint": MessageLookupByLibrary.simpleMessage(
+      "Сертифікат сервера видано для іншого домену.",
+    ),
+    "tlsSelfSignedHint": MessageLookupByLibrary.simpleMessage(
+      "Сервер надіслав самопідписаний сертифікат. Найімовірніше, з\'єднання перехоплює антивірус, корпоративний проксі або captive-портал.",
+    ),
+    "tlsUntrustedChainHint": MessageLookupByLibrary.simpleMessage(
+      "Сертифікат сервера не пройшов перевірку: ланцюжок сертифікатів неповний або його корінь не є довіреним на цьому пристрої. Якщо сервер підписки ваш — переконайтеся, що він віддає повний ланцюжок (fullchain.pem). Інакше встановіть оновлення системи та спробуйте ще раз.",
+    ),
     "toggle": MessageLookupByLibrary.simpleMessage("Перемкнути"),
     "tonalSpotScheme": MessageLookupByLibrary.simpleMessage("Тональний акцент"),
     "tooFrequentOperation": MessageLookupByLibrary.simpleMessage(
       "Будь ласка, зачекайте 15 секунд перед повторним оновленням",
     ),
-    "tlsCertificateExpiredHint": MessageLookupByLibrary.simpleMessage(
-        "Термін дії сертифіката сервера минув або ще не почався. Перевірте дату й час на пристрої."),
-    "tlsErrorDetails":
-        MessageLookupByLibrary.simpleMessage("Технічні подробиці"),
-    "tlsGenericHint": MessageLookupByLibrary.simpleMessage(
-        "Не вдалося завершити TLS-рукостискання із сервером."),
-    "tlsHandshakeFailed": MessageLookupByLibrary.simpleMessage(
-        "Не вдалося встановити захищене з'єднання (TLS)"),
-    "tlsHostMismatchHint": MessageLookupByLibrary.simpleMessage(
-        "Сертифікат сервера видано для іншого домену."),
-    "tlsSelfSignedHint": MessageLookupByLibrary.simpleMessage(
-        "Сервер надіслав самопідписаний сертифікат. Найімовірніше, з'єднання перехоплює антивірус, корпоративний проксі або captive-портал."),
-    "tlsUntrustedChainHint": MessageLookupByLibrary.simpleMessage(
-        "Сертифікат сервера не пройшов перевірку: ланцюжок сертифікатів неповний або його корінь не є довіреним на цьому пристрої. Якщо сервер підписки ваш — переконайтеся, що він віддає повний ланцюжок (fullchain.pem). Інакше встановіть оновлення системи та спробуйте ще раз."),
     "tools": MessageLookupByLibrary.simpleMessage("Налаштування"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("Tproxy-порт"),
     "traffic": MessageLookupByLibrary.simpleMessage("Трафік"),

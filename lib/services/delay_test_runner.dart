@@ -12,9 +12,12 @@ class DelayTestRunner {
   DelayTestRunner({
     required this.probe,
     required this.onDelay,
-    this.concurrency = 4,
+    this.concurrency = defaultConcurrency,
     this.timeout = const Duration(seconds: 7),
   }) : assert(concurrency > 0, 'concurrency must be positive');
+
+  // The native queue in core/delay.go enforces the same process-wide ceiling.
+  static const defaultConcurrency = 10;
 
   final Future<Delay> Function(DelayTestTarget target) probe;
   final void Function(Delay delay) onDelay;

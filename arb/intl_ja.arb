@@ -515,5 +515,18 @@
   "tlsHostMismatchHint": "サーバー証明書は別のドメイン向けに発行されています。",
   "tlsSelfSignedHint": "サーバーが自己署名証明書を提示しました。ウイルス対策ソフト、社内プロキシ、またはキャプティブポータルが接続を傍受している可能性があります。",
   "tlsGenericHint": "サーバーとの TLS ハンドシェイクに失敗しました。",
-  "tlsErrorDetails": "技術的な詳細"
+  "tlsErrorDetails": "技術的な詳細",
+  "ipDetailsTitle": "IPアドレスの詳細",
+  "ipDetailsAddress": "IPアドレス",
+  "ipDetailsCountry": "国 / 地域",
+  "ipDetailsRegionCity": "都道府県 / 都市",
+  "ipDetailsDomain": "ドメイン",
+  "ipDetailsUnavailable": "情報なし",
+  "ipDetailsLoading": "IPアドレスの詳細を読み込み中…",
+  "ipDetailsLoadFailed": "追加情報を読み込めませんでした。IPアドレスは引き続き表示されています。",
+  "ipDetailsRetry": "再試行",
+  "ipDetailsRefresh": "IPを更新",
+  "ipDetailsOpenInBrowser": "IPアドレスの詳細をブラウザで開く",
+  "ipDetailsOpenFailed": "ブラウザを開けませんでした。",
+  "ipDetailsEnglishFallback": "この言語では、位置情報サービスが地域名と都市名を英語で提供します。"
 }

@@ -224,5 +224,19 @@
   "tlsHostMismatchHint": "Palvelimen varmenne on myönnetty toiselle verkkotunnukselle.",
   "tlsSelfSignedHint": "Palvelin esitti itse allekirjoitetun varmenteen. Yhteyttä sieppaa todennäköisesti virustorjunta, yrityksen välityspalvelin tai kirjautumisportaali.",
   "tlsGenericHint": "TLS-kättely palvelimen kanssa epäonnistui.",
-  "tlsErrorDetails": "Tekniset tiedot"
+  "tlsErrorDetails": "Tekniset tiedot",
+  "ipDetailsTitle": "IP-osoitteen tiedot",
+  "ipDetailsAddress": "IP-osoite",
+  "ipDetailsCountry": "Maa / Alue",
+  "ipDetailsRegionCity": "Maakunta / Kaupunki",
+  "ipDetailsDomain": "Verkkotunnus",
+  "ipDetailsUnavailable": "Ei saatavilla",
+  "ipDetailsLoading": "Ladataan IP-osoitteen tietoja…",
+  "ipDetailsLoadFailed": "Lisätietojen lataaminen epäonnistui. IP-osoite on edelleen näkyvissä.",
+  "ipDetailsRetry": "Yritä uudelleen",
+  "ipDetailsRefresh": "Päivitä IP",
+  "ipDetailsOpenInBrowser": "Avaa IP-osoitteen tiedot selaimessa",
+  "ipDetailsOpenFailed": "Selaimen avaaminen epäonnistui.",
+  "ipDetailsEnglishFallback": "Sijaintipalvelu tarjoaa alueiden ja kaupunkien nimet tällä kielellä vain englanniksi.",
+  "detectionTip": "Tiedot perustuvat kolmannen osapuolen palveluun ja ovat suuntaa antavia."
 }

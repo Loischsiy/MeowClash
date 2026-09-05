@@ -543,5 +543,18 @@
   "tlsHostMismatchHint": "Сертификат сервера выдан для другого домена.",
   "tlsSelfSignedHint": "Сервер прислал самоподписанный сертификат. Скорее всего, соединение перехватывает антивирус, корпоративный прокси или captive-портал.",
   "tlsGenericHint": "Не удалось завершить TLS-рукопожатие с сервером.",
-  "tlsErrorDetails": "Технические подробности"
+  "tlsErrorDetails": "Технические подробности",
+  "ipDetailsTitle": "Подробная информация об IP",
+  "ipDetailsAddress": "IP-адрес",
+  "ipDetailsCountry": "Страна / Регион",
+  "ipDetailsRegionCity": "Область / Город",
+  "ipDetailsDomain": "Домен",
+  "ipDetailsUnavailable": "Нет данных",
+  "ipDetailsLoading": "Загрузка сведений об IP…",
+  "ipDetailsLoadFailed": "Не удалось загрузить дополнительные сведения. IP-адрес по-прежнему доступен.",
+  "ipDetailsRetry": "Повторить",
+  "ipDetailsRefresh": "Обновить IP",
+  "ipDetailsOpenInBrowser": "Открыть сведения об IP в браузере",
+  "ipDetailsOpenFailed": "Не удалось открыть браузер.",
+  "ipDetailsEnglishFallback": "Для этого языка сервис предоставляет названия регионов и городов на английском."
 }

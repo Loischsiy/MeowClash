@@ -414,6 +414,33 @@ class MessageLookup extends MessageLookupByLibrary {
     "interval": MessageLookupByLibrary.simpleMessage("Интервал"),
     "intranetIP": MessageLookupByLibrary.simpleMessage("Внутренний IP"),
     "invalidQrMessage": MessageLookupByLibrary.simpleMessage("Неверный QR-код"),
+    "ipDetailsAddress": MessageLookupByLibrary.simpleMessage("IP-адрес"),
+    "ipDetailsCountry": MessageLookupByLibrary.simpleMessage("Страна / Регион"),
+    "ipDetailsDomain": MessageLookupByLibrary.simpleMessage("Домен"),
+    "ipDetailsEnglishFallback": MessageLookupByLibrary.simpleMessage(
+      "Для этого языка сервис предоставляет названия регионов и городов на английском.",
+    ),
+    "ipDetailsLoadFailed": MessageLookupByLibrary.simpleMessage(
+      "Не удалось загрузить дополнительные сведения. IP-адрес по-прежнему доступен.",
+    ),
+    "ipDetailsLoading": MessageLookupByLibrary.simpleMessage(
+      "Загрузка сведений об IP…",
+    ),
+    "ipDetailsOpenFailed": MessageLookupByLibrary.simpleMessage(
+      "Не удалось открыть браузер.",
+    ),
+    "ipDetailsOpenInBrowser": MessageLookupByLibrary.simpleMessage(
+      "Открыть сведения об IP в браузере",
+    ),
+    "ipDetailsRefresh": MessageLookupByLibrary.simpleMessage("Обновить IP"),
+    "ipDetailsRegionCity": MessageLookupByLibrary.simpleMessage(
+      "Область / Город",
+    ),
+    "ipDetailsRetry": MessageLookupByLibrary.simpleMessage("Повторить"),
+    "ipDetailsTitle": MessageLookupByLibrary.simpleMessage(
+      "Подробная информация об IP",
+    ),
+    "ipDetailsUnavailable": MessageLookupByLibrary.simpleMessage("Нет данных"),
     "ipcidr": MessageLookupByLibrary.simpleMessage("IPCIDR"),
     "ipv6Desc": MessageLookupByLibrary.simpleMessage(
       "При включении будет возможно получать IPv6 трафик",
@@ -878,25 +905,32 @@ class MessageLookup extends MessageLookupByLibrary {
     "tight": MessageLookupByLibrary.simpleMessage("Плотный"),
     "time": MessageLookupByLibrary.simpleMessage("Время"),
     "tip": MessageLookupByLibrary.simpleMessage("Подсказка"),
+    "tlsCertificateExpiredHint": MessageLookupByLibrary.simpleMessage(
+      "Срок действия сертификата сервера истёк или ещё не начался. Проверьте дату и время на устройстве.",
+    ),
+    "tlsErrorDetails": MessageLookupByLibrary.simpleMessage(
+      "Технические подробности",
+    ),
+    "tlsGenericHint": MessageLookupByLibrary.simpleMessage(
+      "Не удалось завершить TLS-рукопожатие с сервером.",
+    ),
+    "tlsHandshakeFailed": MessageLookupByLibrary.simpleMessage(
+      "Не удалось установить защищённое соединение (TLS)",
+    ),
+    "tlsHostMismatchHint": MessageLookupByLibrary.simpleMessage(
+      "Сертификат сервера выдан для другого домена.",
+    ),
+    "tlsSelfSignedHint": MessageLookupByLibrary.simpleMessage(
+      "Сервер прислал самоподписанный сертификат. Скорее всего, соединение перехватывает антивирус, корпоративный прокси или captive-портал.",
+    ),
+    "tlsUntrustedChainHint": MessageLookupByLibrary.simpleMessage(
+      "Сертификат сервера не прошёл проверку: цепочка сертификатов неполная или её корень не является доверенным на этом устройстве. Если сервер подписки ваш — убедитесь, что он отдаёт полную цепочку (fullchain.pem). Иначе установите обновления системы и попробуйте снова.",
+    ),
     "toggle": MessageLookupByLibrary.simpleMessage("Переключить"),
     "tonalSpotScheme": MessageLookupByLibrary.simpleMessage("Тональный акцент"),
     "tooFrequentOperation": MessageLookupByLibrary.simpleMessage(
       "Пожалуйста, подождите 15 секунд перед повторным обновлением",
     ),
-    "tlsCertificateExpiredHint": MessageLookupByLibrary.simpleMessage(
-        "Срок действия сертификата сервера истёк или ещё не начался. Проверьте дату и время на устройстве."),
-    "tlsErrorDetails":
-        MessageLookupByLibrary.simpleMessage("Технические подробности"),
-    "tlsGenericHint": MessageLookupByLibrary.simpleMessage(
-        "Не удалось завершить TLS-рукопожатие с сервером."),
-    "tlsHandshakeFailed": MessageLookupByLibrary.simpleMessage(
-        "Не удалось установить защищённое соединение (TLS)"),
-    "tlsHostMismatchHint": MessageLookupByLibrary.simpleMessage(
-        "Сертификат сервера выдан для другого домена."),
-    "tlsSelfSignedHint": MessageLookupByLibrary.simpleMessage(
-        "Сервер прислал самоподписанный сертификат. Скорее всего, соединение перехватывает антивирус, корпоративный прокси или captive-портал."),
-    "tlsUntrustedChainHint": MessageLookupByLibrary.simpleMessage(
-        "Сертификат сервера не прошёл проверку: цепочка сертификатов неполная или её корень не является доверенным на этом устройстве. Если сервер подписки ваш — убедитесь, что он отдаёт полную цепочку (fullchain.pem). Иначе установите обновления системы и попробуйте снова."),
     "tools": MessageLookupByLibrary.simpleMessage("Настройки"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("Tproxy-порт"),
     "traffic": MessageLookupByLibrary.simpleMessage("Трафик"),

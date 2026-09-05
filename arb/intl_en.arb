@@ -542,5 +542,18 @@
   "tlsHostMismatchHint": "The server certificate was issued for a different domain.",
   "tlsSelfSignedHint": "The server presented a self-signed certificate. The connection is most likely being intercepted by an antivirus, a corporate proxy, or a captive portal.",
   "tlsGenericHint": "The TLS handshake with the server failed.",
-  "tlsErrorDetails": "Technical details"
+  "tlsErrorDetails": "Technical details",
+  "ipDetailsTitle": "IP details",
+  "ipDetailsAddress": "IP address",
+  "ipDetailsCountry": "Country / Region",
+  "ipDetailsRegionCity": "Region / City",
+  "ipDetailsDomain": "Domain",
+  "ipDetailsUnavailable": "Not available",
+  "ipDetailsLoading": "Loading IP details…",
+  "ipDetailsLoadFailed": "Could not load additional details. Your IP address is still shown.",
+  "ipDetailsRetry": "Retry",
+  "ipDetailsRefresh": "Refresh IP",
+  "ipDetailsOpenInBrowser": "Open IP details in browser",
+  "ipDetailsOpenFailed": "Could not open the browser.",
+  "ipDetailsEnglishFallback": "The location service provides region and city names in English for this language."
 }

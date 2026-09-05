@@ -543,5 +543,18 @@
   "tlsHostMismatchHint": "Сертифікат сервера видано для іншого домену.",
   "tlsSelfSignedHint": "Сервер надіслав самопідписаний сертифікат. Найімовірніше, з'єднання перехоплює антивірус, корпоративний проксі або captive-портал.",
   "tlsGenericHint": "Не вдалося завершити TLS-рукостискання із сервером.",
-  "tlsErrorDetails": "Технічні подробиці"
+  "tlsErrorDetails": "Технічні подробиці",
+  "ipDetailsTitle": "Докладна інформація про IP",
+  "ipDetailsAddress": "IP-адреса",
+  "ipDetailsCountry": "Країна / Регіон",
+  "ipDetailsRegionCity": "Область / Місто",
+  "ipDetailsDomain": "Домен",
+  "ipDetailsUnavailable": "Немає даних",
+  "ipDetailsLoading": "Завантаження відомостей про IP…",
+  "ipDetailsLoadFailed": "Не вдалося завантажити додаткові відомості. IP-адреса залишається доступною.",
+  "ipDetailsRetry": "Повторити",
+  "ipDetailsRefresh": "Оновити IP",
+  "ipDetailsOpenInBrowser": "Відкрити відомості про IP у браузері",
+  "ipDetailsOpenFailed": "Не вдалося відкрити браузер.",
+  "ipDetailsEnglishFallback": "Для цієї мови сервіс надає назви регіонів і міст англійською."
 }

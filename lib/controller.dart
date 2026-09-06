@@ -474,6 +474,12 @@ class AppController {
 
   void setProfileAndAutoApply(Profile profile) {
     _ref.read(profilesProvider.notifier).setProfile(profile);
+    // The default subscription already exists on first launch, but is not
+    // selected yet. Saving it should also activate it, just like adding the
+    // first profile, without replacing an existing selection.
+    if (_ref.read(currentProfileIdProvider) == null) {
+      _ref.read(currentProfileIdProvider.notifier).value = profile.id;
+    }
     if (profile.id == _ref.read(currentProfileIdProvider)) {
       applyProfileDebounce(silence: true);
     }

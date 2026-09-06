@@ -72,7 +72,8 @@ class ApplicationState extends ConsumerState<Application> {
     );
     _syncGroupPolling();
     _autoUpdateProfilesTask();
-    _autoUpdateProvidersTask();
+    // Android has one provider refresh owner: the background service engine.
+    if (!Platform.isAndroid) _autoUpdateProvidersTask();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       final currentContext = globalState.navigatorKey.currentContext;
       if (currentContext != null) {

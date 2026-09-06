@@ -195,11 +195,16 @@ func handleAction(action *Action, result ActionResult) {
 			result.success(err.Error())
 			return
 		}
-		providerName := params["providerName"]
-		data := params["data"]
-		handleSideLoadExternalProvider(providerName, []byte(data), func(value string) {
-			result.success(value)
-		})
+		payload, err := decodeProviderPayload(params)
+		if err == nil {
+			err = applyProviderRefresh(params, payload)
+		}
+		if err != nil {
+			result.success(err.Error())
+			return
+		}
+		result.success("")
+		sendMessage(Message{Type: LoadedMessage, Data: params["providerName"]})
 		return
 	case startLogMethod:
 		handleStartLog()

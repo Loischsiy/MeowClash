@@ -419,7 +419,7 @@ func handleGetExternalProviders() string {
 	defer runLock.Unlock()
 	externalProviders = getExternalProvidersRaw()
 	eps := make([]ExternalProvider, 0)
-	for _, p := range externalProviders {
+	for _, p := range externalProviderCandidates() {
 		externalProvider, err := toExternalProvider(p)
 		if err != nil {
 			continue

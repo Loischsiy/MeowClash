@@ -8,6 +8,7 @@ import 'package:meowclash/common/common.dart';
 import 'package:meowclash/enum/enum.dart';
 import 'package:meowclash/plugins/tile.dart';
 import 'package:meowclash/providers/providers.dart';
+import 'package:meowclash/services/image_memory.dart';
 import 'package:meowclash/state.dart';
 
 class AppStateManager extends ConsumerStatefulWidget {
@@ -124,6 +125,7 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
       case AppLifecycleState.inactive:
         unawaited(globalState.appController.savePreferences());
       case AppLifecycleState.paused:
+        releaseUnusedUiImages(PaintingBinding.instance.imageCache);
         unawaited(globalState.appController.savePreferences());
         if (Platform.isAndroid) {
           // The VPN foreground service keeps this process alive (and unfrozen)
@@ -135,6 +137,7 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
           globalState.stopUpdateTasks();
         }
       case AppLifecycleState.hidden:
+        releaseUnusedUiImages(PaintingBinding.instance.imageCache);
         // Desktop window hidden (tray/minimize). Falling through to the
         // generic resume branch cancelled the render pause armed by
         // window.hide(), so the engine kept rasterizing dashboard animations

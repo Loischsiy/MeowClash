@@ -617,7 +617,7 @@ class GlobalState {
           final file = File(path);
           if (!await file.exists() || await file.length() == 0) {
             try {
-              await clashCore.downloadAndDecryptProvider(
+              await ClashCore.downloadAndDecryptProvider(
                 profile: profile,
                 providerName: key.toString(),
                 url: proxyProvider["url"].toString(),
@@ -651,7 +651,7 @@ class GlobalState {
           final file = File(path);
           if (!await file.exists() || await file.length() == 0) {
             try {
-              await clashCore.downloadAndDecryptProvider(
+              await ClashCore.downloadAndDecryptProvider(
                 profile: profile,
                 providerName: key.toString(),
                 url: ruleProvider["url"].toString(),
@@ -958,7 +958,9 @@ class GlobalState {
     return evaluateProfileScript(
       currentScript.content,
       config,
-      httpProxy: MeowClashHttpOverrides.currentProxy,
+      // The Android service has no AppState. Its sockets use system/TUN
+      // routing, including when a profile script runs during a tile cold start.
+      httpProxy: isService ? 'DIRECT' : MeowClashHttpOverrides.currentProxy,
       proxyBypassHost: localhost,
     );
   }

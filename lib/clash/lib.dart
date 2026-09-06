@@ -10,10 +10,12 @@ import 'package:meowclash/common/common.dart';
 import 'package:meowclash/enum/enum.dart';
 import 'package:meowclash/models/models.dart';
 import 'package:meowclash/plugins/service.dart';
+import 'package:meowclash/services/provider_refresh_plan.dart';
 import 'package:meowclash/state.dart';
 
 import 'generated/clash_ffi.dart';
 import 'interface.dart';
+import 'native_config.dart';
 
 class ClashLib extends ClashHandlerInterface with AndroidClashInterface {
 
@@ -32,6 +34,25 @@ class ClashLib extends ClashHandlerInterface with AndroidClashInterface {
 
   @override
   Future<bool> preload() => _canSendCompleter.future;
+
+  @override
+  Future<String> setupConfig(SetupParams setupParams) {
+    final profile = globalState.config.currentProfile;
+    final plan = ProviderRefreshPlan.forProfile(
+      profileId: profile?.id ?? '',
+      userAgent: globalState.ua,
+      config: setupParams.config,
+      credentials: profile?.providerHeaders ?? const {},
+    );
+    return invoke<String>(
+      method: ActionMethod.setupConfig,
+      data: json.encode({
+        ...setupParams.toJson(),
+        providerRefreshMetadataKey: plan.toJson(),
+      }),
+      timeout: const Duration(minutes: 2),
+    );
+  }
 
   Future<void> _initService() async {
     commonPrint.log("[DART] ClashLib._initService: Starting service initialization...");
@@ -247,16 +268,11 @@ class ClashLibHandler {
 
   Future<Map<String, dynamic>> getConfig(String id) async {
     final path = await appPath.getProfilePath(id);
-    final pathChar = path.toNativeUtf8().cast<Char>();
-    final configRaw = clashFFI.getConfig(pathChar);
-    final configString = configRaw.cast<Utf8>().toDartString();
-    if (configString.isEmpty) {
-      return {};
-    }
-    final config = json.decode(configString);
-    malloc.free(pathChar);
-    clashFFI.freeCString(configRaw);
-    return config;
+    return readNativeConfig(
+      path,
+      getConfig: clashFFI.getConfig,
+      freeCString: clashFFI.freeCString,
+    );
   }
 
   Future<String> quickStart(

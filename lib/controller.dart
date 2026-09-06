@@ -696,6 +696,7 @@ class AppController {
   }
 
   Future<void> autoUpdateProviders() async {
+    if (Platform.isAndroid) return; // Owned by the service, not this UI isolate.
     final isCoreInit = await clashCore.isInit;
     if (!isCoreInit) return;
 

@@ -9,6 +9,10 @@ import 'package:meowclash/enum/enum.dart';
 import 'package:meowclash/plugins/app.dart';
 import 'package:meowclash/plugins/tile.dart';
 import 'package:meowclash/plugins/vpn.dart';
+import 'package:meowclash/services/image_memory.dart';
+import 'package:meowclash/services/provider_payload.dart';
+import 'package:meowclash/services/provider_refresh_plan.dart';
+import 'package:meowclash/services/provider_refresh_service.dart';
 import 'package:meowclash/state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -24,6 +28,7 @@ Future<void> main() async {
   runZonedGuarded(() async {
     globalState.isService = false;
     WidgetsFlutterBinding.ensureInitialized();
+    configureUiImageCache(PaintingBinding.instance.imageCache);
     commonPrint.log("=== [DART] main entrypoint started ===");
 
     // Enable Skia graphics for better performance on desktop
@@ -103,6 +108,18 @@ Future<void> _service(List<String> flags) async {
       Isolate.current.kill(priority: Isolate.immediate);
       return;
     }
+
+    // This owner survives Activity/UI disposal. It does not read UI state or
+    // stale SharedPreferences caches; setup IPC supplies the applied snapshot.
+    final providerDownloader = ProviderPayloadDownloader();
+    final providerUpdates = ProviderRefreshService(
+      invokeCore: clashLibHandler.invokeAction,
+      isRunning: () => clashLibHandler.getRunTime() != null,
+      fetch: providerDownloader.fetch,
+      modifiedAt: providerCacheModifiedAt,
+      persist: writeProviderCache,
+      log: commonPrint.log,
+    );
 
     commonPrint.log("[DART] Adding tile listener...");
     tile?.addListener(
@@ -212,17 +229,26 @@ Future<void> _service(List<String> flags) async {
             commonPrint.log("TileService: Setup params ready");
 
             commonPrint.log("TileService: Starting ClashCore with quickStart");
-            final res = await clashLibHandler.quickStart(
-              InitParams(
-                homeDir: homeDirPath,
-                version: version,
+            final refreshPlan = ProviderRefreshPlan.forProfile(
+              profileId: profileId,
+              userAgent: globalState.ua,
+              config: params.config,
+              credentials: globalState.config.currentProfile?.providerHeaders ?? const {},
+            );
+            final res = await providerUpdates.configure(
+              refreshPlan,
+              () => clashLibHandler.quickStart(
+                InitParams(homeDir: homeDirPath, version: version),
+                params.copyWith(config: refreshPlan.prepareCoreConfig(params.config)),
+                globalState.getCoreState(),
               ),
-              params,
-              globalState.getCoreState(),
+              succeeded: (result) => result.isEmpty,
             );
             commonPrint.log("TileService: quickStart result: $res");
 
             if (res.isNotEmpty) {
+              providerUpdates.dispose();
+              providerDownloader.close();
               commonPrint.log("TileService: Start failed with error: $res");
               unawaited(app?.tip("Start failed: $res"));
               try {
@@ -249,9 +275,12 @@ Future<void> _service(List<String> flags) async {
 
             commonPrint.log("TileService: Starting listener");
             clashLibHandler.startListener();
+            providerUpdates.resume();
             commonPrint
                 .log("=== TileService onStart completed successfully ===");
           } catch (e, stackTrace) {
+            providerUpdates.dispose();
+            providerDownloader.close();
             commonPrint.log("=== TileService onStart ERROR ===");
             commonPrint.log("Error: $e");
             commonPrint.log("StackTrace: $stackTrace");
@@ -266,6 +295,8 @@ Future<void> _service(List<String> flags) async {
           }
         },
         onStop: () async {
+          providerUpdates.dispose();
+          providerDownloader.close();
           try {
             unawaited(app?.tip(appLocalizations.stopVpn));
             clashLibHandler.stopListener();
@@ -327,7 +358,7 @@ Future<void> _service(List<String> flags) async {
     if (!quickStart) {
       // App is in memory - set up IPC for communication with main isolate
       commonPrint.log("[DART] Not quickStart, calling _handleMainIpc");
-      _handleMainIpc(clashLibHandler);
+      _handleMainIpc(clashLibHandler, providerUpdates);
     } else {
       // App was not in memory - VPN will be started via pending action triggered by signalServiceReady()
       // The onStart callback in tile listener will handle the actual VPN startup
@@ -341,7 +372,10 @@ Future<void> _service(List<String> flags) async {
   });
 }
 
-void _handleMainIpc(ClashLibHandler clashLibHandler) async {
+void _handleMainIpc(
+  ClashLibHandler clashLibHandler,
+  ProviderRefreshService providerUpdates,
+) async {
   commonPrint.log("[DART] _handleMainIpc: Looking up mainIsolate port...");
 
   SendPort? sendPort;
@@ -369,7 +403,7 @@ void _handleMainIpc(ClashLibHandler clashLibHandler) async {
 
   final serviceReceiverPort = ReceivePort();
   serviceReceiverPort.listen((message) async {
-    final res = await clashLibHandler.invokeAction(message);
+    final res = await providerUpdates.handleAction(message as String);
     safeSend(res);
   });
   commonPrint.log("[DART] _handleMainIpc: Sending service port to mainIsolate");

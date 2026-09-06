@@ -219,7 +219,7 @@ class ClashCore {
     );
   }
 
-  Future<void> downloadAndDecryptProvider({
+  static Future<void> downloadAndDecryptProvider({
     required Profile profile,
     required String providerName,
     required String url,
@@ -254,6 +254,11 @@ class ClashCore {
   Future<String> updateExternalProvider({
     required String providerName,
   }) async {
+    // The service owns Android refreshes, including manual ones, so closing
+    // the UI cannot abort decryption and a timer cannot race a manual download.
+    if (Platform.isAndroid) {
+      return clashInterface.updateExternalProvider(providerName);
+    }
     final currentProfile = globalState.config.currentProfile;
     if (currentProfile != null) {
       final profileId = currentProfile.id;

@@ -99,27 +99,11 @@ func extractProxyDescriptionsFromRaw(rawConfig *config.RawConfig) {
 }
 
 // proxiesWithDescriptions injects serverDescription for each proxy in API response.
-func proxiesWithDescriptions() map[string]interface{} {
+func proxiesWithDescriptions() map[string]json.RawMessage {
 	proxyDescLock.RLock()
 	descSnapshot := proxyDescriptions
 	proxyDescLock.RUnlock()
-	proxies := proxiesWithProviders()
-	result := make(map[string]interface{}, len(proxies))
-	for name, proxy := range proxies {
-		data, err := json.Marshal(proxy)
-		if err != nil {
-			continue
-		}
-		item := make(map[string]interface{})
-		if err := json.Unmarshal(data, &item); err != nil {
-			continue
-		}
-		if desc, ok := descSnapshot[name]; ok && desc != "" {
-			item["serverDescription"] = desc
-		}
-		result[name] = item
-	}
-	return result
+	return snapshotProxyJSON(proxiesWithProviders(), descSnapshot)
 }
 
 func getExternalProvidersRaw() map[string]cp.Provider {

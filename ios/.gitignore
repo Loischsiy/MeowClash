@@ -1,0 +1,13 @@
+Pods/
+.symlinks/
+Flutter/Generated.xcconfig
+Flutter/flutter_export_environment.sh
+Flutter/ephemeral/
+Flutter/App.framework/
+Flutter/Flutter.framework/
+Flutter/Flutter.podspec
+Runner/GeneratedPluginRegistrant.*
+Runner/Assets.xcassets/AppIcon.appiconset/Icon-*.png
+Config/Signing.xcconfig
+**/xcuserdata/
+*.xcuserstate

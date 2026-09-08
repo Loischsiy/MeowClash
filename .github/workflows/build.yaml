@@ -12,6 +12,7 @@ on:
           - windows
           - linux
           - macos
+          - ios
       arch:
         description: 'Architecture'
         required: false
@@ -115,7 +116,7 @@ jobs:
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
-          name: artifact-android-arm64-v8a
+          name: artifact-android
           path: ./dist
           overwrite: true
 
@@ -155,16 +156,75 @@ jobs:
 
       - name: Build
         run: |
-          $env:ENV_FLAG = ""
-          if ("${{ github.event.inputs.env }}" -eq "stable") { $env:ENV_FLAG = "--env stable" }
-          elseif ("${{ github.event.inputs.env }}" -eq "pre") { $env:ENV_FLAG = "--env pre" }
-          elseif ("${{ env.IS_STABLE }}" -eq "true") { $env:ENV_FLAG = "--env stable" }
-          dart setup.dart windows --arch amd64 $env:ENV_FLAG
+          $envFlag = @()
+          if ("${{ github.event.inputs.env }}" -eq "stable") { $envFlag = @("--env", "stable") }
+          elseif ("${{ github.event.inputs.env }}" -eq "pre") { $envFlag = @("--env", "pre") }
+          elseif ("${{ env.IS_STABLE }}" -eq "true") { $envFlag = @("--env", "stable") }
+          dart setup.dart windows --arch amd64 @envFlag
 
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
           name: artifact-windows-amd64
+          path: ./dist
+          overwrite: true
+
+  build-windows-arm64:
+    runs-on: windows-11-arm
+    if: >-
+      (github.event_name == 'push') ||
+      (github.event.inputs.platform == 'windows' && (github.event.inputs.arch == 'arm64' || github.event.inputs.arch == 'all' || github.event.inputs.arch == ''))
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup flutter_distributor
+        run: |
+          if (Test-Path plugins/flutter_distributor) { Remove-Item -Recurse -Force plugins/flutter_distributor }
+          git clone --depth 1 https://github.com/leanflutter/flutter_distributor plugins/flutter_distributor
+          Remove-Item -Recurse -Force plugins/flutter_distributor/.git
+
+      - name: Setup native ARM64 Rust and installer
+        shell: pwsh
+        run: |
+          Invoke-WebRequest https://win.rustup.rs/aarch64 -OutFile "$env:RUNNER_TEMP/rustup-init.exe"
+          & "$env:RUNNER_TEMP/rustup-init.exe" -y --profile minimal --default-toolchain stable
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          "$env:USERPROFILE\.cargo\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          choco install innosetup --yes --no-progress
+          if ($LASTEXITCODE -notin @(0, 1641, 3010)) { exit $LASTEXITCODE }
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.0'
+          cache-dependency-path: core/go.sum
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: master
+          flutter-version: 3.44.1
+          cache: true
+
+      - name: Get Flutter Dependency
+        run: |
+          flutter --version
+          flutter clean
+          flutter pub get
+
+      - name: Build
+        run: |
+          $envFlag = @()
+          if ("${{ github.event.inputs.env }}" -eq "stable") { $envFlag = @("--env", "stable") }
+          elseif ("${{ github.event.inputs.env }}" -eq "pre") { $envFlag = @("--env", "pre") }
+          elseif ("${{ env.IS_STABLE }}" -eq "true") { $envFlag = @("--env", "stable") }
+          dart setup.dart windows --arch arm64 @envFlag
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifact-windows-arm64
           path: ./dist
           overwrite: true
 
@@ -388,9 +448,47 @@ jobs:
           path: ./dist
           overwrite: true
 
+  build-ios-arm64:
+    runs-on: macos-15
+    if: github.event.inputs.platform == 'ios' && (github.event.inputs.arch == 'arm64' || github.event.inputs.arch == 'all' || github.event.inputs.arch == '')
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.26.0'
+          cache-dependency-path: core/go.sum
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.44.1
+          cache: true
+      - name: Prepare iOS dependencies
+        run: |
+          xcodebuild -version
+          flutter pub get
+      - name: Build unsigned iOS device app
+        shell: bash
+        env:
+          APP_ENV: ${{ inputs.env || 'pre' }}
+        run: |
+          set -euo pipefail
+          dart setup.dart ios --arch arm64 --env "$APP_ENV" 2>&1 | tee setup-ios.log
+          test -d build/ios/iphoneos/Runner.app/PlugIns/PacketTunnel.appex
+          file build/ios/iphoneos/Runner.app/PlugIns/PacketTunnel.appex/PacketTunnel
+      - uses: actions/upload-artifact@v4
+        with:
+          name: artifact-ios-arm64-unsigned
+          path: dist/*.ipa
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: setup-log-ios
+          path: setup-ios.log
+
   upload:
     permissions: write-all
-    needs: [ build-android, build-windows-amd64, build-linux-amd64, build-linux-arm64, build-macos-amd64, build-macos-arm64 ]
+    needs: [ build-android, build-windows-amd64, build-windows-arm64, build-ios-arm64, build-linux-amd64, build-linux-arm64, build-macos-amd64, build-macos-arm64 ]
     runs-on: ubuntu-latest
     if: github.event_name == 'push'
     steps:
@@ -412,73 +510,10 @@ jobs:
           sed "s|VERSION|$version|g" ./.github/release_template.md > release.md
 
       - name: Rename release assets
+        shell: bash
         run: |
-          version=$(echo "${{ github.ref_name }}" | sed 's/^v//')
-          cd ./dist
-          find . -type f -not -name "*.sha256" | while read -r filepath; do
-            filename=$(basename "$filepath" | tr '[:upper:]' '[:lower:]')
-            ext=".${filepath##*.}"
-            if [[ "$filename" == *.tar.gz ]]; then
-              ext=".tar.gz"
-            fi
-            new_name=""
-            
-            if [[ "$filename" == *"android"* ]]; then
-              if [[ "$filename" == *"arm64"* || "$filename" == *"arm64-v8a"* ]]; then
-                new_name="MeowClash-${version}-android-arm64-v8a${ext}"
-              elif [[ "$filename" == *"armeabi-v7a"* || "$filename" == *"armv7"* || "$filename" == *"android-arm"* ]]; then
-                new_name="MeowClash-${version}-android-armeabi-v7a${ext}"
-              elif [[ "$filename" == *"x86_64"* || "$filename" == *"x64"* || "$filename" == *"x86-64"* ]]; then
-                new_name="MeowClash-${version}-android-x86_64${ext}"
-              else
-                new_name="MeowClash-${version}-android${ext}"
-              fi
-            elif [[ "$filename" == *"windows"* ]]; then
-              if [[ "$filename" == *"setup.exe" ]]; then
-                new_name="MeowClash-${version}-windows-amd64-setup.exe"
-              elif [[ "$filename" == *".zip" ]]; then
-                new_name="MeowClash-${version}-windows-amd64.zip"
-              fi
-            elif [[ "$filename" == *"macos"* || "$filename" == *"darwin"* ]]; then
-              if [[ "$filename" == *"arm64"* ]]; then
-                new_name="MeowClash-${version}-macos-arm64${ext}"
-              elif [[ "$filename" == *"amd64"* || "$filename" == *"x64"* || "$filename" == *"x86_64"* ]]; then
-                new_name="MeowClash-${version}-macos-amd64${ext}"
-              fi
-            elif [[ "$filename" == *"linux"* ]]; then
-              if [[ "$filename" == *"arm64"* ]]; then
-                if [[ "$filename" == *"portable"* || "$filename" == *.tar.gz ]]; then
-                  new_name="MeowClash-${version}-linux-arm64-portable.tar.gz"
-                else
-                  new_name="MeowClash-${version}-linux-arm64${ext}"
-                fi
-              elif [[ "$filename" == *"amd64"* || "$filename" == *"x64"* || "$filename" == *"x86_64"* ]]; then
-                if [[ "$filename" == *"portable"* || "$filename" == *.tar.gz ]]; then
-                  new_name="MeowClash-${version}-linux-amd64-portable.tar.gz"
-                elif [[ "$filename" == *".appimage" ]]; then
-                  new_name="MeowClash-${version}-linux-amd64.AppImage"
-                elif [[ "$filename" == *".deb" ]]; then
-                  new_name="MeowClash-${version}-linux-amd64.deb"
-                elif [[ "$filename" == *".rpm" ]]; then
-                  new_name="MeowClash-${version}-linux-amd64.rpm"
-                else
-                  new_name="MeowClash-${version}-linux-amd64${ext}"
-                fi
-              fi
-            fi
-            
-            if [ -n "$new_name" ]; then
-              if [ "$filepath" != "./$new_name" ]; then
-                echo "Renaming/moving: $filepath -> ./$new_name"
-                mv "$filepath" "./$new_name"
-              else
-                echo "File is already named correctly: $new_name"
-              fi
-            else
-              echo "Warning: Could not determine target filename pattern for: $filepath"
-            fi
-          done
-          find . -type d -empty -delete
+          version="${GITHUB_REF_NAME#v}"
+          python3 scripts/rename_release_assets.py "$version"
 
       - name: Generate sha256
         if: env.IS_STABLE == 'true'

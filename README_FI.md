@@ -221,3 +221,8 @@ Mukautettu `meowclash-*`-ohitusjärjestelmä poistettiin kokonaan. Aiemmin näm�
 
 ## 📄 Lisenssi
 MeowClash on avoimen lähdekoodin ohjelmisto ja julkaistu [GPL-3.0-lisenssillä](LICENSE).
+
+
+### iOS / ARM64
+
+[iOS- ja ARM64-koontiohjeet](docs/platform-builds.md)

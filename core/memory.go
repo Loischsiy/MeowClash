@@ -1,6 +1,7 @@
 package main
 
 import (
+	"runtime"
 	"runtime/debug"
 	"sync/atomic"
 )
@@ -11,7 +12,12 @@ import (
 // native allocations, or the size of a live proxy configuration.
 func init() {
 	debug.SetGCPercent(50)
-	debug.SetMemoryLimit(192 << 20)
+	if runtime.GOOS == "ios" {
+		// NE has a tight process budget; this is a soft Go heap limit, NOT RSS.
+		debug.SetMemoryLimit(32 << 20)
+	} else {
+		debug.SetMemoryLimit(192 << 20)
+	}
 }
 
 // OS memory-pressure callbacks and manual requests can arrive together. One

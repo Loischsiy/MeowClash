@@ -1,0 +1,5 @@
+// Change these together, then provision both targets and this App Group.
+APP_BUNDLE_ID = com.meowclash.app
+APP_GROUP_ID = group.$(APP_BUNDLE_ID)
+// Optional local, gitignored file: DEVELOPMENT_TEAM = YOUR_APPLE_TEAM_ID
+#include? "Signing.xcconfig"

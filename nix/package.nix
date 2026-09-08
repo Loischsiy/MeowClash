@@ -42,6 +42,18 @@ let
       tar --strip-components=1 -xzf "$src" -C "$out"
     '';
 
+  quickjsSource = runCommand "meowclash-quickjs-source"
+    {
+      src = fetchurl {
+        url = "https://codeload.github.com/abner/quickjs-c-bridge/tar.gz/7204d9bf1afbe0550d51d7decdcce398b2c22e1a";
+        hash = "sha256-QqybogqZTld4RDr2u5IW5kjuP90dZ4YMoGVwIF5Y7Tg=";
+      };
+    }
+    ''
+      mkdir -p "$out"
+      tar --strip-components=1 -xzf "$src" -C "$out"
+    '';
+
   core = buildGoModule {
     pname = "meowclash-core";
     version = appVersion;
@@ -122,6 +134,7 @@ flutter.buildFlutterApplication rec {
   ];
 
   preBuild = ''
+    export MEOW_QUICKJS_SOURCE=${quickjsSource}
     mkdir -p libclash/linux
     ln -sf ${core}/bin/MeowClashCore libclash/linux/MeowClashCore
 
@@ -183,6 +196,6 @@ flutter.buildFlutterApplication rec {
     homepage = "https://github.com/Loischsiy/MeowClash";
     license = lib.licenses.gpl3Only;
     mainProgram = "meowclash";
-    platforms = [ "x86_64-linux" ];
+    platforms = [ "x86_64-linux" "aarch64-linux" ];
   };
 }

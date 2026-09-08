@@ -12,6 +12,7 @@ import 'package:meowclash/services/subscription_notification_service.dart';
 import 'package:meowclash/services/ui_lifecycle.dart';
 import 'package:meowclash/enum/enum.dart';
 import 'package:meowclash/plugins/app.dart';
+import 'package:meowclash/plugins/ios.dart';
 import 'package:meowclash/providers/providers.dart';
 import 'package:meowclash/state.dart';
 import 'package:meowclash/widgets/dialog.dart';
@@ -106,9 +107,15 @@ class AppController {
   Future<void> restartCore() async {
     delayTests.cancel();
     commonPrint.log("restart core");
-    await clashService?.reStart();
+    final wasRunning = _ref.read(runTimeProvider.notifier).isStart;
+    if (Platform.isIOS) {
+      await iosVpn!.stop();
+      await iosVpn!.restartLocal();
+    } else {
+      await clashService?.reStart();
+    }
     await _initCore();
-    if (_ref.read(runTimeProvider.notifier).isStart) {
+    if (wasRunning) {
       await globalState.handleStart();
     }
   }
@@ -595,6 +602,7 @@ class AppController {
   }
 
   Future<Result<bool>> _requestAdmin(bool enableTun) async {
+    if (Platform.isIOS) return Result.success(false);
     final realTunEnable = _ref.read(realTunEnableProvider);
     if (enableTun != realTunEnable && realTunEnable == false) {
       final code = await system.authorizeCore();
@@ -721,7 +729,8 @@ class AppController {
   }
 
   Future<void> autoUpdateProviders() async {
-    if (Platform.isAndroid) return; // Owned by the service, not this UI isolate.
+    if (Platform.isAndroid)
+      return; // Owned by the service, not this UI isolate.
     final isCoreInit = await clashCore.isInit;
     if (!isCoreInit) return;
 
@@ -1226,7 +1235,7 @@ class AppController {
 
   Future<void> _initStatus() async {
     commonPrint.log("AppController: _initStatus starting...");
-    if (Platform.isAndroid) {
+    if (Platform.isAndroid || Platform.isIOS) {
       commonPrint.log("AppController: Updating start time...");
       await globalState.updateStartTime();
     }
@@ -1416,7 +1425,8 @@ class AppController {
   List<Proxy> _sortOfDelay({
     required List<Proxy> proxies,
     String? testUrl,
-  }) => getProxyDelaySnapshot().sort(proxies, testUrl);
+  }) =>
+      getProxyDelaySnapshot().sort(proxies, testUrl);
 
   List<Proxy> getSortProxies(List<Proxy> proxies, [String? url]) =>
       switch (_ref.read(proxiesStyleSettingProvider).sortType) {

@@ -202,8 +202,8 @@ func updateListeners() {
 	listener.ReCreateShadowSocks(general.ShadowSocksConfig, tunnel.Tunnel)
 	listener.ReCreateVmess(general.VmessConfig, tunnel.Tunnel)
 	listener.ReCreateTuic(general.TuicServer, tunnel.Tunnel)
-	// Desktop builds may include the `cmfa` tag, so gate TUN only on Android.
-	if runtime.GOOS != "android" {
+	// Mobile TUN descriptors are owned by VpnService / NetworkExtension.
+	if runtime.GOOS != "android" && runtime.GOOS != "ios" {
 		log.Infoln(
 			"[Listener] recreate TUN enable=%t device=%s stack=%s auto-route=%t",
 			general.Tun.Enable,
@@ -228,7 +228,7 @@ func stopListeners() {
 	listener.ReCreateShadowSocks("", tunnel.Tunnel)
 	listener.ReCreateVmess("", tunnel.Tunnel)
 	listener.ReCreateTuic(LC.TuicServer{}, tunnel.Tunnel)
-	if runtime.GOOS != "android" {
+	if runtime.GOOS != "android" && runtime.GOOS != "ios" {
 		log.Infoln("[Listener] stop TUN")
 		listener.ReCreateTun(LC.Tun{}, tunnel.Tunnel)
 	}
@@ -348,7 +348,12 @@ func setupConfig(params *SetupParams) error {
 	manualDelayProxies = proxyLookupCache{}
 
 	parseStart := time.Now()
-	currentConfig, err = config.ParseRawConfig(params.Config)
+	parsedConfig, err := config.ParseRawConfig(params.Config)
+	// A failed live iOS reload must not replace a working tunnel with defaults.
+	if err != nil && runtime.GOOS == "ios" {
+		return err
+	}
+	currentConfig = parsedConfig
 	if err != nil {
 		log.Errorln("[Config] ParseRawConfig failed, falling back to default: %v", err)
 		currentConfig, _ = config.ParseRawConfig(config.DefaultRawConfig())

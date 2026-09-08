@@ -11,6 +11,7 @@
       lib = nixpkgs.lib;
       supportedSystems = [
         "x86_64-linux"
+        "aarch64-linux"
       ];
       forAllSystems = lib.genAttrs supportedSystems;
       mkPkgs = system: import nixpkgs { inherit system; };

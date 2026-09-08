@@ -135,7 +135,7 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
     }
     // Desktop run status is owned here; Android must first synchronize with
     // its independent VPN service in the guarded resume branch below.
-    if (!Platform.isAndroid && globalState.isStart) {
+    if (!Platform.isAndroid && !Platform.isIOS && globalState.isStart) {
       unawaited(globalState.startUpdateTasks());
     }
   }
@@ -150,7 +150,7 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
       case AppLifecycleState.paused:
         unawaited(globalState.appController.savePreferences());
       case AppLifecycleState.resumed:
-        if (Platform.isAndroid) {
+        if (Platform.isAndroid || Platform.isIOS) {
           // Tile/notification actions may have changed the VPN while the UI
           // was unloaded. Never let a stale resume callback restart polling.
           await globalState.updateStartTime();

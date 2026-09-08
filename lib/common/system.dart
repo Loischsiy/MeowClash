@@ -40,6 +40,9 @@ class System {
     return switch (Platform.operatingSystem) {
       "macos" => (deviceInfo as MacOsDeviceInfo).majorVersion,
       "android" => (deviceInfo as AndroidDeviceInfo).version.sdkInt,
+      "ios" => int.tryParse(
+              (deviceInfo as IosDeviceInfo).systemVersion.split('.').first) ??
+          0,
       "windows" => (deviceInfo as WindowsDeviceInfo).majorVersion,
       String() => 0
     };
@@ -189,6 +192,7 @@ class System {
   }
 
   Future<AuthorizeCode> authorizeCore() async {
+    if (Platform.isIOS) return AuthorizeCode.none;
     if (Platform.isAndroid) {
       return AuthorizeCode.error;
     }
@@ -467,6 +471,9 @@ class System {
   }
 
   Future<void> exit() async {
+    // iOS apps must not terminate the process programmatically. The independent
+    // VPN is stopped only by an explicit VPN action, never by Flutter disposal.
+    if (Platform.isIOS) return;
     commonPrint.log("System: Exiting application...");
     if (Platform.isAndroid) {
       commonPrint.log("System: Calling SystemNavigator.pop()");

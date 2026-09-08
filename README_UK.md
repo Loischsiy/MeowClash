@@ -221,3 +221,8 @@ sudo apk add libayatana-appindicator-dev keybinder3-dev
 
 ## 📄 Ліцензія
 Вихідний код MeowClash поширюється на умовах вільної ліцензії [GPL-3.0 License](LICENSE).
+
+
+### iOS / ARM64
+
+[Збірка iOS та ARM64, підпис і обмеження](docs/platform-builds.md)

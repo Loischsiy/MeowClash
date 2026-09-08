@@ -48,3 +48,14 @@ nixTest:
 	nix build .#checks.x86_64-linux.nixos-vm -L
 
 nixAll: nixCheck nixCore nixBuild nixTest
+# Additional physical-device / ARM64 targets (existing macOS targets unchanged).
+.PHONY: ios_arm64 windows_arm64 linux_arm64
+
+ios_arm64:
+	dart setup.dart ios --arch arm64
+
+windows_arm64:
+	dart setup.dart windows --arch arm64
+
+linux_arm64:
+	dart setup.dart linux --arch arm64

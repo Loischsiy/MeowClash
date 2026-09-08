@@ -62,7 +62,7 @@ func handleStartListener() bool {
 		// On Android TUN is driven by a file descriptor from VpnService in
 		// handleStartTun, not by mihomo's internal TUN — keep cfg flag off.
 		// On desktop, updateListeners() below will (re)create the TUN device.
-		if runtime.GOOS == "android" {
+		if runtime.GOOS == "android" || runtime.GOOS == "ios" {
 			currentConfig.General.Tun.Enable = false
 		} else {
 			currentConfig.General.Tun.Enable = pendingTunEnable

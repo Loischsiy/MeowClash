@@ -3,10 +3,10 @@ import 'dart:io';
 
 import 'package:meowclash/common/common.dart';
 import 'package:path/path.dart';
+import 'package:meowclash/plugins/ios.dart';
 import 'package:path_provider/path_provider.dart';
 
 class AppPath {
-
   factory AppPath() {
     _instance ??= AppPath._internal();
     return _instance!;
@@ -14,15 +14,18 @@ class AppPath {
 
   AppPath._internal() {
     appDirPath = join(dirname(Platform.resolvedExecutable));
-    getApplicationSupportDirectory().then((value) {
-      dataDir.complete(value);
-    });
+    final support = Platform.isIOS
+        ? iosVpn!.homeDirectory.then(Directory.new)
+        : getApplicationSupportDirectory();
+    dataDir.complete(support);
     getTemporaryDirectory().then((value) {
       tempDir.complete(value);
     });
-    getDownloadsDirectory().then((value) {
-      downloadDir.complete(value);
-    });
+    // iOS document picker exports bytes; Downloads may be unsupported or null.
+    downloadDir.complete(Platform.isIOS
+        ? getTemporaryDirectory()
+        : getDownloadsDirectory()
+            .then((value) async => value ?? await getTemporaryDirectory()));
   }
   static AppPath? _instance;
   Completer<Directory> dataDir = Completer();
@@ -178,7 +181,8 @@ class AppPath {
     return parts.join('|');
   }
 
-  String get helperPath => join(executableDirPath, "$appHelperService$executableExtension");
+  String get helperPath =>
+      join(executableDirPath, "$appHelperService$executableExtension");
 
   Future<String> get downloadDirPath async {
     final directory = await downloadDir.future;

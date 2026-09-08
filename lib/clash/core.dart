@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:meowclash/clash/clash.dart';
 import 'package:meowclash/clash/interface.dart';
+import 'package:meowclash/clash/ios.dart';
+import 'package:meowclash/plugins/ios.dart';
 import 'package:meowclash/clash/proxy_groups.dart';
 import 'package:meowclash/common/common.dart';
 import 'package:meowclash/l10n/l10n.dart';
@@ -15,7 +17,6 @@ import 'package:meowclash/state.dart';
 import 'package:path/path.dart';
 
 class ClashCore {
-
   factory ClashCore() {
     _instance ??= ClashCore._internal();
     return _instance!;
@@ -24,6 +25,8 @@ class ClashCore {
   ClashCore._internal() {
     if (Platform.isAndroid) {
       clashInterface = clashLib!;
+    } else if (Platform.isIOS) {
+      clashInterface = ClashIOSHandler(bridge: iosVpn!);
     } else {
       clashInterface = clashService!;
     }
@@ -55,20 +58,24 @@ class ClashCore {
         );
         final isExists = await geoFile.exists();
         if (isExists) {
-          commonPrint.log("ClashCore: Geo file $geoFileName already exists, skipping");
+          commonPrint
+              .log("ClashCore: Geo file $geoFileName already exists, skipping");
           continue;
         }
         commonPrint.log("ClashCore: Loading $geoFileName from assets...");
         try {
           final data = await rootBundle.load('assets/data/$geoFileName');
           final List<int> bytes = data.buffer.asUint8List();
-          commonPrint.log("ClashCore: Writing $geoFileName to $homePath (${bytes.length} bytes)");
+          commonPrint.log(
+              "ClashCore: Writing $geoFileName to $homePath (${bytes.length} bytes)");
           await geoFile.writeAsBytes(bytes, flush: true);
         } catch (e) {
-          commonPrint.log("ClashCore: Failed to load $geoFileName from assets: $e");
+          commonPrint
+              .log("ClashCore: Failed to load $geoFileName from assets: $e");
         }
       }
-      commonPrint.log("ClashCore: initGeo finished (errors may have been logged)");
+      commonPrint
+          .log("ClashCore: initGeo finished (errors may have been logged)");
     } catch (e, stackTrace) {
       commonPrint.log("=== ClashCore: initGeo NON-FATAL ERROR ===");
       commonPrint.log("Error: $e");
@@ -86,7 +93,8 @@ class ClashCore {
       clashCore.stopLog();
     }
     final homeDirPath = await appPath.homeDirPath;
-    commonPrint.log("ClashCore: Calling clashInterface.init(homeDir=$homeDirPath)...");
+    commonPrint
+        .log("ClashCore: Calling clashInterface.init(homeDir=$homeDirPath)...");
     final result = await clashInterface.init(
       InitParams(
         homeDir: homeDirPath,
@@ -115,7 +123,8 @@ class ClashCore {
     return clashInterface.convertSubscription(data);
   }
 
-  Future<String> updateConfig(UpdateParams updateParams) => clashInterface.updateConfig(updateParams);
+  Future<String> updateConfig(UpdateParams updateParams) =>
+      clashInterface.updateConfig(updateParams);
 
   Future<String> setupConfig(SetupParams setupParams) {
     ensureCoreInputSize(
@@ -130,7 +139,8 @@ class ClashCore {
     return compute(parseProxyGroups, proxies);
   }
 
-  FutureOr<String> changeProxy(ChangeProxyParams changeProxyParams) async => await clashInterface.changeProxy(changeProxyParams);
+  FutureOr<String> changeProxy(ChangeProxyParams changeProxyParams) async =>
+      await clashInterface.changeProxy(changeProxyParams);
 
   Future<List<Connection>> getConnections() async {
     final res = await clashInterface.getConnections();
@@ -179,7 +189,8 @@ class ClashCore {
     return ExternalProvider.fromJson(json.decode(externalProvidersRawString));
   }
 
-  Future<String> updateGeoData(UpdateGeoDataParams params) => clashInterface.updateGeoData(params);
+  Future<String> updateGeoData(UpdateGeoDataParams params) =>
+      clashInterface.updateGeoData(params);
 
   Future<String> sideLoadExternalProvider({
     required String providerName,
@@ -237,7 +248,9 @@ class ClashCore {
     );
 
     final password = profile.providerHeaders['meowclash-password'];
-    final iterations = int.tryParse(profile.providerHeaders['meowclash-password-iterations'] ?? '') ?? kDefaultPbkdf2Iterations;
+    final iterations = int.tryParse(
+            profile.providerHeaders['meowclash-password-iterations'] ?? '') ??
+        kDefaultPbkdf2Iterations;
 
     final decryptedData = await maybeDecryptProvider(
       responseData,
@@ -283,7 +296,8 @@ class ClashCore {
         }
 
         if (url != null && type != null) {
-          final providerPath = await appPath.getProvidersFilePath(profileId, type, url);
+          final providerPath =
+              await appPath.getProvidersFilePath(profileId, type, url);
           await downloadAndDecryptProvider(
             profile: currentProfile,
             providerName: providerName,

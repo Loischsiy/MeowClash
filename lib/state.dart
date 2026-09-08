@@ -11,6 +11,7 @@ import 'package:meowclash/common/theme.dart';
 import 'package:meowclash/enum/enum.dart';
 import 'package:meowclash/l10n/l10n.dart';
 import 'package:meowclash/plugins/service.dart';
+import 'package:meowclash/plugins/ios.dart';
 import 'package:meowclash/services/async_polling_loop.dart';
 import 'package:meowclash/services/profile_script_evaluator.dart';
 import 'package:meowclash/widgets/dialog.dart';
@@ -196,6 +197,19 @@ class GlobalState {
   void stopUpdateTasks() => _updateLoop.stop();
 
   Future<bool> handleStart([UpdateTasks? tasks]) async {
+    if (Platform.isIOS) {
+      try {
+        final status = await iosVpn!.start();
+        startTime = status.isConnected ? status.startedAt : null;
+        if (!status.isConnected) return false;
+        await startUpdateTasks(tasks);
+        return true;
+      } catch (_) {
+        await updateStartTime();
+        stopUpdateTasks();
+        rethrow;
+      }
+    }
     startTime ??= DateTime.now();
     await clashCore.startListener();
     final started = await service?.startVpn();
@@ -210,10 +224,21 @@ class GlobalState {
   }
 
   Future updateStartTime() async {
+    if (Platform.isIOS) {
+      final status = await iosVpn!.refreshStatus();
+      startTime = status.isConnected ? status.startedAt : null;
+      return;
+    }
     startTime = await clashLib?.getRunTime();
   }
 
   Future handleStop() async {
+    if (Platform.isIOS) {
+      await iosVpn!.stop();
+      startTime = null;
+      stopUpdateTasks();
+      return;
+    }
     startTime = null;
     await clashCore.stopListener();
     await service?.stopVpn();

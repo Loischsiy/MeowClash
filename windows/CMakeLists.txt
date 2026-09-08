@@ -118,3 +118,14 @@ install(DIRECTORY "${PROJECT_BUILD_DIR}/${FLUTTER_ASSET_DIR_NAME}"
 install(FILES "${AOT_LIBRARY}" DESTINATION "${INSTALL_BUNDLE_DATA_DIR}"
   CONFIGURATIONS Profile;Release
   COMPONENT Runtime)
+
+# Replace flutter_js's x86-64-only prebuilt bridge with a target-native one.
+# Keep this AFTER all generated plugin install rules (and Linux bundle cleanup).
+set(BUILD_TESTING OFF CACHE BOOL "Build native dependency tests")
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/../native/quickjs" "meow_quickjs")
+add_dependencies(${BINARY_NAME} meow_quickjs)
+install(FILES "$<TARGET_FILE:meow_quickjs>"
+  DESTINATION "${INSTALL_BUNDLE_LIB_DIR}" COMPONENT Runtime)
+
+install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/../native/quickjs/QuickJS-LICENSE.txt"
+  DESTINATION "${INSTALL_BUNDLE_DATA_DIR}" COMPONENT Runtime)

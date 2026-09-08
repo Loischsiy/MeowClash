@@ -221,3 +221,8 @@ NixOS を使用している場合は、提供されている Flake インプッ�
 
 ## 📄 ライセンス
 MeowClash はオープンソースであり、[GPL-3.0 License](LICENSE) の下でリリースされています。
+
+
+### iOS / ARM64
+
+[iOS・ARM64 のビルドと署名](docs/platform-builds.md)

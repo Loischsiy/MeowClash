@@ -221,3 +221,8 @@ The custom `meowclash-*` override system was fully removed. Previously, these se
 
 ## 📄 License
 MeowClash is open-source and released under the [GPL-3.0 License](LICENSE).
+
+
+### iOS / ARM64
+
+[iOS and ARM64 build/signing guide](docs/platform-builds.md)

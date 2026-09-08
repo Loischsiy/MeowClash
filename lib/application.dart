@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:meowclash/manager/ios_vpn_manager.dart';
+
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -44,12 +46,13 @@ class ApplicationState extends ConsumerState<Application> {
   Timer? _autoUpdateProfilesTaskTimer;
   Timer? _autoUpdateProvidersTaskTimer;
 
-  final _pageTransitionsTheme = const PageTransitionsTheme(
+  final _pageTransitionsTheme = PageTransitionsTheme(
     builders: <TargetPlatform, PageTransitionsBuilder>{
-      TargetPlatform.android: CommonPageTransitionsBuilder(),
-      TargetPlatform.windows: CommonPageTransitionsBuilder(),
-      TargetPlatform.linux: CommonPageTransitionsBuilder(),
-      TargetPlatform.macOS: CommonPageTransitionsBuilder(),
+      ...const PageTransitionsTheme().builders,
+      TargetPlatform.android: const CommonPageTransitionsBuilder(),
+      TargetPlatform.windows: const CommonPageTransitionsBuilder(),
+      TargetPlatform.linux: const CommonPageTransitionsBuilder(),
+      TargetPlatform.macOS: const CommonPageTransitionsBuilder(),
     },
   );
 
@@ -120,6 +123,7 @@ class ApplicationState extends ConsumerState<Application> {
         ),
       );
     }
+    if (Platform.isIOS) return IOSVpnManager(child: child);
     return AndroidManager(
       child: TileManager(
         child: child,
@@ -148,6 +152,7 @@ class ApplicationState extends ConsumerState<Application> {
         child: child,
       );
     }
+    if (Platform.isIOS) return child;
     return VpnManager(
       child: child,
     );

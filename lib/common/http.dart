@@ -29,8 +29,9 @@ class MeowClashHttpOverrides extends HttpOverrides {
     // running the traffic is already captured. `realTunEnable` is a desktop-
     // only flag (it tracks admin authorization for TUN on Win/macOS/Linux)
     // and stays false on Android even though TUN is effectively on.
-    final tunHandlesTraffic =
-        Platform.isAndroid || globalState.appState.realTunEnable;
+    final tunHandlesTraffic = Platform.isAndroid ||
+        Platform.isIOS ||
+        globalState.appState.realTunEnable;
     if (tunHandlesTraffic) {
       return "DIRECT";
     }

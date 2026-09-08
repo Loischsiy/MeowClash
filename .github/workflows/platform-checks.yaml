@@ -1,0 +1,90 @@
+name: platform checks
+on:
+  pull_request:
+    paths:
+      - 'core/**'
+      - 'lib/**'
+      - 'ios/**'
+      - 'native/**'
+      - 'scripts/**'
+      - 'setup.dart'
+      - '.github/workflows/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native-js:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-22.04
+            arch: x64
+          - runner: ubuntu-24.04-arm
+            arch: arm64
+          - runner: windows-2022
+            arch: x64
+          - runner: windows-11-arm
+            arch: ARM64
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and test native JavaScript bridge
+        shell: bash
+        run: |
+          set -euo pipefail
+          args=()
+          if [[ "$RUNNER_OS" == Windows ]]; then args=(-A "${{ matrix.arch }}"); fi
+          cmake -S native/quickjs -B build/native-quickjs -DCMAKE_BUILD_TYPE=Release "${args[@]}"
+          cmake --build build/native-quickjs --config Release --parallel 2
+          ctest --test-dir build/native-quickjs -C Release --output-on-failure
+      # ARM64 desktop hosts need a tag checkout (stable has no ARM64 SDK zip).
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: master
+          flutter-version: 3.44.1
+          cache: true
+      - name: Test profile scripts against the built bridge
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter pub get
+          export MEOW_NATIVE_JS_SMOKE=1
+          if [[ "$RUNNER_OS" == Windows ]]; then
+            export PATH="$PWD/build/native-quickjs/Release:$PATH"
+          else
+            export LIBQUICKJSC_TEST_PATH="$PWD/build/native-quickjs/libquickjs_c_bridge_plugin.so"
+          fi
+          flutter test test/desktop_native_js_test.dart
+  source-tests:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.26.0'
+          cache-dependency-path: core/go.sum
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.44.1
+          cache: true
+      - name: Go transport, core and ARM64 cross-builds
+        run: |
+          set -euo pipefail
+          CGO_ENABLED=0 go -C core test ./...
+          go -C core test -race ./mobilebridge
+          mkdir -p build/check-cores
+          for os in windows linux; do
+            for arch in amd64 arm64; do
+              GOOS="$os" GOARCH="$arch" CGO_ENABLED=0 go -C core build -mod=readonly -tags=with_gvisor,cmfa -o "../build/check-cores/$os-$arch" .
+            done
+          done
+      - name: Flutter and artifact tests
+        run: |
+          flutter pub get
+          flutter analyze --no-fatal-infos --no-fatal-warnings
+          flutter test
+          python3 -m unittest discover -s scripts -p 'test_*.py'
+      - name: Compile Runner and PacketTunnel without signing
+        run: dart setup.dart ios --arch arm64 --env pre

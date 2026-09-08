@@ -5,6 +5,7 @@ import 'package:meowclash/common/common.dart';
 import 'package:meowclash/enum/enum.dart';
 import 'package:meowclash/providers/config.dart';
 import 'package:meowclash/providers/app.dart';
+import 'package:meowclash/services/ui_lifecycle.dart';
 import 'package:meowclash/state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -48,6 +49,19 @@ class _WindowContainerState extends ConsumerState<WindowManager>
     windowExtManager.addListener(this);
     if (!Platform.isMacOS) {
       windowManager.addListener(this);
+      unawaited(_syncInitialVisibility());
+    }
+  }
+
+  Future<void> _syncInitialVisibility() async {
+    try {
+      await uiLifecycle.synchronizeWindowVisibility(() async {
+        final visible = await windowManager.isVisible();
+        final minimized = await windowManager.isMinimized();
+        return visible && !minimized;
+      });
+    } catch (error) {
+      commonPrint.log('Window visibility unavailable: $error');
     }
   }
 
@@ -61,6 +75,7 @@ class _WindowContainerState extends ConsumerState<WindowManager>
   void onWindowFocus() {
     super.onWindowFocus();
     commonPrint.log("focus");
+    uiLifecycle.updateWindowVisibility(visible: true);
     render?.resume();
   }
 
@@ -98,6 +113,7 @@ class _WindowContainerState extends ConsumerState<WindowManager>
   void onWindowMinimize() async {
     globalState.appController.savePreferencesDebounce();
     commonPrint.log("minimize");
+    uiLifecycle.updateWindowVisibility(visible: false);
     render?.pause();
     super.onWindowMinimize();
   }
@@ -105,6 +121,7 @@ class _WindowContainerState extends ConsumerState<WindowManager>
   @override
   void onWindowRestore() {
     commonPrint.log("restore");
+    uiLifecycle.updateWindowVisibility(visible: true);
     render?.resume();
     super.onWindowRestore();
   }

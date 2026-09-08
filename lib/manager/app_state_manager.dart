@@ -9,7 +9,9 @@ import 'package:meowclash/enum/enum.dart';
 import 'package:meowclash/plugins/tile.dart';
 import 'package:meowclash/providers/providers.dart';
 import 'package:meowclash/services/image_memory.dart';
+import 'package:meowclash/services/ui_lifecycle.dart';
 import 'package:meowclash/state.dart';
+import 'package:meowclash/widgets/visibility_polling.dart';
 
 class AppStateManager extends ConsumerStatefulWidget {
   const AppStateManager({
@@ -31,6 +33,10 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    uiLifecycle
+      ..updateLifecycle(WidgetsBinding.instance.lifecycleState)
+      ..addListener(_syncUiActivity);
+    _syncUiActivity();
     ref.listenManual(layoutChangeProvider, (prev, next) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (prev != next) {
@@ -109,62 +115,56 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
   @override
   void dispose() {
     _lifecycleGeneration++;
+    uiLifecycle.removeListener(_syncUiActivity);
     globalState.stopUpdateTasks();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
+  void _syncUiActivity() {
+    if (uiLifecycle.isVisible) {
+      render?.resume();
+    } else {
+      render?.pause();
+      releaseUnusedUiImages(PaintingBinding.instance.imageCache);
+    }
+    if (!uiLifecycle.isForeground) {
+      globalState.stopUpdateTasks();
+      debouncer.cancel(FunctionTag.updateGroups);
+      return;
+    }
+    // Desktop run status is owned here; Android must first synchronize with
+    // its independent VPN service in the guarded resume branch below.
+    if (!Platform.isAndroid && globalState.isStart) {
+      unawaited(globalState.startUpdateTasks());
+    }
+  }
+
   @override
   Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
     final generation = ++_lifecycleGeneration;
+    uiLifecycle.updateLifecycle(state);
     commonPrint.log("$state");
-    if (Platform.isAndroid && state != AppLifecycleState.resumed) {
-      globalState.stopUpdateTasks();
-    }
     switch (state) {
       case AppLifecycleState.inactive:
-        unawaited(globalState.appController.savePreferences());
       case AppLifecycleState.paused:
-        releaseUnusedUiImages(PaintingBinding.instance.imageCache);
         unawaited(globalState.appController.savePreferences());
-        if (Platform.isAndroid) {
-          // The VPN foreground service keeps this process alive (and unfrozen)
-          // while backgrounded, so the 1-second UI polling loop (traffic +
-          // runtime via FFI into the core) would otherwise run forever for a
-          // UI nobody is looking at — a straight battery drain. The service
-          // engine keeps its own notification updates; this only pauses the
-          // in-app dashboard polling.
-          globalState.stopUpdateTasks();
-        }
-      case AppLifecycleState.hidden:
-        releaseUnusedUiImages(PaintingBinding.instance.imageCache);
-        // Desktop window hidden (tray/minimize). Falling through to the
-        // generic resume branch cancelled the render pause armed by
-        // window.hide(), so the engine kept rasterizing dashboard animations
-        // in an invisible window.
-        render?.pause();
       case AppLifecycleState.resumed:
-        render?.resume();
         if (Platform.isAndroid) {
-          // The proxy may have been started/stopped from the tile or the
-          // persistent notification while the UI was backgrounded — re-read
-          // the native truth before deciding whether to restart the polling
-          // loop paused above.
+          // Tile/notification actions may have changed the VPN while the UI
+          // was unloaded. Never let a stale resume callback restart polling.
           await globalState.updateStartTime();
           if (!mounted ||
               generation != _lifecycleGeneration ||
-              WidgetsBinding.instance.lifecycleState !=
-                  AppLifecycleState.resumed) {
+              !isUiForeground) {
             return;
           }
+          globalState.appController.updateRunTime();
           if (globalState.isStart) {
             unawaited(globalState.startUpdateTasks());
-          } else {
-            // Stopped while backgrounded — reflect it instead of leaving the
-            // last polled runtime on screen.
-            globalState.appController.updateRunTime();
           }
         }
+      case AppLifecycleState.hidden:
       case AppLifecycleState.detached:
         break;
     }
@@ -180,7 +180,7 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
   @override
   Widget build(BuildContext context) => Listener(
         onPointerHover: (_) {
-          render?.resume();
+          if (uiLifecycle.isVisible) render?.resume();
         },
         child: widget.child,
       );

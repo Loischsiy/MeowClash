@@ -14,7 +14,9 @@ import 'package:meowclash/manager/manager.dart';
 import 'package:meowclash/plugins/app.dart';
 import 'package:meowclash/providers/providers.dart';
 import 'package:meowclash/services/async_polling_loop.dart';
+import 'package:meowclash/services/ui_lifecycle.dart';
 import 'package:meowclash/state.dart';
+import 'package:meowclash/widgets/suspendable_ui.dart';
 import 'package:meowclash/widgets/visibility_polling.dart';
 
 import 'controller.dart';
@@ -30,12 +32,11 @@ class Application extends ConsumerStatefulWidget {
 }
 
 class ApplicationState extends ConsumerState<Application> {
-  late final AppLifecycleListener _groupLifecycle;
   late final _groupPolling = AsyncPollingLoop(
     interval: const Duration(seconds: 20),
     onTick: (_) {
       if (mounted && globalState.appState.isInit) {
-        globalState.appController.updateGroupsDebounce();
+        return globalState.appController.updateGroups();
       }
     },
     onError: (error, stack) => commonPrint.log('Group refresh failed: $error'),
@@ -67,9 +68,7 @@ class ApplicationState extends ConsumerState<Application> {
     }
 
     globalState.appController = AppController(context, ref);
-    _groupLifecycle = AppLifecycleListener(
-      onStateChange: (_) => _syncGroupPolling(),
-    );
+    uiLifecycle.addListener(_syncGroupPolling);
     _syncGroupPolling();
     _autoUpdateProfilesTask();
     // Android has one provider refresh owner: the background service engine.
@@ -185,9 +184,12 @@ class ApplicationState extends ConsumerState<Application> {
                   GlobalWidgetsLocalizations.delegate
                 ],
                 builder: (_, child) {
-                  final Widget app = AppEnvManager(
-                    child: _buildPlatformApp(
-                      _buildApp(child!),
+                  final Widget app = UiActivityScope(
+                    controller: uiLifecycle,
+                    child: AppEnvManager(
+                      child: _buildPlatformApp(
+                        _buildApp(child!),
+                      ),
                     ),
                   );
 
@@ -237,7 +239,18 @@ class ApplicationState extends ConsumerState<Application> {
                 home: child,
               );
             },
-            child: const HomePage(),
+            child: Consumer(
+              builder: (_, ref, __) => SuspendableUi(
+                controller: uiLifecycle,
+                // Dashboard layout editing already uses the back-block guard.
+                canUnload: !ref.watch(backBlockProvider),
+                builder: (_) => const HomePage(),
+                onUnload: () {
+                  globalState.cacheHeightMap.clear();
+                  commonPrint.log('Background UI unloaded');
+                },
+              ),
+            ),
           ),
         ),
       );
@@ -246,7 +259,7 @@ class ApplicationState extends ConsumerState<Application> {
   Future<void> dispose() async {
     linkManager.destroy();
     _groupPolling.dispose();
-    _groupLifecycle.dispose();
+    uiLifecycle.removeListener(_syncGroupPolling);
     _autoUpdateProfilesTaskTimer?.cancel();
     _autoUpdateProvidersTaskTimer?.cancel();
     globalState.appController.delayTests.cancel();

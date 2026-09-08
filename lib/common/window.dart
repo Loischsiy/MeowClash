@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:meowclash/common/common.dart';
+import 'package:meowclash/services/ui_lifecycle.dart';
 import 'package:meowclash/state.dart';
 import 'package:flutter/material.dart';
 import 'package:screen_retriever/screen_retriever.dart';
@@ -21,6 +22,7 @@ class Window {
 
     // On macOS, the app runs in status bar with popover - no window manager needed
     if (Platform.isMacOS) {
+      await StatusBarManager.initVisibility(uiLifecycle);
       return;
     }
 
@@ -70,7 +72,11 @@ class Window {
     if (Platform.isMacOS) return;
 
     render?.resume();
+    if (await windowManager.isMinimized()) {
+      await windowManager.restore();
+    }
     await windowManager.show();
+    uiLifecycle.updateWindowVisibility(visible: true);
     await windowManager.focus();
     await windowManager.setSkipTaskbar(false);
   }
@@ -90,8 +96,9 @@ class Window {
   Future<void> hide() async {
     if (Platform.isMacOS) return;
 
-    render?.pause();
     await windowManager.hide();
+    uiLifecycle.updateWindowVisibility(visible: false);
+    render?.pause();
     await windowManager.setSkipTaskbar(true);
   }
 }

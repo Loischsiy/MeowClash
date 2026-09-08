@@ -9,6 +9,7 @@ import 'package:meowclash/providers/app.dart';
 import 'package:meowclash/providers/config.dart';
 import 'package:meowclash/providers/state.dart';
 import 'package:meowclash/state.dart';
+import 'package:meowclash/widgets/visibility_polling.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -75,9 +76,10 @@ class _ClashContainerState extends ConsumerState<ClashManager>
     super.onDelay(delay);
     final appController = globalState.appController;
     appController.setDelay(delay);
+    if (!isUiForeground) return;
     _delayRefreshTimer ??= Timer(const Duration(seconds: 5), () {
       _delayRefreshTimer = null;
-      if (mounted) appController.updateGroupsDebounce();
+      if (mounted && isUiForeground) appController.updateGroupsDebounce();
     });
   }
 

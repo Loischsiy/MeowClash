@@ -9,11 +9,13 @@ import 'package:meowclash/common/archive.dart';
 import 'package:meowclash/common/proxy_delay.dart';
 import 'package:meowclash/services/delay_test_runner.dart';
 import 'package:meowclash/services/subscription_notification_service.dart';
+import 'package:meowclash/services/ui_lifecycle.dart';
 import 'package:meowclash/enum/enum.dart';
 import 'package:meowclash/plugins/app.dart';
 import 'package:meowclash/providers/providers.dart';
 import 'package:meowclash/state.dart';
 import 'package:meowclash/widgets/dialog.dart';
+import 'package:meowclash/widgets/visibility_polling.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -66,7 +68,10 @@ class AppController {
   }
 
   void updateGroupsDebounce() {
-    debouncer.call(FunctionTag.updateGroups, updateGroups);
+    if (!isUiForeground) return;
+    debouncer.call(FunctionTag.updateGroups, () async {
+      if (isUiForeground) await updateGroups();
+    });
   }
 
   void addCheckIpNumDebounce() {
@@ -116,6 +121,9 @@ class AppController {
         updateRunTime,
         updateTraffic,
       ]);
+      // Tray/system-proxy state must change even when dashboard polling is
+      // suspended. Do not rely on the first UI timer to publish run status.
+      updateRunTime();
       if (!started) {
         await StatusBarManager.updateIcon(isConnected: false);
         _ref.read(runTimeProvider.notifier).value = null;
@@ -155,11 +163,21 @@ class AppController {
   }
 
   Future<void> updateTraffic() async {
+    if (!isUiForeground) return;
+    final generation = uiLifecycle.generation;
     final traffic = await clashCore.getTraffic();
-    if (!context.mounted) return;
+    if (!context.mounted ||
+        !isUiForeground ||
+        generation != uiLifecycle.generation) {
+      return;
+    }
     _ref.read(trafficsProvider.notifier).addTraffic(traffic);
     final totalTraffic = await clashCore.getTotalTraffic();
-    if (!context.mounted) return;
+    if (!context.mounted ||
+        !isUiForeground ||
+        generation != uiLifecycle.generation) {
+      return;
+    }
     _ref.read(totalTrafficProvider.notifier).value = totalTraffic;
   }
 
@@ -544,12 +562,21 @@ class AppController {
     );
   }
 
+  /// Progress UI is optional. Tray actions, auto-updates and deep links must
+  /// still execute when the home scaffold has been unloaded.
+  Future<T?> runWithOptionalUi<T>(
+    Future<T> Function() action, {
+    String? title,
+  }) {
+    final scaffold = globalState.homeScaffoldKey.currentState;
+    if (scaffold != null && scaffold.mounted) {
+      return scaffold.loadingRun(action, title: title);
+    }
+    return globalState.safeRun(action, title: title);
+  }
+
   Future<void> updateClashConfig() async {
-    final commonScaffoldState = globalState.homeScaffoldKey.currentState;
-    if (commonScaffoldState?.mounted != true) return;
-    await commonScaffoldState?.loadingRun(() async {
-      await _updateClashConfig();
-    });
+    await runWithOptionalUi(_updateClashConfig);
   }
 
   Future<void> _updateClashConfig() async {
@@ -594,11 +621,7 @@ class AppController {
   }
 
   Future<void> setupClashConfig() async {
-    final commonScaffoldState = globalState.homeScaffoldKey.currentState;
-    if (commonScaffoldState?.mounted != true) return;
-    await commonScaffoldState?.loadingRun(() async {
-      await _setupClashConfig();
-    });
+    await runWithOptionalUi(_setupClashConfig);
   }
 
   Future<void> _setupClashConfig() async {
@@ -648,11 +671,7 @@ class AppController {
     if (silence) {
       await _applyProfile();
     } else {
-      final commonScaffoldState = globalState.homeScaffoldKey.currentState;
-      if (commonScaffoldState?.mounted != true) return;
-      await commonScaffoldState?.loadingRun(() async {
-        await _applyProfile();
-      });
+      await runWithOptionalUi(_applyProfile);
     }
     addCheckIpNumDebounce();
   }
@@ -1313,11 +1332,8 @@ class AppController {
       globalState.navigatorKey.currentState?.popUntil((route) => route.isFirst);
     }
     toPage(PageLabel.dashboard);
-    final commonScaffoldState = globalState.homeScaffoldKey.currentState;
-    if (commonScaffoldState?.mounted != true) return;
-
     try {
-      final profile = await commonScaffoldState?.loadingRun<Profile>(
+      final profile = await runWithOptionalUi<Profile>(
         () async {
           final prefs = await SharedPreferences.getInstance();
           final shouldSend = prefs.getBool('sendDeviceHeaders') ?? true;
@@ -1357,9 +1373,7 @@ class AppController {
     if (!context.mounted) return;
     globalState.navigatorKey.currentState?.popUntil((route) => route.isFirst);
     toPage(PageLabel.dashboard);
-    final commonScaffoldState = globalState.homeScaffoldKey.currentState;
-    if (commonScaffoldState?.mounted != true) return;
-    final profile = await commonScaffoldState?.loadingRun<Profile?>(
+    final profile = await runWithOptionalUi<Profile?>(
       () async {
         await Future.delayed(const Duration(milliseconds: 300));
         return Profile.normal(label: platformFile?.name).saveFile(bytes);

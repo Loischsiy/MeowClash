@@ -4,14 +4,16 @@ import window_ext
 import LaunchAtLogin
 
 @main
-class AppDelegate: FlutterAppDelegate {
+class AppDelegate: FlutterAppDelegate, NSPopoverDelegate {
     var statusBarController: StatusBarController?
+    private var statusBarChannel: FlutterMethodChannel?
     
     var flutterUIPopover = NSPopover.init()
     
     override init() {
         super.init()
         flutterUIPopover.behavior = NSPopover.Behavior.transient
+        flutterUIPopover.delegate = self
     }
     
     override func applicationDidFinishLaunching(_ aNotification: Notification) {
@@ -47,8 +49,11 @@ class AppDelegate: FlutterAppDelegate {
             binaryMessenger: flutterViewController.engine.binaryMessenger
         )
         
+        statusBarChannel = channel
         channel.setMethodCallHandler { [weak self] (call: FlutterMethodCall, result: @escaping FlutterResult) in
             switch call.method {
+            case "isVisible":
+                result(self?.flutterUIPopover.isShown ?? false)
             case "updateIcon":
                 if let args = call.arguments as? [String: Any],
                    let isConnected = args["isConnected"] as? Bool {
@@ -65,6 +70,17 @@ class AppDelegate: FlutterAppDelegate {
         NSLog("StatusBar channel set up successfully")
     }
     
+    // NSPopover closes automatically on outside clicks/Escape as well as via
+    // the status item. Its delegate covers all paths; the original Flutter
+    // window is closed and cannot be used as a visibility signal.
+    func popoverWillShow(_ notification: Notification) {
+        statusBarChannel?.invokeMethod("visibilityChanged", arguments: true)
+    }
+
+    func popoverDidClose(_ notification: Notification) {
+        statusBarChannel?.invokeMethod("visibilityChanged", arguments: false)
+    }
+
     func setupCoreInApplicationSupport() {
         guard let appSupportURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else {
             print("ERROR: Could not get Application Support directory")

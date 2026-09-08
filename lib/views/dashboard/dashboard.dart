@@ -40,6 +40,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> with PageMixin {
   @override
   void dispose() {
     _isEditNotifier.dispose();
+    _addedWidgetsNotifier.dispose();
     super.dispose();
   }
 
@@ -112,6 +113,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> with PageMixin {
       return;
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       final dashboardWidgets = children
           .map(
             DashboardWidget.getDashboardWidget,
@@ -168,6 +170,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> with PageMixin {
           ),
     ];
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       _addedWidgetsNotifier.value = DashboardWidget.values
           .where(
             (item) => !children.contains(item.widget) && isAllowed(item),

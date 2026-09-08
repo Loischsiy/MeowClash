@@ -2,8 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 import 'package:meowclash/services/async_polling_loop.dart';
+import 'package:meowclash/services/ui_lifecycle.dart';
 
 bool get isUiForeground {
+  if (uiLifecycle.hasWindowVisibility) return uiLifecycle.isForeground;
+  if (!uiLifecycle.isVisible) return false;
   final state = WidgetsBinding.instance.lifecycleState;
   return state == null || state == AppLifecycleState.resumed;
 }
@@ -25,6 +28,7 @@ mixin VisibilityPollingMixin<T extends StatefulWidget> on State<T> {
   @override
   void initState() {
     super.initState();
+    uiLifecycle.addListener(_syncPolling);
     _pollingLifecycle = AppLifecycleListener(
       onStateChange: (_) => _syncPolling(),
     );
@@ -50,6 +54,7 @@ mixin VisibilityPollingMixin<T extends StatefulWidget> on State<T> {
   @override
   void dispose() {
     polling.dispose();
+    uiLifecycle.removeListener(_syncPolling);
     _pollingLifecycle.dispose();
     super.dispose();
   }

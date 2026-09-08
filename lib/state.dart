@@ -184,8 +184,9 @@ class GlobalState {
 
   Future<void> startUpdateTasks([UpdateTasks? tasks]) async {
     if (tasks != null) this.tasks = tasks;
+    // UI polling is unnecessary in the tray/minimized on every platform.
     // The Android service isolate owns notification updates independently.
-    if (!isService && Platform.isAndroid && !isUiForeground) {
+    if (!isService && !isUiForeground) {
       _updateLoop.stop();
       return;
     }

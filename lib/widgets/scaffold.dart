@@ -3,6 +3,7 @@ import 'package:meowclash/common/common.dart';
 import 'package:meowclash/enum/enum.dart';
 import 'package:meowclash/models/models.dart';
 import 'package:meowclash/providers/providers.dart';
+import 'package:meowclash/services/ui_lifecycle.dart';
 import 'package:meowclash/state.dart';
 import 'package:meowclash/widgets/fade_box.dart';
 import 'package:meowclash/widgets/pop_scope.dart';
@@ -158,6 +159,7 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
     String? title,
   }) async {
     _loading.value = true;
+    final releaseUi = uiLifecycle.keepAlive();
     try {
       final res = await futureFunction();
       _loading.value = false;
@@ -171,6 +173,8 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
       );
       _loading.value = false;
       return null;
+    } finally {
+      releaseUi();
     }
   }
 

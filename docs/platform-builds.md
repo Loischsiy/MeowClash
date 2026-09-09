@@ -45,6 +45,33 @@ archive is available (`channel: master` on flutter-action is a checkout mechanis
 not a request to build an unpinned moving SDK). Go uses the canonical version in
 `core/constant/version.go`; do not edit `lib/core_version.dart` manually.
 
+Flutter 3.44.1 removed `--target-platform` from `flutter build windows`; that
+command now always builds for the host architecture. `setup.dart` probes
+`flutter build windows --help` and forwards `--build-target-platform` to the
+distributor only when the installed SDK still accepts it. Otherwise it checks
+that the requested architecture matches `PROCESSOR_ARCHITECTURE`, which is the
+same value the distributor uses to locate `build/windows/<arch>/runner/Release`,
+so packaging keeps finding the artifacts. Cross-building Windows ARM64 from an
+x64 host consequently needs an SDK that still exposes the flag. `flutter build
+linux` still accepts it, so Linux packaging is unchanged.
+
+The Inno Setup template used to reference an `{{ARCH}}` variable that the
+packager never substitutes, so the installers were produced without any
+architecture restriction. It now uses the supported `{{ARCHITECTURES_ALLOWED}}`
+and `{{ARCHITECTURES_INSTALL_IN_64BIT_MODE}}` variables, and `setup.dart` writes
+`x64` or `arm64` into `windows/packaging/exe/make_config.yaml` for the duration
+of packaging, restoring the original file afterwards.
+
+Swift Package Manager is switched off for this project through
+`flutter: config: enable-swift-package-manager: false` in `pubspec.yaml`. It is
+enabled by default from Flutter 3.44, but its Xcode migration only recognises
+the object identifiers of the stock Runner project, so against this custom iOS
+project (Runner + PacketTunnel + MeowCore) it aborts with `Could not find
+BuildableReference for Runner`. Every native iOS dependency is resolved by
+CocoaPods and `flutter_js` has no SwiftPM support, so nothing is lost.
+Re-enabling it would require regenerating `ios/Runner.xcodeproj` with Flutter's
+template identifiers.
+
 Windows/Linux packaging also requires the distributor checkout used by the
 existing CI. If `plugins/flutter_distributor` is absent, prepare it once:
 

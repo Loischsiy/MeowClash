@@ -15,8 +15,8 @@ SolidCompression=yes
 SetupIconFile={{SETUP_ICON_FILE}}
 WizardStyle=modern
 PrivilegesRequired={{PRIVILEGES_REQUIRED}}
-ArchitecturesAllowed={{ARCH}}
-ArchitecturesInstallIn64BitMode={{ARCH}}
+ArchitecturesAllowed={{ARCHITECTURES_ALLOWED}}
+ArchitecturesInstallIn64BitMode={{ARCHITECTURES_INSTALL_IN_64BIT_MODE}}
 UninstallDisplayIcon={uninstallexe}
 ChangesAssociations=yes
 ; Update mode settings

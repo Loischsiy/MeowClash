@@ -203,6 +203,68 @@ class Build {
     }
   }
 
+  static final Map<String, bool> _flutterBuildOptions = {};
+
+  /// Whether `flutter build [platform]` still accepts `--[option]`.
+  ///
+  /// Flutter removed `--target-platform` from the Windows build command and
+  /// always builds for the host architecture instead, while the pinned SDKs
+  /// used by the other jobs still expose it. Probing the CLI keeps a single
+  /// setup script working on every SDK the project pins.
+  static Future<bool> flutterBuildSupportsOption(
+      String platform, String option) async {
+    final key = "$platform:$option";
+    final cached = _flutterBuildOptions[key];
+    if (cached != null) return cached;
+    late final ProcessResult result;
+    try {
+      result = await Process.run(
+        "flutter",
+        ["build", platform, "--help"],
+        runInShell: true,
+      );
+    } on ProcessException {
+      return _flutterBuildOptions[key] = false;
+    }
+    final help = "${result.stdout}${result.stderr}";
+    return _flutterBuildOptions[key] = help.contains("--$option");
+  }
+
+  /// Host architecture of the current Windows machine.
+  static Arch get windowsHostArch =>
+      (Platform.environment["PROCESSOR_ARCHITECTURE"] ?? "").toUpperCase() ==
+              "ARM64"
+          ? Arch.arm64
+          : Arch.amd64;
+
+  /// Inno Setup architecture identifier for [arch]. `x64` and `arm64` are
+  /// understood by every Inno Setup 6 release, unlike the newer
+  /// `x64compatible` alias.
+  static String innoArch(Arch arch) => arch == Arch.arm64 ? "arm64" : "x64";
+
+  /// Rewrites the Inno Setup make config so the installer is restricted to the
+  /// architecture currently being packaged. The packager only substitutes the
+  /// `ARCHITECTURES_ALLOWED` and `ARCHITECTURES_INSTALL_IN_64BIT_MODE`
+  /// template variables, and it reads their values from this file.
+  static String patchWindowsMakeConfig(String source, Arch arch) {
+    const keys = [
+      "architectures_allowed",
+      "architectures_install_in_64bit_mode",
+    ];
+    final lines = source
+        .split("\n")
+        .where(
+            (line) => !keys.any((key) => line.trimLeft().startsWith("$key:")))
+        .toList();
+    while (lines.isNotEmpty && lines.last.trim().isEmpty) {
+      lines.removeLast();
+    }
+    final value = innoArch(arch);
+    lines.add("architectures_allowed: $value");
+    lines.add("architectures_install_in_64bit_mode: $value");
+    return "${lines.join("\n")}\n";
+  }
+
   static Future<String> calcSha256(String filePath) async {
     final file = File(filePath);
     if (!await file.exists()) {
@@ -890,14 +952,34 @@ class BuildCommand extends Command {
             ? await Build.calcSha256(corePaths.first)
             : null;
         await Build.buildHelper(target, token!, arch: arch);
-        await _buildDistributor(
-          target: target,
-          targets: "exe,zip",
-          args:
-              " --build-target-platform windows-${arch == Arch.arm64 ? 'arm64' : 'x64'} --build-dart-define=CORE_SHA256=$token --build-dart-define=CORE_VERSION=$coreVersion",
-          env: env,
-        );
-        _renameWindowsOutputs(arch!);
+        final windowsTargetPlatform =
+            "windows-${arch == Arch.arm64 ? 'arm64' : 'x64'}";
+        final supportsTargetPlatform = await Build.flutterBuildSupportsOption(
+            "windows", "target-platform");
+        if (!supportsTargetPlatform && arch != Build.windowsHostArch) {
+          throw UsageException(
+              'This Flutter version builds Windows apps for the host '
+              'architecture (${Build.windowsHostArch.name}) only, so '
+              '${arch!.name} needs a matching host.',
+              usage);
+        }
+        final makeConfig =
+            File(join("windows", "packaging", "exe", "make_config.yaml"));
+        final originalMakeConfig = makeConfig.readAsStringSync();
+        makeConfig.writeAsStringSync(
+            Build.patchWindowsMakeConfig(originalMakeConfig, arch!));
+        try {
+          await _buildDistributor(
+            target: target,
+            targets: "exe,zip",
+            args:
+                "${supportsTargetPlatform ? ' --build-target-platform $windowsTargetPlatform' : ''} --build-dart-define=CORE_SHA256=$token --build-dart-define=CORE_VERSION=$coreVersion",
+            env: env,
+          );
+        } finally {
+          makeConfig.writeAsStringSync(originalMakeConfig);
+        }
+        _renameWindowsOutputs(arch);
         return;
       case Target.linux:
         final targetMap = {

@@ -91,6 +91,14 @@ dependency_overrides:
   analyzer_plugin: 0.13.4
 
 flutter:
+  # Flutter 3.44+ turns Swift Package Manager on by default, and its Xcode
+  # migration only recognises the object identifiers of the stock Runner
+  # project. This repository ships a custom iOS project (Runner +
+  # PacketTunnel + MeowCore) and resolves every native dependency through
+  # CocoaPods, so keep SwiftPM off - otherwise `flutter build ios` aborts
+  # while rewriting Runner.xcscheme.
+  config:
+    enable-swift-package-manager: false
   uses-material-design: true
   assets:
     - assets/data/geoip.metadb

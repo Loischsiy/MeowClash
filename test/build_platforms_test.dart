@@ -146,8 +146,23 @@ void main() {
       expect(shim, contains('#define $name meow_qjs_$name'),
           reason: 'quickjs.c takes the address of $name in its Math table');
     }
+    expect(shim, contains('!defined(__cplusplus)'),
+        reason: 'the shim is force-included target-wide, C++ must stay clean');
     final cmake = File('native/quickjs/CMakeLists.txt').readAsStringSync();
-    expect(cmake, contains(r'$<$<COMPILE_LANGUAGE:C>:/FImsvc_arm64_math.h>'));
+    // The Visual Studio generator behind `flutter build windows` drops
+    // target-wide $<COMPILE_LANGUAGE:C> options, so that spelling silently
+    // removed the force-include and arm64 kept failing with C2099.
+    expect(cmake,
+        isNot(contains(r'$<$<COMPILE_LANGUAGE:C>:/FImsvc_arm64_math.h>')));
+    expect(
+        cmake,
+        contains(
+            r'set_source_files_properties(${MEOW_QUICKJS_C_SOURCES} PROPERTIES'));
+    expect(cmake, contains('COMPILE_OPTIONS "/FImsvc_arm64_math.h"'));
+    expect(
+        cmake,
+        contains(
+            'target_compile_options(meow_quickjs PRIVATE /FImsvc_arm64_math.h)'));
     expect(
         cmake,
         contains('target_include_directories(meow_quickjs PRIVATE '

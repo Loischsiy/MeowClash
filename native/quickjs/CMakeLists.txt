@@ -17,9 +17,11 @@ set(QJS "${MEOW_QUICKJS_SOURCE}/cxx/quickjs")
 file(STRINGS "${QJS}/VERSION" QUICKJS_VERSION)
 
 # One DLL, not a bridge DLL depending on an unbundled quickjs.dll.
-add_library(meow_quickjs SHARED
+set(MEOW_QUICKJS_C_SOURCES
   "${QJS}/cutils.c" "${QJS}/libregexp.c" "${QJS}/libunicode.c"
-  "${QJS}/quickjs.c"
+  "${QJS}/quickjs.c")
+add_library(meow_quickjs SHARED
+  ${MEOW_QUICKJS_C_SOURCES}
   "${MEOW_QUICKJS_SOURCE}/cxx/libfastdev_quickjs_runtime.cpp")
 target_compile_features(meow_quickjs PRIVATE cxx_std_17)
 target_compile_definitions(meow_quickjs PRIVATE CONFIG_VERSION="${QUICKJS_VERSION}")
@@ -35,9 +37,16 @@ if(WIN32)
     # Math table - a static initializer full of libm addresses - is rejected
     # with C2099 on windows-arm64 while x64 compiles. Force-include a shim that
     # keeps those addresses constant; it is a no-op for the x64 build.
+    #
+    # `flutter build windows` drives the Visual Studio generator, which drops
+    # target-wide $<COMPILE_LANGUAGE:C> options on a mixed C/C++ target: the
+    # previous genex never reached cl.exe and arm64 kept failing with C2099.
+    # Attach the force-include to the C sources, and repeat it target-wide as a
+    # safety net - the header expands to nothing in C++ and on non-ARM64 MSVC.
     target_include_directories(meow_quickjs PRIVATE "${CMAKE_CURRENT_LIST_DIR}")
-    target_compile_options(meow_quickjs PRIVATE
-      $<$<COMPILE_LANGUAGE:C>:/FImsvc_arm64_math.h>)
+    set_source_files_properties(${MEOW_QUICKJS_C_SOURCES} PROPERTIES
+      COMPILE_OPTIONS "/FImsvc_arm64_math.h")
+    target_compile_options(meow_quickjs PRIVATE /FImsvc_arm64_math.h)
   endif()
 else()
   set_target_properties(meow_quickjs PROPERTIES OUTPUT_NAME quickjs_c_bridge_plugin)

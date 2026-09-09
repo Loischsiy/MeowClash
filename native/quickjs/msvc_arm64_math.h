@@ -16,9 +16,12 @@
 #define MEOW_QUICKJS_MSVC_ARM64_MATH_H
 
 /* MEOW_QUICKJS_FORCE_MATH_SHIM exists so the wrappers can be compiled and
- * checked on a non-Windows host. */
-#if defined(MEOW_QUICKJS_FORCE_MATH_SHIM) ||                                   \
-    (defined(_MSC_VER) && (defined(_M_ARM64) || defined(_M_ARM64EC)))
+ * checked on a non-Windows host. The build system also force-includes this
+ * header target-wide, so it must expand to nothing in the C++ bridge file:
+ * redirecting <math.h> names there would break the C++ overloads. */
+#if !defined(__cplusplus) &&                                                   \
+    (defined(MEOW_QUICKJS_FORCE_MATH_SHIM) ||                                  \
+     (defined(_MSC_VER) && (defined(_M_ARM64) || defined(_M_ARM64EC))))
 
 #if defined(_MSC_VER)
 /* quickjs.c includes <WinSock2.h> after <math.h>. Pull the platform headers in

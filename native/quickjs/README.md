@@ -12,7 +12,12 @@ are changed. A single Windows DLL contains both QuickJS and the bridge.
 On MSVC the C sources are compiled with `/FImsvc_arm64_math.h`. That header
 wraps the libm symbols whose addresses QuickJS keeps in its static `Math` table,
 because MSVC emits them as inline ARM64 intrinsics and then refuses the table
-with `C2099` on windows-arm64. The header compiles to nothing on x64.
+with `C2099` on windows-arm64. The header compiles to nothing on x64 and in C++.
+
+The force-include is set on the C source files and repeated target-wide. The
+Visual Studio generator used by `flutter build windows` drops target-wide
+`$<$<COMPILE_LANGUAGE:C>:...>` options on a mixed C/C++ target, so that spelling
+never reached `cl.exe` and windows-arm64 kept failing.
 
 ```sh
 cmake -S native/quickjs -B build/quickjs -DCMAKE_BUILD_TYPE=Release

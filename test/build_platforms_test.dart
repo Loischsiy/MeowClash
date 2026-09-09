@@ -110,4 +110,47 @@ void main() {
     expect(setup.Build.hostArchFromEnvironment('AMD64'), setup.Arch.amd64);
     expect(setup.Build.hostArchFromEnvironment(null), setup.Arch.amd64);
   });
+
+  test('QuickJS keeps constant Math initializers on windows-arm64', () {
+    // Every libm symbol whose address quickjs.c stores in js_math_funcs.
+    const wrapped = <String>[
+      'acos',
+      'acosh',
+      'asin',
+      'asinh',
+      'atan',
+      'atan2',
+      'atanh',
+      'cbrt',
+      'ceil',
+      'cos',
+      'cosh',
+      'exp',
+      'expm1',
+      'fabs',
+      'floor',
+      'log',
+      'log10',
+      'log1p',
+      'log2',
+      'sin',
+      'sinh',
+      'sqrt',
+      'tan',
+      'tanh',
+      'trunc',
+    ];
+    final shim = File('native/quickjs/msvc_arm64_math.h').readAsStringSync();
+    expect(shim, contains('_M_ARM64'));
+    for (final name in wrapped) {
+      expect(shim, contains('#define $name meow_qjs_$name'),
+          reason: 'quickjs.c takes the address of $name in its Math table');
+    }
+    final cmake = File('native/quickjs/CMakeLists.txt').readAsStringSync();
+    expect(cmake, contains(r'$<$<COMPILE_LANGUAGE:C>:/FImsvc_arm64_math.h>'));
+    expect(
+        cmake,
+        contains('target_include_directories(meow_quickjs PRIVATE '
+            r'"${CMAKE_CURRENT_LIST_DIR}")'));
+  });
 }

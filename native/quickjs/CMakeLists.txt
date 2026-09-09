@@ -30,6 +30,15 @@ if(WIN32)
   set_target_properties(meow_quickjs PROPERTIES OUTPUT_NAME quickjs_c_bridge)
   target_compile_definitions(meow_quickjs PRIVATE _CRT_SECURE_NO_WARNINGS)
   target_compile_options(meow_quickjs PRIVATE /utf-8)
+  if(MSVC)
+    # MSVC turns part of <math.h> into inline ARM64 intrinsics, so QuickJS's
+    # Math table - a static initializer full of libm addresses - is rejected
+    # with C2099 on windows-arm64 while x64 compiles. Force-include a shim that
+    # keeps those addresses constant; it is a no-op for the x64 build.
+    target_include_directories(meow_quickjs PRIVATE "${CMAKE_CURRENT_LIST_DIR}")
+    target_compile_options(meow_quickjs PRIVATE
+      $<$<COMPILE_LANGUAGE:C>:/FImsvc_arm64_math.h>)
+  endif()
 else()
   set_target_properties(meow_quickjs PROPERTIES OUTPUT_NAME quickjs_c_bridge_plugin)
   target_compile_definitions(meow_quickjs PRIVATE _GNU_SOURCE)

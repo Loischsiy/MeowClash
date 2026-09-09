@@ -99,6 +99,14 @@ architectures. The final CMake install rule replaces the dependency's x64-only
 prebuilt file. Shared pub-cache files and Apple's JavaScriptCore are untouched.
 See [native bridge details](../native/quickjs/README.md).
 
+The bridge's C sources are compiled with a force-included shim,
+`native/quickjs/msvc_arm64_math.h`. MSVC compiles part of `<math.h>` as inline
+ARM64 intrinsics, and QuickJS stores the address of those libm functions in the
+static `Math` table, which the compiler rejects with `C2099: initializer is not
+a constant` on windows-arm64 even though the identical x64 build succeeds. The
+shim wraps those symbols in real functions and expands to nothing on x64 and on
+every non-MSVC toolchain.
+
 Nix obtains the same checksum-pinned source through a fixed-output download;
 there is no configure-time network request inside the Nix sandbox. Existing Go
 vendor hash, Flutter lockfile, and the VM test's LTS kernel pin are unchanged.

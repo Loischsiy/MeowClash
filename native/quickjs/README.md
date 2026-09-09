@@ -9,6 +9,11 @@ The final install rule deliberately replaces the dependency's x86-64-only
 prebuilt file **after** plugin installation. No files in the shared pub cache
 are changed. A single Windows DLL contains both QuickJS and the bridge.
 
+On MSVC the C sources are compiled with `/FImsvc_arm64_math.h`. That header
+wraps the libm symbols whose addresses QuickJS keeps in its static `Math` table,
+because MSVC emits them as inline ARM64 intrinsics and then refuses the table
+with `C2099` on windows-arm64. The header compiles to nothing on x64.
+
 ```sh
 cmake -S native/quickjs -B build/quickjs -DCMAKE_BUILD_TYPE=Release
 cmake --build build/quickjs --config Release

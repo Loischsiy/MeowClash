@@ -63,4 +63,51 @@ void main() {
             'ArchitecturesInstallIn64BitMode={{ARCHITECTURES_INSTALL_IN_64BIT_MODE}}'));
     expect(template, isNot(contains('{{ARCH}}')));
   });
+
+  test('Build option probe ignores flags mentioned in prose', () {
+    const help = '    --[no-]analyze-size    Whether to produce additional '
+        'profile information for artifact output size. When building for '
+        'Android, a single ABI must be specified at a time with the '
+        '"--target-platform" flag.\n'
+        '    --target=<path>    The main entry-point file.\n';
+    expect(setup.Build.probeDeclaresOption(help, 'target-platform'), isFalse);
+  });
+
+  test('Build option probe reads the argument parser verdict', () {
+    expect(
+      setup.Build.probeDeclaresOption(
+        'Could not find an option named "--target-platform".',
+        'target-platform',
+      ),
+      isFalse,
+    );
+    expect(
+      setup.Build.probeDeclaresOption(
+        'Missing argument for "--target-platform".',
+        'target-platform',
+      ),
+      isTrue,
+    );
+    expect(
+      setup.Build.probeDeclaresOption(
+        'Missing argument for "target-platform".',
+        'target-platform',
+      ),
+      isTrue,
+    );
+    expect(
+      setup.Build.probeDeclaresOption(
+        '    --target-platform=<default>    The target platform.\n',
+        'target-platform',
+      ),
+      isTrue,
+    );
+  });
+
+  test('Windows host architecture is detected under x64 emulation', () {
+    expect(setup.Build.hostArchFromEnvironment('ARM64'), setup.Arch.arm64);
+    expect(setup.Build.hostArchFromEnvironment('arm64'), setup.Arch.arm64);
+    expect(setup.Build.hostArchFromEnvironment('AMD64'), setup.Arch.amd64);
+    expect(setup.Build.hostArchFromEnvironment(null), setup.Arch.amd64);
+  });
 }

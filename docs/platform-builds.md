@@ -55,6 +55,13 @@ so packaging keeps finding the artifacts. Cross-building Windows ARM64 from an
 x64 host consequently needs an SDK that still exposes the flag. `flutter build
 linux` still accepts it, so Linux packaging is unchanged.
 
+The probe reads the output of `flutter build windows --help --target-platform`
+instead of scanning plain help text: the `--analyze-size` description mentions
+`--target-platform` in prose on every platform, so a substring search reports
+the option as present even on SDKs that removed it. The flag is additionally
+considered only when the requested architecture differs from the host, which
+means CI - where each job runs on a matching runner - never forwards it.
+
 The Inno Setup template used to reference an `{{ARCH}}` variable that the
 packager never substitutes, so the installers were produced without any
 architecture restriction. It now uses the supported `{{ARCHITECTURES_ALLOWED}}`

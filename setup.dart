@@ -220,22 +220,53 @@ class Build {
     try {
       result = await Process.run(
         "flutter",
-        ["build", platform, "--help"],
+        ["build", platform, "--help", "--$option"],
         runInShell: true,
       );
     } on ProcessException {
       return _flutterBuildOptions[key] = false;
     }
-    final help = "${result.stdout}${result.stderr}";
-    return _flutterBuildOptions[key] = help.contains("--$option");
+    return _flutterBuildOptions[key] =
+        probeDeclaresOption("${result.stdout}${result.stderr}", option);
+  }
+
+  /// Interprets the output of `flutter build <platform> --help --<option>`.
+  ///
+  /// The option is passed last and without a value on purpose: the argument
+  /// parser rejects that command either way, so nothing is ever built, while
+  /// the two rejection messages tell the cases apart. Scanning plain help text
+  /// for `--<option>` is not enough, because the `--analyze-size` description
+  /// mentions `--target-platform` in prose on every platform - which is how
+  /// the Windows ARM64 job kept forwarding a flag Flutter had removed.
+  static bool probeDeclaresOption(String output, String option) {
+    final lower = output.toLowerCase();
+    final name = option.toLowerCase();
+    if (lower.contains("could not find an option named")) return false;
+    // Flutter quotes the option together with its dashes
+    // (`Missing argument for "--target-platform".`) while older SDKs quote the
+    // bare name, so accept both spellings.
+    if (RegExp('missing argument for "-*${RegExp.escape(name)}"')
+        .hasMatch(lower)) {
+      return true;
+    }
+    final declaration = RegExp(
+      r'^\s*(?:-\w,\s*)?--(?:\[no-\])?' + RegExp.escape(name) + r'(?:[=,\s]|$)',
+      multiLine: true,
+    );
+    return declaration.hasMatch(lower);
   }
 
   /// Host architecture of the current Windows machine.
+  ///
+  /// `PROCESSOR_ARCHITEW6432` wins because an emulated x64 process running on
+  /// an ARM64 host reports `AMD64` in `PROCESSOR_ARCHITECTURE`.
   static Arch get windowsHostArch =>
-      (Platform.environment["PROCESSOR_ARCHITECTURE"] ?? "").toUpperCase() ==
-              "ARM64"
-          ? Arch.arm64
-          : Arch.amd64;
+      hostArchFromEnvironment(Platform.environment["PROCESSOR_ARCHITEW6432"] ??
+          Platform.environment["PROCESSOR_ARCHITECTURE"]);
+
+  /// Maps a Windows `PROCESSOR_ARCHITECTURE` value onto an architecture.
+  static Arch hostArchFromEnvironment(String? value) =>
+      (value ?? "").toUpperCase() == "ARM64" ? Arch.arm64 : Arch.amd64;
 
   /// Inno Setup architecture identifier for [arch]. `x64` and `arm64` are
   /// understood by every Inno Setup 6 release, unlike the newer
@@ -954,9 +985,14 @@ class BuildCommand extends Command {
         await Build.buildHelper(target, token!, arch: arch);
         final windowsTargetPlatform =
             "windows-${arch == Arch.arm64 ? 'arm64' : 'x64'}";
-        final supportsTargetPlatform = await Build.flutterBuildSupportsOption(
-            "windows", "target-platform");
-        if (!supportsTargetPlatform && arch != Build.windowsHostArch) {
+        // Building for the host architecture never needs the flag, so only a
+        // cross build pays for the probe - and CI, where the runner always
+        // matches the requested architecture, never forwards it at all.
+        final needsTargetPlatform = arch != Build.windowsHostArch;
+        final supportsTargetPlatform = needsTargetPlatform &&
+            await Build.flutterBuildSupportsOption(
+                "windows", "target-platform");
+        if (needsTargetPlatform && !supportsTargetPlatform) {
           throw UsageException(
               'This Flutter version builds Windows apps for the host '
               'architecture (${Build.windowsHostArch.name}) only, so '

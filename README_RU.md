@@ -154,49 +154,77 @@ sudo apk add libayatana-appindicator-dev keybinder3-dev
 
 ## 🛠️ Сборка из исходников
 
+### Поддерживаемые платформы и архитектуры
+
+| Платформа | Архитектуры | Результат сборки |
+| --- | --- | --- |
+| Android | ARMv7, ARM64, x86-64 | APK под каждую ABI + универсальный APK |
+| Windows | x64, ARM64 | Установщик (`.exe`) + портативный ZIP |
+| Linux | x64, ARM64 | DEB, RPM, AppImage, портативный `.tar.gz` |
+| macOS | x64, ARM64 | DMG |
+| iOS / iPadOS 15+ | ARM64, только реальные устройства | **Неподписанный** IPA — подписывать нужно самостоятельно |
+| NixOS | `x86_64-linux`, `aarch64-linux` | Flake-пакет + модуль NixOS |
+
 ### Требования
-1. Установите **Flutter SDK (3.35.7)**.
-2. Установите **Golang (1.24.0)** (требуется для сборки прокси-ядра).
-3. При сборке для Windows: Установите **Rust** (актуальная версия, для вспомогательного сервиса Helper), **GCC** и **Inno Setup**.
-4. При сборке для Android: Установите **Android SDK** и **NDK**, а также задайте переменную окружения `ANDROID_NDK`.
+
+1. **Flutter SDK** — `3.35.7` для Android, macOS и Linux x64; `3.44.1` для Windows ARM64 и iOS.
+2. **Golang** — `1.24.0` (`1.26.0` для iOS-моста), нужен для сборки прокси-ядра.
+3. **Windows**: **Rust** (для ARM64 добавьте цель `aarch64-pc-windows-msvc`), C++-инструментарий Visual Studio и **Inno Setup** с поддержкой ARM64.
+4. **Android**: **Android SDK** и **NDK**, переменная окружения `ANDROID_NDK`.
+5. **iOS**: **полный Xcode** (в одних Command Line Tools нет SDK iPhoneOS) и **CocoaPods**. Сборка под симулятор намеренно запрещена.
 
 ### Инструкция по сборке
-1. **Клонируйте репозиторий вместе с подмодулями:**
+
+1. **Клонируйте репозиторий:**
    ```bash
    git clone https://github.com/Loischsiy/MeowClash.git
    cd MeowClash
-   git submodule update --init --recursive
    ```
 
-2. **Загрузите зависимости Flutter:**
+2. **Загрузите пакеты Flutter:**
    ```bash
    flutter pub get
    ```
 
-3. **Сгенерируйте файлы моделей, провайдеров и локализации:**
+3. **Сгенерируйте код (модели, провайдеры, локализация):**
    ```bash
    dart run build_runner build --delete-conflicting-outputs
    flutter pub run intl_utils:generate
    ```
 
-4. **Соберите приложение с помощью скрипта сборки:**
+4. **Соберите приложение скриптом setup.dart:**
+   ```bash
+   dart setup.dart android                       # все ABI: универсальный + 3 отдельных APK
+   dart setup.dart android --arch arm64          # одна ABI
+   dart setup.dart windows --arch <arm64|amd64>
+   dart setup.dart linux   --arch <arm64|amd64>
+   dart setup.dart macos   --arch <arm64|amd64>
+   dart setup.dart ios     --arch arm64          # неподписанный IPA в dist/
+   ```
 
-   - **Android:**
-     ```bash
-     dart setup.dart android
-     ```
-   - **Windows:**
-     ```bash
-     dart setup.dart windows --arch <arm64 | amd64>
-     ```
-   - **Linux:**
-     ```bash
-     dart setup.dart linux --arch <arm64 | amd64>
-     ```
-   - **macOS:**
-     ```bash
-     dart setup.dart macos --arch <arm64 | amd64>
-     ```
+   Флаг `--out core` собирает только прокси-ядро. Для упаковки Windows и Linux дополнительно
+   нужен `flutter_distributor` — скрипт клонирует его сам. Кросс-сборка Windows ARM64 с x64-хоста
+   требует SDK, в котором ещё есть `--target-platform`; сборка на соответствующем хосте работает всегда.
+
+### 📱 Подпись iOS
+
+Публикуемый IPA **не подписан и не устанавливается напрямую**. Переподписать только внешнее
+приложение недостаточно: встроенному `PacketTunnel.appex` нужен свой provisioning-профиль с
+возможностями **Network Extensions (Packet Tunnel)** и **App Groups**.
+
+1. Задайте уникальные `APP_BUNDLE_ID` и `APP_GROUP_ID` в `ios/Config/Identifiers.xcconfig`. Расширение использует `<APP_BUNDLE_ID>.PacketTunnel`.
+2. Зарегистрируйте оба App ID и App Group в своей команде Apple Developer, включив **Network Extensions** и **App Groups** для обоих.
+3. Создайте локальный `ios/Config/Signing.xcconfig` (в .gitignore) со строкой `DEVELOPMENT_TEAM = ВАШ_APPLE_TEAM_ID`.
+4. Выполните `flutter pub get`, затем `dart setup.dart ios --arch arm64 --out core`, затем `cd ios && pod install`.
+5. Откройте `ios/Runner.xcworkspace`, выберите реальное устройство, проверьте подпись у **обоих** таргетов и запустите или архивируйте сборку.
+
+Никогда не коммитьте сертификаты, приватные ключи, provisioning-профили и `Signing.xcconfig`.
+
+**Ограничения iOS:** нет kill switch, нет маршрутизации по приложениям и нет гарантии отсутствия
+утечек. VPN-расширение живёт в жёстком лимите памяти (soft limit Go — 32 MiB), размер запроса ограничен
+8 MiB, так что очень большие geodata или наборы правил система может выгрузить. Функции только для Android
+(контроль доступа по приложениям, системный прокси, allow-bypass) недоступны, а отключение IPv6 лишь
+убирает IPv6-маршруты — это не IPv6 kill switch.
 
 ---
 
@@ -222,7 +250,4 @@ sudo apk add libayatana-appindicator-dev keybinder3-dev
 ## 📄 Лицензия
 Исходный код MeowClash распространяется на условиях свободной лицензии [GPL-3.0 License](LICENSE).
 
-
-### iOS / ARM64
-
-[Сборка iOS и ARM64, подпись и ограничения](docs/platform-builds.md)
+Лицензии сторонних компонентов — в [`LICENSES/`](LICENSES/): названия стран в `lib/common/ip_country_names.dart` взяты из [Unicode CLDR](LICENSES/unicode.txt).

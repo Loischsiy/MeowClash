@@ -154,49 +154,78 @@ NixOS を使用している場合は、提供されている Flake インプッ�
 
 ## 🛠️ ソースからのビルド
 
-### 必要要件
-1. **Flutter SDK (3.35.7)** をインストール。
-2. **Golang (1.24.0)** をインストール（プロキシコアのビルドに必要）。
-3. Windows 向けにビルドする場合：**Rust** (最新のツールチェーン、Helper Service 用)、**GCC**、および **Inno Setup** をインストール。
-4. Android 向けにビルドする場合：**Android SDK** と **NDK** をインストールし、環境変数 `ANDROID_NDK` を定義。
+### 対応プラットフォームとアーキテクチャ
+
+| プラットフォーム | アーキテクチャ | 生成物 |
+| --- | --- | --- |
+| Android | ARMv7, ARM64, x86-64 | ABI 別 APK + ユニバーサル APK |
+| Windows | x64, ARM64 | インストーラー（`.exe`）+ ポータブル ZIP |
+| Linux | x64, ARM64 | DEB、RPM、AppImage、ポータブル `.tar.gz` |
+| macOS | x64, ARM64 | DMG |
+| iOS / iPadOS 15+ | ARM64、実機のみ | **未署名** IPA — 署名は自分で行う必要があります |
+| NixOS | `x86_64-linux`, `aarch64-linux` | Flake パッケージ + NixOS モジュール |
+
+### 前提条件
+
+1. **Flutter SDK** — Android / macOS / Linux x64 は `3.35.7`、Windows ARM64 と iOS は `3.44.1`。
+2. **Golang** — `1.24.0`（iOS ブリッジは `1.26.0`）。プロキシコアのビルドに必要です。
+3. **Windows**: **Rust**（ARM64 では `aarch64-pc-windows-msvc` ターゲットを追加）、Visual Studio の C++ ツールチェーン、ARM64 対応の **Inno Setup**。
+4. **Android**: **Android SDK** と **NDK**、および環境変数 `ANDROID_NDK`。
+5. **iOS**: **完全な Xcode**（Command Line Tools だけでは iPhoneOS SDK が含まれません）と **CocoaPods**。シミュレーター向けビルドは拒否されます。
 
 ### ビルド手順
-1. **リポジトリとサブモジュールをクローンします:**
+
+1. **リポジトリをクローン:**
    ```bash
    git clone https://github.com/Loischsiy/MeowClash.git
    cd MeowClash
-   git submodule update --init --recursive
    ```
 
-2. **Flutter パッケージを取得します:**
+2. **Flutter パッケージを取得:**
    ```bash
    flutter pub get
    ```
 
-3. **モデル、プロバイダー、およびローカライズ用のコードを生成します:**
+3. **コード生成（モデル・プロバイダー・l10n）:**
    ```bash
    dart run build_runner build --delete-conflicting-outputs
    flutter pub run intl_utils:generate
    ```
 
-4. **セットアップスクリプトを使用してアプリケーションをビルドします:**
+4. **setup.dart でアプリをビルド:**
+   ```bash
+   dart setup.dart android                       # 全 ABI: ユニバーサル + 3 つの分割 APK
+   dart setup.dart android --arch arm64          # 単一 ABI
+   dart setup.dart windows --arch <arm64|amd64>
+   dart setup.dart linux   --arch <arm64|amd64>
+   dart setup.dart macos   --arch <arm64|amd64>
+   dart setup.dart ios     --arch arm64          # 未署名 IPA を dist/ に出力
+   ```
 
-   - **Android:**
-     ```bash
-     dart setup.dart android
-     ```
-   - **Windows:**
-     ```bash
-     dart setup.dart windows --arch <arm64 | amd64>
-     ```
-   - **Linux:**
-     ```bash
-     dart setup.dart linux --arch <arm64 | amd64>
-     ```
-   - **macOS:**
-     ```bash
-     dart setup.dart macos --arch <arm64 | amd64>
-     ```
+   `--out core` を付けるとプロキシコアのみをビルドします。Windows と Linux のパッケージングには
+   `flutter_distributor` のチェックアウトも必要ですが、スクリプトが自動で取得します。x64 ホストから
+   Windows ARM64 をクロスビルドするには `--target-platform` をまだ受け付ける SDK が必要で、
+   同じアーキテクチャのホストでのビルドは常に動作します。
+
+### 📱 iOS の署名
+
+公開されている IPA は **未署名で、そのままではインストールできません**。外側のアプリだけを再署名しても
+不十分で、埋め込まれた `PacketTunnel.appex` には **Network Extensions (Packet Tunnel)** と
+**App Groups** を有効にした専用のプロビジョニングプロファイルが必要です。
+
+1. `ios/Config/Identifiers.xcconfig` で固有の `APP_BUNDLE_ID` と `APP_GROUP_ID` を設定します。拡張は `<APP_BUNDLE_ID>.PacketTunnel` を使用します。
+2. 両方の App ID と App Group を Apple Developer チームに登録し、双方で **Network Extensions** と **App Groups** を有効にします。
+3. `ios/Config/Signing.xcconfig`（gitignore 済み）を作成し、`DEVELOPMENT_TEAM = あなたの APPLE_TEAM_ID` を記述します。
+4. `flutter pub get` → `dart setup.dart ios --arch arm64 --out core` → `cd ios && pod install` を実行します。
+5. `ios/Runner.xcworkspace` を開き、実機を選択し、**両方**のターゲットの署名を確認してから実行またはアーカイブします。
+
+証明書・秘密鍵・プロビジョニングプロファイル・`Signing.xcconfig` は絶対にコミットしないでください。
+
+**iOS の制限:** キルスイッチ、アプリ単位のルーティング、リーク防止の保証はありません。VPN 拡張は厳しい
+メモリ制限（Go のソフトリミット 32 MiB）で動作し、リクエストは 8 MiB が上限のため、非常に大きな geodata や
+ルールセットはシステムによって強制終了されることがあります。Android 専用機能（アプリ単位のアクセス制御、
+システムプロキシ、allow-bypass）は利用できず、IPv6 を無効にしても IPv6 ルートが削除されるだけで、
+IPv6 のキルスイッチではありません。
 
 ---
 
@@ -222,7 +251,4 @@ NixOS を使用している場合は、提供されている Flake インプッ�
 ## 📄 ライセンス
 MeowClash はオープンソースであり、[GPL-3.0 License](LICENSE) の下でリリースされています。
 
-
-### iOS / ARM64
-
-[iOS・ARM64 のビルドと署名](docs/platform-builds.md)
+サードパーティのライセンス表記は [`LICENSES/`](LICENSES/) にあります。`lib/common/ip_country_names.dart` の国名データは [Unicode CLDR](LICENSES/unicode.txt) に基づきます。

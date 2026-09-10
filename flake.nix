@@ -133,7 +133,7 @@
                 echo "programs.meowclash evaluates cleanly on ${system}" > "$out"
               '';
 
-          nixos-vm = import ./nix/tests/nixos-module.nix {
+          nixos-vm = import ./test/nixos-module.nix {
             inherit pkgs meowclash;
             nixosModule = self.nixosModules.meowclash;
           };

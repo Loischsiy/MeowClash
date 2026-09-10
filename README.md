@@ -154,18 +154,31 @@ Grab the latest pre-compiled binaries from the release pages:
 
 ## 🛠️ Building from Source
 
+### Platform & Architecture Support
+
+| Platform | Architectures | Output |
+| --- | --- | --- |
+| Android | ARMv7, ARM64, x86-64 | Per-ABI APKs + universal APK |
+| Windows | x64, ARM64 | Installer (`.exe`) + portable ZIP |
+| Linux | x64, ARM64 | DEB, RPM, AppImage, portable `.tar.gz` |
+| macOS | x64, ARM64 | DMG |
+| iOS / iPadOS 15+ | ARM64, physical devices only | **Unsigned** IPA — you must sign it yourself |
+| NixOS | `x86_64-linux`, `aarch64-linux` | Flake package + NixOS module |
+
 ### Prerequisites
-1. Install **Flutter SDK (3.35.7)**.
-2. Install **Golang (1.24.0)** (required to build the proxy core).
-3. If building for Windows: Install **Rust** (latest toolchain, for the Helper Service), **GCC**, and **Inno Setup**.
-4. If building for Android: Install **Android SDK** and **NDK**, and define the `ANDROID_NDK` environment variable.
+
+1. **Flutter SDK** — `3.35.7` for Android, macOS and Linux x64; `3.44.1` for Windows ARM64 and iOS.
+2. **Golang** — `1.24.0` (`1.26.0` for the iOS bridge), required to build the proxy core.
+3. **Windows**: **Rust** (add the `aarch64-pc-windows-msvc` target for ARM64), the Visual Studio C++ toolchain and **Inno Setup** with ARM64 support.
+4. **Android**: **Android SDK** + **NDK**, with the `ANDROID_NDK` environment variable set.
+5. **iOS**: **full Xcode** (Command Line Tools alone do not include the iPhoneOS SDK) and **CocoaPods**. Simulator builds are rejected.
 
 ### Build Steps
-1. **Clone the repository and submodules:**
+
+1. **Clone the repository:**
    ```bash
    git clone https://github.com/Loischsiy/MeowClash.git
    cd MeowClash
-   git submodule update --init --recursive
    ```
 
 2. **Fetch Flutter packages:**
@@ -180,23 +193,39 @@ Grab the latest pre-compiled binaries from the release pages:
    ```
 
 4. **Build the application using the setup helper:**
+   ```bash
+   dart setup.dart android                       # all ABIs: universal + 3 split APKs
+   dart setup.dart android --arch arm64          # single ABI
+   dart setup.dart windows --arch <arm64|amd64>
+   dart setup.dart linux   --arch <arm64|amd64>
+   dart setup.dart macos   --arch <arm64|amd64>
+   dart setup.dart ios     --arch arm64          # unsigned IPA in dist/
+   ```
 
-   - **Android:**
-     ```bash
-     dart setup.dart android
-     ```
-   - **Windows:**
-     ```bash
-     dart setup.dart windows --arch <arm64 | amd64>
-     ```
-   - **Linux:**
-     ```bash
-     dart setup.dart linux --arch <arm64 | amd64>
-     ```
-   - **macOS:**
-     ```bash
-     dart setup.dart macos --arch <arm64 | amd64>
-     ```
+   Add `--out core` to build only the proxy core. Windows and Linux packaging also needs the
+   `flutter_distributor` checkout, which the setup script clones for you. Cross-building Windows
+   ARM64 from an x64 host requires an SDK that still accepts `--target-platform`; building on a
+   matching host always works.
+
+### 📱 iOS Signing
+
+The published IPA is **unsigned and not directly installable**. Re-signing only the outer app is not
+enough — the embedded `PacketTunnel.appex` needs its own provisioning profile with the
+**Network Extensions (Packet Tunnel)** and **App Groups** capabilities.
+
+1. Set a unique `APP_BUNDLE_ID` and `APP_GROUP_ID` in `ios/Config/Identifiers.xcconfig`. The extension uses `<APP_BUNDLE_ID>.PacketTunnel`.
+2. Register both App IDs and the App Group with your Apple Developer team, enabling **Network Extensions** and **App Groups** for both.
+3. Create `ios/Config/Signing.xcconfig` (gitignored) containing `DEVELOPMENT_TEAM = YOUR_APPLE_TEAM_ID`.
+4. Run `flutter pub get`, then `dart setup.dart ios --arch arm64 --out core`, then `cd ios && pod install`.
+5. Open `ios/Runner.xcworkspace`, select a physical device, verify signing on **both** targets, then run or archive.
+
+Never commit certificates, private keys, provisioning profiles or `Signing.xcconfig`.
+
+**iOS limitations:** no kill switch, no per-app routing and no leak-prevention guarantee. The VPN
+extension runs under a tight memory budget (32 MiB Go soft limit) and requests are capped at 8 MiB,
+so very large geodata or rule sets can be terminated by the system. Android-only features (per-app
+access control, system proxy, allow-bypass) are unavailable, and disabling IPv6 only removes IPv6
+routes — it is not an IPv6 kill switch.
 
 ---
 
@@ -222,7 +251,4 @@ The custom `meowclash-*` override system was fully removed. Previously, these se
 ## 📄 License
 MeowClash is open-source and released under the [GPL-3.0 License](LICENSE).
 
-
-### iOS / ARM64
-
-[iOS and ARM64 build/signing guide](docs/platform-builds.md)
+Third-party notices live in [`LICENSES/`](LICENSES/) — the bundled country names in `lib/common/ip_country_names.dart` come from [Unicode CLDR](LICENSES/unicode.txt).

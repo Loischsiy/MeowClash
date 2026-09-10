@@ -30,7 +30,7 @@ RELEASE_ASSETS = [
     'MeowClash-VERSION-linux-arm64.rpm',
 ]
 
-spec = importlib.util.spec_from_file_location('assets', Path(__file__).with_name('rename_release_assets.py'))
+spec = importlib.util.spec_from_file_location('assets', ROOT / 'scripts' / 'rename_release_assets.py')
 assets = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(assets)
 

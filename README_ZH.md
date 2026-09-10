@@ -154,49 +154,75 @@ sudo apk add libayatana-appindicator-dev keybinder3-dev
 
 ## 🛠️ 从源码构建
 
-### 前提条件
-1. 安装 **Flutter SDK (3.35.7)**。
-2. 安装 **Golang (1.24.0)** (构建代理内核所需)。
-3. 若为 Windows 构建：安装 **Rust** (最新工具链，用于辅助服务 Helper)、**GCC** 以及 **Inno Setup**。
-4. 若为 Android 构建：安装 **Android SDK** 和 **NDK**，并配置 `ANDROID_NDK` 环境变量。
+### 平台与架构支持
+
+| 平台 | 架构 | 产物 |
+| --- | --- | --- |
+| Android | ARMv7、ARM64、x86-64 | 各 ABI 的 APK + 通用 APK |
+| Windows | x64、ARM64 | 安装程序（`.exe`）+ 便携版 ZIP |
+| Linux | x64、ARM64 | DEB、RPM、AppImage、便携版 `.tar.gz` |
+| macOS | x64、ARM64 | DMG |
+| iOS / iPadOS 15+ | ARM64，仅限真机 | **未签名** IPA — 需要自行签名 |
+| NixOS | `x86_64-linux`、`aarch64-linux` | Flake 包 + NixOS 模块 |
+
+### 前置条件
+
+1. **Flutter SDK** — Android、macOS 和 Linux x64 使用 `3.35.7`；Windows ARM64 和 iOS 使用 `3.44.1`。
+2. **Golang** — `1.24.0`（iOS 桥接为 `1.26.0`），用于构建代理内核。
+3. **Windows**：**Rust**（ARM64 需添加 `aarch64-pc-windows-msvc` 目标）、Visual Studio 的 C++ 工具链，以及支持 ARM64 的 **Inno Setup**。
+4. **Android**：**Android SDK** 与 **NDK**，并设置环境变量 `ANDROID_NDK`。
+5. **iOS**：**完整的 Xcode**（仅有 Command Line Tools 不包含 iPhoneOS SDK）和 **CocoaPods**。模拟器构建会被拒绝。
 
 ### 构建步骤
-1. **克隆仓库及子模块:**
+
+1. **克隆仓库：**
    ```bash
    git clone https://github.com/Loischsiy/MeowClash.git
    cd MeowClash
-   git submodule update --init --recursive
    ```
 
-2. **获取 Flutter 依赖包:**
+2. **获取 Flutter 依赖：**
    ```bash
    flutter pub get
    ```
 
-3. **生成代码 (模型类、Provider 及 l10n):**
+3. **生成代码（模型、providers 和 l10n）：**
    ```bash
    dart run build_runner build --delete-conflicting-outputs
    flutter pub run intl_utils:generate
    ```
 
-4. **使用构建脚本打包应用:**
+4. **使用 setup.dart 构建应用：**
+   ```bash
+   dart setup.dart android                       # 所有 ABI：通用包 + 3 个分包 APK
+   dart setup.dart android --arch arm64          # 单个 ABI
+   dart setup.dart windows --arch <arm64|amd64>
+   dart setup.dart linux   --arch <arm64|amd64>
+   dart setup.dart macos   --arch <arm64|amd64>
+   dart setup.dart ios     --arch arm64          # 未签名 IPA 输出到 dist/
+   ```
 
-   - **Android:**
-     ```bash
-     dart setup.dart android
-     ```
-   - **Windows:**
-     ```bash
-     dart setup.dart windows --arch <arm64 | amd64>
-     ```
-   - **Linux:**
-     ```bash
-     dart setup.dart linux --arch <arm64 | amd64>
-     ```
-   - **macOS:**
-     ```bash
-     dart setup.dart macos --arch <arm64 | amd64>
-     ```
+   添加 `--out core` 只构建代理内核。Windows 与 Linux 打包还需要 `flutter_distributor`，
+   脚本会自动克隆。在 x64 主机上交叉构建 Windows ARM64 需要仍然接受 `--target-platform` 的 SDK；
+   在相同架构的主机上构建始终可用。
+
+### 📱 iOS 签名
+
+发布的 IPA **未签名，无法直接安装**。仅重新签名外层应用并不够：内嵌的 `PacketTunnel.appex`
+需要自己的描述文件，并启用 **Network Extensions (Packet Tunnel)** 和 **App Groups** 能力。
+
+1. 在 `ios/Config/Identifiers.xcconfig` 中设置唯一的 `APP_BUNDLE_ID` 和 `APP_GROUP_ID`。扩展使用 `<APP_BUNDLE_ID>.PacketTunnel`。
+2. 在 Apple Developer 团队中注册两个 App ID 和 App Group，并为两者启用 **Network Extensions** 和 **App Groups**。
+3. 创建本地 `ios/Config/Signing.xcconfig`（已在 .gitignore 中），写入 `DEVELOPMENT_TEAM = 你的_APPLE_TEAM_ID`。
+4. 依次执行 `flutter pub get`、`dart setup.dart ios --arch arm64 --out core`、`cd ios && pod install`。
+5. 打开 `ios/Runner.xcworkspace`，选择真机，确认**两个**目标的签名，然后运行或归档。
+
+请勿提交证书、私钥、描述文件或 `Signing.xcconfig`。
+
+**iOS 限制：**没有 kill switch、没有分应用路由，也不保证防泄露。VPN 扩展运行在严格的内存预算下
+（Go 软限制 32 MiB），请求上限为 8 MiB，因此非常大的 geodata 或规则集可能被系统终止。仅限 Android
+的功能（分应用访问控制、系统代理、allow-bypass）不可用；禁用 IPv6 仅会移除 IPv6 路由，
+并不是 IPv6 kill switch。
 
 ---
 
@@ -222,7 +248,4 @@ sudo apk add libayatana-appindicator-dev keybinder3-dev
 ## 📄 开源协议
 MeowClash 开源并遵循 [GPL-3.0 协议](LICENSE)。
 
-
-### iOS / ARM64
-
-[iOS 与 ARM64 构建及签名说明](docs/platform-builds.md)
+第三方许可声明位于 [`LICENSES/`](LICENSES/)：`lib/common/ip_country_names.dart` 中的国家/地区名称来自 [Unicode CLDR](LICENSES/unicode.txt)。

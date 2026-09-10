@@ -7,6 +7,7 @@ on:
       - 'ios/**'
       - 'native/**'
       - 'scripts/**'
+      - 'test/**'
       - 'setup.dart'
       - '.github/workflows/**'
   workflow_dispatch:
@@ -85,6 +86,6 @@ jobs:
           flutter pub get
           flutter analyze --no-fatal-infos --no-fatal-warnings
           flutter test
-          python3 -m unittest discover -s scripts -p 'test_*.py'
+          python3 -m unittest discover -s test -p 'test_*.py'
       - name: Compile Runner and PacketTunnel without signing
         run: dart setup.dart ios --arch arm64 --env pre

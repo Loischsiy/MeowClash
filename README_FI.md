@@ -154,49 +154,78 @@ Lataa uusimmat esikäännetyt binäärit julkaisusivuilta:
 
 ## 🛠️ Kääntäminen lähdekoodista
 
-### Vaatimukset
-1. Asenna **Flutter SDK (3.35.7)**.
-2. Asenna **Golang (1.24.0)** (vaaditaan välityspalvelinytimen rakentamiseen).
-3. Jos rakennat Windowsille: asenna **Rust** (uusin työkaluketju, Helper Serviceä varten), **GCC** ja **Inno Setup**.
-4. Jos rakennat Androidille: asenna **Android SDK** ja **NDK** sekä määritä `ANDROID_NDK`-ympäristömuuttuja.
+### Tuetut alustat ja arkkitehtuurit
 
-### Rakennusvaiheet
-1. **Kloonaa tietovarasto ja aliprojektit:**
+| Alusta | Arkkitehtuurit | Tuotos |
+| --- | --- | --- |
+| Android | ARMv7, ARM64, x86-64 | ABI-kohtaiset APK:t + universaali APK |
+| Windows | x64, ARM64 | Asennusohjelma (`.exe`) + siirrettävä ZIP |
+| Linux | x64, ARM64 | DEB, RPM, AppImage, siirrettävä `.tar.gz` |
+| macOS | x64, ARM64 | DMG |
+| iOS / iPadOS 15+ | ARM64, vain fyysiset laitteet | **Allekirjoittamaton** IPA — allekirjoitus on tehtävä itse |
+| NixOS | `x86_64-linux`, `aarch64-linux` | Flake-paketti + NixOS-moduuli |
+
+### Esivaatimukset
+
+1. **Flutter SDK** — `3.35.7` Androidille, macOS:lle ja Linux x64:lle; `3.44.1` Windows ARM64:lle ja iOS:lle.
+2. **Golang** — `1.24.0` (`1.26.0` iOS-siltaa varten), tarvitaan välityspalvelinytimen kääntämiseen.
+3. **Windows**: **Rust** (ARM64:lle lisää kohde `aarch64-pc-windows-msvc`), Visual Studion C++-työkaluketju ja **Inno Setup**, jossa on ARM64-tuki.
+4. **Android**: **Android SDK** ja **NDK** sekä ympäristömuuttuja `ANDROID_NDK`.
+5. **iOS**: **täysi Xcode** (pelkät Command Line Tools eivät sisällä iPhoneOS-SDK:ta) ja **CocoaPods**. Simulaattorikäännökset hylätään.
+
+### Käännösvaiheet
+
+1. **Kloonaa repositorio:**
    ```bash
    git clone https://github.com/Loischsiy/MeowClash.git
    cd MeowClash
-   git submodule update --init --recursive
    ```
 
-2. **Nouda Flutter-paketit:**
+2. **Hae Flutter-paketit:**
    ```bash
    flutter pub get
    ```
 
-3. **Luo koodi (mallit, providerit ja l10n):**
+3. **Generoi koodi (mallit, providerit ja lokalisointi):**
    ```bash
    dart run build_runner build --delete-conflicting-outputs
    flutter pub run intl_utils:generate
    ```
 
-4. **Rakenna sovellus setup-apurilla:**
+4. **Käännä sovellus setup.dart-skriptillä:**
+   ```bash
+   dart setup.dart android                       # kaikki ABI:t: universaali + 3 erillistä APK:ta
+   dart setup.dart android --arch arm64          # yksi ABI
+   dart setup.dart windows --arch <arm64|amd64>
+   dart setup.dart linux   --arch <arm64|amd64>
+   dart setup.dart macos   --arch <arm64|amd64>
+   dart setup.dart ios     --arch arm64          # allekirjoittamaton IPA hakemistoon dist/
+   ```
 
-   - **Android:**
-     ```bash
-     dart setup.dart android
-     ```
-   - **Windows:**
-     ```bash
-     dart setup.dart windows --arch <arm64 | amd64>
-     ```
-   - **Linux:**
-     ```bash
-     dart setup.dart linux --arch <arm64 | amd64>
-     ```
-   - **macOS:**
-     ```bash
-     dart setup.dart macos --arch <arm64 | amd64>
-     ```
+   Lippu `--out core` kääntää vain välityspalvelinytimen. Windowsin ja Linuxin paketointi tarvitsee
+   lisäksi `flutter_distributor`-kloonin, jonka skripti hakee puolestasi. Windows ARM64:n
+   ristiinkääntäminen x64-koneella vaatii SDK:n, joka yhä hyväksyy `--target-platform`-lipun;
+   vastaavalla koneella kääntäminen toimii aina.
+
+### 📱 iOS-allekirjoitus
+
+Julkaistu IPA on **allekirjoittamaton eikä asennu suoraan**. Pelkän ulomman sovelluksen
+uudelleenallekirjoitus ei riitä: upotettu `PacketTunnel.appex` tarvitsee oman provisioning-profiilin,
+jossa on **Network Extensions (Packet Tunnel)**- ja **App Groups** -ominaisuudet.
+
+1. Aseta yksilölliset `APP_BUNDLE_ID` ja `APP_GROUP_ID` tiedostoon `ios/Config/Identifiers.xcconfig`. Laajennus käyttää tunnusta `<APP_BUNDLE_ID>.PacketTunnel`.
+2. Rekisteröi molemmat App ID:t ja App Group Apple Developer -tiimiisi ja ota **Network Extensions** ja **App Groups** käyttöön molemmille.
+3. Luo paikallinen `ios/Config/Signing.xcconfig` (gitignoressa), jossa on rivi `DEVELOPMENT_TEAM = SINUN_APPLE_TEAM_ID`.
+4. Aja `flutter pub get`, sitten `dart setup.dart ios --arch arm64 --out core` ja lopuksi `cd ios && pod install`.
+5. Avaa `ios/Runner.xcworkspace`, valitse fyysinen laite, tarkista allekirjoitus **molemmissa** kohteissa ja aja tai arkistoi.
+
+Älä koskaan committaa varmenteita, yksityisiä avaimia, provisioning-profiileja tai `Signing.xcconfig`-tiedostoa.
+
+**iOS-rajoitukset:** ei kill switchiä, ei sovelluskohtaista reititystä eikä takuuta vuotojen estosta.
+VPN-laajennus toimii tiukassa muistibudjetissa (Gon pehmeä raja 32 MiB) ja pyyntöjen katto on 8 MiB, joten
+järjestelmä voi lopettaa hyvin suuret geodata- tai sääntöjoukot. Vain Androidille tarkoitetut ominaisuudet
+(sovelluskohtainen pääsynhallinta, järjestelmän välityspalvelin, allow-bypass) eivät ole käytettävissä, ja
+IPv6:n poistaminen käytöstä vain poistaa IPv6-reitit — se ei ole IPv6:n kill switch.
 
 ---
 
@@ -222,7 +251,4 @@ Mukautettu `meowclash-*`-ohitusjärjestelmä poistettiin kokonaan. Aiemmin näm�
 ## 📄 Lisenssi
 MeowClash on avoimen lähdekoodin ohjelmisto ja julkaistu [GPL-3.0-lisenssillä](LICENSE).
 
-
-### iOS / ARM64
-
-[iOS- ja ARM64-koontiohjeet](docs/platform-builds.md)
+Kolmansien osapuolten lisenssit ovat hakemistossa [`LICENSES/`](LICENSES/): maiden nimet tiedostossa `lib/common/ip_country_names.dart` ovat [Unicode CLDR](LICENSES/unicode.txt) -dataa.

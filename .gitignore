@@ -42,10 +42,11 @@ app.*.symbols
 app.*.map.json
 
 #AI generated
+# `.agent/` is agent scratch space (logs, jobs) and stays ignored.
+# `.agents/` is tracked on purpose: it holds the AGENTS.md topic guides.
 /.claude
 .opencode
 .agent
-.agents
 .gemini
 .pi
 

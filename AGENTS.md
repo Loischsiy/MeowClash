@@ -1,427 +1,121 @@
 # AGENTS.md — MeowClash
 
-> Compact, repo-specific instructions for AI agents. Omit anything already obvious from file names or defaults.
+Router file: rules that always apply, plus pointers to `.agents/<topic>.md`. Read the guide that matches
+your task instead of everything. Keep this file under ~150 lines.
 
-## AI Instructions for this Repo
+## Project overview
 
-1. **Context Awareness:** Before performing any task, always review the project structure. If you notice new technologies not described here, suggest updating this file.
-2. **Analysis Mode:** When prompted to "Analyze and Update AGENTS.md," you must rescan the entire project, identify changes in the architecture, and update the Tech Stack and Project Structure sections.
-3. **Consistency:** Always follow the patterns already implemented in the `/lib` folder (or equivalent). Do not suggest third-party libraries if the project already has a built-in solution.
-4. **Recursive Improvement:** You are permitted to edit this file if you believe that adding a new rule will improve the quality of your work with the current code.
-5. **Where documentation goes — there is no `docs/` folder.** This repo deliberately has none. Agent-facing reasons, gotchas and internal mechanics belong **in this file**. Anything users need (requirements, build/signing steps, platform limits) belongs in the **six READMEs** (`README.md`, `README_RU.md`, `README_UK.md`, `README_FI.md`, `README_JA.md`, `README_ZH.md`) — edit all six. Component-level native notes belong next to the code (`native/quickjs/README.md`). Do **not** create new standalone `.md` files, and never record one-off validation reports, device checklists, dated fork comparisons, test counts or analyzer diagnostic counts in a tracked `.md` — they are stale on the next commit, so they go in the PR description or `CHANGELOG.md`. `CLAUDE.md` and `GEMINI.md` are thin pointers to this file; do not duplicate rules into them.
+Multi-platform Flutter proxy client (Android, Windows, macOS, Linux, iOS/iPadOS 15+), fork of FlClashX,
+wrapping the [mihomo](https://github.com/MetaCubeX/mihomo) Go core. It also ships a Rust Windows service
+helper (`services/helper/`) and a rebuilt QuickJS C bridge (`native/quickjs/`).
 
-## Project type
+Every platform ships **x64 and ARM64** (Windows arm64, Linux arm64, `aarch64-linux` via Nix, Android
+arm64-v8a, iOS arm64). iOS is physical devices only — simulator builds are rejected — and the IPA is
+**unsigned** by design.
 
-Multi-platform Flutter proxy client (Android, Windows, macOS, Linux, iOS/iPadOS 15+).
-Fork of FlClashX. Wraps the [mihomo](https://github.com/MetaCubeX/mihomo) core (Go) with a Flutter UI.
-Also contains a Rust Windows service helper (`services/helper/`) and a rebuilt QuickJS C bridge (`native/quickjs/`).
+## Tech stack
 
-Both desktop and mobile ship **x64 and ARM64**: Windows arm64, Linux arm64, `aarch64-linux` via Nix,
-Android arm64-v8a, and iOS arm64 (physical devices only — simulator builds are rejected). iOS produces an
-**unsigned** IPA; see "iOS / ARM64 platform gotchas" and "iOS runtime architecture" below.
+- Flutter **3.35.7** and **3.44.1**, Go **1.24.0** and **1.26.0** — two versions of each coexist; check
+  the workflow you are touching (`.agents/ci-and-release.md`).
+- Rust (`services/helper/`), Java 17 + Android NDK for Android, Nix (nixpkgs unstable) for Linux/NixOS.
+- Riverpod + freezed + json_serializable, `flutter_intl` from `arb/`, FFI to the Go core.
 
-## Languages / tool versions (CI source of truth)
+## Project structure
 
-**Two Flutter versions and two Go versions coexist — check the workflow you are touching.**
+- `lib/` Flutter app · `core/` Go mihomo wrapper (+ `core/mobilebridge/` for iOS) · `ios/` Runner + PacketTunnel
+- `native/quickjs/` rebuilt QuickJS C bridge · `services/helper/` Rust Windows service · `nix/` + `flake.nix`
+- `test/` all Dart/Python/NixOS tests · `scripts/` + `tool/` generators · `arb/` translations
+- Full ownership map: `.agents/project-structure.md`
 
-| Tool    | CI version | Notes |
-|---------|------------|-------|
-| Flutter | **3.35.7** + **3.44.1** | `3.35.7` (`channel: stable`) for the legacy Android/macOS/Linux-x64 jobs in `build.yaml` and `release-all.yaml`. `3.44.1` for Windows ARM64, iOS and everything in `platform-checks.yaml`. ARM/iOS hosts use `channel: master` because no stable host archive exists — that is a pinned checkout mechanism, not "track master". |
-| Go      | **1.24.0** + **1.26.0** | `1.24.0` in `build.yaml`; `1.26.0` in `platform-checks.yaml` and the iOS job of `release-all.yaml`. The mihomo version itself always comes from `core/constant/version.go`, never from the toolchain. |
-| Rust    | latest     | `services/helper/` is a Cargo project. |
-| Java    | 17         | CI uses Temurin 17 for Android builds. |
-| Android NDK | latest | Must set `ANDROID_NDK` env var for Android builds. |
-| Nix     | nixpkgs unstable | `flake.nix` packages Linux builds and exposes a NixOS module. |
-
-## Architecture & ownership
-
-```
-core/               Go wrapper around mihomo; single source of truth for core version (see below)
-  mobilebridge/     iOS bridge package; has its own tests, also run under -race
-ios/                Xcode project: Runner (app) + PacketTunnel (NetworkExtension) + Shared;
-                    build_core.sh, generate_icons.sh, Config/*.xcconfig
-native/quickjs/     Rebuilt flutter_js QuickJS C bridge (CMake) + MSVC ARM64 shim + smoke.cpp;
-                    has its own README.md with the pinned upstream commit
-scripts/            Python release tooling (rename_release_assets.py)
-tool/               One-off Node generators (generate_ip_country_names.cjs)
-test/               All Dart, Python and NixOS-VM tests (see Testing)
-LICENSES/           Third-party license notices (Unicode CLDR data for lib/common/ip_country_names.dart)
-lib/                Flutter app code
-  clash/            FFI bridge to core (+ ios.dart, native_config.dart, proxy_groups.dart)
-  common/           Helpers, extensions, constants (color, http, navigation, preferences,
-                    tls_error, proxy_delay, ip_country_names, etc.)
-  enum/             Shared enum definitions
-  l10n/             Generated by flutter_intl from `arb/`
-  manager/          Platform-specific managers (window, tray, VPN, tile, ios_vpn_manager)
-  models/           freezed+json_serializable models; outputs go to lib/models/generated/
-  pages/            Full-screen page routes (home, editor, scan, send_to_tv_page)
-  plugins/          Platform bridge abstractions (app, service, tile, vpn, ios)
-  providers/        Riverpod providers; outputs go to lib/providers/generated/
-  services/         Business services: async_polling_loop, delay_test_runner, image_memory,
-                    ip_details_service, profile_script_evaluator, provider_payload,
-                    provider_refresh_plan, provider_refresh_service, subscription_crypto,
-                    subscription_notification_service, ui_lifecycle
-  utils/            Device info service
-  views/            UI pages organized by feature
-    about.dart, access.dart, application_setting.dart, backup_and_recovery.dart,
-    developer.dart, hotkey.dart, logs.dart, resources.dart, theme.dart, tools.dart
-    config/         General, DNS, network config views
-    connection/     Connection list, request details
-    dashboard/      Main dashboard + widgets (announce, inbound ip, memory, network, outbound, quick options, traffic)
-    profiles/       Profile management (add, edit, override, receive, scripts)
-    proxies/        Proxy list, cards, settings, providers
-  widgets/          Reusable UI components (dialogs, cards, grids, charts, inputs, sheets,
-                    suspendable_ui, visibility_polling, navigation_page_view, ip_details dialog)
-plugins/
-  proxy/            Windows plugin for system proxy toggle
-  window_ext/       macOS/Windows window management plugin
-  flutter_distributor/  NOT in repo; cloned at build time from leanflutter/flutter_distributor
-nix/                Nix package/module support; includes pubspec.lock.json for nixpkgs Flutter builder
-                    (the NixOS VM test itself lives in test/nixos-module.nix)
-services/helper/    Rust binary (Windows service helper)
-```
-
-### Root-level lib/ files
-
-- `main.dart` — App entry point + background service isolate
-- `application.dart` — App widget and initialization
-- `state.dart` — `GlobalState` singleton with `ValueNotifier` for shared mutable state
-- `controller.dart` — Main controller orchestrating core lifecycle
-- `core_version.dart` — Generated by `setup.dart` from `core/constant/version.go`
-
-## Core version: single source of truth
-
-`core/constant/version.go` holds the canonical mihomo version string.
-Do **not** hardcode versions elsewhere.
-
-- `setup.dart` reads it at build time and writes it to `lib/core_version.dart`.
-- It also injects it into Go linker flags (`-X github.com/metacubex/mihomo/constant.Version=...`).
-- `nix/package.nix` reads the same file independently (it does **not** use `setup.dart`), regenerates `lib/core_version.dart` in `preBuild`, and passes `--dart-define=CORE_VERSION=...` to Flutter.
-- `lib/core_version.dart` is generated by both paths — never hand-edit it.
-
-### Bumping the mihomo version — full checklist
-
-A version bump touches **four** places. Skipping any of the last three still builds
-locally and fails in CI.
-
-1. `core/go.mod` — point `github.com/metacubex/mihomo` at the new tag.
-2. `core/constant/version.go` — update `var Version` to the exact same string.
-3. `cd core && go mod tidy` — regenerates `core/go.sum` and the indirect requires.
-   Afterwards confirm the `replace github.com/metacubex/utls => ...` pseudo-version
-   survived: the Firefox/Safari fingerprints live on an upstream *branch*, not a tag,
-   so its pseudo-version sorts below mihomo's own `v1.8.7` require and a careless
-   edit silently loses them.
-4. **`vendorHash` in `nix/package.nix`** — see below. This is the one that bites.
-
-#### Updating `vendorHash`
-
-`buildGoModule` fetches Go dependencies in a **fixed-output derivation**, so the hash of
-the whole module set is pinned in `nix/package.nix`. Any dependency change — including
-new *indirect* deps pulled in by a mihomo bump — invalidates it, and `nix build .#core`
-dies with `hash mismatch in fixed-output derivation` right before `installPhase`. The
-Go code itself is fine at that point; only Nix's bookkeeping is stale.
-
-The hash cannot be computed without fetching the modules, so let the build report it:
+## Commands
 
 ```bash
-nix build .#core -L 2>&1 | grep -A2 'hash mismatch'
-#          specified: sha256-<stale value currently in nix/package.nix>
-#             got:    sha256-<real value>   ← paste this into vendorHash
-```
-
-Equivalently, set `vendorHash = lib.fakeHash;` first and read the `got:` line. Either
-way, re-run `nix build .#core -L` afterwards to confirm it is green.
-
-Commit `core/go.mod`, `core/go.sum`, `core/constant/version.go` and the new `vendorHash`
-**together in one commit** — they are only valid as a set, and splitting them leaves the
-default branch red.
-
-> `nix/pubspec.lock.json` is Flutter-only and is *not* affected by a Go dependency bump.
-> Do not regenerate it for a mihomo version change.
-
-## Build system
-
-The main build script is **`setup.dart`** (not raw `flutter build`). It cross-compiles the Go core, runs `flutter_distributor` packaging, and handles platform-specific steps.
-
-### Local commands
-
-| Task | Command |
-|------|---------|
-| Android (arm64) | `make android_arm64` or `dart setup.dart android --arch arm64` |
-| Android (all ABIs) | `dart setup.dart android` (universal + three split APKs) |
-| iOS (arm64, unsigned IPA) | `make ios_arm64` or `dart setup.dart ios --arch arm64` → `dist/MeowClash-<version>-ios-arm64-unsigned.ipa` |
-| Windows (arm64) | `make windows_arm64` or `dart setup.dart windows --arch arm64` |
-| Linux (arm64) | `make linux_arm64` or `dart setup.dart linux --arch arm64` |
-| macOS (arm64) local | `make macLocal` (cleans `dist/` + `build/` first) |
-| macOS (amd64) local | `make macLocal_amd64` |
-| Core only (skip app) | `dart setup.dart <platform> --arch <arch> --out core` |
-| Nix Linux package | `nix build .#meowclash` or `make nixBuild` |
-| Nix Linux core only | `nix build .#core` or `make nixCore` |
-| NixOS checks (fast, eval only) | `nix flake check --no-build` or `make nixCheck` |
-| NixOS VM integration test | `nix build .#checks.x86_64-linux.nixos-vm -L` or `make nixTest` |
-| Everything NixOS | `make nixAll` |
-
-### Important build behaviors
-
-- **Android**: builds `libclash.so` (CGO, `c-shared`) for all ABIs (`armeabi-v7a`, `arm64-v8a`, `x86_64`). `setup.dart` produces a universal APK.
-- **Desktop** (win/linux/mac): builds a `MeowClashCore` executable (Go, no CGO).
-- **Windows**: also builds the Rust `helper.exe` and packages with `flutter_distributor` into `exe` + `zip`.
-- **macOS**: uses `create-dmg` to produce a DMG in `dist/`.
-- **Linux**: installs `libayatana-appindicator3-dev`, `libkeybinder-3.0-dev`, etc. For amd64 also produces AppImage + RPM.
-- **iOS**: `ios/build_core.sh` produces `MeowCore.xcframework`, then Runner + PacketTunnel are compiled into an **unsigned** IPA (`dist/MeowClash-<version>-ios-arm64-unsigned.ipa`). Needs full Xcode (Command Line Tools have no iPhoneOS SDK) and CocoaPods. Simulator builds are intentionally rejected.
-- **Windows/Linux ARM64**: rebuild the pinned `flutter_js` QuickJS C bridge for the host architecture; the final CMake install rule replaces the dependency's x64-only prebuilt file. Shared pub-cache files and Apple's JavaScriptCore are untouched.
-- **Nix/NixOS**: `flake.nix` builds the Go core with `buildGoModule` and the Flutter app with nixpkgs `buildFlutterApplication`; it does not use `setup.dart` or `flutter_distributor`. `flake.nix` now declares **both** `x86_64-linux` and `aarch64-linux`; the old x86-64-only limitation is gone because `native/quickjs/` rebuilds the `flutter_js` bridge from checksum-pinned source (a fixed-output download, so no configure-time network access inside the Nix sandbox) instead of relying on the dependency's x64-only `libquickjs_c_bridge_plugin.so`.
-
-### NixOS build verification
-
-`flake.nix` exposes a `checks` output so NixOS support cannot silently rot.
-
-| Check | Cost | What it proves |
-|-------|------|----------------|
-| `nixos-module-eval` | seconds, no build | The NixOS module still evaluates and `programs.meowclash` installs the package, wires `corePackage` to `package.core`, and declares the `cap_net_admin+ep` wrapper on the core binary. |
-| `core` | Go build | The mihomo core compiles with `buildGoModule`. |
-| `package` | Flutter build | The app compiles with `buildFlutterApplication` (this is where `nix/pubspec.lock.json` drift shows up). |
-| `nixos-vm` | boots 2 VMs, needs KVM | On a real NixOS system: the launcher, desktop entry and icon are installed; the wrapper exports `MEOWCLASH_NIX_PACKAGE`/`MEOWCLASH_CORE_PATH` and puts `/run/wrappers/bin` on PATH; `/run/wrappers/bin/MeowClashCore` carries `cap_net_admin` and actually executes; and with `tunMode.enable = false` no capability wrapper is created. |
-
-The VM test lives in `test/nixos-module.nix` (imported by `flake.nix`). It calls the core with no
-arguments and expects the `Arguments error` exit — that is the cheapest way to
-prove the ELF loads and links on NixOS. If you change how the core parses
-`os.Args`, update that assertion.
-
-Regenerate `nix/pubspec.lock.json` (see Code generation) whenever `pubspec.lock`
-changes, otherwise `checks.package` fails.
-
-> **No `flake.lock` is committed.** Every evaluation re-resolves
-> `nixpkgs-unstable`, so a green run today can break tomorrow with no code
-> change. Run `nix flake lock` and commit the result to make NixOS builds
-> reproducible; CI emits a warning while it is missing and runs the full check
-> weekly on a schedule to catch upstream drift.
-
-#### The VM nodes pin an LTS kernel
-
-Both nodes import a small `ltsKernel` module that sets
-`boot.kernelPackages = pkgs.linuxPackages_6_12`. **Do not remove it to "use a newer
-kernel".** Because no `flake.lock` is committed, the test otherwise boots whatever
-kernel `nixpkgs-unstable` shipped that day, and on 2026-08-17 that was 6.18.44,
-which hits `kernel BUG at arch/x86/kernel/alternative.c:2531` in `__text_poke`
-while `udev` loads `virtio_net`. The udev worker dies with SIGSEGV, udev wedges,
-`virtio_blk` never probes, `/dev/disk/by-label/nixos` never appears, and the VM
-sits in the initrd until the 300 s device timeout drops it to `emergency.target`.
-The kernel is not what this check exercises, so it is pinned rather than tracked.
-If that attribute is ever dropped from nixpkgs, move the pin to the current LTS
-series — do not fall back to the default kernel.
-
-When a VM test fails, **ignore the Python traceback**: `RuntimeError: Shell
-disconnected` only means the machine stopped answering. NixOS test instrumentation
-ships `panic-on-fail.service` (`wantedBy = [ "emergency.target" ]`), which runs
-`echo c > /proc/sysrq-trigger`, so any boot failure ends as a deliberate kernel
-panic and the traceback always blames whichever `wait_for_unit` was in flight. The
-real cause is in the serial console above it:
-
-```bash
-nix log /nix/store/<hash>-vm-test-run-meowclash-nixos.drv \
-  | grep -E '^(plain|tun) #' \
-  | grep -iE 'BUG|Oops|SEGV|Failed to start|Dependency failed|timed out|Out of memory'
-```
-
-A `initrd-*` prefix on the failed units means the machine died **before**
-`pivot_root`, so nothing about `programs.meowclash` was ever evaluated — look at
-the kernel and the virtio devices, not at this repo.
-
-### NixOS TUN mode
-
-Use the flake module when TUN mode is needed on NixOS:
-
-```nix
-{
-  imports = [ inputs.meowclash.nixosModules.default ];
-
-  programs.meowclash = {
-    enable = true;
-    tunMode.enable = true;
-  };
-}
-```
-
-The module creates a `/run/wrappers/bin/MeowClashCore` wrapper with `cap_net_admin+ep`.
-The app package sets `MEOWCLASH_CORE_PATH=MeowClashCore` and searches `/run/wrappers/bin` before the store core, so TUN works without trying to mutate the read-only Nix store.
-If `tunMode.enable` is false, the app must not attempt to `chown`/`chmod` the store core; it should show the NixOS module hint instead.
-
-### Environment variables
-
-- `ANDROID_NDK` — required for Android. CI resolves it from `ANDROID_NDK_LATEST_HOME` or `ANDROID_HOME/ndk/<latest>`.
-- `APP_ENV` — `stable` or `pre`. Controls branding/release behavior.
-- `APP_BUNDLE_ID`, `APP_GROUP_ID` — iOS identifiers in `ios/Config/Identifiers.xcconfig`. The extension is always `<APP_BUNDLE_ID>.PacketTunnel`; both targets share `APP_GROUP_ID`.
-- `DEVELOPMENT_TEAM` — Apple team id in `ios/Config/Signing.xcconfig`. That file is **gitignored**: never commit it, certificates, private keys or provisioning profiles.
-
-## Code generation
-
-Generated files are **checked in**, but you must regenerate after editing sources.
-
-| Generator | Input | Output | Command |
-|-----------|-------|--------|---------|
-| `build_runner` | `lib/models/*.dart`, `lib/providers/*.dart` | `lib/models/generated/*.{g,freezed}.dart`, `lib/providers/generated/*.g.dart` | `dart run build_runner build --delete-conflicting-outputs` |
-| `ffigen` | `libclash/android/arm64-v8a/libclash.h` | `lib/clash/generated/clash_ffi.dart` | `dart run ffigen --config ffigen.yaml` (if config exists) or via pubspec ffigen section |
-| `flutter_intl` | `arb/*.arb` | `lib/l10n/l10n.dart` | IDE plugin or `flutter pub run intl_utils:generate` |
-| Country names | Unicode CLDR, via Node with full ICU | `lib/common/ip_country_names.dart` | `node tool/generate_ip_country_names.cjs`, then `dart format lib/common/ip_country_names.dart`. Keep `LICENSES/unicode.txt` — the bundled data is CLDR-licensed. |
-| Nix pub lock JSON | `pubspec.lock` | `nix/pubspec.lock.json` | `ruby -e 'require "yaml"; require "json"; File.write("nix/pubspec.lock.json", JSON.pretty_generate(YAML.load_file("pubspec.lock")) + "\n")'` |
-
-### Analysis / lint quirks
-
-- `analysis_options.yaml` enables **many** extra lints beyond `flutter_lints`. Notable strict ones: `avoid_print`, `prefer_const_constructors`, `use_build_context_synchronously`, `unawaited_futures`, `always_declare_return_types`.
-- `custom_lint` is configured for `riverpod_lint`. Run `dart run custom_lint` if you want to verify Riverpod-specific rules.
-- `analyzer.exclude` ignores `build/`, `lib/generated_plugin_registrant.dart`, `lib/clash/generated/**`, `lib/l10n/**`, `plugins/flutter_distributor/**`.
-
-## Testing
-
-Every test lives in `test/`, except the Go tests and two files that cannot move (see below).
-
-```bash
-flutter test                                        # ~33 Dart test files
-flutter test test/build_platforms_test.dart         # focused run
-CGO_ENABLED=0 go -C core test ./...                 # Go core tests
-go -C core test -race ./mobilebridge                # iOS bridge, race detector
-python3 -m unittest discover -s test -p 'test_*.py' # release-asset naming
-nix build .#checks.x86_64-linux.nixos-vm -L         # NixOS VM test (test/nixos-module.nix)
-```
-
-- **Dart** (`test/*_test.dart`): proxy chains, delay queue/snapshots, provider refresh and payloads, profile-script evaluation, subscription crypto, IP details, iOS core protocol, UI lifecycle/suspension, polling, backup/recovery and build-target wiring. `test/performance_test_support.dart` is a shared helper, not a suite; the `*_performance_test.dart` files are host workload checks and do **not** measure device FPS.
-- **Go tests stay in `core/`** (`core/*_test.go`, `core/mobilebridge/bridge_test.go`). Go requires test files in the same package directory as the code under test, so moving them into `test/` would break `go test ./...`.
-- **`macos/RunnerTests/RunnerTests.swift` stays put** — it is an Xcode test target wired into `macos/Runner.xcodeproj`.
-- **`native/quickjs/smoke.cpp` is not a test-runner test** but a CMake target (`meow_quickjs_smoke`) that `platform-checks.yaml` builds and executes to prove the bridge ABI works.
-- The CI gate is `platform-checks.yaml` (see CI / release) — do not assume tests run only locally.
-
-## Running the app locally (desktop)
-
-1. Ensure Flutter and Go are installed.
-2. Get Dart deps: `flutter pub get`
-3. Build core for your platform so the executable exists (e.g., `dart setup.dart macos --arch arm64 --out core`).
-4. Run the Flutter app: `flutter run` (it will look for the core binary / shared lib in platform-specific paths).
-
-On macOS you may need to codesign or disable gatekeeper for the local core binary.
-
-## CI / release
-
-- `.github/workflows/build.yaml` triggers on tags `v*` or manual `workflow_dispatch`.
-- `.github/workflows/release-all.yaml` — release-all workflow.
-- `.github/workflows/nixos.yaml` — NixOS verification. Runs on pushes/PRs touching Nix-relevant paths, weekly on a schedule, and on manual dispatch.
-  - Job `eval`: `nix flake check --no-build` + `checks.x86_64-linux.nixos-module-eval`. Fast, should always be green.
-  - Job `build`: frees runner disk space, enables KVM, builds `.#core` and `.#meowclash`, then runs `checks.x86_64-linux.nixos-vm`. Dispatch with `skip_vm_test: true` to skip the VM stage.
-  - There is no binary cache configured, so the `build` job compiles Flutter and Go from source and is slow. Adding a Cachix cache is the obvious speedup.
-- `.github/workflows/platform-checks.yaml` — **the test workflow**. Runs on PRs touching `core/**`, `lib/**`, `ios/**`, `native/**`, `scripts/**`, `test/**`, `setup.dart` or `.github/workflows/**`, plus manual dispatch. It builds and runs the real native JS bridge on Windows and Linux (x64 + ARM64), cross-builds the desktop Go cores, runs `flutter analyze`, `flutter test`, the Python tests and `flutter test test/desktop_native_js_test.dart`, and compiles both iOS targets unsigned on a macOS/Xcode runner. There is no `test.yaml`; this workflow is the gate.
-- It clones `flutter_distributor` fresh each run (`plugins/flutter_distributor` is gitignored).
-- Artifacts are uploaded to GitHub Releases and GitLab Releases.
-  The READMEs also advertise a **GitVerse** page
-  (`https://gitverse.ru/Loischsiy/meowclash/releases`), but **no workflow
-  publishes there** — it is a manual mirror. If you automate it, add the step
-  next to `Publish GitLab release` in `release-all.yaml`.
-- Release notes are rendered from `.github/release_template.md` by both
-  `build.yaml` and `release-all.yaml` via `sed "s|VERSION|$version|g"`, so the
-  literal `VERSION`/`vVERSION` placeholders must stay in the template. It links
-  one download badge per published asset; when packaging adds or drops a file,
-  update the template and `RELEASE_ASSETS` in `test/test_release_assets.py`.
-- Releases do **not** ship `.sha256` sidecars — GitHub already exposes a digest
-  for every asset. Both workflows delete stray `*.sha256` files from `dist`
-  before uploading, because packaging tools emit some of them.
-- Changelog is auto-generated from commits between tags.
-
-## Common gotchas
-
-- **`plugins/flutter_distributor/` is missing locally?** This is expected; it is cloned by CI and by `setup.dart`. If you need packaging locally, run the setup script or clone it manually.
-- **`libclash/` directory missing?** It is the build output directory for compiled core binaries and is gitignored. Created automatically by `setup.dart`.
-- **No `.gitmodules` file exists**, despite README mentioning `git submodule update --init --recursive`. The Go dependency on mihomo is fetched via `go mod` (see `core/go.mod`). That submodule instruction may be stale.
-- **Windows helper cross-compilation**: `services/helper` uses `cargo build --release --features windows-service`. For `aarch64-pc-windows-msvc`, `setup.dart` adds `--target aarch64-pc-windows-msvc`.
-- **ffigen header path** is hardcoded in `pubspec.yaml` to `libclash/android/arm64-v8a/libclash.h`. Regenerating FFI bindings requires the Android core to have been built first.
-- **`test/build_platforms_test.dart` asserts on source text**, not behavior: it greps `setup.dart`, `windows/packaging/exe/inno_setup.iss`, `native/quickjs/CMakeLists.txt` and `native/quickjs/msvc_arm64_math.h` for specific strings. Editing any of those files without updating that test turns CI red, and vice versa — it proves the text is present, not that the build works.
-- **Do not create a `docs/` folder.** See rule 5 at the top: agent-facing notes belong in this file, user-facing docs in the six READMEs, native component notes in `native/quickjs/README.md`.
-- **Download badges live in six READMEs.** `README.md`, `README_RU.md`, `README_UK.md`, `README_FI.md`, `README_JA.md` and `README_ZH.md` each carry the same badge block under their `📥` download heading. The block is one `<div>` containing compact `<a><img></a>` items at `width="220px"`, arranged two per row: GitHub + Obtainium, then a `<br>`, then GitLab + GitVerse. Adding, removing or reordering a download channel means editing **all six** — they are not generated from a shared source. `README_FI.md` localizes the `alt` text (`Hae GitHubista`, `Hae GitLabista`), the others keep English `Get it on X`. These SVGs are referenced only from the READMEs; nothing in `lib/` or `setup.dart` reads them.
-
-## iOS / ARM64 platform gotchas
-
-Why the build code looks the way it does. Do not "simplify" any of these.
-
-- **Flutter 3.44 removed `--target-platform` from `flutter build windows`**, which now always builds for the host. `setup.dart` probes `flutter build windows --help --target-platform` — **not** plain `--help`, because the `--analyze-size` description mentions `--target-platform` in prose on every SDK, so a substring search reports the flag as present even where it was removed. It forwards `--build-target-platform` to the distributor only when the SDK still accepts it *and* the requested arch differs from the host; otherwise it verifies the request matches `PROCESSOR_ARCHITECTURE`, the same value the distributor uses to find `build/windows/<arch>/runner/Release`. Cross-building Windows ARM64 from x64 therefore needs an older SDK. `flutter build linux` still accepts the flag, so Linux packaging is unchanged.
-- **Inno Setup**: `{{ARCH}}` is never substituted by the packager, so installers used to carry no architecture restriction at all. The template now uses the supported `{{ARCHITECTURES_ALLOWED}}` and `{{ARCHITECTURES_INSTALL_IN_64BIT_MODE}}`, and `setup.dart` writes `x64`/`arm64` into `windows/packaging/exe/make_config.yaml` for the duration of packaging, restoring the original file afterwards.
-- **Swift Package Manager must stay off** (`flutter: config: enable-swift-package-manager: false` in `pubspec.yaml`). It is on by default from Flutter 3.44, but its Xcode migration only recognises the stock Runner project's object identifiers and aborts on this custom project (Runner + PacketTunnel + MeowCore) with `Could not find BuildableReference for Runner`. All native iOS dependencies come from CocoaPods and `flutter_js` has no SwiftPM support, so nothing is lost. Re-enabling it would require regenerating `ios/Runner.xcodeproj` from Flutter's template.
-- **QuickJS on MSVC ARM64 needs the force-included shim** `native/quickjs/msvc_arm64_math.h`:
-  - MSVC compiles parts of `<math.h>` as inline ARM64 intrinsics, so QuickJS storing those libm addresses in its static `Math` table fails with `C2099: initializer is not a constant` on windows-arm64 while the identical x64 build succeeds. The shim wraps them in real functions and expands to nothing on x64 and on every non-MSVC toolchain.
-  - `libregexp.c` and `quickjs.c` call `alloca()` without including `<malloc.h>`, and MSVC only recognises the bare name on x86/x64. ARM64 compiled cleanly and then died at link time with `LNK2019`/`LNK2001` on `alloca` → `LNK1120: 1 unresolved externals` for `quickjs_c_bridge.dll`. The shim maps `alloca` onto `_alloca` on **every** MSVC architecture; C++ is left untouched.
-- **Toolchains**: Windows needs the native Visual Studio C++ toolchain, the Rust target `aarch64-pc-windows-msvc` (or `x86_64-pc-windows-msvc`) and Inno Setup with ARM64 support. Windows/Linux packaging needs the `plugins/flutter_distributor` checkout; core-only and iOS builds do not.
-- **The released IPA is unsigned by design.** Resigning only the outer app is not enough: the embedded `.appex` needs its own provisioning profile with NetworkExtension (Packet Tunnel) and App Groups entitlements. No App Store/TestFlight credentials are configured.
-- A green unsigned compile proves nothing about VPN routing, signing, extension memory or provider scripts on a real device. Physical-device acceptance for iOS/ARM64 releases belongs in the PR checklist, not in a tracked `.md`.
-
-## iOS runtime architecture (Runner vs PacketTunnel)
-
-- Dart keeps MeowClash's existing `id / method / data` + `code` protocol, including its double-encoded config strings. Do not import the newer reference project's protocol into this older core.
-- **Runner** hosts a foreground preview core; **PacketTunnel** hosts the independent VPN core with no Flutter engine. Backgrounding or disposing Flutter must never stop the VPN.
-- Both processes share profiles/geodata through the App Group, but each has its **own BoltDB** (`.ios-ui-cache` / `.ios-tunnel-cache`) so one database is never owned twice. Runner releases preview providers/listeners before the VPN starts.
-- A successful config, the selected-proxy map, raw updates and core state are saved atomically for reconnects. A rejected config update must not replace that snapshot.
-- Large payloads use bounded UUID-scoped files in the App Group; only the small UUID envelope goes through `sendProviderMessage`, and no public TCP control server is exposed. Requests/responses cap at **8 MiB**; UI event storage caps at **128 events / 256 KiB** and is drained only while Flutter is foregrounded — dropping old events must never interrupt the tunnel.
-- Go runs with a **32 MiB soft memory limit** inside the extension. That is not an RSS guarantee: large geodata, huge rule sets or complex transports can still get the NE killed by the OS.
-- The extension owns TUN/DNS/routes and Go receives a duplicated NE socket descriptor. Internal auto-routing, process discovery, the external controller and profile-defined inbound listeners are **disabled on iOS**; loopback HTTP/SOCKS stay available inside the running core.
-- Android's per-app access control and system-proxy/allow-bypass switches must not be advertised on iOS. Disabling IPv6 removes IPv6 tunnel routes — it is not an IPv6 kill switch. There is no kill switch, per-app routing or leak-prevention guarantee.
-- Subscription decryption and JS profile/provider transforms stay in the existing Dart services and run only while the app is foregrounded; PacketTunnel has no Android-style Flutter background service.
-
-## Feature mechanics worth knowing
-
-Non-obvious runtime contracts. Breaking one looks like a UI bug, not a build failure.
-
-- **Manual delay tests** (`lib/services/delay_test_runner.dart`): one shared queue with concurrency capped at **10** on every platform; single-node, group and all-group checks share that limit. Duplicate effective `(proxy, URL)` targets share in-flight work, and native tests have a **5 s** deadline that includes queue wait. Profile/core changes discard queued work and ignore late responses, settling any started loading indicator. Delay updates coalesce for **50 ms** and copy only changed URL buckets — never mutate existing immutable snapshots, and do not notify on unchanged scalars.
-- **Provider refresh** (`lib/services/provider_refresh_service.dart`): owned by the **Android service engine**, not the Activity or the `Application` widget. Setup IPC and quick-settings cold starts hand it a snapshot of the effective provider configuration, including profile-script changes and decryption credentials.
-- **UI suspension** (`lib/services/ui_lifecycle.dart`, `lib/widgets/suspendable_ui.dart`): run-time/traffic polling must stop on Android background transitions and a stale resume callback must not restart it; periodic group refresh pauses in the background. Check `mounted`/results **after** awaits, not only before. An in-flight core request is allowed to finish instead of being killed, and the polling loop must not launch an overlapping replacement.
-- **Profile scripts** (`lib/services/profile_script_evaluator.dart`): one-shot transforms run in a short-lived isolate on `flutter_js`; results are converted to Dart data before native teardown, and success, evaluation errors and conversion errors all release the engine. The fetch polyfill is loaded through the parent engine's asset bundle before spawning the worker, and XHR/fetch is initialized synchronously inside it before evaluating the profile.
-- **Go memory**: there is no periodic forced GC (the old two-minute `runtime.GC()` + `debug.FreeOSMemory()` timer was removed). Allocation-driven GC stays active with GC percent **50** and a **192 MiB** soft limit on desktop/Android (the iOS extension uses 32 MiB); explicit and OS-pressure reclaims coalesce into one outstanding request. Do not call `Touch()` on providers just to forward delay history — it updates their last-use timestamp and defeats `lazy` health checks.
-- **IP details** (`lib/services/ip_details_service.dart`): extra data is fetched only while the dialog is open, through the proxy-aware client, for that exact IP; responses for a different IP are rejected. Successful lookups are cached **5 min** in a **16-entry** IP/language LRU; failures are not cached. Country names always come from bundled CLDR data, never the API's translated string, and `ipwho.is` has no Finnish/Ukrainian region names — those fall back to English with a localized notice.
-
-## Quick verification checklist (before committing)
-
-```bash
-flutter pub get
-# If you changed models/providers:
-dart run build_runner build --delete-conflicting-outputs
-# If you changed ARB files:
-flutter pub run intl_utils:generate
-# Lint:
-flutter analyze
-# Tests (Dart, Go, Python):
-flutter test
+dart setup.dart <platform> --arch <arch>   # the build entry point, not raw `flutter build`
+make android_arm64 | ios_arm64 | windows_arm64 | linux_arm64 | macLocal | nixAll
+flutter analyze && flutter test
 CGO_ENABLED=0 go -C core test ./...
-go -C core test -race ./mobilebridge
 python3 -m unittest discover -s test -p 'test_*.py'
 ```
 
-For Nix packaging changes, additionally evaluate/build on NixOS or a Linux Nix host:
+Full command matrix and build behaviors: `.agents/build.md`. Pre-commit checklist: `.agents/testing.md`.
+
+## Code style
+
+- Follow the patterns already in `lib/`; do not add a dependency for something the repo already solves.
+- `analysis_options.yaml` is stricter than `flutter_lints` (`avoid_print`, `prefer_const_constructors`,
+  `use_build_context_synchronously`, `unawaited_futures`, `always_declare_return_types`), and
+  `custom_lint` + `riverpod_lint` are configured. Details: `.agents/codegen-and-lint.md`.
+- Generated files are checked in — regenerate them, never hand-edit: `lib/core_version.dart`,
+  `lib/models/generated/**`, `lib/providers/generated/**`, `lib/clash/generated/**`, `lib/l10n/**`.
+
+## Invariants
+
+- **The core version has one source:** `core/constant/version.go`. Never hardcode it elsewhere; a bump
+  touches four files including `vendorHash` (`.agents/core-version.md`).
+- **`test/build_platforms_test.dart` asserts on source text** of `setup.dart`,
+  `windows/packaging/exe/inno_setup.iss`, `native/quickjs/CMakeLists.txt` and
+  `native/quickjs/msvc_arm64_math.h`. Editing those without updating the test turns CI red, and vice
+  versa — it proves the text is present, not that the build works.
+- **The QuickJS MSVC math shim is not architecture-gated.** Never re-add an `_M_ARM64` guard
+  (`.agents/platform-gotchas.md`).
+- The CI gate is `.github/workflows/platform-checks.yaml`; there is no `test.yaml`.
+
+## Testing
 
 ```bash
-nix flake check --no-build                     # fast: flake + NixOS module evaluation
-nix build .#core -L                            # Go core only
-nix build .#meowclash -L                       # full Flutter app
-nix build .#checks.x86_64-linux.nixos-vm -L    # boots real NixOS VMs (needs KVM)
-# or simply:
-make nixAll
+flutter test                                        # ~33 Dart test files
+CGO_ENABLED=0 go -C core test ./...                 # Go core
+go -C core test -race ./mobilebridge                # iOS bridge, race detector
+python3 -m unittest discover -s test -p 'test_*.py' # release-asset naming
 ```
 
-## Fork changes — `meowclash-*` provider-override system removed (2026-05)
+Every test lives in `test/`, except the Go tests, `macos/RunnerTests/RunnerTests.swift` and
+`native/quickjs/smoke.cpp` — see `.agents/testing.md` for why and for the full pre-commit checklist.
 
-The custom `meowclash-*` override system was fully removed. These keys were read **only** from the subscription's HTTP **response headers**, never from the profile YAML body — so writing them inside a profile's YAML never had any effect. The decision (variant B) was full physical deletion, while keeping subscription decryption fully working.
+## Documentation policy — there is no `docs/` folder
 
-### Removed (now deleted / no-op)
+- Agent-facing reasoning, gotchas and internal mechanics: this file for short always-on rules, a topic
+  guide in `.agents/` for anything longer.
+- When a section outgrows this router, move the prose into `.agents/<topic>.md` and leave a one-line
+  pointer here. Keep guides focused; link between them instead of duplicating.
+- User-facing docs (requirements, build/signing steps, platform limits) go in the **six READMEs**
+  (`README.md`, `README_RU.md`, `README_UK.md`, `README_FI.md`, `README_JA.md`, `README_ZH.md`) — edit
+  all six.
+- Component-level native notes live next to the code (`native/quickjs/README.md`).
+- Do not create standalone `.md` files outside `.agents/` and those READMEs, and never track one-off
+  validation reports, device checklists, dated fork comparisons, test counts or analyzer diagnostic
+  counts — they are stale on the next commit, so they belong in the PR description or `CHANGELOG.md`.
+- `CLAUDE.md` and `GEMINI.md` are thin pointers to this file; never duplicate rules into them.
 
-Headers no longer handled: `meowclash-settings`, `meowclash-hex`, `meowclash-widgets`, `meowclash-view`, `meowclash-custom`, `meowclash-androidsecure`, `meowclash-servicename`, `meowclash-servicelogo`, `meowclash-serverinfo`, `meowclash-globalmode`, `meowclash-denywidgets`, `meowclash-background`.
+## Keeping these instructions current
 
-### Kept (still functional — do NOT break)
+- Review the real project structure before acting. If you find technology not described here, say so and
+  update the docs.
+- **You are expected to edit this file and its `.agents/` guides** whenever a change makes them wrong, or
+  when a new rule would improve future work. Ship the doc update in the same commit as the code.
+- On "Analyze and update AGENTS.md": rescan the project, refresh the Tech stack and Project structure
+  sections here, and update the affected guides.
 
-- **Subscription decryption**: headers `meowclash-password`, `meowclash-password-iterations`; `_maybeDecrypt`, `SubscriptionCrypto.looksLikeEncryptedPayload`, `SubscriptionCrypto.decryptBase64`, `kDefaultPbkdf2Iterations`, `SubscriptionPasswordRequiredException`, import `package:meowclash/services/subscription_crypto.dart`, `Profile.update` params `decryptionPassword`/`decryptionIterations`.
-- Non-override headers: `announce`, `support-url`, `profile-update-interval`, `x-hwid-limit` + the device-limit dialog.
+## Safety and permissions
 
-### Files modified
+- Never commit secrets. `ios/Config/Signing.xcconfig` is gitignored; keep certificates, private keys and
+  provisioning profiles out of the repo.
+- `dist/`, `build/`, `libclash/` and `plugins/flutter_distributor/` are build outputs — never commit them.
+- Long/expensive jobs (`nix build`, the NixOS VM test, full `setup.dart` runs) take tens of minutes; ask
+  before starting one.
 
-- `lib/models/profile.dart` — replaced the generic `meowclash-*` collection loop with password-only collection (`headersToCollect` kept: `announce`, `support-url`, `profile-update-interval`, `x-hwid-limit`).
-- `lib/providers/state.dart` — neutralized 4 providers: `globalModeEnabled → true`, `hasServiceInfoData → false`, `hasServerInfoData → false`, `backgroundUrl → null` (`hasAnnounceData` kept).
-- `lib/views/dashboard/dashboard.dart` — removed the `denywidgets` `Consumer` gate; the button now renders directly.
-- `lib/controller.dart` — deleted `applySubscriptionSettings`, `_applyAllHeaderSettings`, `_applyProviderSettings`, `_applyThemeColor`, `_applyThemeColorFromHex`, `_applyCustomViewSettings` and all their call sites; cleaned `initForegroundCache` (servicename/serverinfo decode) and `_setupClashConfig` (androidsecure mixedPort override).
-- `lib/views/application_setting.dart` — removed the `OverrideProviderSettingsItem` toggle from the list and deleted the class; ungated `MinimizeItem` / `AutoLaunchItem` / `SilentLaunchItem` / `AutoRunItem` / `AutoCheckUpdateItem` (no longer wrapped in `Opacity`/`isEnabled`, now always user-controlled). Header→setting mapping that used to drive these: `minimize→minimizeOnExit`, `autorun→autoLaunch`, `shadowstart→silentLaunch`, `autostart→autoRun`, `autoupdate→autoCheckUpdate`.
+## File routing
 
-### Known leftovers
-
-- The `overrideProviderSettings` field is still present in the `appSetting` model — left intentionally to avoid a freezed cascade + persisted-state migration. Remove later if desired.
+| Read when the task touches | Guide |
+|---|---|
+| Folder ownership, `lib/` layout | `.agents/project-structure.md` |
+| Building, packaging, env vars, running locally | `.agents/build.md` |
+| Bumping mihomo / core version, `vendorHash` | `.agents/core-version.md` |
+| Nix, NixOS module, VM check, TUN mode | `.agents/nix.md` |
+| build_runner, ffigen, intl, CLDR data, lint config | `.agents/codegen-and-lint.md` |
+| Writing or running tests, pre-commit checklist | `.agents/testing.md` |
+| Workflows, toolchain versions, release assets | `.agents/ci-and-release.md` |
+| Windows/MSVC/Inno/QuickJS/iOS build gotchas | `.agents/platform-gotchas.md` |
+| iOS Runner vs PacketTunnel behavior | `.agents/ios-runtime.md` |
+| Delay tests, provider refresh, UI suspension, memory, IP details | `.agents/runtime-contracts.md` |
+| History of the removed `meowclash-*` overrides | `.agents/fork-changes.md` |

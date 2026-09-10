@@ -1,16 +1,18 @@
 /*
- * MSVC compiles part of <math.h> as __forceinline wrappers around ARM64
+ * MSVC compiles part of <math.h> as __forceinline wrappers around hardware
  * instructions. QuickJS builds its Math table with a static initializer that
  * stores the address of those libm functions, and the MSVC C frontend does not
  * accept the address of such an inline function as a constant expression:
  *
  *   quickjs.c(41964,35): error C2099: initializer is not a constant
  *
- * The x64 build of the very same source succeeds, so this is a windows-arm64
- * only defect. This header is force-included (/FI) into the C sources of the
- * bridge and routes every libm symbol that table references through a real
- * function with a stable address. It expands to nothing on x64 MSVC, on the
- * C++ bridge file and on every non-MSVC toolchain, so no other target changes.
+ * windows-arm64 hit this first, but VS 17.14 (MSVC 19.44, Windows SDK
+ * 10.0.26100) inlines the same names on x64 and rejects the very same line, so
+ * the wrappers cover every MSVC architecture and the file name is historical.
+ * This header is force-included (/FI) into the C sources of the bridge and
+ * routes every libm symbol that table references through a real function with
+ * a stable address. It expands to nothing in the C++ bridge file and on every
+ * non-MSVC toolchain, so no other target changes.
  *
  * The same force-include also repairs alloca(). libregexp.c and quickjs.c call
  * alloca() but never include <malloc.h>, and MSVC only recognises the bare name
@@ -28,8 +30,8 @@
 #ifndef MEOW_QUICKJS_MSVC_ARM64_MATH_H
 #define MEOW_QUICKJS_MSVC_ARM64_MATH_H
 
-/* Unlike the C2099 workaround below, this part must apply to every MSVC
- * architecture, so it stays outside the windows-arm64 block. <malloc.h> already
+/* This part applies to every MSVC architecture and stays outside the math
+ * block below, which a non-Windows host can also force on. <malloc.h> already
  * spells this mapping when the non-standard names are enabled; only define it
  * if the toolchain did not. C++ is left untouched: the bridge file does not use
  * alloca and must keep its own declarations. */
@@ -43,10 +45,12 @@
 /* MEOW_QUICKJS_FORCE_MATH_SHIM exists so the wrappers can be compiled and
  * checked on a non-Windows host. The build system also force-includes this
  * header target-wide, so it must expand to nothing in the C++ bridge file:
- * redirecting <math.h> names there would break the C++ overloads. */
+ * redirecting <math.h> names there would break the C++ overloads. Never gate
+ * this block on an architecture: which libm names MSVC turns into inline
+ * intrinsics changes with the toolchain and SDK, and wrapping one that it left
+ * alone costs nothing. */
 #if !defined(__cplusplus) &&                                                   \
-    (defined(MEOW_QUICKJS_FORCE_MATH_SHIM) ||                                  \
-     (defined(_MSC_VER) && (defined(_M_ARM64) || defined(_M_ARM64EC))))
+    (defined(MEOW_QUICKJS_FORCE_MATH_SHIM) || defined(_MSC_VER))
 
 #if defined(_MSC_VER)
 /* quickjs.c includes <WinSock2.h> after <math.h>. Pull the platform headers in
@@ -116,5 +120,5 @@ MEOW_QJS_MATH_WRAP2(atan2)
 #define trunc meow_qjs_trunc
 #define atan2 meow_qjs_atan2
 
-#endif /* windows-arm64 */
+#endif /* MSVC math wrappers */
 #endif /* MEOW_QUICKJS_MSVC_ARM64_MATH_H */

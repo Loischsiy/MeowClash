@@ -11,9 +11,12 @@ are changed. A single Windows DLL contains both QuickJS and the bridge.
 
 On MSVC the C sources are compiled with `/FImsvc_arm64_math.h`. That header
 wraps the libm symbols whose addresses QuickJS keeps in its static `Math` table,
-because MSVC emits them as inline ARM64 intrinsics and then refuses the table
-with `C2099` on windows-arm64. Those wrappers compile to nothing on x64 and in
-C++.
+because MSVC emits them as inline intrinsics and then refuses the table with
+`C2099: initializer is not a constant`. windows-arm64 hit this first; VS 17.14
+(MSVC 19.44, Windows SDK 10.0.26100) inlines the same names on x64 and fails on
+the identical line, so the wrappers are active on **every** MSVC architecture
+and the file name is historical. They still compile to nothing in C++ and
+outside MSVC.
 
 The same header maps `alloca` onto the `_alloca` intrinsic. `libregexp.c` and
 `quickjs.c` call `alloca()` without ever including `<malloc.h>`, and MSVC only

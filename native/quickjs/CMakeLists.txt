@@ -6,6 +6,10 @@ project(meow_quickjs LANGUAGES C CXX)
 # Pin BOTH the revision and archive hash. Nix supplies the same unpacked archive.
 set(MEOW_QUICKJS_SOURCE "$ENV{MEOW_QUICKJS_SOURCE}" CACHE PATH "QuickJS bridge source (offline builds)")
 if(NOT MEOW_QUICKJS_SOURCE)
+  # Extraction timestamps, not archive ones; also silences the CMP0135 warning.
+  if(POLICY CMP0135)
+    cmake_policy(SET CMP0135 NEW)
+  endif()
   include(FetchContent)
   FetchContent_Declare(meow_quickjs_source
     URL https://codeload.github.com/abner/quickjs-c-bridge/tar.gz/7204d9bf1afbe0550d51d7decdcce398b2c22e1a
@@ -33,16 +37,17 @@ if(WIN32)
   target_compile_definitions(meow_quickjs PRIVATE _CRT_SECURE_NO_WARNINGS)
   target_compile_options(meow_quickjs PRIVATE /utf-8)
   if(MSVC)
-    # MSVC turns part of <math.h> into inline ARM64 intrinsics, so QuickJS's
-    # Math table - a static initializer full of libm addresses - is rejected
-    # with C2099 on windows-arm64 while x64 compiles. Force-include a shim that
-    # keeps those addresses constant; it is a no-op for the x64 build.
+    # MSVC turns part of <math.h> into inline intrinsics, so QuickJS's Math
+    # table - a static initializer full of libm addresses - is rejected with
+    # C2099. windows-arm64 broke first; MSVC 19.44 (VS 17.14, SDK 10.0.26100)
+    # inlines the same names on x64, so the force-included shim keeps those
+    # addresses constant on every MSVC architecture.
     #
     # `flutter build windows` drives the Visual Studio generator, which drops
     # target-wide $<COMPILE_LANGUAGE:C> options on a mixed C/C++ target: the
     # previous genex never reached cl.exe and arm64 kept failing with C2099.
     # Attach the force-include to the C sources, and repeat it target-wide as a
-    # safety net - the header expands to nothing in C++ and on non-ARM64 MSVC.
+    # safety net - the header expands to nothing in C++ and outside MSVC.
     target_include_directories(meow_quickjs PRIVATE "${CMAKE_CURRENT_LIST_DIR}")
     set_source_files_properties(${MEOW_QUICKJS_C_SOURCES} PROPERTIES
       COMPILE_OPTIONS "/FImsvc_arm64_math.h")

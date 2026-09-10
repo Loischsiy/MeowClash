@@ -111,7 +111,7 @@ void main() {
     expect(setup.Build.hostArchFromEnvironment(null), setup.Arch.amd64);
   });
 
-  test('QuickJS keeps constant Math initializers on windows-arm64', () {
+  test('QuickJS keeps constant Math initializers on every MSVC arch', () {
     // Every libm symbol whose address quickjs.c stores in js_math_funcs.
     const wrapped = <String>[
       'acos',
@@ -141,7 +141,15 @@ void main() {
       'trunc',
     ];
     final shim = File('native/quickjs/msvc_arm64_math.h').readAsStringSync();
-    expect(shim, contains('_M_ARM64'));
+    // windows-arm64 broke first, but MSVC 19.44 with the 10.0.26100 SDK
+    // inlines the same libm names on x64 and fails on the same quickjs.c
+    // line, so the wrappers must never be gated on an architecture.
+    expect(
+        shim,
+        contains(
+            '(defined(MEOW_QUICKJS_FORCE_MATH_SHIM) || defined(_MSC_VER))'));
+    expect(shim, isNot(contains('_M_ARM64')),
+        reason: 'the Math wrappers apply to every MSVC architecture');
     for (final name in wrapped) {
       expect(shim, contains('#define $name meow_qjs_$name'),
           reason: 'quickjs.c takes the address of $name in its Math table');

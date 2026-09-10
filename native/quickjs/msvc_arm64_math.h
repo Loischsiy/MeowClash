@@ -11,9 +11,34 @@
  * bridge and routes every libm symbol that table references through a real
  * function with a stable address. It expands to nothing on x64 MSVC, on the
  * C++ bridge file and on every non-MSVC toolchain, so no other target changes.
+ *
+ * The same force-include also repairs alloca(). libregexp.c and quickjs.c call
+ * alloca() but never include <malloc.h>, and MSVC only recognises the bare name
+ * as an intrinsic on x86/x64. On ARM64 the C frontend falls back to an implicit
+ * declaration, so link.exe looks for a runtime symbol that does not exist:
+ *
+ *   libregexp.obj : error LNK2019: unresolved external symbol alloca
+ *                   referenced in function lre_exec
+ *   quickjs.obj : error LNK2001: unresolved external symbol alloca
+ *   quickjs_c_bridge.dll : fatal error LNK1120: 1 unresolved externals
+ *
+ * Mapping the name onto the _alloca intrinsic fixes the ARM64 link and is a
+ * no-op on x64, where the compiler already expanded the call inline.
  */
 #ifndef MEOW_QUICKJS_MSVC_ARM64_MATH_H
 #define MEOW_QUICKJS_MSVC_ARM64_MATH_H
+
+/* Unlike the C2099 workaround below, this part must apply to every MSVC
+ * architecture, so it stays outside the windows-arm64 block. <malloc.h> already
+ * spells this mapping when the non-standard names are enabled; only define it
+ * if the toolchain did not. C++ is left untouched: the bridge file does not use
+ * alloca and must keep its own declarations. */
+#if defined(_MSC_VER) && !defined(__cplusplus)
+#include <malloc.h>
+#if !defined(alloca)
+#define alloca _alloca
+#endif
+#endif
 
 /* MEOW_QUICKJS_FORCE_MATH_SHIM exists so the wrappers can be compiled and
  * checked on a non-Windows host. The build system also force-includes this

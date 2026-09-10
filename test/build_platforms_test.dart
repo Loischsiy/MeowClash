@@ -168,4 +168,23 @@ void main() {
         contains('target_include_directories(meow_quickjs PRIVATE '
             r'"${CMAKE_CURRENT_LIST_DIR}")'));
   });
+
+  test('QuickJS resolves alloca on windows-arm64', () {
+    // libregexp.c and quickjs.c call alloca() without including <malloc.h>.
+    // MSVC only recognises the bare name as an intrinsic on x86/x64, so arm64
+    // compiled cleanly and then failed with LNK2019/LNK2001 on `alloca` and
+    // LNK1120 for quickjs_c_bridge.dll.
+    final shim = File('native/quickjs/msvc_arm64_math.h').readAsStringSync();
+    const guard = '#define MEOW_QUICKJS_MSVC_ARM64_MATH_H';
+    final mathBlock = shim.indexOf('MEOW_QUICKJS_FORCE_MATH_SHIM');
+    expect(mathBlock, greaterThan(0));
+    final prelude =
+        shim.substring(shim.indexOf(guard) + guard.length, mathBlock);
+    expect(prelude, contains('#include <malloc.h>'));
+    expect(prelude, contains('#define alloca _alloca'),
+        reason: 'the mapping must cover every MSVC arch, not only ARM64');
+    expect(prelude, contains('defined(_MSC_VER)'));
+    expect(prelude, contains('!defined(__cplusplus)'),
+        reason: 'the shim is force-included target-wide, C++ must stay clean');
+  });
 }

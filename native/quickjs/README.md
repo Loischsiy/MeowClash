@@ -12,7 +12,15 @@ are changed. A single Windows DLL contains both QuickJS and the bridge.
 On MSVC the C sources are compiled with `/FImsvc_arm64_math.h`. That header
 wraps the libm symbols whose addresses QuickJS keeps in its static `Math` table,
 because MSVC emits them as inline ARM64 intrinsics and then refuses the table
-with `C2099` on windows-arm64. The header compiles to nothing on x64 and in C++.
+with `C2099` on windows-arm64. Those wrappers compile to nothing on x64 and in
+C++.
+
+The same header maps `alloca` onto the `_alloca` intrinsic. `libregexp.c` and
+`quickjs.c` call `alloca()` without ever including `<malloc.h>`, and MSVC only
+recognises the bare name as an intrinsic on x86/x64. windows-arm64 therefore
+compiled cleanly and then failed to link with `LNK2019`/`LNK2001` on `alloca`
+and `LNK1120: 1 unresolved externals` for `quickjs_c_bridge.dll`. That mapping
+is active on every MSVC architecture and stays out of the C++ bridge file.
 
 The force-include is set on the C source files and repeated target-wide. The
 Visual Studio generator used by `flutter build windows` drops target-wide

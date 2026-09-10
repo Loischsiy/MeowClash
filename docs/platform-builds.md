@@ -107,6 +107,14 @@ a constant` on windows-arm64 even though the identical x64 build succeeds. The
 shim wraps those symbols in real functions and expands to nothing on x64 and on
 every non-MSVC toolchain.
 
+The same shim maps `alloca` onto the `_alloca` intrinsic. `libregexp.c` and
+`quickjs.c` call `alloca()` without including `<malloc.h>`, and MSVC recognises
+the bare name as an intrinsic only on x86/x64. windows-arm64 consequently
+compiled without errors and then failed at link time with `LNK2019`/`LNK2001`
+on `alloca` in `libregexp.obj` and `quickjs.obj`, ending in `LNK1120: 1
+unresolved externals` for `quickjs_c_bridge.dll`. Unlike the `C2099` wrappers,
+that mapping is applied on every MSVC architecture; C++ is left untouched.
+
 Nix obtains the same checksum-pinned source through a fixed-output download;
 there is no configure-time network request inside the Nix sandbox. Existing Go
 vendor hash, Flutter lockfile, and the VM test's LTS kernel pin are unchanged.

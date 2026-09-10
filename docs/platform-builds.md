@@ -192,6 +192,9 @@ Linux x64/ARM64, cross-builds desktop Go cores, and compiles both iOS targets on
 macOS/Xcode runner. `build.yaml` includes manual iOS/Windows ARM64 builds;
 `release-all.yaml` includes their distinctly named artifacts. Asset normalization
 rejects ambiguous architecture labels/collisions instead of overwriting binaries.
+Release notes come from `.github/release_template.md`, which links one download
+badge per published asset; releases no longer ship `.sha256` sidecars because
+GitHub exposes a digest for every asset, and both workflows delete stray ones.
 
 ### Required physical-device checks
 

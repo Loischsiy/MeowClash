@@ -668,14 +668,15 @@ jobs:
         run: |
           python3 scripts/rename_release_assets.py "$APP_VERSION"
 
-      - name: Generate sha256
+      - name: Drop checksum sidecars
         shell: bash
         run: |
           set -euo pipefail
-          cd ./dist
-          find . -type f -not -name "*.sha256" -print0 | while IFS= read -r -d '' file; do
-            sha256sum "$file" > "${file}.sha256"
-          done
+          # GitHub already publishes a SHA-256 digest for every release asset,
+          # so .sha256 sidecars only doubled the asset list. Packaging tools
+          # write some of them into dist, so delete instead of merely skipping
+          # generation.
+          find ./dist -type f -name '*.sha256' -print -delete
 
       - name: Release
         uses: softprops/action-gh-release@v2

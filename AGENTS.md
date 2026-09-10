@@ -277,6 +277,14 @@ On macOS you may need to codesign or disable gatekeeper for the local core binar
   (`https://gitverse.ru/Loischsiy/meowclash/releases`), but **no workflow
   publishes there** — it is a manual mirror. If you automate it, add the step
   next to `Publish GitLab release` in `release-all.yaml`.
+- Release notes are rendered from `.github/release_template.md` by both
+  `build.yaml` and `release-all.yaml` via `sed "s|VERSION|$version|g"`, so the
+  literal `VERSION`/`vVERSION` placeholders must stay in the template. It links
+  one download badge per published asset; when packaging adds or drops a file,
+  update the template and `RELEASE_ASSETS` in `scripts/test_release_assets.py`.
+- Releases do **not** ship `.sha256` sidecars — GitHub already exposes a digest
+  for every asset. Both workflows delete stray `*.sha256` files from `dist`
+  before uploading, because packaging tools emit some of them.
 - Changelog is auto-generated from commits between tags.
 
 ## Common gotchas

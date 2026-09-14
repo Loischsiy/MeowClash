@@ -2,10 +2,28 @@
 
 All notable changes to **MeowClash** will be documented in this file.
 
-## [Unreleased]
+## [v1.1.0]
+
+### ✨ New Features
+- **iOS & ARM64 Support**: Added official iOS build target with NetworkExtension packet tunnel provider support (physical devices, unsigned IPA) and full ARM64 support across Windows, Linux, and iOS.
+- **Dashboard**: Added IP details dialog displaying country, region, city, and connection domain via ipwho.is with offline country name localization across all six app languages (Unicode CLDR) and 5-minute LRU caching.
+- **Core Delay Testing**: Implemented bounded delay testing queue in the Go core with platform concurrency limits and optimized Flutter delay testing UI for large proxy lists.
+- **Android Provider Refresh**: Moved automatic and manual encrypted HTTP proxy and rule provider updates to the Android VPN service-engine isolate with immutable proxy snapshots and separated candidate namespaces.
+- **UI Suspension**: Added window lifecycle management (`UiLifecycleController`, `SuspendableUi`, `UiActivityScope`) to suspend UI rendering and idle polling loops when the window is hidden.
+
+### 🐛 Bug Fixes
+- **QuickJS / MSVC**: Added and configured MSVC math shim (`msvc_arm64_math.h`) and alloca resolution for QuickJS to resolve C2099 static Math table initializer errors on MSVC across all architectures (x64 and ARM64).
+- **Windows Packaging**: Adapted Windows installer and setup scripts for Flutter 3.44+ changes, improved Windows ARM64 cross-build detection, and restricted installers to target architecture.
+- **Subscriptions**: Auto-select and activate the default subscription on first launch when saving via EditProfileView if no profile is currently active.
 
 ### 🚀 Improvements
-- **Diagnostics**: TLS failures while downloading a subscription, provider or update are now reported with an explicit reason (untrusted/incomplete certificate chain, expired certificate, hostname mismatch, self-signed certificate) instead of a generic update error. The log records the failing host, the OS error string, the platform version and the certificate the server actually presented, so a certificate report can be diagnosed from the log alone.
+- **Core**: Updated mihomo proxy engine to version 1.19.31 and refreshed Go dependencies.
+- **Diagnostics**: Detailed TLS failure diagnostics when downloading subscriptions, providers, or updates with explicit error causes (expired certificate, hostname mismatch, untrusted chain, self-signed certificate).
+- **Performance**: Reduced idle CPU and memory usage by removing the forced Go GC, coalescing reclaims via a single-flight memory gate, moving profile script evaluation to short-lived isolates, and introducing lifecycle-aware polling.
+- **Flutter Hardening**: Configured explicit image-cache budgets, explicit FFI allocator ownership for synchronous core config APIs, and CommonTargetIcon caching surviving rebuilds.
+- **Testing & CI**: Consolidated tests into `test/`, added CI workflows for iOS builds, ARM64 platform checks, and native QuickJS testing across Ubuntu and Windows runners.
+- **Documentation**: Restructured project documentation by splitting `AGENTS.md` into a lean router with modular `.agents/` topic guides and removing the obsolete `docs/` folder.
+- **Releases**: Updated download badges, removed redundant checksum sidecars from release workflows, and updated Nix vendorHash.
 
 ## [v1.0.8]
 

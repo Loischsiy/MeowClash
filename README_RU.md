@@ -1,11 +1,13 @@
 <div align="center">
 
+<img src="assets/images/icon.png" alt="MeowClash Logo" width="100" height="100" />
+
 # MeowClash
 
 [![Downloads](https://img.shields.io/github/downloads/Loischsiy/MeowClash/total?style=flat-square&logo=github&color=b966cf)](https://github.com/Loischsiy/MeowClash/releases/)
 [![Last Version](https://img.shields.io/github/release/Loischsiy/MeowClash/all.svg?style=flat-square&color=8c52ff)](https://github.com/Loischsiy/MeowClash/releases/)
 [![License](https://img.shields.io/github/license/Loischsiy/MeowClash?style=flat-square&color=4296f4)](LICENSE)
-[![Platform Support](https://img.shields.io/badge/platform-Android%20%7C%20Windows%20%7C%20macOS%20%7C%20Linux-e84393?style=flat-square)](#скачать)
+[![Platform Support](https://img.shields.io/badge/platform-Android%20%7C%20Windows%20%7C%20macOS%20%7C%20Linux%20%7C%20iOS-e84393?style=flat-square)](#скачать)
 
 [**English**](README.md) | [**Suomi**](README_FI.md) | **Русский** | [**Українська**](README_UK.md) | [**日本語**](README_JA.md) | [**简体中文**](README_ZH.md)
 
@@ -13,7 +15,7 @@
 
 ---
 
-**MeowClash** — это современный, многофункциональный мультиплатформенный прокси-клиент с открытым исходным кодом на базе ядра **ClashMeta (mihomo)**. Он предлагает красивый интерфейс в стиле Material You для управления вашими прокси-соединениями, полностью лишен рекламы и нативно работает на Android, Windows, macOS и Linux.
+**MeowClash** — это современный, многофункциональный мультиплатформенный прокси-клиент с открытым исходным кодом на базе ядра **ClashMeta (mihomo)**. Он предлагает красивый интерфейс в стиле Material You для управления вашими прокси-соединениями, полностью лишен рекламы и нативно работает на Android, Windows, macOS, Linux и iOS.
 
 *MeowClash является форком отличного проекта [FlClashX](https://github.com/pluralplay/FlClashX).*
 

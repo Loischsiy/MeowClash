@@ -1,11 +1,13 @@
 <div align="center">
 
+<img src="assets/images/icon.png" alt="MeowClash Logo" width="100" height="100" />
+
 # MeowClash
 
 [![Downloads](https://img.shields.io/github/downloads/Loischsiy/MeowClash/total?style=flat-square&logo=github&color=b966cf)](https://github.com/Loischsiy/MeowClash/releases/)
 [![Last Version](https://img.shields.io/github/release/Loischsiy/MeowClash/all.svg?style=flat-square&color=8c52ff)](https://github.com/Loischsiy/MeowClash/releases/)
 [![License](https://img.shields.io/github/license/Loischsiy/MeowClash?style=flat-square&color=4296f4)](LICENSE)
-[![Platform Support](https://img.shields.io/badge/platform-Android%20%7C%20Windows%20%7C%20macOS%20%7C%20Linux-e84393?style=flat-square)](#download)
+[![Platform Support](https://img.shields.io/badge/platform-Android%20%7C%20Windows%20%7C%20macOS%20%7C%20Linux%20%7C%20iOS-e84393?style=flat-square)](#download)
 
 **English** | [**Suomi**](README_FI.md) | [**Русский**](README_RU.md) | [**Українська**](README_UK.md) | [**日本語**](README_JA.md) | [**简体中文**](README_ZH.md)
 
@@ -13,7 +15,7 @@
 
 ---
 
-**MeowClash** is a modern, feature-rich, and open-source multi-platform proxy client based on the **ClashMeta (mihomo)** core. It provides a beautiful Material You UI for managing your proxy connections, is completely ad-free, and runs natively on Android, Windows, macOS, and Linux.
+**MeowClash** is a modern, feature-rich, and open-source multi-platform proxy client based on the **ClashMeta (mihomo)** core. It provides a beautiful Material You UI for managing your proxy connections, is completely ad-free, and runs natively on Android, Windows, macOS, Linux, and iOS.
 
 *MeowClash is a fork of the excellent [FlClashX](https://github.com/pluralplay/FlClashX) project.*
 

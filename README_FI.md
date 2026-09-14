@@ -1,11 +1,13 @@
 <div align="center">
 
+<img src="assets/images/icon.png" alt="MeowClash Logo" width="100" height="100" />
+
 # MeowClash
 
 [![Downloads](https://img.shields.io/github/downloads/Loischsiy/MeowClash/total?style=flat-square&logo=github&color=b966cf)](https://github.com/Loischsiy/MeowClash/releases/)
 [![Last Version](https://img.shields.io/github/release/Loischsiy/MeowClash/all.svg?style=flat-square&color=8c52ff)](https://github.com/Loischsiy/MeowClash/releases/)
 [![License](https://img.shields.io/github/license/Loischsiy/MeowClash?style=flat-square&color=4296f4)](LICENSE)
-[![Platform Support](https://img.shields.io/badge/platform-Android%20%7C%20Windows%20%7C%20macOS%20%7C%20Linux-e84393?style=flat-square)](#lataa)
+[![Platform Support](https://img.shields.io/badge/platform-Android%20%7C%20Windows%20%7C%20macOS%20%7C%20Linux%20%7C%20iOS-e84393?style=flat-square)](#lataa)
 
 [**English**](README.md) | **Suomi** | [**Русский**](README_RU.md) | [**Українська**](README_UK.md) | [**日本語**](README_JA.md) | [**简体中文**](README_ZH.md)
 
@@ -13,7 +15,7 @@
 
 ---
 
-**MeowClash** on moderni, monipuolinen ja avoimen lähdekoodin usean käyttöjärjestelmän välityspalvelinasiakas, joka perustuu **ClashMeta (mihomo)** -ytimeen. Se tarjoaa tyylikkään Material You -käyttöliittymän välityspalvelinyhteyksien hallintaan, on täysin mainokseton ja toimii natiivisti Androidissa, Windowsissa, macOS:ssä ja Linuxissa.
+**MeowClash** on moderni, monipuolinen ja avoimen lähdekoodin usean käyttöjärjestelmän välityspalvelinasiakas, joka perustuu **ClashMeta (mihomo)** -ytimeen. Se tarjoaa tyylikkään Material You -käyttöliittymän välityspalvelinyhteyksien hallintaan, on täysin mainokseton ja toimii natiivisti Androidissa, Windowsissa, macOS:ssä, Linuxissa ja iOS:ssä.
 
 *MeowClash on erinomaisen [FlClashX](https://github.com/pluralplay/FlClashX) -projektin haara.*
 

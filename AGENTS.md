@@ -32,10 +32,13 @@ arm64-v8a, iOS arm64). iOS is physical devices only — simulator builds are rej
 ```bash
 dart setup.dart <platform> --arch <arch>   # the build entry point, not raw `flutter build`
 make android_arm64 | ios_arm64 | windows_arm64 | linux_arm64 | macLocal | nixAll
-flutter analyze && flutter test
+flutter analyze --no-fatal-infos --no-fatal-warnings && flutter test
 CGO_ENABLED=0 go -C core test ./...
 python3 -m unittest discover -s test -p 'test_*.py'
 ```
+
+Plain `flutter analyze` exits non-zero on the repo-wide `info`/`warning` baseline, so the flags above keep
+only errors fatal. Still leave every file you touch free of new diagnostics.
 
 Full command matrix and build behaviors: `.agents/build.md`. Pre-commit checklist: `.agents/testing.md`.
 
@@ -117,5 +120,5 @@ Every test lives in `test/`, except the Go tests, `macos/RunnerTests/RunnerTests
 | Workflows, toolchain versions, release assets | `.agents/ci-and-release.md` |
 | Windows/MSVC/Inno/QuickJS/iOS build gotchas | `.agents/platform-gotchas.md` |
 | iOS Runner vs PacketTunnel behavior | `.agents/ios-runtime.md` |
-| Delay tests, provider refresh, UI suspension, memory, IP details | `.agents/runtime-contracts.md` |
+| Delay tests, provider refresh, UI suspension, navigation transitions, memory, IP details | `.agents/runtime-contracts.md` |
 | History of the removed `meowclash-*` overrides | `.agents/fork-changes.md` |

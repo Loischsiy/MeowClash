@@ -36,6 +36,16 @@ class _TickerPageState extends State<_TickerPage>
       Center(child: Text('page-${widget.index}'));
 }
 
+double _fadeOpacity(WidgetTester tester) => tester
+    .widget<FadeTransition>(
+      find.descendant(
+        of: find.byType(NavigationPageView),
+        matching: find.byType(FadeTransition),
+      ),
+    )
+    .opacity
+    .value;
+
 void main() {
   testWidgets(
       'far navigation builds no intermediate pages and stops hidden tickers',
@@ -124,6 +134,37 @@ void main() {
     await tester.pumpWidget(host(4));
     await tester.pumpAndSettle();
     expect(find.text('page-3'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
+      'far navigation fades the destination in unless animation is disabled',
+      (tester) async {
+    Widget host(int index, {bool animate = true}) => MaterialApp(
+            home: Scaffold(
+                body: NavigationPageView(
+          selectedIndex: index,
+          itemCount: 5,
+          animate: animate,
+          keepAlive: (_) => true,
+          itemKey: ValueKey.new,
+          itemBuilder: (_, i) => Center(child: Text('page-$i')),
+        )));
+    await tester.pumpWidget(host(0));
+    await tester.pumpAndSettle();
+    expect(_fadeOpacity(tester), 1);
+    await tester.pumpWidget(host(3));
+    await tester.pump(); // Run the post-frame jump before the clock advances.
+    await tester.pump(const Duration(milliseconds: 40));
+    expect(find.text('page-3'), findsOneWidget);
+    expect(_fadeOpacity(tester), greaterThan(0));
+    expect(_fadeOpacity(tester), lessThan(1));
+    await tester.pumpAndSettle();
+    expect(_fadeOpacity(tester), 1);
+    await tester.pumpWidget(host(0, animate: false));
+    await tester.pump();
+    expect(find.text('page-0'), findsOneWidget);
+    expect(_fadeOpacity(tester), 1);
     expect(tester.takeException(), isNull);
   });
 }

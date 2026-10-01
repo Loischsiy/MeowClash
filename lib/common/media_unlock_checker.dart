@@ -1098,34 +1098,65 @@ class MediaUnlockChecker {
     }
   }
 
-  /// Roblox is not behind Cloudflare, so a plain reachability probe of the
-  /// site is used: any HTTP answer below 400 means the node can reach it.
+  /// Country as Roblox sees this exit node. The main site has no public geo
+  /// endpoint, but Roblox's help centre (en.help.roblox.com) sits behind
+  /// Cloudflare, so its `/cdn-cgi/trace` reports the exit country.
+  Future<String?> _robloxRegion(Dio dio) async {
+    try {
+      final res = await dio.get<String>(
+        'https://en.help.roblox.com/cdn-cgi/trace',
+      );
+      final match =
+          RegExp(r'^loc=([A-Za-z]{2})\s*$', multiLine: true).firstMatch(
+        res.data ?? '',
+      );
+      return match?.group(1)?.toUpperCase();
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Availability and latency come from Roblox's own gateway
+  /// (www.roblox.com, not a third-party CDN); the country comes from
+  /// [_robloxRegion]. Both requests run in parallel.
   Future<MediaUnlockResult> checkRoblox() async {
     final sw = Stopwatch()..start();
     final dio = _createDio(followRedirects: true);
+    const siteUrl = 'https://www.roblox.com/';
     try {
-      final res = await dio.get<ResponseBody>(
-        'https://www.roblox.com/',
-        options: Options(
-          responseType: ResponseType.stream,
-          receiveTimeout: const Duration(seconds: 4),
-          sendTimeout: const Duration(seconds: 4),
-        ),
-      );
-      final code = res.statusCode ?? 0;
-      final status = code >= 200 && code < 400
-          ? MediaUnlockStatus.unlocked
-          : MediaUnlockStatus.blocked;
+      final regionFuture = _robloxRegion(dio);
+      final MediaUnlockStatus status;
+      int latency;
+      try {
+        final res = await dio.get<ResponseBody>(
+          siteUrl,
+          options: Options(
+            responseType: ResponseType.stream,
+            receiveTimeout: const Duration(seconds: 4),
+            sendTimeout: const Duration(seconds: 4),
+          ),
+        );
+        latency = sw.elapsedMilliseconds;
+        final code = res.statusCode ?? 0;
+        status = code >= 200 && code < 400
+            ? MediaUnlockStatus.unlocked
+            : MediaUnlockStatus.blocked;
+      } catch (_) {
+        return MediaUnlockResult(
+          platform: MediaPlatform.roblox,
+          status: MediaUnlockStatus.failed,
+          region: await regionFuture,
+          latency: sw.elapsedMilliseconds,
+        );
+      }
+      if (status == MediaUnlockStatus.unlocked) {
+        latency = await _measureLatency(dio, siteUrl, latency);
+      }
       return MediaUnlockResult(
         platform: MediaPlatform.roblox,
         status: status,
-        latency: sw.elapsedMilliseconds,
-      );
-    } catch (_) {
-      return MediaUnlockResult(
-        platform: MediaPlatform.roblox,
-        status: MediaUnlockStatus.failed,
-        latency: sw.elapsedMilliseconds,
+        region: await regionFuture,
+        latency: latency,
       );
     } finally {
       dio.close(force: true);

@@ -36,6 +36,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Valitut sovellukset suljetaan VPN:n ulkopuolelle",
     ),
     "account": MessageLookupByLibrary.simpleMessage("Tili"),
+    "activeGoroutines": MessageLookupByLibrary.simpleMessage("Goroutines"),
     "add": MessageLookupByLibrary.simpleMessage("Lisää"),
     "addHop": MessageLookupByLibrary.simpleMessage("Lisää hyppy"),
     "address": MessageLookupByLibrary.simpleMessage("Osoite"),
@@ -44,6 +45,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "ago": MessageLookupByLibrary.simpleMessage(" sitten"),
     "agree": MessageLookupByLibrary.simpleMessage("Hyväksy"),
+    "allocatedMemory": MessageLookupByLibrary.simpleMessage("Varattu"),
     "allowLan": MessageLookupByLibrary.simpleMessage("Salli lähiverkko"),
     "allowLanDesc": MessageLookupByLibrary.simpleMessage(
       "Salli välityspalvelimen käyttö lähiverkon kautta",
@@ -132,6 +134,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "copySuccess": MessageLookupByLibrary.simpleMessage("Kopiointi onnistui"),
     "core": MessageLookupByLibrary.simpleMessage("Ydin"),
     "coreInfo": MessageLookupByLibrary.simpleMessage("Ytimen tiedot"),
+    "coreProcessMemory": MessageLookupByLibrary.simpleMessage(
+      "Ytimen prosessi",
+    ),
+    "coreStatus": MessageLookupByLibrary.simpleMessage("Ytimen tila"),
     "country": MessageLookupByLibrary.simpleMessage("Maa"),
     "create": MessageLookupByLibrary.simpleMessage("Luo"),
     "createProfile": MessageLookupByLibrary.simpleMessage("Luo profiili"),
@@ -173,9 +179,13 @@ class MessageLookup extends MessageLookupByLibrary {
       "Suodata järjestelmäsovellukset",
     ),
     "flagged": MessageLookupByLibrary.simpleMessage("Merkitty"),
+    "flutterShellMemory": MessageLookupByLibrary.simpleMessage("Flutter-kuori"),
     "general": MessageLookupByLibrary.simpleMessage("Yleiset"),
+    "geodataUse": MessageLookupByLibrary.simpleMessage("GEO-lataus"),
     "global": MessageLookupByLibrary.simpleMessage("Yleinen"),
     "goDownload": MessageLookupByLibrary.simpleMessage("Siirry lataukseen"),
+    "goRuntimeMemory": MessageLookupByLibrary.simpleMessage("Go-ajonaikainen"),
+    "heapObjects": MessageLookupByLibrary.simpleMessage("Objects"),
     "hop": MessageLookupByLibrary.simpleMessage("Hyppy"),
     "hour": MessageLookupByLibrary.simpleMessage("tunti"),
     "hours": MessageLookupByLibrary.simpleMessage("Tuntia"),
@@ -259,6 +269,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Voit valita enintään 4 kohdetta",
     ),
     "mediaUnlocked": MessageLookupByLibrary.simpleMessage("Avattu"),
+    "memoryAndRuntime": MessageLookupByLibrary.simpleMessage(
+      "Muisti ja ajonaikainen",
+    ),
     "minimizeOnExit": MessageLookupByLibrary.simpleMessage(
       "Pienennä suljettaessa",
     ),
@@ -298,6 +311,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "password": MessageLookupByLibrary.simpleMessage("Salasana"),
     "paste": MessageLookupByLibrary.simpleMessage("Liitä"),
+    "peakMemory": MessageLookupByLibrary.simpleMessage("Kuoren huippu"),
     "pleaseBindWebDAV": MessageLookupByLibrary.simpleMessage("Määritä WebDAV"),
     "pleaseUploadFile": MessageLookupByLibrary.simpleMessage("Lataa tiedosto"),
     "pleaseUploadValidQrcode": MessageLookupByLibrary.simpleMessage(
@@ -306,6 +320,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "port": MessageLookupByLibrary.simpleMessage("Portti"),
     "preview": MessageLookupByLibrary.simpleMessage("Esikatselu"),
     "profile": MessageLookupByLibrary.simpleMessage("Profiili"),
+    "profileAndRules": MessageLookupByLibrary.simpleMessage(
+      "Profiili ja säännöt",
+    ),
     "profileAutoUpdateIntervalInvalidValidationDesc":
         MessageLookupByLibrary.simpleMessage(
           "Anna kelvollinen aikavälin muoto",
@@ -334,19 +351,28 @@ class MessageLookup extends MessageLookupByLibrary {
     "profiles": MessageLookupByLibrary.simpleMessage("Profiilit"),
     "project": MessageLookupByLibrary.simpleMessage("Projekti"),
     "proxies": MessageLookupByLibrary.simpleMessage("Välityspalvelimet"),
+    "proxiesCount": MessageLookupByLibrary.simpleMessage("Välityspalvelimet"),
     "proxyChains": MessageLookupByLibrary.simpleMessage(
       "Välityspalvelinketjut",
     ),
     "proxyGroup": MessageLookupByLibrary.simpleMessage("Välityspalvelinryhmä"),
+    "proxyGroupsCount": MessageLookupByLibrary.simpleMessage("Ryhmät"),
     "proxyPort": MessageLookupByLibrary.simpleMessage(
       "Välityspalvelimen portti",
     ),
     "proxyPortDesc": MessageLookupByLibrary.simpleMessage(
       "Aseta Clashin kuunteluportti",
     ),
+    "proxyProvidersCount": MessageLookupByLibrary.simpleMessage(
+      "Välityspalvelinjoukot",
+    ),
     "qrcode": MessageLookupByLibrary.simpleMessage("QR-koodi"),
     "qrcodeDesc": MessageLookupByLibrary.simpleMessage(
       "Skannaa QR-koodi saadaksesi profiilin",
+    ),
+    "ramUsage": MessageLookupByLibrary.simpleMessage("RAM-käyttö"),
+    "reclaimableMemory": MessageLookupByLibrary.simpleMessage(
+      "Palautettavissa",
     ),
     "recovery": MessageLookupByLibrary.simpleMessage("Palauta"),
     "recoveryAll": MessageLookupByLibrary.simpleMessage(
@@ -358,6 +384,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "recoverySuccess": MessageLookupByLibrary.simpleMessage(
       "Palautus onnistui",
     ),
+    "releaseMemory": MessageLookupByLibrary.simpleMessage("Vapauta muistia"),
     "remaining": MessageLookupByLibrary.simpleMessage("Jäljellä"),
     "remove": MessageLookupByLibrary.simpleMessage("Poista"),
     "requestDetails": MessageLookupByLibrary.simpleMessage("Pyynnön tiedot"),
@@ -379,6 +406,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "retry": MessageLookupByLibrary.simpleMessage("Yritä uudelleen"),
     "ru": MessageLookupByLibrary.simpleMessage("Venäjä"),
     "rule": MessageLookupByLibrary.simpleMessage("Sääntöjen mukaan"),
+    "ruleProvidersCount": MessageLookupByLibrary.simpleMessage("Sääntöjoukot"),
+    "rulesCount": MessageLookupByLibrary.simpleMessage("Säännöt"),
     "running": MessageLookupByLibrary.simpleMessage("Käynnissä"),
     "save": MessageLookupByLibrary.simpleMessage("Tallenna"),
     "search": MessageLookupByLibrary.simpleMessage("Hae"),
@@ -386,6 +415,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "selectAll": MessageLookupByLibrary.simpleMessage("Valitse kaikki"),
     "selected": MessageLookupByLibrary.simpleMessage("Valittu"),
     "settings": MessageLookupByLibrary.simpleMessage("Asetukset"),
+    "sharedProcessMemoryHint": MessageLookupByLibrary.simpleMessage(
+      "Ydin toimii sovelluksen prosessissa, joten kuoren RSS sisältää ytimen.",
+    ),
     "show": MessageLookupByLibrary.simpleMessage("Näytä"),
     "silentLaunch": MessageLookupByLibrary.simpleMessage(
       "Hiljainen käynnistys",

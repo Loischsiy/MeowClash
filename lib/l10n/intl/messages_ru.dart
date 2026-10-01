@@ -76,6 +76,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "action_start": MessageLookupByLibrary.simpleMessage("Старт/Стоп"),
     "action_tun": MessageLookupByLibrary.simpleMessage("TUN"),
     "action_view": MessageLookupByLibrary.simpleMessage("Показать/Скрыть"),
+    "activeGoroutines": MessageLookupByLibrary.simpleMessage("Goroutines"),
     "add": MessageLookupByLibrary.simpleMessage("Добавить"),
     "addFromPhoneSubtitle": MessageLookupByLibrary.simpleMessage(
       "Сканировать QR-код телефоном",
@@ -103,6 +104,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "ago": MessageLookupByLibrary.simpleMessage(" назад"),
     "agree": MessageLookupByLibrary.simpleMessage("Согласен"),
     "allApps": MessageLookupByLibrary.simpleMessage("Все приложения"),
+    "allocatedMemory": MessageLookupByLibrary.simpleMessage("Выделено"),
     "allowBypass": MessageLookupByLibrary.simpleMessage("Разрешить обход VPN"),
     "allowBypassDesc": MessageLookupByLibrary.simpleMessage(
       "Некоторые приложения смогут обходить VPN",
@@ -243,6 +245,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "copySuccess": MessageLookupByLibrary.simpleMessage("Копирование успешно"),
     "core": MessageLookupByLibrary.simpleMessage("Ядро"),
     "coreInfo": MessageLookupByLibrary.simpleMessage("Информация о ядре"),
+    "coreProcessMemory": MessageLookupByLibrary.simpleMessage("Процесс ядра"),
+    "coreStatus": MessageLookupByLibrary.simpleMessage("Статус ядра"),
     "country": MessageLookupByLibrary.simpleMessage("Страна"),
     "crashTest": MessageLookupByLibrary.simpleMessage("Тест на сбои"),
     "create": MessageLookupByLibrary.simpleMessage("Создать"),
@@ -364,6 +368,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "firstHop": MessageLookupByLibrary.simpleMessage("Первое звено (вход)"),
     "flagged": MessageLookupByLibrary.simpleMessage("Помечен"),
+    "flutterShellMemory": MessageLookupByLibrary.simpleMessage(
+      "Оболочка Flutter",
+    ),
     "fontFamily": MessageLookupByLibrary.simpleMessage("Семейство шрифтов"),
     "fourColumns": MessageLookupByLibrary.simpleMessage("Четыре столбца"),
     "fruitSaladScheme": MessageLookupByLibrary.simpleMessage("Фруктовый микс"),
@@ -378,6 +385,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "geodataLoaderDesc": MessageLookupByLibrary.simpleMessage(
       "Использовать режим загрузки геоданных с низким потреблением памяти",
     ),
+    "geodataUse": MessageLookupByLibrary.simpleMessage("Загрузка GEO"),
     "geoipCode": MessageLookupByLibrary.simpleMessage("Код Geoip"),
     "getOriginRules": MessageLookupByLibrary.simpleMessage(
       "Получить оригинальные правила",
@@ -385,10 +393,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "global": MessageLookupByLibrary.simpleMessage("Глобальный"),
     "go": MessageLookupByLibrary.simpleMessage("Перейти"),
     "goDownload": MessageLookupByLibrary.simpleMessage("Перейти к загрузке"),
+    "goRuntimeMemory": MessageLookupByLibrary.simpleMessage("Среда Go"),
     "gratitude": MessageLookupByLibrary.simpleMessage("Благодарность"),
     "hasCacheChange": MessageLookupByLibrary.simpleMessage(
       "Сохранить изменения в кэше?",
     ),
+    "heapObjects": MessageLookupByLibrary.simpleMessage("Objects"),
     "hop": MessageLookupByLibrary.simpleMessage("Звено"),
     "hostsDesc": MessageLookupByLibrary.simpleMessage("Добавить Hosts"),
     "hotkeyConflict": MessageLookupByLibrary.simpleMessage(
@@ -529,6 +539,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Можно выбрать максимум 4 элемента",
     ),
     "mediaUnlocked": MessageLookupByLibrary.simpleMessage("Разблокировано"),
+    "memoryAndRuntime": MessageLookupByLibrary.simpleMessage(
+      "Память и среда выполнения",
+    ),
     "memoryInfo": MessageLookupByLibrary.simpleMessage("Информация о памяти"),
     "messageTest": MessageLookupByLibrary.simpleMessage(
       "Тестирование сообщения",
@@ -649,6 +662,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "password": MessageLookupByLibrary.simpleMessage("Пароль"),
     "paste": MessageLookupByLibrary.simpleMessage("Вставить"),
     "pasteFromClipboard": MessageLookupByLibrary.simpleMessage("Вставить"),
+    "peakMemory": MessageLookupByLibrary.simpleMessage("Пик оболочки"),
     "pleaseBindWebDAV": MessageLookupByLibrary.simpleMessage(
       "Пожалуйста, привяжите WebDAV",
     ),
@@ -675,6 +689,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "pressKeyboard": MessageLookupByLibrary.simpleMessage("Нажмите клавишу"),
     "preview": MessageLookupByLibrary.simpleMessage("Предпросмотр"),
     "profile": MessageLookupByLibrary.simpleMessage("Профиль"),
+    "profileAndRules": MessageLookupByLibrary.simpleMessage(
+      "Профиль и правила",
+    ),
     "profileAutoUpdateIntervalInvalidValidationDesc":
         MessageLookupByLibrary.simpleMessage(
           "Пожалуйста, введите действительный формат интервала времени",
@@ -743,12 +760,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "project": MessageLookupByLibrary.simpleMessage("Проект"),
     "providers": MessageLookupByLibrary.simpleMessage("Провайдеры"),
     "proxies": MessageLookupByLibrary.simpleMessage("Прокси"),
+    "proxiesCount": MessageLookupByLibrary.simpleMessage("Прокси"),
     "proxiesSetting": MessageLookupByLibrary.simpleMessage("Настройка прокси"),
     "proxyChains": MessageLookupByLibrary.simpleMessage("Прокси-цепочки"),
     "proxyChainsDesc": MessageLookupByLibrary.simpleMessage(
       "Объединение прокси в цепочку: вход → выход",
     ),
     "proxyGroup": MessageLookupByLibrary.simpleMessage("Группа прокси"),
+    "proxyGroupsCount": MessageLookupByLibrary.simpleMessage("Группы"),
     "proxyNameserver": MessageLookupByLibrary.simpleMessage(
       "Прокси-сервер имен",
     ),
@@ -760,6 +779,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Установить порт прослушивания прокси-сервера",
     ),
     "proxyProviders": MessageLookupByLibrary.simpleMessage("Провайдеры прокси"),
+    "proxyProvidersCount": MessageLookupByLibrary.simpleMessage(
+      "Наборы прокси",
+    ),
     "pureBlackMode": MessageLookupByLibrary.simpleMessage("Чисто черный режим"),
     "qrNotFound": MessageLookupByLibrary.simpleMessage("QR-код не найден"),
     "qrcode": MessageLookupByLibrary.simpleMessage("QR-код"),
@@ -767,9 +789,11 @@ class MessageLookup extends MessageLookupByLibrary {
       "Сканировать QR-код для получения профиля",
     ),
     "rainbowScheme": MessageLookupByLibrary.simpleMessage("Радужные"),
+    "ramUsage": MessageLookupByLibrary.simpleMessage("Использование RAM"),
     "receiveSubscriptionTitle": MessageLookupByLibrary.simpleMessage(
       "Получение подписки",
     ),
+    "reclaimableMemory": MessageLookupByLibrary.simpleMessage("К возврату"),
     "recovery": MessageLookupByLibrary.simpleMessage("Восстановление"),
     "recoveryAll": MessageLookupByLibrary.simpleMessage(
       "Восстановить все данные",
@@ -792,6 +816,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "redirPort": MessageLookupByLibrary.simpleMessage("Redir-порт"),
     "redo": MessageLookupByLibrary.simpleMessage("Повторить"),
     "regExp": MessageLookupByLibrary.simpleMessage("Регулярное выражение"),
+    "releaseMemory": MessageLookupByLibrary.simpleMessage("Освободить память"),
     "remaining": MessageLookupByLibrary.simpleMessage("Осталось"),
     "remainingPlural": MessageLookupByLibrary.simpleMessage("Осталось"),
     "remainingSingular": MessageLookupByLibrary.simpleMessage("Остался"),
@@ -851,7 +876,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "rule": MessageLookupByLibrary.simpleMessage("По правилам"),
     "ruleName": MessageLookupByLibrary.simpleMessage("Название правила"),
     "ruleProviders": MessageLookupByLibrary.simpleMessage("Провайдеры правил"),
+    "ruleProvidersCount": MessageLookupByLibrary.simpleMessage("Наборы правил"),
     "ruleTarget": MessageLookupByLibrary.simpleMessage("Цель правила"),
+    "rulesCount": MessageLookupByLibrary.simpleMessage("Правила"),
     "running": MessageLookupByLibrary.simpleMessage("Запущено"),
     "save": MessageLookupByLibrary.simpleMessage("Сохранить"),
     "saveChanges": MessageLookupByLibrary.simpleMessage("Сохранить изменения?"),
@@ -875,6 +902,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "settingsSendDeviceDataTitle": MessageLookupByLibrary.simpleMessage(
       "Отправлять HWID",
+    ),
+    "sharedProcessMemoryHint": MessageLookupByLibrary.simpleMessage(
+      "Ядро работает в процессе приложения, поэтому RSS оболочки включает ядро.",
     ),
     "show": MessageLookupByLibrary.simpleMessage("Показать"),
     "shrink": MessageLookupByLibrary.simpleMessage("Сжать"),

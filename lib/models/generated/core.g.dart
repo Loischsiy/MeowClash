@@ -77,6 +77,40 @@ const _$ExternalControllerStatusEnumMap = {
   ExternalControllerStatus.open: '127.0.0.1:9090',
 };
 
+_$CoreStatusImpl _$$CoreStatusImplFromJson(Map<String, dynamic> json) =>
+    _$CoreStatusImpl(
+      physical: (json['physical'] as num?)?.toInt() ?? 0,
+      inUse: (json['in-use'] as num?)?.toInt() ?? 0,
+      reclaimable: (json['reclaimable'] as num?)?.toInt() ?? 0,
+      sys: (json['sys'] as num?)?.toInt() ?? 0,
+      goroutines: (json['goroutines'] as num?)?.toInt() ?? 0,
+      heapObjects: (json['heap-objects'] as num?)?.toInt() ?? 0,
+      lastGC: (json['last-gc'] as num?)?.toInt() ?? 0,
+      rules: (json['rules'] as num?)?.toInt() ?? 0,
+      proxies: (json['proxies'] as num?)?.toInt() ?? 0,
+      proxyGroups: (json['proxy-groups'] as num?)?.toInt() ?? 0,
+      ruleProviders: (json['rule-providers'] as num?)?.toInt() ?? 0,
+      proxyProviders: (json['proxy-providers'] as num?)?.toInt() ?? 0,
+      geodataUse: json['geodata-use'] as String? ?? 'None',
+    );
+
+Map<String, dynamic> _$$CoreStatusImplToJson(_$CoreStatusImpl instance) =>
+    <String, dynamic>{
+      'physical': instance.physical,
+      'in-use': instance.inUse,
+      'reclaimable': instance.reclaimable,
+      'sys': instance.sys,
+      'goroutines': instance.goroutines,
+      'heap-objects': instance.heapObjects,
+      'last-gc': instance.lastGC,
+      'rules': instance.rules,
+      'proxies': instance.proxies,
+      'proxy-groups': instance.proxyGroups,
+      'rule-providers': instance.ruleProviders,
+      'proxy-providers': instance.proxyProviders,
+      'geodata-use': instance.geodataUse,
+    };
+
 _$CoreStateImpl _$$CoreStateImplFromJson(Map<String, dynamic> json) =>
     _$CoreStateImpl(
       vpnProps: VpnProps.fromJson(json['vpn-props'] as Map<String, dynamic>),
@@ -322,6 +356,7 @@ const _$ActionMethodEnumMap = {
   ActionMethod.stopListener: 'stopListener',
   ActionMethod.getCountryCode: 'getCountryCode',
   ActionMethod.getMemory: 'getMemory',
+  ActionMethod.getCoreStatus: 'getCoreStatus',
   ActionMethod.crash: 'crash',
   ActionMethod.setupConfig: 'setupConfig',
   ActionMethod.setState: 'setState',

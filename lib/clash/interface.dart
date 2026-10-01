@@ -59,6 +59,8 @@ mixin ClashInterface {
 
   FutureOr<String> getMemory();
 
+  FutureOr<String> getCoreStatus();
+
   resetTraffic();
 
   startLog();
@@ -369,5 +371,10 @@ abstract class ClashHandlerInterface with ClashInterface {
   @override
   FutureOr<String> getMemory() => invoke<String>(
       method: ActionMethod.getMemory,
+    );
+
+  @override
+  FutureOr<String> getCoreStatus() => invoke<String>(
+      method: ActionMethod.getCoreStatus,
     );
 }

@@ -382,6 +382,18 @@ class ClashCore {
     return int.parse(value);
   }
 
+  Future<CoreStatus?> getCoreStatus() async {
+    final value = await clashInterface.getCoreStatus();
+    if (value.isEmpty) {
+      return null;
+    }
+    final decoded = json.decode(value);
+    if (decoded is! Map) {
+      return null;
+    }
+    return CoreStatus.fromJson(Map<String, Object?>.from(decoded));
+  }
+
   void resetTraffic() {
     clashInterface.resetTraffic();
   }

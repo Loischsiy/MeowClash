@@ -6,6 +6,7 @@ import 'package:meowclash/common/common.dart';
 import 'package:meowclash/models/common.dart';
 import 'package:meowclash/services/async_polling_loop.dart';
 import 'package:meowclash/state.dart';
+import 'package:meowclash/views/dashboard/widgets/core_status_dialog.dart';
 import 'package:meowclash/widgets/visibility_polling.dart';
 import 'package:meowclash/widgets/widgets.dart';
 
@@ -49,7 +50,8 @@ class _MemoryInfoState extends State<MemoryInfo>
             iconData: Icons.memory,
             label: appLocalizations.memoryInfo,
           ),
-          onPressed: clashCore.requestGc,
+          // Opens core status; manual GC lives in the dialog.
+          onPressed: showCoreStatusDialog,
           child: Container(
             padding: baseInfoEdgeInsets.copyWith(
               top: 0,

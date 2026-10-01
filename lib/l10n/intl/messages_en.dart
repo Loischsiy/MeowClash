@@ -77,6 +77,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "action_start": MessageLookupByLibrary.simpleMessage("Start/Stop"),
     "action_tun": MessageLookupByLibrary.simpleMessage("TUN"),
     "action_view": MessageLookupByLibrary.simpleMessage("Show/Hide"),
+    "activeGoroutines": MessageLookupByLibrary.simpleMessage("Goroutines"),
     "add": MessageLookupByLibrary.simpleMessage("Add"),
     "addFromPhoneSubtitle": MessageLookupByLibrary.simpleMessage(
       "Scan QR code with phone",
@@ -104,6 +105,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "ago": MessageLookupByLibrary.simpleMessage(" Ago"),
     "agree": MessageLookupByLibrary.simpleMessage("Agree"),
     "allApps": MessageLookupByLibrary.simpleMessage("All apps"),
+    "allocatedMemory": MessageLookupByLibrary.simpleMessage("Allocated"),
     "allowBypass": MessageLookupByLibrary.simpleMessage(
       "Allow applications to bypass VPN",
     ),
@@ -236,6 +238,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "copySuccess": MessageLookupByLibrary.simpleMessage("Copy success"),
     "core": MessageLookupByLibrary.simpleMessage("Core"),
     "coreInfo": MessageLookupByLibrary.simpleMessage("Core info"),
+    "coreProcessMemory": MessageLookupByLibrary.simpleMessage("Core process"),
+    "coreStatus": MessageLookupByLibrary.simpleMessage("Core Status"),
     "country": MessageLookupByLibrary.simpleMessage("Country"),
     "crashTest": MessageLookupByLibrary.simpleMessage("Crash test"),
     "create": MessageLookupByLibrary.simpleMessage("Create"),
@@ -343,6 +347,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "firstHop": MessageLookupByLibrary.simpleMessage("First hop (entry)"),
     "flagged": MessageLookupByLibrary.simpleMessage("Flagged"),
+    "flutterShellMemory": MessageLookupByLibrary.simpleMessage("Flutter shell"),
     "fontFamily": MessageLookupByLibrary.simpleMessage("FontFamily"),
     "fourColumns": MessageLookupByLibrary.simpleMessage("Four columns"),
     "fruitSaladScheme": MessageLookupByLibrary.simpleMessage("FruitSalad"),
@@ -357,6 +362,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "geodataLoaderDesc": MessageLookupByLibrary.simpleMessage(
       "Enabling will use the Geo low memory loader",
     ),
+    "geodataUse": MessageLookupByLibrary.simpleMessage("GEO Load"),
     "geoipCode": MessageLookupByLibrary.simpleMessage("Geoip code"),
     "getOriginRules": MessageLookupByLibrary.simpleMessage(
       "Get original rules",
@@ -364,10 +370,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "global": MessageLookupByLibrary.simpleMessage("Global"),
     "go": MessageLookupByLibrary.simpleMessage("Go"),
     "goDownload": MessageLookupByLibrary.simpleMessage("Go to download"),
+    "goRuntimeMemory": MessageLookupByLibrary.simpleMessage("Go runtime"),
     "gratitude": MessageLookupByLibrary.simpleMessage("Gratitude"),
     "hasCacheChange": MessageLookupByLibrary.simpleMessage(
       "Do you want to cache the changes?",
     ),
+    "heapObjects": MessageLookupByLibrary.simpleMessage("Objects"),
     "hop": MessageLookupByLibrary.simpleMessage("Hop"),
     "hostsDesc": MessageLookupByLibrary.simpleMessage("Add Hosts"),
     "hotkeyConflict": MessageLookupByLibrary.simpleMessage("Hotkey conflict"),
@@ -508,6 +516,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "You can select up to 4 items",
     ),
     "mediaUnlocked": MessageLookupByLibrary.simpleMessage("Unlocked"),
+    "memoryAndRuntime": MessageLookupByLibrary.simpleMessage(
+      "Memory & Runtime",
+    ),
     "memoryInfo": MessageLookupByLibrary.simpleMessage("Memory info"),
     "messageTest": MessageLookupByLibrary.simpleMessage("Message test"),
     "messageTestTip": MessageLookupByLibrary.simpleMessage(
@@ -618,6 +629,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "password": MessageLookupByLibrary.simpleMessage("Password"),
     "paste": MessageLookupByLibrary.simpleMessage("Paste"),
     "pasteFromClipboard": MessageLookupByLibrary.simpleMessage("Paste"),
+    "peakMemory": MessageLookupByLibrary.simpleMessage("Shell peak"),
     "pleaseBindWebDAV": MessageLookupByLibrary.simpleMessage(
       "Please bind WebDAV",
     ),
@@ -646,6 +658,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "preview": MessageLookupByLibrary.simpleMessage("Preview"),
     "profile": MessageLookupByLibrary.simpleMessage("Profile"),
+    "profileAndRules": MessageLookupByLibrary.simpleMessage("Profile & Rules"),
     "profileAutoUpdateIntervalInvalidValidationDesc":
         MessageLookupByLibrary.simpleMessage(
           "Please input a valid interval time format",
@@ -712,12 +725,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "project": MessageLookupByLibrary.simpleMessage("Project"),
     "providers": MessageLookupByLibrary.simpleMessage("Providers"),
     "proxies": MessageLookupByLibrary.simpleMessage("Proxies"),
+    "proxiesCount": MessageLookupByLibrary.simpleMessage("Proxies"),
     "proxiesSetting": MessageLookupByLibrary.simpleMessage("Proxies setting"),
     "proxyChains": MessageLookupByLibrary.simpleMessage("Proxy chains"),
     "proxyChainsDesc": MessageLookupByLibrary.simpleMessage(
       "Chain proxies together: entry → exit",
     ),
     "proxyGroup": MessageLookupByLibrary.simpleMessage("Proxy group"),
+    "proxyGroupsCount": MessageLookupByLibrary.simpleMessage("Proxy Groups"),
     "proxyNameserver": MessageLookupByLibrary.simpleMessage("Proxy nameserver"),
     "proxyNameserverDesc": MessageLookupByLibrary.simpleMessage(
       "Domain for resolving proxy nodes",
@@ -727,6 +742,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Set the Clash listening port",
     ),
     "proxyProviders": MessageLookupByLibrary.simpleMessage("Proxy providers"),
+    "proxyProvidersCount": MessageLookupByLibrary.simpleMessage(
+      "Proxy Providers",
+    ),
     "pureBlackMode": MessageLookupByLibrary.simpleMessage("Pure black mode"),
     "qrNotFound": MessageLookupByLibrary.simpleMessage("QR code not found"),
     "qrcode": MessageLookupByLibrary.simpleMessage("QR code"),
@@ -734,9 +752,11 @@ class MessageLookup extends MessageLookupByLibrary {
       "Scan QR code to obtain profile",
     ),
     "rainbowScheme": MessageLookupByLibrary.simpleMessage("Rainbow"),
+    "ramUsage": MessageLookupByLibrary.simpleMessage("RAM usage"),
     "receiveSubscriptionTitle": MessageLookupByLibrary.simpleMessage(
       "Receive Subscription",
     ),
+    "reclaimableMemory": MessageLookupByLibrary.simpleMessage("Reclaimable"),
     "recovery": MessageLookupByLibrary.simpleMessage("Recovery"),
     "recoveryAll": MessageLookupByLibrary.simpleMessage("Recovery all data"),
     "recoveryProfiles": MessageLookupByLibrary.simpleMessage(
@@ -755,6 +775,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "redirPort": MessageLookupByLibrary.simpleMessage("Redir Port"),
     "redo": MessageLookupByLibrary.simpleMessage("redo"),
     "regExp": MessageLookupByLibrary.simpleMessage("RegExp"),
+    "releaseMemory": MessageLookupByLibrary.simpleMessage("Free memory"),
     "remaining": MessageLookupByLibrary.simpleMessage("Remaining"),
     "remainingPlural": MessageLookupByLibrary.simpleMessage("Remaining"),
     "remainingSingular": MessageLookupByLibrary.simpleMessage("Remaining"),
@@ -808,7 +829,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "rule": MessageLookupByLibrary.simpleMessage("By rule"),
     "ruleName": MessageLookupByLibrary.simpleMessage("Rule name"),
     "ruleProviders": MessageLookupByLibrary.simpleMessage("Rule providers"),
+    "ruleProvidersCount": MessageLookupByLibrary.simpleMessage(
+      "Rule Providers",
+    ),
     "ruleTarget": MessageLookupByLibrary.simpleMessage("Rule target"),
+    "rulesCount": MessageLookupByLibrary.simpleMessage("Rules"),
     "running": MessageLookupByLibrary.simpleMessage("Running"),
     "save": MessageLookupByLibrary.simpleMessage("Save"),
     "saveChanges": MessageLookupByLibrary.simpleMessage(
@@ -836,6 +861,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "settingsSendDeviceDataTitle": MessageLookupByLibrary.simpleMessage(
       "Send HWID",
+    ),
+    "sharedProcessMemoryHint": MessageLookupByLibrary.simpleMessage(
+      "The core runs inside the app process, so the shell RSS includes the core.",
     ),
     "show": MessageLookupByLibrary.simpleMessage("Show"),
     "shrink": MessageLookupByLibrary.simpleMessage("Shrink"),

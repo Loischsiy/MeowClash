@@ -61,6 +61,7 @@
 - **IPv6-tuki**: Ota IPv6-sisääntulevan liikenteen reititys kokonaan käyttöön tai pois käytöstä.
 - **Vähän muistia käyttävä lataaja**: Ota Geo-tietokannoille käyttöön Go Low Memory -tila resurssien säästämiseksi.
 - **Sivustojen saatavuus -widget**: Kojelaudan kortti, joka tarkistaa, ovatko Reddit, Gemini, Cloudflare ja muut palvelut tavoitettavissa nykyisen solmun kautta; estetyille sivustoille näytetään viiveen sijaan estokuvake ja ”Ei saatavilla”. Napauttamalla avautuu koko luettelo luokittain.
+- **Ytimen tila -ikkuna**: Muistikortin napautus näyttää Go-muistin (varattu / palautettavissa %), goroutinet, keon objektit, sääntöjen, välityspalvelimien, ryhmien ja joukkojen määrät, käytössä olevat GEO-tietokannat sekä Flutter-kuoren ja ytimen RAM-käytön erikseen.
 
 ### ☁️ Synkronointi, salaus ja palveluntarjoajaominaisuudet
 - **WebDAV-synkronointi**: Varmuuskopioi ja palauta asetukset ja profiilit etäyhteyden kautta.

@@ -631,6 +631,449 @@ abstract class _UpdateParams implements UpdateParams {
       throw _privateConstructorUsedError;
 }
 
+CoreStatus _$CoreStatusFromJson(Map<String, dynamic> json) {
+  return _CoreStatus.fromJson(json);
+}
+
+/// @nodoc
+mixin _$CoreStatus {
+  int get physical => throw _privateConstructorUsedError;
+  @JsonKey(name: 'in-use')
+  int get inUse => throw _privateConstructorUsedError;
+  int get reclaimable => throw _privateConstructorUsedError;
+  int get sys => throw _privateConstructorUsedError;
+  int get goroutines => throw _privateConstructorUsedError;
+  @JsonKey(name: 'heap-objects')
+  int get heapObjects => throw _privateConstructorUsedError;
+  @JsonKey(name: 'last-gc')
+  int get lastGC => throw _privateConstructorUsedError;
+  int get rules => throw _privateConstructorUsedError;
+  int get proxies => throw _privateConstructorUsedError;
+  @JsonKey(name: 'proxy-groups')
+  int get proxyGroups => throw _privateConstructorUsedError;
+  @JsonKey(name: 'rule-providers')
+  int get ruleProviders => throw _privateConstructorUsedError;
+  @JsonKey(name: 'proxy-providers')
+  int get proxyProviders => throw _privateConstructorUsedError;
+  @JsonKey(name: 'geodata-use')
+  String get geodataUse => throw _privateConstructorUsedError;
+
+  /// Serializes this CoreStatus to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of CoreStatus
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $CoreStatusCopyWith<CoreStatus> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $CoreStatusCopyWith<$Res> {
+  factory $CoreStatusCopyWith(
+          CoreStatus value, $Res Function(CoreStatus) then) =
+      _$CoreStatusCopyWithImpl<$Res, CoreStatus>;
+  @useResult
+  $Res call(
+      {int physical,
+      @JsonKey(name: 'in-use') int inUse,
+      int reclaimable,
+      int sys,
+      int goroutines,
+      @JsonKey(name: 'heap-objects') int heapObjects,
+      @JsonKey(name: 'last-gc') int lastGC,
+      int rules,
+      int proxies,
+      @JsonKey(name: 'proxy-groups') int proxyGroups,
+      @JsonKey(name: 'rule-providers') int ruleProviders,
+      @JsonKey(name: 'proxy-providers') int proxyProviders,
+      @JsonKey(name: 'geodata-use') String geodataUse});
+}
+
+/// @nodoc
+class _$CoreStatusCopyWithImpl<$Res, $Val extends CoreStatus>
+    implements $CoreStatusCopyWith<$Res> {
+  _$CoreStatusCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of CoreStatus
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? physical = null,
+    Object? inUse = null,
+    Object? reclaimable = null,
+    Object? sys = null,
+    Object? goroutines = null,
+    Object? heapObjects = null,
+    Object? lastGC = null,
+    Object? rules = null,
+    Object? proxies = null,
+    Object? proxyGroups = null,
+    Object? ruleProviders = null,
+    Object? proxyProviders = null,
+    Object? geodataUse = null,
+  }) {
+    return _then(_value.copyWith(
+      physical: null == physical
+          ? _value.physical
+          : physical // ignore: cast_nullable_to_non_nullable
+              as int,
+      inUse: null == inUse
+          ? _value.inUse
+          : inUse // ignore: cast_nullable_to_non_nullable
+              as int,
+      reclaimable: null == reclaimable
+          ? _value.reclaimable
+          : reclaimable // ignore: cast_nullable_to_non_nullable
+              as int,
+      sys: null == sys
+          ? _value.sys
+          : sys // ignore: cast_nullable_to_non_nullable
+              as int,
+      goroutines: null == goroutines
+          ? _value.goroutines
+          : goroutines // ignore: cast_nullable_to_non_nullable
+              as int,
+      heapObjects: null == heapObjects
+          ? _value.heapObjects
+          : heapObjects // ignore: cast_nullable_to_non_nullable
+              as int,
+      lastGC: null == lastGC
+          ? _value.lastGC
+          : lastGC // ignore: cast_nullable_to_non_nullable
+              as int,
+      rules: null == rules
+          ? _value.rules
+          : rules // ignore: cast_nullable_to_non_nullable
+              as int,
+      proxies: null == proxies
+          ? _value.proxies
+          : proxies // ignore: cast_nullable_to_non_nullable
+              as int,
+      proxyGroups: null == proxyGroups
+          ? _value.proxyGroups
+          : proxyGroups // ignore: cast_nullable_to_non_nullable
+              as int,
+      ruleProviders: null == ruleProviders
+          ? _value.ruleProviders
+          : ruleProviders // ignore: cast_nullable_to_non_nullable
+              as int,
+      proxyProviders: null == proxyProviders
+          ? _value.proxyProviders
+          : proxyProviders // ignore: cast_nullable_to_non_nullable
+              as int,
+      geodataUse: null == geodataUse
+          ? _value.geodataUse
+          : geodataUse // ignore: cast_nullable_to_non_nullable
+              as String,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$CoreStatusImplCopyWith<$Res>
+    implements $CoreStatusCopyWith<$Res> {
+  factory _$$CoreStatusImplCopyWith(
+          _$CoreStatusImpl value, $Res Function(_$CoreStatusImpl) then) =
+      __$$CoreStatusImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call(
+      {int physical,
+      @JsonKey(name: 'in-use') int inUse,
+      int reclaimable,
+      int sys,
+      int goroutines,
+      @JsonKey(name: 'heap-objects') int heapObjects,
+      @JsonKey(name: 'last-gc') int lastGC,
+      int rules,
+      int proxies,
+      @JsonKey(name: 'proxy-groups') int proxyGroups,
+      @JsonKey(name: 'rule-providers') int ruleProviders,
+      @JsonKey(name: 'proxy-providers') int proxyProviders,
+      @JsonKey(name: 'geodata-use') String geodataUse});
+}
+
+/// @nodoc
+class __$$CoreStatusImplCopyWithImpl<$Res>
+    extends _$CoreStatusCopyWithImpl<$Res, _$CoreStatusImpl>
+    implements _$$CoreStatusImplCopyWith<$Res> {
+  __$$CoreStatusImplCopyWithImpl(
+      _$CoreStatusImpl _value, $Res Function(_$CoreStatusImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of CoreStatus
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? physical = null,
+    Object? inUse = null,
+    Object? reclaimable = null,
+    Object? sys = null,
+    Object? goroutines = null,
+    Object? heapObjects = null,
+    Object? lastGC = null,
+    Object? rules = null,
+    Object? proxies = null,
+    Object? proxyGroups = null,
+    Object? ruleProviders = null,
+    Object? proxyProviders = null,
+    Object? geodataUse = null,
+  }) {
+    return _then(_$CoreStatusImpl(
+      physical: null == physical
+          ? _value.physical
+          : physical // ignore: cast_nullable_to_non_nullable
+              as int,
+      inUse: null == inUse
+          ? _value.inUse
+          : inUse // ignore: cast_nullable_to_non_nullable
+              as int,
+      reclaimable: null == reclaimable
+          ? _value.reclaimable
+          : reclaimable // ignore: cast_nullable_to_non_nullable
+              as int,
+      sys: null == sys
+          ? _value.sys
+          : sys // ignore: cast_nullable_to_non_nullable
+              as int,
+      goroutines: null == goroutines
+          ? _value.goroutines
+          : goroutines // ignore: cast_nullable_to_non_nullable
+              as int,
+      heapObjects: null == heapObjects
+          ? _value.heapObjects
+          : heapObjects // ignore: cast_nullable_to_non_nullable
+              as int,
+      lastGC: null == lastGC
+          ? _value.lastGC
+          : lastGC // ignore: cast_nullable_to_non_nullable
+              as int,
+      rules: null == rules
+          ? _value.rules
+          : rules // ignore: cast_nullable_to_non_nullable
+              as int,
+      proxies: null == proxies
+          ? _value.proxies
+          : proxies // ignore: cast_nullable_to_non_nullable
+              as int,
+      proxyGroups: null == proxyGroups
+          ? _value.proxyGroups
+          : proxyGroups // ignore: cast_nullable_to_non_nullable
+              as int,
+      ruleProviders: null == ruleProviders
+          ? _value.ruleProviders
+          : ruleProviders // ignore: cast_nullable_to_non_nullable
+              as int,
+      proxyProviders: null == proxyProviders
+          ? _value.proxyProviders
+          : proxyProviders // ignore: cast_nullable_to_non_nullable
+              as int,
+      geodataUse: null == geodataUse
+          ? _value.geodataUse
+          : geodataUse // ignore: cast_nullable_to_non_nullable
+              as String,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$CoreStatusImpl implements _CoreStatus {
+  const _$CoreStatusImpl(
+      {this.physical = 0,
+      @JsonKey(name: 'in-use') this.inUse = 0,
+      this.reclaimable = 0,
+      this.sys = 0,
+      this.goroutines = 0,
+      @JsonKey(name: 'heap-objects') this.heapObjects = 0,
+      @JsonKey(name: 'last-gc') this.lastGC = 0,
+      this.rules = 0,
+      this.proxies = 0,
+      @JsonKey(name: 'proxy-groups') this.proxyGroups = 0,
+      @JsonKey(name: 'rule-providers') this.ruleProviders = 0,
+      @JsonKey(name: 'proxy-providers') this.proxyProviders = 0,
+      @JsonKey(name: 'geodata-use') this.geodataUse = 'None'});
+
+  factory _$CoreStatusImpl.fromJson(Map<String, dynamic> json) =>
+      _$$CoreStatusImplFromJson(json);
+
+  @override
+  @JsonKey()
+  final int physical;
+  @override
+  @JsonKey(name: 'in-use')
+  final int inUse;
+  @override
+  @JsonKey()
+  final int reclaimable;
+  @override
+  @JsonKey()
+  final int sys;
+  @override
+  @JsonKey()
+  final int goroutines;
+  @override
+  @JsonKey(name: 'heap-objects')
+  final int heapObjects;
+  @override
+  @JsonKey(name: 'last-gc')
+  final int lastGC;
+  @override
+  @JsonKey()
+  final int rules;
+  @override
+  @JsonKey()
+  final int proxies;
+  @override
+  @JsonKey(name: 'proxy-groups')
+  final int proxyGroups;
+  @override
+  @JsonKey(name: 'rule-providers')
+  final int ruleProviders;
+  @override
+  @JsonKey(name: 'proxy-providers')
+  final int proxyProviders;
+  @override
+  @JsonKey(name: 'geodata-use')
+  final String geodataUse;
+
+  @override
+  String toString() {
+    return 'CoreStatus(physical: $physical, inUse: $inUse, reclaimable: $reclaimable, sys: $sys, goroutines: $goroutines, heapObjects: $heapObjects, lastGC: $lastGC, rules: $rules, proxies: $proxies, proxyGroups: $proxyGroups, ruleProviders: $ruleProviders, proxyProviders: $proxyProviders, geodataUse: $geodataUse)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$CoreStatusImpl &&
+            (identical(other.physical, physical) ||
+                other.physical == physical) &&
+            (identical(other.inUse, inUse) || other.inUse == inUse) &&
+            (identical(other.reclaimable, reclaimable) ||
+                other.reclaimable == reclaimable) &&
+            (identical(other.sys, sys) || other.sys == sys) &&
+            (identical(other.goroutines, goroutines) ||
+                other.goroutines == goroutines) &&
+            (identical(other.heapObjects, heapObjects) ||
+                other.heapObjects == heapObjects) &&
+            (identical(other.lastGC, lastGC) || other.lastGC == lastGC) &&
+            (identical(other.rules, rules) || other.rules == rules) &&
+            (identical(other.proxies, proxies) || other.proxies == proxies) &&
+            (identical(other.proxyGroups, proxyGroups) ||
+                other.proxyGroups == proxyGroups) &&
+            (identical(other.ruleProviders, ruleProviders) ||
+                other.ruleProviders == ruleProviders) &&
+            (identical(other.proxyProviders, proxyProviders) ||
+                other.proxyProviders == proxyProviders) &&
+            (identical(other.geodataUse, geodataUse) ||
+                other.geodataUse == geodataUse));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(
+      runtimeType,
+      physical,
+      inUse,
+      reclaimable,
+      sys,
+      goroutines,
+      heapObjects,
+      lastGC,
+      rules,
+      proxies,
+      proxyGroups,
+      ruleProviders,
+      proxyProviders,
+      geodataUse);
+
+  /// Create a copy of CoreStatus
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$CoreStatusImplCopyWith<_$CoreStatusImpl> get copyWith =>
+      __$$CoreStatusImplCopyWithImpl<_$CoreStatusImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$CoreStatusImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _CoreStatus implements CoreStatus {
+  const factory _CoreStatus(
+          {final int physical,
+          @JsonKey(name: 'in-use') final int inUse,
+          final int reclaimable,
+          final int sys,
+          final int goroutines,
+          @JsonKey(name: 'heap-objects') final int heapObjects,
+          @JsonKey(name: 'last-gc') final int lastGC,
+          final int rules,
+          final int proxies,
+          @JsonKey(name: 'proxy-groups') final int proxyGroups,
+          @JsonKey(name: 'rule-providers') final int ruleProviders,
+          @JsonKey(name: 'proxy-providers') final int proxyProviders,
+          @JsonKey(name: 'geodata-use') final String geodataUse}) =
+      _$CoreStatusImpl;
+
+  factory _CoreStatus.fromJson(Map<String, dynamic> json) =
+      _$CoreStatusImpl.fromJson;
+
+  @override
+  int get physical;
+  @override
+  @JsonKey(name: 'in-use')
+  int get inUse;
+  @override
+  int get reclaimable;
+  @override
+  int get sys;
+  @override
+  int get goroutines;
+  @override
+  @JsonKey(name: 'heap-objects')
+  int get heapObjects;
+  @override
+  @JsonKey(name: 'last-gc')
+  int get lastGC;
+  @override
+  int get rules;
+  @override
+  int get proxies;
+  @override
+  @JsonKey(name: 'proxy-groups')
+  int get proxyGroups;
+  @override
+  @JsonKey(name: 'rule-providers')
+  int get ruleProviders;
+  @override
+  @JsonKey(name: 'proxy-providers')
+  int get proxyProviders;
+  @override
+  @JsonKey(name: 'geodata-use')
+  String get geodataUse;
+
+  /// Create a copy of CoreStatus
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$CoreStatusImplCopyWith<_$CoreStatusImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
 CoreState _$CoreStateFromJson(Map<String, dynamic> json) {
   return _CoreState.fromJson(json);
 }

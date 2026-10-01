@@ -4363,6 +4363,171 @@ class AppLocalizations {
   String get unavailable {
     return Intl.message('Unavailable', name: 'unavailable', desc: '', args: []);
   }
+
+  /// `Core Status`
+  String get coreStatus {
+    return Intl.message('Core Status', name: 'coreStatus', desc: '', args: []);
+  }
+
+  /// `Memory & Runtime`
+  String get memoryAndRuntime {
+    return Intl.message(
+      'Memory & Runtime',
+      name: 'memoryAndRuntime',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Allocated`
+  String get allocatedMemory {
+    return Intl.message(
+      'Allocated',
+      name: 'allocatedMemory',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reclaimable`
+  String get reclaimableMemory {
+    return Intl.message(
+      'Reclaimable',
+      name: 'reclaimableMemory',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Goroutines`
+  String get activeGoroutines {
+    return Intl.message(
+      'Goroutines',
+      name: 'activeGoroutines',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Objects`
+  String get heapObjects {
+    return Intl.message('Objects', name: 'heapObjects', desc: '', args: []);
+  }
+
+  /// `Profile & Rules`
+  String get profileAndRules {
+    return Intl.message(
+      'Profile & Rules',
+      name: 'profileAndRules',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Rules`
+  String get rulesCount {
+    return Intl.message('Rules', name: 'rulesCount', desc: '', args: []);
+  }
+
+  /// `Proxies`
+  String get proxiesCount {
+    return Intl.message('Proxies', name: 'proxiesCount', desc: '', args: []);
+  }
+
+  /// `Proxy Groups`
+  String get proxyGroupsCount {
+    return Intl.message(
+      'Proxy Groups',
+      name: 'proxyGroupsCount',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Rule Providers`
+  String get ruleProvidersCount {
+    return Intl.message(
+      'Rule Providers',
+      name: 'ruleProvidersCount',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Proxy Providers`
+  String get proxyProvidersCount {
+    return Intl.message(
+      'Proxy Providers',
+      name: 'proxyProvidersCount',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `GEO Load`
+  String get geodataUse {
+    return Intl.message('GEO Load', name: 'geodataUse', desc: '', args: []);
+  }
+
+  /// `RAM usage`
+  String get ramUsage {
+    return Intl.message('RAM usage', name: 'ramUsage', desc: '', args: []);
+  }
+
+  /// `Flutter shell`
+  String get flutterShellMemory {
+    return Intl.message(
+      'Flutter shell',
+      name: 'flutterShellMemory',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Core process`
+  String get coreProcessMemory {
+    return Intl.message(
+      'Core process',
+      name: 'coreProcessMemory',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Go runtime`
+  String get goRuntimeMemory {
+    return Intl.message(
+      'Go runtime',
+      name: 'goRuntimeMemory',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Shell peak`
+  String get peakMemory {
+    return Intl.message('Shell peak', name: 'peakMemory', desc: '', args: []);
+  }
+
+  /// `The core runs inside the app process, so the shell RSS includes the core.`
+  String get sharedProcessMemoryHint {
+    return Intl.message(
+      'The core runs inside the app process, so the shell RSS includes the core.',
+      name: 'sharedProcessMemoryHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Free memory`
+  String get releaseMemory {
+    return Intl.message(
+      'Free memory',
+      name: 'releaseMemory',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

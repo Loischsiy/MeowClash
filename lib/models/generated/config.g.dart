@@ -121,6 +121,7 @@ const _$MediaPlatformEnumMap = {
   MediaPlatform.suno: 'suno',
   MediaPlatform.cloudflare: 'cloudflare',
   MediaPlatform.perplexity: 'perplexity',
+  MediaPlatform.metaai: 'metaai',
   MediaPlatform.netflix: 'netflix',
   MediaPlatform.disney: 'disney',
   MediaPlatform.youtube: 'youtube',

@@ -1098,14 +1098,10 @@ class MediaUnlockChecker {
     }
   }
 
-  /// Country as Roblox sees this exit node. The main site has no public geo
-  /// endpoint, but Roblox's help centre (en.help.roblox.com) sits behind
-  /// Cloudflare, so its `/cdn-cgi/trace` reports the exit country.
-  Future<String?> _robloxRegion(Dio dio) async {
+  /// Exit country from a Cloudflare `/cdn-cgi/trace` endpoint (`loc=`).
+  Future<String?> _traceRegion(Dio dio, String url) async {
     try {
-      final res = await dio.get<String>(
-        'https://en.help.roblox.com/cdn-cgi/trace',
-      );
+      final res = await dio.get<String>(url);
       final match =
           RegExp(r'^loc=([A-Za-z]{2})\s*$', multiLine: true).firstMatch(
         res.data ?? '',
@@ -1115,6 +1111,12 @@ class MediaUnlockChecker {
       return null;
     }
   }
+
+  /// Country as Roblox sees this exit node. The main site has no public geo
+  /// endpoint, but Roblox's help centre (en.help.roblox.com) sits behind
+  /// Cloudflare, so its `/cdn-cgi/trace` reports the exit country.
+  Future<String?> _robloxRegion(Dio dio) =>
+      _traceRegion(dio, 'https://en.help.roblox.com/cdn-cgi/trace');
 
   /// Availability and latency come from Roblox's own gateway
   /// (www.roblox.com, not a third-party CDN); the country comes from
@@ -1158,6 +1160,107 @@ class MediaUnlockChecker {
         region: await regionFuture,
         latency: latency,
       );
+    } finally {
+      dio.close(force: true);
+    }
+  }
+
+  static final _metaRdVerify = RegExp(r"""['"](/__rd_verify[^'"]+)['"]""");
+  static final _metaAccessGate = RegExp(
+    r'isAllowed\\*"\s*:\s*(true|false)\s*,\s*\\*"blockReason\\*"\s*:\s*'
+    r'(?:null|\\*"([A-Za-z_]+)\\*")',
+  );
+
+  /// Meta AI renders its own access verdict into the page as
+  /// `{"isAllowed":..,"blockReason":..}`; the web app shows a "not available
+  /// in your country" screen for `blockReason: "geo"`, and anti-abuse screens
+  /// for `integrity`, `rate_limit` and `age`. That verdict is used as is.
+  ///
+  /// First visits get a JavaScript challenge (403 + `x-fb-rd`) that only
+  /// POSTs to a `/__rd_verify_*` URL and reloads; it is replayed here with the
+  /// returned `rd_challenge` cookie.
+  ///
+  /// Meta exposes no country for logged-out visitors, and the country hints on
+  /// its other sites disagree with each other for the same IP, so the country
+  /// shown is the exit country from Cloudflare's trace, fetched in parallel.
+  Future<MediaUnlockResult> checkMetaAi() async {
+    final sw = Stopwatch()..start();
+    final dio = _createDio(followRedirects: true);
+    const siteUrl = 'https://www.meta.ai/';
+    final pageOptions = Options(
+      headers: {
+        'Accept':
+            'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Sec-Fetch-Dest': 'document',
+        'Sec-Fetch-Mode': 'navigate',
+        'Sec-Fetch-Site': 'none',
+        'Upgrade-Insecure-Requests': '1',
+      },
+    );
+    try {
+      final regionFuture =
+          _traceRegion(dio, 'https://www.cloudflare.com/cdn-cgi/trace');
+      try {
+        var res = await dio.get<String>(siteUrl, options: pageOptions);
+        var latency = sw.elapsedMilliseconds;
+        var body = res.data ?? '';
+
+        final verifyPath = _metaRdVerify.firstMatch(body)?.group(1);
+        if (res.statusCode == 403 && verifyPath != null) {
+          final verify = await dio.post<String>(
+            'https://www.meta.ai$verifyPath',
+          );
+          final cookies = (verify.headers['set-cookie'] ?? const <String>[])
+              .map((c) => c.split(';').first.trim())
+              .where((c) => c.contains('='))
+              .join('; ');
+          if (cookies.isNotEmpty) {
+            res = await dio.get<String>(
+              siteUrl,
+              options: pageOptions.copyWith(
+                headers: {...?pageOptions.headers, 'Cookie': cookies},
+              ),
+            );
+            body = res.data ?? '';
+          }
+        }
+
+        final code = res.statusCode ?? 0;
+        final gate = _metaAccessGate.firstMatch(body);
+        final MediaUnlockStatus status;
+        if (gate != null) {
+          final allowed = gate.group(1) == 'true';
+          final reason = gate.group(2);
+          status = allowed || reason == null
+              ? MediaUnlockStatus.unlocked
+              : reason == 'geo'
+                  ? MediaUnlockStatus.blocked
+                  : MediaUnlockStatus.flagged;
+        } else if (code == 403 && res.headers.value('x-fb-rd') != null) {
+          status = MediaUnlockStatus.flagged;
+        } else if (code >= 200 && code < 400) {
+          status = MediaUnlockStatus.unlocked;
+        } else {
+          status = MediaUnlockStatus.blocked;
+        }
+
+        if (status == MediaUnlockStatus.unlocked) {
+          latency = await _measureLatency(dio, siteUrl, latency);
+        }
+        return MediaUnlockResult(
+          platform: MediaPlatform.metaai,
+          status: status,
+          region: await regionFuture,
+          latency: latency,
+        );
+      } catch (_) {
+        return MediaUnlockResult(
+          platform: MediaPlatform.metaai,
+          status: MediaUnlockStatus.failed,
+          region: await regionFuture,
+          latency: sw.elapsedMilliseconds,
+        );
+      }
     } finally {
       dio.close(force: true);
     }
@@ -1657,6 +1760,7 @@ class MediaUnlockChecker {
         _checkCloudflareTrace(MediaPlatform.cloudflare, 'api.cloudflare.com'),
       MediaPlatform.perplexity =>
         _checkCloudflareTrace(MediaPlatform.perplexity, 'www.perplexity.ai'),
+      MediaPlatform.metaai => checkMetaAi(),
       MediaPlatform.netflix => checkNetflix(),
       MediaPlatform.disney => checkDisney(),
       MediaPlatform.youtube => checkYouTube(),

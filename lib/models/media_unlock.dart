@@ -38,6 +38,7 @@ enum MediaPlatform {
   suno,
   cloudflare,
   perplexity,
+  metaai,
   netflix,
   disney,
   youtube,
@@ -105,7 +106,8 @@ extension MediaPlatformExt on MediaPlatform {
         MediaPlatform.poe ||
         MediaPlatform.suno ||
         MediaPlatform.cloudflare ||
-        MediaPlatform.perplexity =>
+        MediaPlatform.perplexity ||
+        MediaPlatform.metaai =>
           MediaCategory.ai,
         MediaPlatform.netflix ||
         MediaPlatform.disney ||
@@ -173,6 +175,7 @@ extension MediaPlatformExt on MediaPlatform {
         MediaPlatform.suno => 'Suno',
         MediaPlatform.cloudflare => 'Cloudflare',
         MediaPlatform.perplexity => 'Perplexity',
+        MediaPlatform.metaai => 'Meta AI',
         MediaPlatform.netflix => 'Netflix',
         MediaPlatform.disney => 'Disney+',
         MediaPlatform.youtube => 'YouTube',

@@ -2,6 +2,20 @@
 
 All notable changes to **MeowClash** will be documented in this file.
 
+## [v1.1.1]
+
+### ✨ New Features
+- **Site Availability Widget**: Added dashboard cards and a full categorized page (ported from Bettbox) that check AI, streaming, social, developer, gaming, and crypto services through the current node. Blocked or unreachable sites show a block icon and "Unavailable" instead of latency; checks run only while the core is running and pause in the background.
+- **Roblox Check**: Added Roblox to the Gaming category with latency to the Roblox gateway (`www.roblox.com`) and the exit country as seen by Roblox's Cloudflare-fronted help centre.
+- **Core Status Dialog**: Tapping the memory card now opens a core status dialog (ported from Bettbox) with a memory ring, allocated/reclaimable memory, goroutines, heap objects, rule/proxy/provider counts, GEO usage, and separate Flutter shell and core RAM stats. It polls only while open and in the foreground, and manual GC moved from the card tap into the dialog.
+- **URL-Test Concurrency Setting**: Added a General setting to change how many proxy delay tests run in parallel (0 = unlimited, up to 1000); the Go core limiter now follows the value sent with each request.
+
+### 🚀 Improvements
+- **Core**: Updated mihomo proxy engine to version 1.19.32.
+- **Delay Testing**: Raised the default URL-test concurrency on Windows, macOS, and Linux from 10 to 32; Android and iOS keep 10.
+- **Navigation**: Added a fade transition when `NavigationPageView` jumps more than one page away.
+- **Docs**: Updated `flutter analyze` flags in `AGENTS.md` to ignore info and warning levels.
+
 ## [v1.1.0]
 
 ### ✨ New Features

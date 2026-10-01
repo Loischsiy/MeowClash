@@ -131,6 +131,14 @@ class MessageLookup extends MessageLookupByLibrary {
       "システムアプリの除外を解除",
     ),
     "cancelSelectAll": MessageLookupByLibrary.simpleMessage("全選択解除"),
+    "categoryAi": MessageLookupByLibrary.simpleMessage("AI"),
+    "categoryAll": MessageLookupByLibrary.simpleMessage("すべて"),
+    "categoryChina": MessageLookupByLibrary.simpleMessage("中国直通"),
+    "categoryCrypto": MessageLookupByLibrary.simpleMessage("暗号資産"),
+    "categoryDeveloper": MessageLookupByLibrary.simpleMessage("開発者"),
+    "categoryGaming": MessageLookupByLibrary.simpleMessage("ゲームセンター"),
+    "categorySocial": MessageLookupByLibrary.simpleMessage("コミュニティ"),
+    "categoryStreaming": MessageLookupByLibrary.simpleMessage("動画配信"),
     "chainHopsRequired": MessageLookupByLibrary.simpleMessage(
       "ホップを2つ以上選択してください",
     ),
@@ -138,6 +146,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "chainName": MessageLookupByLibrary.simpleMessage("チェーン名"),
     "changeServer": MessageLookupByLibrary.simpleMessage("サーバーを変更"),
     "checkError": MessageLookupByLibrary.simpleMessage("確認エラー"),
+    "checkFailed": MessageLookupByLibrary.simpleMessage("タイムアウト"),
     "checkUpdate": MessageLookupByLibrary.simpleMessage("更新を確認"),
     "checkUpdateError": MessageLookupByLibrary.simpleMessage("アプリは最新版です"),
     "checking": MessageLookupByLibrary.simpleMessage("確認中..."),
@@ -250,6 +259,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "有効化するとパフォーマンスが若干低下します",
     ),
     "firstHop": MessageLookupByLibrary.simpleMessage("最初のホップ（入口）"),
+    "flagged": MessageLookupByLibrary.simpleMessage("フラグ付き"),
     "fontFamily": MessageLookupByLibrary.simpleMessage("フォントファミリー"),
     "fourColumns": MessageLookupByLibrary.simpleMessage("4列"),
     "fruitSaladScheme": MessageLookupByLibrary.simpleMessage("フルーツサラダ"),
@@ -326,6 +336,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "language": MessageLookupByLibrary.simpleMessage("言語"),
     "layout": MessageLookupByLibrary.simpleMessage("レイアウト"),
     "light": MessageLookupByLibrary.simpleMessage("ライト"),
+    "limitedUnlock": MessageLookupByLibrary.simpleMessage("自作のみ"),
     "list": MessageLookupByLibrary.simpleMessage("リスト"),
     "listen": MessageLookupByLibrary.simpleMessage("リスン"),
     "local": MessageLookupByLibrary.simpleMessage("ローカル"),
@@ -347,6 +358,31 @@ class MessageLookup extends MessageLookupByLibrary {
     "managedByProviderNetwork": MessageLookupByLibrary.simpleMessage(
       "これらのパラメータはプロバイダーによって管理されています",
     ),
+    "mediaUnlock": MessageLookupByLibrary.simpleMessage("接続性テスト"),
+    "mediaUnlockColorfulIcons": MessageLookupByLibrary.simpleMessage(
+      "既定でカラーアイコンを表示",
+    ),
+    "mediaUnlockDisplaySettings": MessageLookupByLibrary.simpleMessage("表示設定"),
+    "mediaUnlockExtraDetails": MessageLookupByLibrary.simpleMessage(
+      "IP の詳細情報を表示",
+    ),
+    "mediaUnlockMiscSettings": MessageLookupByLibrary.simpleMessage("その他の設定"),
+    "mediaUnlockMoreStreamingPlatforms": MessageLookupByLibrary.simpleMessage(
+      "その他のストリーミング解除項目",
+    ),
+    "mediaUnlockPinnedSettingsDesc": MessageLookupByLibrary.simpleMessage(
+      "ウィジェットに常駐表示する最大4項目を選択できます",
+    ),
+    "mediaUnlockRefreshByCategory": MessageLookupByLibrary.simpleMessage(
+      "現在のカテゴリに基づいて部分更新",
+    ),
+    "mediaUnlockRefreshOnNodeChange": MessageLookupByLibrary.simpleMessage(
+      "ノード変更時に自動更新",
+    ),
+    "mediaUnlockSelectLimit": MessageLookupByLibrary.simpleMessage(
+      "最大4項目まで選択できます",
+    ),
+    "mediaUnlocked": MessageLookupByLibrary.simpleMessage("ロック解除済み"),
     "memoryInfo": MessageLookupByLibrary.simpleMessage("メモリ情報"),
     "messageTest": MessageLookupByLibrary.simpleMessage("メッセージテスト"),
     "messageTestTip": MessageLookupByLibrary.simpleMessage("これはメッセージです。"),
@@ -392,6 +428,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "notSelectedTip": MessageLookupByLibrary.simpleMessage(
       "現在のプロキシグループは選択できません",
     ),
+    "notUnlocked": MessageLookupByLibrary.simpleMessage("未解除"),
     "nullProfileDesc": MessageLookupByLibrary.simpleMessage(
       "プロファイルがありません。追加してください",
     ),
@@ -572,6 +609,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "restartCoreTip": MessageLookupByLibrary.simpleMessage(
       "コアを再起動しますか？アクティブな接続は一時的に切断されます。",
     ),
+    "retry": MessageLookupByLibrary.simpleMessage("再試行"),
     "routeAddress": MessageLookupByLibrary.simpleMessage("ルートアドレス"),
     "routeAddressDesc": MessageLookupByLibrary.simpleMessage("ルートアドレスを設定"),
     "routeMode": MessageLookupByLibrary.simpleMessage("ルートモード"),
@@ -642,6 +680,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "tcpConcurrent": MessageLookupByLibrary.simpleMessage("TCP並列処理"),
     "tcpConcurrentDesc": MessageLookupByLibrary.simpleMessage("TCP並列処理を許可"),
     "testUrl": MessageLookupByLibrary.simpleMessage("URLテスト"),
+    "testing": MessageLookupByLibrary.simpleMessage("検出中"),
     "textScale": MessageLookupByLibrary.simpleMessage("テキストスケーリング"),
     "thanks": MessageLookupByLibrary.simpleMessage("貢献に感謝"),
     "theme": MessageLookupByLibrary.simpleMessage("テーマ"),
@@ -686,12 +725,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "unableToUpdateCurrentProfileDesc": MessageLookupByLibrary.simpleMessage(
       "現在のプロファイルを更新できません",
     ),
+    "unavailable": MessageLookupByLibrary.simpleMessage("利用不可"),
     "undo": MessageLookupByLibrary.simpleMessage("元に戻す"),
     "unifiedDelay": MessageLookupByLibrary.simpleMessage("統一遅延"),
     "unifiedDelayDesc": MessageLookupByLibrary.simpleMessage(
       "ハンドシェイクなどの余分な遅延を削除",
     ),
     "unknown": MessageLookupByLibrary.simpleMessage("不明"),
+    "unlocked": MessageLookupByLibrary.simpleMessage("完了"),
     "unnamed": MessageLookupByLibrary.simpleMessage("無題"),
     "update": MessageLookupByLibrary.simpleMessage("更新"),
     "updateAllGeoData": MessageLookupByLibrary.simpleMessage("すべての地理データを更新"),

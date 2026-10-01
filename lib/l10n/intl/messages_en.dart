@@ -182,6 +182,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "cancelSelectAll": MessageLookupByLibrary.simpleMessage(
       "Cancel select all",
     ),
+    "categoryAi": MessageLookupByLibrary.simpleMessage("AI"),
+    "categoryAll": MessageLookupByLibrary.simpleMessage("All"),
+    "categoryChina": MessageLookupByLibrary.simpleMessage("China Direct"),
+    "categoryCrypto": MessageLookupByLibrary.simpleMessage("Crypto"),
+    "categoryDeveloper": MessageLookupByLibrary.simpleMessage("Developer"),
+    "categoryGaming": MessageLookupByLibrary.simpleMessage("Gaming Center"),
+    "categorySocial": MessageLookupByLibrary.simpleMessage("Social Platforms"),
+    "categoryStreaming": MessageLookupByLibrary.simpleMessage("Streaming"),
     "chainHopsRequired": MessageLookupByLibrary.simpleMessage(
       "Select at least two hops",
     ),
@@ -189,6 +197,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "chainName": MessageLookupByLibrary.simpleMessage("Chain name"),
     "changeServer": MessageLookupByLibrary.simpleMessage("Change Server"),
     "checkError": MessageLookupByLibrary.simpleMessage("Check error"),
+    "checkFailed": MessageLookupByLibrary.simpleMessage("Timeout"),
     "checkUpdate": MessageLookupByLibrary.simpleMessage("Check for updates"),
     "checkUpdateError": MessageLookupByLibrary.simpleMessage(
       "The current application is already the latest version",
@@ -333,6 +342,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "There is a certain performance loss after opening",
     ),
     "firstHop": MessageLookupByLibrary.simpleMessage("First hop (entry)"),
+    "flagged": MessageLookupByLibrary.simpleMessage("Flagged"),
     "fontFamily": MessageLookupByLibrary.simpleMessage("FontFamily"),
     "fourColumns": MessageLookupByLibrary.simpleMessage("Four columns"),
     "fruitSaladScheme": MessageLookupByLibrary.simpleMessage("FruitSalad"),
@@ -439,6 +449,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "language": MessageLookupByLibrary.simpleMessage("Language"),
     "layout": MessageLookupByLibrary.simpleMessage("Layout"),
     "light": MessageLookupByLibrary.simpleMessage("Light"),
+    "limitedUnlock": MessageLookupByLibrary.simpleMessage("Originals Only"),
     "list": MessageLookupByLibrary.simpleMessage("List"),
     "listen": MessageLookupByLibrary.simpleMessage("Listen"),
     "local": MessageLookupByLibrary.simpleMessage("Local"),
@@ -468,6 +479,35 @@ class MessageLookup extends MessageLookupByLibrary {
     "managedByProviderNetwork": MessageLookupByLibrary.simpleMessage(
       "These parameters are managed by your provider",
     ),
+    "mediaUnlock": MessageLookupByLibrary.simpleMessage("Connectivity Test"),
+    "mediaUnlockColorfulIcons": MessageLookupByLibrary.simpleMessage(
+      "Show colored icons by default",
+    ),
+    "mediaUnlockDisplaySettings": MessageLookupByLibrary.simpleMessage(
+      "Display Settings",
+    ),
+    "mediaUnlockExtraDetails": MessageLookupByLibrary.simpleMessage(
+      "Show more IP details",
+    ),
+    "mediaUnlockMiscSettings": MessageLookupByLibrary.simpleMessage(
+      "Misc Settings",
+    ),
+    "mediaUnlockMoreStreamingPlatforms": MessageLookupByLibrary.simpleMessage(
+      "More Streaming Unlock Items",
+    ),
+    "mediaUnlockPinnedSettingsDesc": MessageLookupByLibrary.simpleMessage(
+      "Select up to 4 items to pin on the widget",
+    ),
+    "mediaUnlockRefreshByCategory": MessageLookupByLibrary.simpleMessage(
+      "Partially refresh based on current category",
+    ),
+    "mediaUnlockRefreshOnNodeChange": MessageLookupByLibrary.simpleMessage(
+      "Auto refresh on node change",
+    ),
+    "mediaUnlockSelectLimit": MessageLookupByLibrary.simpleMessage(
+      "You can select up to 4 items",
+    ),
+    "mediaUnlocked": MessageLookupByLibrary.simpleMessage("Unlocked"),
     "memoryInfo": MessageLookupByLibrary.simpleMessage("Memory info"),
     "messageTest": MessageLookupByLibrary.simpleMessage("Message test"),
     "messageTestTip": MessageLookupByLibrary.simpleMessage(
@@ -521,6 +561,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "notSelectedTip": MessageLookupByLibrary.simpleMessage(
       "The current proxy group cannot be selected.",
     ),
+    "notUnlocked": MessageLookupByLibrary.simpleMessage("Not Unlocked"),
     "nullProfileDesc": MessageLookupByLibrary.simpleMessage(
       "No profile, Please add a profile",
     ),
@@ -753,6 +794,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "restartCoreTip": MessageLookupByLibrary.simpleMessage(
       "Are you sure you want to restart the core? Active connections will be interrupted briefly.",
     ),
+    "retry": MessageLookupByLibrary.simpleMessage("Retry"),
     "routeAddress": MessageLookupByLibrary.simpleMessage("Route address"),
     "routeAddressDesc": MessageLookupByLibrary.simpleMessage(
       "Config listen route address",
@@ -856,6 +898,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Enabling it will allow TCP concurrency",
     ),
     "testUrl": MessageLookupByLibrary.simpleMessage("Test url"),
+    "testing": MessageLookupByLibrary.simpleMessage("Testing"),
     "textScale": MessageLookupByLibrary.simpleMessage("Text Scaling"),
     "thanks": MessageLookupByLibrary.simpleMessage("Thanks for contribution"),
     "theme": MessageLookupByLibrary.simpleMessage("Theme"),
@@ -910,12 +953,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "unableToUpdateCurrentProfileDesc": MessageLookupByLibrary.simpleMessage(
       "unable to update current profile",
     ),
+    "unavailable": MessageLookupByLibrary.simpleMessage("Unavailable"),
     "undo": MessageLookupByLibrary.simpleMessage("undo"),
     "unifiedDelay": MessageLookupByLibrary.simpleMessage("Unified delay"),
     "unifiedDelayDesc": MessageLookupByLibrary.simpleMessage(
       "Remove extra delays such as handshaking",
     ),
     "unknown": MessageLookupByLibrary.simpleMessage("Unknown"),
+    "unlocked": MessageLookupByLibrary.simpleMessage("Completed"),
     "unnamed": MessageLookupByLibrary.simpleMessage("Unnamed"),
     "update": MessageLookupByLibrary.simpleMessage("Update"),
     "updateAllGeoData": MessageLookupByLibrary.simpleMessage(

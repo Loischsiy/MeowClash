@@ -1,4 +1,6 @@
 export 'intranet_ip.dart';
+export 'media_unlock.dart';
+export 'media_unlock_small.dart';
 export 'memory_info.dart';
 export 'network_detection.dart';
 export 'network_speed.dart';

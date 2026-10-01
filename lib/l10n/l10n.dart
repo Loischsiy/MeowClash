@@ -4143,6 +4143,226 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `AI`
+  String get categoryAi {
+    return Intl.message('AI', name: 'categoryAi', desc: '', args: []);
+  }
+
+  /// `All`
+  String get categoryAll {
+    return Intl.message('All', name: 'categoryAll', desc: '', args: []);
+  }
+
+  /// `China Direct`
+  String get categoryChina {
+    return Intl.message(
+      'China Direct',
+      name: 'categoryChina',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Crypto`
+  String get categoryCrypto {
+    return Intl.message('Crypto', name: 'categoryCrypto', desc: '', args: []);
+  }
+
+  /// `Developer`
+  String get categoryDeveloper {
+    return Intl.message(
+      'Developer',
+      name: 'categoryDeveloper',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Gaming Center`
+  String get categoryGaming {
+    return Intl.message(
+      'Gaming Center',
+      name: 'categoryGaming',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Social Platforms`
+  String get categorySocial {
+    return Intl.message(
+      'Social Platforms',
+      name: 'categorySocial',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Streaming`
+  String get categoryStreaming {
+    return Intl.message(
+      'Streaming',
+      name: 'categoryStreaming',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Timeout`
+  String get checkFailed {
+    return Intl.message('Timeout', name: 'checkFailed', desc: '', args: []);
+  }
+
+  /// `Flagged`
+  String get flagged {
+    return Intl.message('Flagged', name: 'flagged', desc: '', args: []);
+  }
+
+  /// `Originals Only`
+  String get limitedUnlock {
+    return Intl.message(
+      'Originals Only',
+      name: 'limitedUnlock',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Connectivity Test`
+  String get mediaUnlock {
+    return Intl.message(
+      'Connectivity Test',
+      name: 'mediaUnlock',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Show colored icons by default`
+  String get mediaUnlockColorfulIcons {
+    return Intl.message(
+      'Show colored icons by default',
+      name: 'mediaUnlockColorfulIcons',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Display Settings`
+  String get mediaUnlockDisplaySettings {
+    return Intl.message(
+      'Display Settings',
+      name: 'mediaUnlockDisplaySettings',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unlocked`
+  String get mediaUnlocked {
+    return Intl.message('Unlocked', name: 'mediaUnlocked', desc: '', args: []);
+  }
+
+  /// `Show more IP details`
+  String get mediaUnlockExtraDetails {
+    return Intl.message(
+      'Show more IP details',
+      name: 'mediaUnlockExtraDetails',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Misc Settings`
+  String get mediaUnlockMiscSettings {
+    return Intl.message(
+      'Misc Settings',
+      name: 'mediaUnlockMiscSettings',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You can select up to 4 items`
+  String get mediaUnlockSelectLimit {
+    return Intl.message(
+      'You can select up to 4 items',
+      name: 'mediaUnlockSelectLimit',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `More Streaming Unlock Items`
+  String get mediaUnlockMoreStreamingPlatforms {
+    return Intl.message(
+      'More Streaming Unlock Items',
+      name: 'mediaUnlockMoreStreamingPlatforms',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select up to 4 items to pin on the widget`
+  String get mediaUnlockPinnedSettingsDesc {
+    return Intl.message(
+      'Select up to 4 items to pin on the widget',
+      name: 'mediaUnlockPinnedSettingsDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Partially refresh based on current category`
+  String get mediaUnlockRefreshByCategory {
+    return Intl.message(
+      'Partially refresh based on current category',
+      name: 'mediaUnlockRefreshByCategory',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Auto refresh on node change`
+  String get mediaUnlockRefreshOnNodeChange {
+    return Intl.message(
+      'Auto refresh on node change',
+      name: 'mediaUnlockRefreshOnNodeChange',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Not Unlocked`
+  String get notUnlocked {
+    return Intl.message(
+      'Not Unlocked',
+      name: 'notUnlocked',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Retry`
+  String get retry {
+    return Intl.message('Retry', name: 'retry', desc: '', args: []);
+  }
+
+  /// `Testing`
+  String get testing {
+    return Intl.message('Testing', name: 'testing', desc: '', args: []);
+  }
+
+  /// `Completed`
+  String get unlocked {
+    return Intl.message('Completed', name: 'unlocked', desc: '', args: []);
+  }
+
+  /// `Unavailable`
+  String get unavailable {
+    return Intl.message('Unavailable', name: 'unavailable', desc: '', args: []);
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

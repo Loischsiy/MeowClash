@@ -34,7 +34,9 @@ lib/                Flutter app code
     developer.dart, hotkey.dart, logs.dart, resources.dart, theme.dart, tools.dart
     config/         General, DNS, network config views
     connection/     Connection list, request details
-    dashboard/      Main dashboard + widgets (announce, inbound ip, memory, network, outbound, quick options, traffic)
+    dashboard/      Main dashboard + widgets (announce, inbound ip, memory, network, outbound, quick options,
+                    site availability, traffic)
+    media_unlock/   Full site-availability page (categories, per-site status)
     profiles/       Profile management (add, edit, override, receive, scripts)
     proxies/        Proxy list, cards, settings, providers
   widgets/          Reusable UI components (dialogs, cards, grids, charts, inputs, sheets,

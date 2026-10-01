@@ -183,6 +183,16 @@ class MessageLookup extends MessageLookupByLibrary {
     "cancelSelectAll": MessageLookupByLibrary.simpleMessage(
       "Отменить выбор всего",
     ),
+    "categoryAi": MessageLookupByLibrary.simpleMessage("AI"),
+    "categoryAll": MessageLookupByLibrary.simpleMessage("Все"),
+    "categoryChina": MessageLookupByLibrary.simpleMessage("Китай (прямой)"),
+    "categoryCrypto": MessageLookupByLibrary.simpleMessage("Криптовалюта"),
+    "categoryDeveloper": MessageLookupByLibrary.simpleMessage(
+      "Для разработчиков",
+    ),
+    "categoryGaming": MessageLookupByLibrary.simpleMessage("Игровой центр"),
+    "categorySocial": MessageLookupByLibrary.simpleMessage("Сообщество"),
+    "categoryStreaming": MessageLookupByLibrary.simpleMessage("Стриминг"),
     "chainHopsRequired": MessageLookupByLibrary.simpleMessage(
       "Выберите минимум два звена",
     ),
@@ -190,6 +200,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "chainName": MessageLookupByLibrary.simpleMessage("Название цепочки"),
     "changeServer": MessageLookupByLibrary.simpleMessage("Изменить сервер"),
     "checkError": MessageLookupByLibrary.simpleMessage("Ошибка проверки"),
+    "checkFailed": MessageLookupByLibrary.simpleMessage("Тайм-аут"),
     "checkUpdate": MessageLookupByLibrary.simpleMessage("Проверить обновления"),
     "checkUpdateError": MessageLookupByLibrary.simpleMessage(
       "Текущее приложение уже является последней версией",
@@ -352,6 +363,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Может незначительно снизить производительность",
     ),
     "firstHop": MessageLookupByLibrary.simpleMessage("Первое звено (вход)"),
+    "flagged": MessageLookupByLibrary.simpleMessage("Помечен"),
     "fontFamily": MessageLookupByLibrary.simpleMessage("Семейство шрифтов"),
     "fourColumns": MessageLookupByLibrary.simpleMessage("Четыре столбца"),
     "fruitSaladScheme": MessageLookupByLibrary.simpleMessage("Фруктовый микс"),
@@ -458,6 +470,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "language": MessageLookupByLibrary.simpleMessage("Язык"),
     "layout": MessageLookupByLibrary.simpleMessage("Макет"),
     "light": MessageLookupByLibrary.simpleMessage("Светлый"),
+    "limitedUnlock": MessageLookupByLibrary.simpleMessage("Только оригиналы"),
     "list": MessageLookupByLibrary.simpleMessage("Список"),
     "listen": MessageLookupByLibrary.simpleMessage("Слушать"),
     "local": MessageLookupByLibrary.simpleMessage("Локальный"),
@@ -487,6 +500,35 @@ class MessageLookup extends MessageLookupByLibrary {
     "managedByProviderNetwork": MessageLookupByLibrary.simpleMessage(
       "Этими параметрами управляет ваш провайдер",
     ),
+    "mediaUnlock": MessageLookupByLibrary.simpleMessage("Проверка доступности"),
+    "mediaUnlockColorfulIcons": MessageLookupByLibrary.simpleMessage(
+      "Показывать цветные значки по умолчанию",
+    ),
+    "mediaUnlockDisplaySettings": MessageLookupByLibrary.simpleMessage(
+      "Настройки отображения",
+    ),
+    "mediaUnlockExtraDetails": MessageLookupByLibrary.simpleMessage(
+      "Показывать больше сведений об IP",
+    ),
+    "mediaUnlockMiscSettings": MessageLookupByLibrary.simpleMessage(
+      "Прочие настройки",
+    ),
+    "mediaUnlockMoreStreamingPlatforms": MessageLookupByLibrary.simpleMessage(
+      "Больше платформ стриминга",
+    ),
+    "mediaUnlockPinnedSettingsDesc": MessageLookupByLibrary.simpleMessage(
+      "Можно выбрать до 4 элементов для закрепления в виджете",
+    ),
+    "mediaUnlockRefreshByCategory": MessageLookupByLibrary.simpleMessage(
+      "Частичное обновление по текущей категории",
+    ),
+    "mediaUnlockRefreshOnNodeChange": MessageLookupByLibrary.simpleMessage(
+      "Автообновление при смене узла",
+    ),
+    "mediaUnlockSelectLimit": MessageLookupByLibrary.simpleMessage(
+      "Можно выбрать максимум 4 элемента",
+    ),
+    "mediaUnlocked": MessageLookupByLibrary.simpleMessage("Разблокировано"),
     "memoryInfo": MessageLookupByLibrary.simpleMessage("Информация о памяти"),
     "messageTest": MessageLookupByLibrary.simpleMessage(
       "Тестирование сообщения",
@@ -544,6 +586,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "notSelectedTip": MessageLookupByLibrary.simpleMessage(
       "Текущая группа прокси недоступна для выбора",
     ),
+    "notUnlocked": MessageLookupByLibrary.simpleMessage("Заблокировано"),
     "nullProfileDesc": MessageLookupByLibrary.simpleMessage(
       "Профиль отсутствует. Пожалуйста, добавьте профиль",
     ),
@@ -792,6 +835,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "restartCoreTip": MessageLookupByLibrary.simpleMessage(
       "Вы действительно хотите перезапустить ядро? Активные соединения будут на короткое время прерваны.",
     ),
+    "retry": MessageLookupByLibrary.simpleMessage("Повторить"),
     "routeAddress": MessageLookupByLibrary.simpleMessage("Адрес маршрутизации"),
     "routeAddressDesc": MessageLookupByLibrary.simpleMessage(
       "Настройка адреса прослушивания маршрутизации",
@@ -893,6 +937,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Использовать параллельные TCP-соединения",
     ),
     "testUrl": MessageLookupByLibrary.simpleMessage("Тест URL"),
+    "testing": MessageLookupByLibrary.simpleMessage("Проверка"),
     "textScale": MessageLookupByLibrary.simpleMessage("Масштабирование текста"),
     "thanks": MessageLookupByLibrary.simpleMessage("Спасибо за вклад"),
     "theme": MessageLookupByLibrary.simpleMessage("Тема"),
@@ -949,6 +994,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "unableToUpdateCurrentProfileDesc": MessageLookupByLibrary.simpleMessage(
       "Невозможно обновить текущий профиль",
     ),
+    "unavailable": MessageLookupByLibrary.simpleMessage("Недоступно"),
     "undo": MessageLookupByLibrary.simpleMessage("Отменить"),
     "unifiedDelay": MessageLookupByLibrary.simpleMessage(
       "Унифицированная задержка",
@@ -957,6 +1003,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Не учитывать дополнительные задержки (например, рукопожатие)",
     ),
     "unknown": MessageLookupByLibrary.simpleMessage("Неизвестно"),
+    "unlocked": MessageLookupByLibrary.simpleMessage("Завершено"),
     "unnamed": MessageLookupByLibrary.simpleMessage("Без имени"),
     "update": MessageLookupByLibrary.simpleMessage("Обновить"),
     "updateAllGeoData": MessageLookupByLibrary.simpleMessage(

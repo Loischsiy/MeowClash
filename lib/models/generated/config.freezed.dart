@@ -24,6 +24,15 @@ mixin _$AppSettingProps {
   @JsonKey(fromJson: dashboardWidgetsSafeFormJson)
   List<DashboardWidget> get dashboardWidgets =>
       throw _privateConstructorUsedError;
+  @JsonKey(fromJson: pinnedMediaPlatformsSafeFromJson)
+  List<MediaPlatform> get pinnedMediaPlatforms =>
+      throw _privateConstructorUsedError;
+  bool get mediaUnlockMoreStreamingPlatforms =>
+      throw _privateConstructorUsedError;
+  bool get mediaUnlockExtraDetails => throw _privateConstructorUsedError;
+  bool get mediaUnlockRefreshOnNodeChange => throw _privateConstructorUsedError;
+  bool get mediaUnlockColorfulIcons => throw _privateConstructorUsedError;
+  bool get mediaUnlockRefreshByCategory => throw _privateConstructorUsedError;
   bool get onlyStatisticsProxy => throw _privateConstructorUsedError;
   bool get autoLaunch => throw _privateConstructorUsedError;
   bool get silentLaunch => throw _privateConstructorUsedError;
@@ -63,6 +72,13 @@ abstract class $AppSettingPropsCopyWith<$Res> {
       {String? locale,
       @JsonKey(fromJson: dashboardWidgetsSafeFormJson)
       List<DashboardWidget> dashboardWidgets,
+      @JsonKey(fromJson: pinnedMediaPlatformsSafeFromJson)
+      List<MediaPlatform> pinnedMediaPlatforms,
+      bool mediaUnlockMoreStreamingPlatforms,
+      bool mediaUnlockExtraDetails,
+      bool mediaUnlockRefreshOnNodeChange,
+      bool mediaUnlockColorfulIcons,
+      bool mediaUnlockRefreshByCategory,
       bool onlyStatisticsProxy,
       bool autoLaunch,
       bool silentLaunch,
@@ -100,6 +116,12 @@ class _$AppSettingPropsCopyWithImpl<$Res, $Val extends AppSettingProps>
   $Res call({
     Object? locale = freezed,
     Object? dashboardWidgets = null,
+    Object? pinnedMediaPlatforms = null,
+    Object? mediaUnlockMoreStreamingPlatforms = null,
+    Object? mediaUnlockExtraDetails = null,
+    Object? mediaUnlockRefreshOnNodeChange = null,
+    Object? mediaUnlockColorfulIcons = null,
+    Object? mediaUnlockRefreshByCategory = null,
     Object? onlyStatisticsProxy = null,
     Object? autoLaunch = null,
     Object? silentLaunch = null,
@@ -128,6 +150,31 @@ class _$AppSettingPropsCopyWithImpl<$Res, $Val extends AppSettingProps>
           ? _value.dashboardWidgets
           : dashboardWidgets // ignore: cast_nullable_to_non_nullable
               as List<DashboardWidget>,
+      pinnedMediaPlatforms: null == pinnedMediaPlatforms
+          ? _value.pinnedMediaPlatforms
+          : pinnedMediaPlatforms // ignore: cast_nullable_to_non_nullable
+              as List<MediaPlatform>,
+      mediaUnlockMoreStreamingPlatforms: null ==
+              mediaUnlockMoreStreamingPlatforms
+          ? _value.mediaUnlockMoreStreamingPlatforms
+          : mediaUnlockMoreStreamingPlatforms // ignore: cast_nullable_to_non_nullable
+              as bool,
+      mediaUnlockExtraDetails: null == mediaUnlockExtraDetails
+          ? _value.mediaUnlockExtraDetails
+          : mediaUnlockExtraDetails // ignore: cast_nullable_to_non_nullable
+              as bool,
+      mediaUnlockRefreshOnNodeChange: null == mediaUnlockRefreshOnNodeChange
+          ? _value.mediaUnlockRefreshOnNodeChange
+          : mediaUnlockRefreshOnNodeChange // ignore: cast_nullable_to_non_nullable
+              as bool,
+      mediaUnlockColorfulIcons: null == mediaUnlockColorfulIcons
+          ? _value.mediaUnlockColorfulIcons
+          : mediaUnlockColorfulIcons // ignore: cast_nullable_to_non_nullable
+              as bool,
+      mediaUnlockRefreshByCategory: null == mediaUnlockRefreshByCategory
+          ? _value.mediaUnlockRefreshByCategory
+          : mediaUnlockRefreshByCategory // ignore: cast_nullable_to_non_nullable
+              as bool,
       onlyStatisticsProxy: null == onlyStatisticsProxy
           ? _value.onlyStatisticsProxy
           : onlyStatisticsProxy // ignore: cast_nullable_to_non_nullable
@@ -216,6 +263,13 @@ abstract class _$$AppSettingPropsImplCopyWith<$Res>
       {String? locale,
       @JsonKey(fromJson: dashboardWidgetsSafeFormJson)
       List<DashboardWidget> dashboardWidgets,
+      @JsonKey(fromJson: pinnedMediaPlatformsSafeFromJson)
+      List<MediaPlatform> pinnedMediaPlatforms,
+      bool mediaUnlockMoreStreamingPlatforms,
+      bool mediaUnlockExtraDetails,
+      bool mediaUnlockRefreshOnNodeChange,
+      bool mediaUnlockColorfulIcons,
+      bool mediaUnlockRefreshByCategory,
       bool onlyStatisticsProxy,
       bool autoLaunch,
       bool silentLaunch,
@@ -251,6 +305,12 @@ class __$$AppSettingPropsImplCopyWithImpl<$Res>
   $Res call({
     Object? locale = freezed,
     Object? dashboardWidgets = null,
+    Object? pinnedMediaPlatforms = null,
+    Object? mediaUnlockMoreStreamingPlatforms = null,
+    Object? mediaUnlockExtraDetails = null,
+    Object? mediaUnlockRefreshOnNodeChange = null,
+    Object? mediaUnlockColorfulIcons = null,
+    Object? mediaUnlockRefreshByCategory = null,
     Object? onlyStatisticsProxy = null,
     Object? autoLaunch = null,
     Object? silentLaunch = null,
@@ -279,6 +339,31 @@ class __$$AppSettingPropsImplCopyWithImpl<$Res>
           ? _value._dashboardWidgets
           : dashboardWidgets // ignore: cast_nullable_to_non_nullable
               as List<DashboardWidget>,
+      pinnedMediaPlatforms: null == pinnedMediaPlatforms
+          ? _value._pinnedMediaPlatforms
+          : pinnedMediaPlatforms // ignore: cast_nullable_to_non_nullable
+              as List<MediaPlatform>,
+      mediaUnlockMoreStreamingPlatforms: null ==
+              mediaUnlockMoreStreamingPlatforms
+          ? _value.mediaUnlockMoreStreamingPlatforms
+          : mediaUnlockMoreStreamingPlatforms // ignore: cast_nullable_to_non_nullable
+              as bool,
+      mediaUnlockExtraDetails: null == mediaUnlockExtraDetails
+          ? _value.mediaUnlockExtraDetails
+          : mediaUnlockExtraDetails // ignore: cast_nullable_to_non_nullable
+              as bool,
+      mediaUnlockRefreshOnNodeChange: null == mediaUnlockRefreshOnNodeChange
+          ? _value.mediaUnlockRefreshOnNodeChange
+          : mediaUnlockRefreshOnNodeChange // ignore: cast_nullable_to_non_nullable
+              as bool,
+      mediaUnlockColorfulIcons: null == mediaUnlockColorfulIcons
+          ? _value.mediaUnlockColorfulIcons
+          : mediaUnlockColorfulIcons // ignore: cast_nullable_to_non_nullable
+              as bool,
+      mediaUnlockRefreshByCategory: null == mediaUnlockRefreshByCategory
+          ? _value.mediaUnlockRefreshByCategory
+          : mediaUnlockRefreshByCategory // ignore: cast_nullable_to_non_nullable
+              as bool,
       onlyStatisticsProxy: null == onlyStatisticsProxy
           ? _value.onlyStatisticsProxy
           : onlyStatisticsProxy // ignore: cast_nullable_to_non_nullable
@@ -362,6 +447,14 @@ class _$AppSettingPropsImpl implements _AppSettingProps {
       {this.locale,
       @JsonKey(fromJson: dashboardWidgetsSafeFormJson)
       final List<DashboardWidget> dashboardWidgets = defaultDashboardWidgets,
+      @JsonKey(fromJson: pinnedMediaPlatformsSafeFromJson)
+      final List<MediaPlatform> pinnedMediaPlatforms =
+          defaultPinnedMediaPlatforms,
+      this.mediaUnlockMoreStreamingPlatforms = false,
+      this.mediaUnlockExtraDetails = false,
+      this.mediaUnlockRefreshOnNodeChange = true,
+      this.mediaUnlockColorfulIcons = true,
+      this.mediaUnlockRefreshByCategory = true,
       this.onlyStatisticsProxy = false,
       this.autoLaunch = false,
       this.silentLaunch = false,
@@ -380,7 +473,8 @@ class _$AppSettingPropsImpl implements _AppSettingProps {
       this.overrideNetworkSettings = false,
       this.chainMode = false,
       this.recoveryStrategy = RecoveryStrategy.compatible})
-      : _dashboardWidgets = dashboardWidgets;
+      : _dashboardWidgets = dashboardWidgets,
+        _pinnedMediaPlatforms = pinnedMediaPlatforms;
 
   factory _$AppSettingPropsImpl.fromJson(Map<String, dynamic> json) =>
       _$$AppSettingPropsImplFromJson(json);
@@ -397,6 +491,31 @@ class _$AppSettingPropsImpl implements _AppSettingProps {
     return EqualUnmodifiableListView(_dashboardWidgets);
   }
 
+  final List<MediaPlatform> _pinnedMediaPlatforms;
+  @override
+  @JsonKey(fromJson: pinnedMediaPlatformsSafeFromJson)
+  List<MediaPlatform> get pinnedMediaPlatforms {
+    if (_pinnedMediaPlatforms is EqualUnmodifiableListView)
+      return _pinnedMediaPlatforms;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_pinnedMediaPlatforms);
+  }
+
+  @override
+  @JsonKey()
+  final bool mediaUnlockMoreStreamingPlatforms;
+  @override
+  @JsonKey()
+  final bool mediaUnlockExtraDetails;
+  @override
+  @JsonKey()
+  final bool mediaUnlockRefreshOnNodeChange;
+  @override
+  @JsonKey()
+  final bool mediaUnlockColorfulIcons;
+  @override
+  @JsonKey()
+  final bool mediaUnlockRefreshByCategory;
   @override
   @JsonKey()
   final bool onlyStatisticsProxy;
@@ -454,7 +573,7 @@ class _$AppSettingPropsImpl implements _AppSettingProps {
 
   @override
   String toString() {
-    return 'AppSettingProps(locale: $locale, dashboardWidgets: $dashboardWidgets, onlyStatisticsProxy: $onlyStatisticsProxy, autoLaunch: $autoLaunch, silentLaunch: $silentLaunch, autoRun: $autoRun, openLogs: $openLogs, closeConnections: $closeConnections, testUrl: $testUrl, isAnimateToPage: $isAnimateToPage, autoCheckUpdate: $autoCheckUpdate, showLabel: $showLabel, disclaimerAccepted: $disclaimerAccepted, minimizeOnExit: $minimizeOnExit, hidden: $hidden, developerMode: $developerMode, overrideProviderSettings: $overrideProviderSettings, overrideNetworkSettings: $overrideNetworkSettings, chainMode: $chainMode, recoveryStrategy: $recoveryStrategy)';
+    return 'AppSettingProps(locale: $locale, dashboardWidgets: $dashboardWidgets, pinnedMediaPlatforms: $pinnedMediaPlatforms, mediaUnlockMoreStreamingPlatforms: $mediaUnlockMoreStreamingPlatforms, mediaUnlockExtraDetails: $mediaUnlockExtraDetails, mediaUnlockRefreshOnNodeChange: $mediaUnlockRefreshOnNodeChange, mediaUnlockColorfulIcons: $mediaUnlockColorfulIcons, mediaUnlockRefreshByCategory: $mediaUnlockRefreshByCategory, onlyStatisticsProxy: $onlyStatisticsProxy, autoLaunch: $autoLaunch, silentLaunch: $silentLaunch, autoRun: $autoRun, openLogs: $openLogs, closeConnections: $closeConnections, testUrl: $testUrl, isAnimateToPage: $isAnimateToPage, autoCheckUpdate: $autoCheckUpdate, showLabel: $showLabel, disclaimerAccepted: $disclaimerAccepted, minimizeOnExit: $minimizeOnExit, hidden: $hidden, developerMode: $developerMode, overrideProviderSettings: $overrideProviderSettings, overrideNetworkSettings: $overrideNetworkSettings, chainMode: $chainMode, recoveryStrategy: $recoveryStrategy)';
   }
 
   @override
@@ -465,6 +584,21 @@ class _$AppSettingPropsImpl implements _AppSettingProps {
             (identical(other.locale, locale) || other.locale == locale) &&
             const DeepCollectionEquality()
                 .equals(other._dashboardWidgets, _dashboardWidgets) &&
+            const DeepCollectionEquality()
+                .equals(other._pinnedMediaPlatforms, _pinnedMediaPlatforms) &&
+            (identical(other.mediaUnlockMoreStreamingPlatforms, mediaUnlockMoreStreamingPlatforms) ||
+                other.mediaUnlockMoreStreamingPlatforms ==
+                    mediaUnlockMoreStreamingPlatforms) &&
+            (identical(other.mediaUnlockExtraDetails, mediaUnlockExtraDetails) ||
+                other.mediaUnlockExtraDetails == mediaUnlockExtraDetails) &&
+            (identical(other.mediaUnlockRefreshOnNodeChange, mediaUnlockRefreshOnNodeChange) ||
+                other.mediaUnlockRefreshOnNodeChange ==
+                    mediaUnlockRefreshOnNodeChange) &&
+            (identical(other.mediaUnlockColorfulIcons, mediaUnlockColorfulIcons) ||
+                other.mediaUnlockColorfulIcons == mediaUnlockColorfulIcons) &&
+            (identical(other.mediaUnlockRefreshByCategory, mediaUnlockRefreshByCategory) ||
+                other.mediaUnlockRefreshByCategory ==
+                    mediaUnlockRefreshByCategory) &&
             (identical(other.onlyStatisticsProxy, onlyStatisticsProxy) ||
                 other.onlyStatisticsProxy == onlyStatisticsProxy) &&
             (identical(other.autoLaunch, autoLaunch) ||
@@ -490,16 +624,10 @@ class _$AppSettingPropsImpl implements _AppSettingProps {
             (identical(other.hidden, hidden) || other.hidden == hidden) &&
             (identical(other.developerMode, developerMode) ||
                 other.developerMode == developerMode) &&
-            (identical(
-                    other.overrideProviderSettings, overrideProviderSettings) ||
-                other.overrideProviderSettings == overrideProviderSettings) &&
-            (identical(
-                    other.overrideNetworkSettings, overrideNetworkSettings) ||
-                other.overrideNetworkSettings == overrideNetworkSettings) &&
-            (identical(other.chainMode, chainMode) ||
-                other.chainMode == chainMode) &&
-            (identical(other.recoveryStrategy, recoveryStrategy) ||
-                other.recoveryStrategy == recoveryStrategy));
+            (identical(other.overrideProviderSettings, overrideProviderSettings) || other.overrideProviderSettings == overrideProviderSettings) &&
+            (identical(other.overrideNetworkSettings, overrideNetworkSettings) || other.overrideNetworkSettings == overrideNetworkSettings) &&
+            (identical(other.chainMode, chainMode) || other.chainMode == chainMode) &&
+            (identical(other.recoveryStrategy, recoveryStrategy) || other.recoveryStrategy == recoveryStrategy));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -508,6 +636,12 @@ class _$AppSettingPropsImpl implements _AppSettingProps {
         runtimeType,
         locale,
         const DeepCollectionEquality().hash(_dashboardWidgets),
+        const DeepCollectionEquality().hash(_pinnedMediaPlatforms),
+        mediaUnlockMoreStreamingPlatforms,
+        mediaUnlockExtraDetails,
+        mediaUnlockRefreshOnNodeChange,
+        mediaUnlockColorfulIcons,
+        mediaUnlockRefreshByCategory,
         onlyStatisticsProxy,
         autoLaunch,
         silentLaunch,
@@ -550,6 +684,13 @@ abstract class _AppSettingProps implements AppSettingProps {
       {final String? locale,
       @JsonKey(fromJson: dashboardWidgetsSafeFormJson)
       final List<DashboardWidget> dashboardWidgets,
+      @JsonKey(fromJson: pinnedMediaPlatformsSafeFromJson)
+      final List<MediaPlatform> pinnedMediaPlatforms,
+      final bool mediaUnlockMoreStreamingPlatforms,
+      final bool mediaUnlockExtraDetails,
+      final bool mediaUnlockRefreshOnNodeChange,
+      final bool mediaUnlockColorfulIcons,
+      final bool mediaUnlockRefreshByCategory,
       final bool onlyStatisticsProxy,
       final bool autoLaunch,
       final bool silentLaunch,
@@ -577,6 +718,19 @@ abstract class _AppSettingProps implements AppSettingProps {
   @override
   @JsonKey(fromJson: dashboardWidgetsSafeFormJson)
   List<DashboardWidget> get dashboardWidgets;
+  @override
+  @JsonKey(fromJson: pinnedMediaPlatformsSafeFromJson)
+  List<MediaPlatform> get pinnedMediaPlatforms;
+  @override
+  bool get mediaUnlockMoreStreamingPlatforms;
+  @override
+  bool get mediaUnlockExtraDetails;
+  @override
+  bool get mediaUnlockRefreshOnNodeChange;
+  @override
+  bool get mediaUnlockColorfulIcons;
+  @override
+  bool get mediaUnlockRefreshByCategory;
   @override
   bool get onlyStatisticsProxy;
   @override

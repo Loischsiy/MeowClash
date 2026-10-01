@@ -188,6 +188,16 @@ class MessageLookup extends MessageLookupByLibrary {
     "cancelSelectAll": MessageLookupByLibrary.simpleMessage(
       "Скасувати вибір усього",
     ),
+    "categoryAi": MessageLookupByLibrary.simpleMessage("AI"),
+    "categoryAll": MessageLookupByLibrary.simpleMessage("Усі"),
+    "categoryChina": MessageLookupByLibrary.simpleMessage("Китай (напряму)"),
+    "categoryCrypto": MessageLookupByLibrary.simpleMessage("Криптовалюта"),
+    "categoryDeveloper": MessageLookupByLibrary.simpleMessage(
+      "Для розробників",
+    ),
+    "categoryGaming": MessageLookupByLibrary.simpleMessage("Ігровий центр"),
+    "categorySocial": MessageLookupByLibrary.simpleMessage("Спільнота"),
+    "categoryStreaming": MessageLookupByLibrary.simpleMessage("Стримінг"),
     "chainHopsRequired": MessageLookupByLibrary.simpleMessage(
       "Виберіть щонайменше дві ланки",
     ),
@@ -195,6 +205,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "chainName": MessageLookupByLibrary.simpleMessage("Назва ланцюжка"),
     "changeServer": MessageLookupByLibrary.simpleMessage("Змінити сервер"),
     "checkError": MessageLookupByLibrary.simpleMessage("Помилка перевірки"),
+    "checkFailed": MessageLookupByLibrary.simpleMessage("Тайм-аут"),
     "checkUpdate": MessageLookupByLibrary.simpleMessage("Перевірити оновлення"),
     "checkUpdateError": MessageLookupByLibrary.simpleMessage(
       "Поточний застосунок уже є останньою версією",
@@ -357,6 +368,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Може незначно знизити продуктивність",
     ),
     "firstHop": MessageLookupByLibrary.simpleMessage("Перша ланка (вхід)"),
+    "flagged": MessageLookupByLibrary.simpleMessage("Позначено"),
     "fontFamily": MessageLookupByLibrary.simpleMessage("Сімейство шрифтів"),
     "fourColumns": MessageLookupByLibrary.simpleMessage("Чотири стовпці"),
     "fruitSaladScheme": MessageLookupByLibrary.simpleMessage("Фруктовий мікс"),
@@ -463,6 +475,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "language": MessageLookupByLibrary.simpleMessage("Мова"),
     "layout": MessageLookupByLibrary.simpleMessage("Макет"),
     "light": MessageLookupByLibrary.simpleMessage("Світлий"),
+    "limitedUnlock": MessageLookupByLibrary.simpleMessage("Лише оригінали"),
     "list": MessageLookupByLibrary.simpleMessage("Список"),
     "listen": MessageLookupByLibrary.simpleMessage("Слухати"),
     "local": MessageLookupByLibrary.simpleMessage("Локальний"),
@@ -492,6 +505,37 @@ class MessageLookup extends MessageLookupByLibrary {
     "managedByProviderNetwork": MessageLookupByLibrary.simpleMessage(
       "Цими параметрами керує ваш провайдер",
     ),
+    "mediaUnlock": MessageLookupByLibrary.simpleMessage(
+      "Перевірка доступності",
+    ),
+    "mediaUnlockColorfulIcons": MessageLookupByLibrary.simpleMessage(
+      "Показувати кольорові значки за замовчуванням",
+    ),
+    "mediaUnlockDisplaySettings": MessageLookupByLibrary.simpleMessage(
+      "Налаштування відображення",
+    ),
+    "mediaUnlockExtraDetails": MessageLookupByLibrary.simpleMessage(
+      "Показувати більше відомостей про IP",
+    ),
+    "mediaUnlockMiscSettings": MessageLookupByLibrary.simpleMessage(
+      "Інші налаштування",
+    ),
+    "mediaUnlockMoreStreamingPlatforms": MessageLookupByLibrary.simpleMessage(
+      "Більше стримінгових платформ",
+    ),
+    "mediaUnlockPinnedSettingsDesc": MessageLookupByLibrary.simpleMessage(
+      "Можна вибрати до 4 елементів для закріплення у віджеті",
+    ),
+    "mediaUnlockRefreshByCategory": MessageLookupByLibrary.simpleMessage(
+      "Часткове оновлення за поточною категорією",
+    ),
+    "mediaUnlockRefreshOnNodeChange": MessageLookupByLibrary.simpleMessage(
+      "Автооновлення під час зміни вузла",
+    ),
+    "mediaUnlockSelectLimit": MessageLookupByLibrary.simpleMessage(
+      "Можна вибрати щонайбільше 4 елементи",
+    ),
+    "mediaUnlocked": MessageLookupByLibrary.simpleMessage("Розблоковано"),
     "memoryInfo": MessageLookupByLibrary.simpleMessage(
       "Інформація про пам\'ять",
     ),
@@ -553,6 +597,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "notSelectedTip": MessageLookupByLibrary.simpleMessage(
       "Поточна група проксі недоступна для вибору",
     ),
+    "notUnlocked": MessageLookupByLibrary.simpleMessage("Заблоковано"),
     "nullProfileDesc": MessageLookupByLibrary.simpleMessage(
       "Профіль відсутній. Будь ласка, додайте профіль",
     ),
@@ -799,6 +844,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "restartCoreTip": MessageLookupByLibrary.simpleMessage(
       "Ви дійсно хочете перезапустити ядро? Активні з\'єднання буде на короткий час перервано.",
     ),
+    "retry": MessageLookupByLibrary.simpleMessage("Повторити"),
     "routeAddress": MessageLookupByLibrary.simpleMessage(
       "Адреса маршрутизації",
     ),
@@ -902,6 +948,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Використовувати паралельні TCP-з\'єднання",
     ),
     "testUrl": MessageLookupByLibrary.simpleMessage("Тест URL"),
+    "testing": MessageLookupByLibrary.simpleMessage("Перевірка"),
     "textScale": MessageLookupByLibrary.simpleMessage("Масштабування тексту"),
     "thanks": MessageLookupByLibrary.simpleMessage("Дякуємо за внесок"),
     "theme": MessageLookupByLibrary.simpleMessage("Тема"),
@@ -958,6 +1005,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "unableToUpdateCurrentProfileDesc": MessageLookupByLibrary.simpleMessage(
       "Неможливо оновити поточний профіль",
     ),
+    "unavailable": MessageLookupByLibrary.simpleMessage("Недоступно"),
     "undo": MessageLookupByLibrary.simpleMessage("Скасувати"),
     "unifiedDelay": MessageLookupByLibrary.simpleMessage(
       "Уніфікована затримка",
@@ -966,6 +1014,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Не враховувати додаткові затримки (наприклад, рукостискання)",
     ),
     "unknown": MessageLookupByLibrary.simpleMessage("Невідомо"),
+    "unlocked": MessageLookupByLibrary.simpleMessage("Завершено"),
     "unnamed": MessageLookupByLibrary.simpleMessage("Без імені"),
     "update": MessageLookupByLibrary.simpleMessage("Оновити"),
     "updateAllGeoData": MessageLookupByLibrary.simpleMessage(

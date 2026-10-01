@@ -70,6 +70,45 @@ List<DashboardWidget> dashboardWidgetsSafeFormJson(
   }
 }
 
+const List<MediaPlatform> defaultPinnedMediaPlatforms = [
+  MediaPlatform.reddit,
+  MediaPlatform.gemini,
+  MediaPlatform.cloudflare,
+];
+
+List<MediaPlatform> pinnedMediaPlatformsSafeFromJson(
+  List<dynamic>? pinnedMediaPlatforms,
+) {
+  try {
+    if (pinnedMediaPlatforms == null) return defaultPinnedMediaPlatforms;
+    final list = <MediaPlatform>[];
+    for (final e in pinnedMediaPlatforms) {
+      final str = e.toString();
+      if (str == 'chatgpt') {
+        list.add(MediaPlatform.openai);
+        continue;
+      }
+      if (str == 'qqnews') {
+        list.add(MediaPlatform.tencent);
+        continue;
+      }
+      if (str == 'alidnsprobe') {
+        list.add(MediaPlatform.alibaba);
+        continue;
+      }
+      if (str == 'bytedance') {
+        list.add(MediaPlatform.douyin);
+        continue;
+      }
+      final p = MediaPlatform.values.where((v) => v.name == str).firstOrNull;
+      if (p != null) list.add(p);
+    }
+    return list.isEmpty ? defaultPinnedMediaPlatforms : list;
+  } catch (_) {
+    return defaultPinnedMediaPlatforms;
+  }
+}
+
 @freezed
 class AppSettingProps with _$AppSettingProps {
   const factory AppSettingProps({
@@ -77,6 +116,14 @@ class AppSettingProps with _$AppSettingProps {
     @Default(defaultDashboardWidgets)
     @JsonKey(fromJson: dashboardWidgetsSafeFormJson)
     List<DashboardWidget> dashboardWidgets,
+    @Default(defaultPinnedMediaPlatforms)
+    @JsonKey(fromJson: pinnedMediaPlatformsSafeFromJson)
+    List<MediaPlatform> pinnedMediaPlatforms,
+    @Default(false) bool mediaUnlockMoreStreamingPlatforms,
+    @Default(false) bool mediaUnlockExtraDetails,
+    @Default(true) bool mediaUnlockRefreshOnNodeChange,
+    @Default(true) bool mediaUnlockColorfulIcons,
+    @Default(true) bool mediaUnlockRefreshByCategory,
     @Default(false) bool onlyStatisticsProxy,
     @Default(false) bool autoLaunch,
     @Default(false) bool silentLaunch,

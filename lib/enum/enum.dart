@@ -396,6 +396,18 @@ enum DashboardWidget {
       crossAxisCellCount: 4,
       child: MemoryInfo(),
     ),
+  ),
+  mediaUnlock(
+    GridItem(
+      crossAxisCellCount: 8,
+      child: MediaUnlock(),
+    ),
+  ),
+  mediaUnlockSmall(
+    GridItem(
+      crossAxisCellCount: 4,
+      child: MediaUnlockSmall(),
+    ),
   );
 
   final GridItem widget;

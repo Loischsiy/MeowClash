@@ -101,12 +101,21 @@ class MessageLookup extends MessageLookupByLibrary {
     "cancelSelectAll": MessageLookupByLibrary.simpleMessage(
       "Poista kaikkien valinta",
     ),
+    "categoryAi": MessageLookupByLibrary.simpleMessage("AI"),
+    "categoryAll": MessageLookupByLibrary.simpleMessage("Kaikki"),
+    "categoryChina": MessageLookupByLibrary.simpleMessage("Kiina (suora)"),
+    "categoryCrypto": MessageLookupByLibrary.simpleMessage("Kryptovaluutat"),
+    "categoryDeveloper": MessageLookupByLibrary.simpleMessage("Kehittäjille"),
+    "categoryGaming": MessageLookupByLibrary.simpleMessage("Pelikeskus"),
+    "categorySocial": MessageLookupByLibrary.simpleMessage("Yhteisöt"),
+    "categoryStreaming": MessageLookupByLibrary.simpleMessage("Suoratoisto"),
     "chainHopsRequired": MessageLookupByLibrary.simpleMessage(
       "Valitse vähintään kaksi hyppyä",
     ),
     "chainMode": MessageLookupByLibrary.simpleMessage("Ketjutustila"),
     "chainName": MessageLookupByLibrary.simpleMessage("Ketjun nimi"),
     "checkError": MessageLookupByLibrary.simpleMessage("Tarkistusvirhe"),
+    "checkFailed": MessageLookupByLibrary.simpleMessage("Aikakatkaisu"),
     "checkUpdate": MessageLookupByLibrary.simpleMessage("Tarkista päivitykset"),
     "checking": MessageLookupByLibrary.simpleMessage("Tarkistetaan..."),
     "columns": MessageLookupByLibrary.simpleMessage("Sarakkeet"),
@@ -163,6 +172,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "filterSystemApp": MessageLookupByLibrary.simpleMessage(
       "Suodata järjestelmäsovellukset",
     ),
+    "flagged": MessageLookupByLibrary.simpleMessage("Merkitty"),
     "general": MessageLookupByLibrary.simpleMessage("Yleiset"),
     "global": MessageLookupByLibrary.simpleMessage("Yleinen"),
     "goDownload": MessageLookupByLibrary.simpleMessage("Siirry lataukseen"),
@@ -211,6 +221,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "justNow": MessageLookupByLibrary.simpleMessage("Juuri nyt"),
     "language": MessageLookupByLibrary.simpleMessage("Kieli"),
     "light": MessageLookupByLibrary.simpleMessage("Vaalea"),
+    "limitedUnlock": MessageLookupByLibrary.simpleMessage("Vain omat sisällöt"),
     "logDetails": MessageLookupByLibrary.simpleMessage("Lokitiedot"),
     "logLevel": MessageLookupByLibrary.simpleMessage("Lokitaso"),
     "logcat": MessageLookupByLibrary.simpleMessage("Lokitus"),
@@ -219,6 +230,35 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "logs": MessageLookupByLibrary.simpleMessage("Lokit"),
     "logsDesc": MessageLookupByLibrary.simpleMessage("Lokitietueet"),
+    "mediaUnlock": MessageLookupByLibrary.simpleMessage("Saatavuustesti"),
+    "mediaUnlockColorfulIcons": MessageLookupByLibrary.simpleMessage(
+      "Näytä värilliset kuvakkeet oletuksena",
+    ),
+    "mediaUnlockDisplaySettings": MessageLookupByLibrary.simpleMessage(
+      "Näyttöasetukset",
+    ),
+    "mediaUnlockExtraDetails": MessageLookupByLibrary.simpleMessage(
+      "Näytä lisää IP-tietoja",
+    ),
+    "mediaUnlockMiscSettings": MessageLookupByLibrary.simpleMessage(
+      "Muut asetukset",
+    ),
+    "mediaUnlockMoreStreamingPlatforms": MessageLookupByLibrary.simpleMessage(
+      "Lisää suoratoistopalveluita",
+    ),
+    "mediaUnlockPinnedSettingsDesc": MessageLookupByLibrary.simpleMessage(
+      "Valitse enintään 4 kohdetta kiinnitettäväksi widgetiin",
+    ),
+    "mediaUnlockRefreshByCategory": MessageLookupByLibrary.simpleMessage(
+      "Päivitä vain nykyinen luokka",
+    ),
+    "mediaUnlockRefreshOnNodeChange": MessageLookupByLibrary.simpleMessage(
+      "Päivitä automaattisesti solmun vaihtuessa",
+    ),
+    "mediaUnlockSelectLimit": MessageLookupByLibrary.simpleMessage(
+      "Voit valita enintään 4 kohdetta",
+    ),
+    "mediaUnlocked": MessageLookupByLibrary.simpleMessage("Avattu"),
     "minimizeOnExit": MessageLookupByLibrary.simpleMessage(
       "Pienennä suljettaessa",
     ),
@@ -244,6 +284,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "noProxyDesc": MessageLookupByLibrary.simpleMessage(
       "Luo profiili tai lisää kelvollinen profiili",
     ),
+    "notUnlocked": MessageLookupByLibrary.simpleMessage("Estetty"),
     "nullProfileDesc": MessageLookupByLibrary.simpleMessage(
       "Ei profiilia. Lisää profiili",
     ),
@@ -335,6 +376,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "restartCoreSuccess": MessageLookupByLibrary.simpleMessage(
       "Ydin käynnistettiin uudelleen",
     ),
+    "retry": MessageLookupByLibrary.simpleMessage("Yritä uudelleen"),
     "ru": MessageLookupByLibrary.simpleMessage("Venäjä"),
     "rule": MessageLookupByLibrary.simpleMessage("Sääntöjen mukaan"),
     "running": MessageLookupByLibrary.simpleMessage("Käynnissä"),
@@ -369,6 +411,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Järjestelmän välityspalvelin",
     ),
     "tabAnimation": MessageLookupByLibrary.simpleMessage("Välilehtianimaatio"),
+    "testing": MessageLookupByLibrary.simpleMessage("Testataan"),
     "theme": MessageLookupByLibrary.simpleMessage("Teema"),
     "themeColor": MessageLookupByLibrary.simpleMessage("Teeman väri"),
     "themeDesc": MessageLookupByLibrary.simpleMessage(
@@ -409,7 +452,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "unableToUpdateCurrentProfileDesc": MessageLookupByLibrary.simpleMessage(
       "Nykyistä profiilia ei voi päivittää",
     ),
+    "unavailable": MessageLookupByLibrary.simpleMessage("Ei saatavilla"),
     "unknown": MessageLookupByLibrary.simpleMessage("Tuntematon"),
+    "unlocked": MessageLookupByLibrary.simpleMessage("Valmis"),
     "update": MessageLookupByLibrary.simpleMessage("Päivitä"),
     "updateAllGeoData": MessageLookupByLibrary.simpleMessage(
       "Päivitä kaikki Geo-tiedostot",

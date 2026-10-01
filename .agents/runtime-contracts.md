@@ -18,6 +18,9 @@ failure.
   not restart it; periodic group refresh pauses in the background. Check `mounted`/results **after**
   awaits, not only before. An in-flight core request is allowed to finish instead of being killed, and
   the polling loop must not launch an overlapping replacement.
+- **Site availability** (`lib/common/media_unlock_state.dart`): checks run only while the core is
+  running and a site-availability dashboard widget is present; node-change rechecks are debounced
+  (800 ms), skipped in the background, and re-run on resume only if the route signature changed.
 - **Profile scripts** (`lib/services/profile_script_evaluator.dart`): one-shot transforms run in a
   short-lived isolate on `flutter_js`; results are converted to Dart data before native teardown, and
   success, evaluation errors and conversion errors all release the engine. The fetch polyfill is loaded

@@ -60,6 +60,7 @@
 - **Ohitettavat toimialueet**: Määritä luettelo toimialueista, joiden tulee ohittaa järjestelmän välityspalvelin.
 - **IPv6-tuki**: Ota IPv6-sisääntulevan liikenteen reititys kokonaan käyttöön tai pois käytöstä.
 - **Vähän muistia käyttävä lataaja**: Ota Geo-tietokannoille käyttöön Go Low Memory -tila resurssien säästämiseksi.
+- **Sivustojen saatavuus -widget**: Kojelaudan kortti, joka tarkistaa, ovatko Reddit, Gemini, Cloudflare ja muut palvelut tavoitettavissa nykyisen solmun kautta; estetyille sivustoille näytetään viiveen sijaan estokuvake ja ”Ei saatavilla”. Napauttamalla avautuu koko luettelo luokittain.
 
 ### ☁️ Synkronointi, salaus ja palveluntarjoajaominaisuudet
 - **WebDAV-synkronointi**: Varmuuskopioi ja palauta asetukset ja profiilit etäyhteyden kautta.

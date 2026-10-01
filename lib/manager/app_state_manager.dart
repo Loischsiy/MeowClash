@@ -53,6 +53,15 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
       },
       fireImmediately: true,
     );
+    ref.listenManual(checkMediaUnlockProvider, (prev, next) {
+      if (next.b && (prev?.a != next.a)) {
+        mediaUnlockState.startCheckOnNodeChange();
+      }
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      mediaUnlockState.tryStartCheck();
+    });
     ref.listenManual(configStateProvider, (prev, next) {
       if (prev != next) {
         globalState.appController.savePreferencesDebounce();
@@ -164,6 +173,8 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
             unawaited(globalState.startUpdateTasks());
           }
         }
+        if (!mounted || generation != _lifecycleGeneration) return;
+        mediaUnlockState.checkOnForegroundResume();
       case AppLifecycleState.hidden:
       case AppLifecycleState.detached:
         break;

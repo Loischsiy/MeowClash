@@ -13,6 +13,20 @@ _$AppSettingPropsImpl _$$AppSettingPropsImplFromJson(
       dashboardWidgets: json['dashboardWidgets'] == null
           ? defaultDashboardWidgets
           : dashboardWidgetsSafeFormJson(json['dashboardWidgets'] as List?),
+      pinnedMediaPlatforms: json['pinnedMediaPlatforms'] == null
+          ? defaultPinnedMediaPlatforms
+          : pinnedMediaPlatformsSafeFromJson(
+              json['pinnedMediaPlatforms'] as List?),
+      mediaUnlockMoreStreamingPlatforms:
+          json['mediaUnlockMoreStreamingPlatforms'] as bool? ?? false,
+      mediaUnlockExtraDetails:
+          json['mediaUnlockExtraDetails'] as bool? ?? false,
+      mediaUnlockRefreshOnNodeChange:
+          json['mediaUnlockRefreshOnNodeChange'] as bool? ?? true,
+      mediaUnlockColorfulIcons:
+          json['mediaUnlockColorfulIcons'] as bool? ?? true,
+      mediaUnlockRefreshByCategory:
+          json['mediaUnlockRefreshByCategory'] as bool? ?? true,
       onlyStatisticsProxy: json['onlyStatisticsProxy'] as bool? ?? false,
       autoLaunch: json['autoLaunch'] as bool? ?? false,
       silentLaunch: json['silentLaunch'] as bool? ?? false,
@@ -44,6 +58,15 @@ Map<String, dynamic> _$$AppSettingPropsImplToJson(
       'dashboardWidgets': instance.dashboardWidgets
           .map((e) => _$DashboardWidgetEnumMap[e]!)
           .toList(),
+      'pinnedMediaPlatforms': instance.pinnedMediaPlatforms
+          .map((e) => _$MediaPlatformEnumMap[e]!)
+          .toList(),
+      'mediaUnlockMoreStreamingPlatforms':
+          instance.mediaUnlockMoreStreamingPlatforms,
+      'mediaUnlockExtraDetails': instance.mediaUnlockExtraDetails,
+      'mediaUnlockRefreshOnNodeChange': instance.mediaUnlockRefreshOnNodeChange,
+      'mediaUnlockColorfulIcons': instance.mediaUnlockColorfulIcons,
+      'mediaUnlockRefreshByCategory': instance.mediaUnlockRefreshByCategory,
       'onlyStatisticsProxy': instance.onlyStatisticsProxy,
       'autoLaunch': instance.autoLaunch,
       'silentLaunch': instance.silentLaunch,
@@ -82,6 +105,67 @@ const _$DashboardWidgetEnumMap = {
   DashboardWidget.systemProxyButton: 'systemProxyButton',
   DashboardWidget.intranetIp: 'intranetIp',
   DashboardWidget.memoryInfo: 'memoryInfo',
+  DashboardWidget.mediaUnlock: 'mediaUnlock',
+  DashboardWidget.mediaUnlockSmall: 'mediaUnlockSmall',
+};
+
+const _$MediaPlatformEnumMap = {
+  MediaPlatform.openai: 'openai',
+  MediaPlatform.claude: 'claude',
+  MediaPlatform.gemini: 'gemini',
+  MediaPlatform.grok: 'grok',
+  MediaPlatform.openrouter: 'openrouter',
+  MediaPlatform.poe: 'poe',
+  MediaPlatform.suno: 'suno',
+  MediaPlatform.cloudflare: 'cloudflare',
+  MediaPlatform.perplexity: 'perplexity',
+  MediaPlatform.netflix: 'netflix',
+  MediaPlatform.disney: 'disney',
+  MediaPlatform.youtube: 'youtube',
+  MediaPlatform.youtubemusic: 'youtubemusic',
+  MediaPlatform.spotify: 'spotify',
+  MediaPlatform.tiktok: 'tiktok',
+  MediaPlatform.iqiyi: 'iqiyi',
+  MediaPlatform.crunchyroll: 'crunchyroll',
+  MediaPlatform.missav: 'missav',
+  MediaPlatform.ehentai: 'ehentai',
+  MediaPlatform.tencent: 'tencent',
+  MediaPlatform.alibaba: 'alibaba',
+  MediaPlatform.netease: 'netease',
+  MediaPlatform.douyin: 'douyin',
+  MediaPlatform.bilibili: 'bilibili',
+  MediaPlatform.cloudflarecn: 'cloudflarecn',
+  MediaPlatform.reddit: 'reddit',
+  MediaPlatform.x: 'x',
+  MediaPlatform.discord: 'discord',
+  MediaPlatform.v2ex: 'v2ex',
+  MediaPlatform.medium: 'medium',
+  MediaPlatform.stackoverflow: 'stackoverflow',
+  MediaPlatform.quora: 'quora',
+  MediaPlatform.telegram: 'telegram',
+  MediaPlatform.github: 'github',
+  MediaPlatform.wikipedia: 'wikipedia',
+  MediaPlatform.apple: 'apple',
+  MediaPlatform.onetrust: 'onetrust',
+  MediaPlatform.gitlab: 'gitlab',
+  MediaPlatform.npm: 'npm',
+  MediaPlatform.cdnjs: 'cdnjs',
+  MediaPlatform.unpkg: 'unpkg',
+  MediaPlatform.nodejs: 'nodejs',
+  MediaPlatform.steam: 'steam',
+  MediaPlatform.epic: 'epic',
+  MediaPlatform.ubisoft: 'ubisoft',
+  MediaPlatform.humblebundle: 'humblebundle',
+  MediaPlatform.coinbase: 'coinbase',
+  MediaPlatform.okx: 'okx',
+  MediaPlatform.kraken: 'kraken',
+  MediaPlatform.cryptocom: 'cryptocom',
+  MediaPlatform.phantom: 'phantom',
+  MediaPlatform.paypal: 'paypal',
+  MediaPlatform.mytvsuper: 'mytvsuper',
+  MediaPlatform.viutv: 'viutv',
+  MediaPlatform.hoytv: 'hoytv',
+  MediaPlatform.rthk: 'rthk',
 };
 
 _$AccessControlImpl _$$AccessControlImplFromJson(Map<String, dynamic> json) =>

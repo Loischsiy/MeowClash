@@ -60,6 +60,7 @@
 - **Bypass Domains**: Set list of domains that should bypass the system proxy.
 - **IPv6 Support**: Fully toggle IPv6 inbound traffic routing.
 - **Low Memory Loader**: Enable Go Low Memory mode for Geo databases to save resources.
+- **Site Availability Widget**: Dashboard card that checks whether Reddit, Gemini, Cloudflare and other services are reachable through the current node; blocked sites show a "blocked" icon and "Unavailable" instead of latency. Tap it for the full list grouped by category.
 
 ### ☁️ Sync, Encryption & Provider Features
 - **WebDAV Synchronization**: Backup and restore your configuration and profiles remotely.

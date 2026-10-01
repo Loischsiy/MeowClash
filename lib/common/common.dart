@@ -42,3 +42,6 @@ export 'tray.dart';
 export 'utils.dart';
 export 'window.dart';
 export 'windows.dart';
+export 'media_unlock_checker.dart';
+export 'media_unlock_state.dart';
+export 'region.dart';

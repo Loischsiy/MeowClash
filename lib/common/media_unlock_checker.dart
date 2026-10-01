@@ -1098,6 +1098,40 @@ class MediaUnlockChecker {
     }
   }
 
+  /// Roblox is not behind Cloudflare, so a plain reachability probe of the
+  /// site is used: any HTTP answer below 400 means the node can reach it.
+  Future<MediaUnlockResult> checkRoblox() async {
+    final sw = Stopwatch()..start();
+    final dio = _createDio(followRedirects: true);
+    try {
+      final res = await dio.get<ResponseBody>(
+        'https://www.roblox.com/',
+        options: Options(
+          responseType: ResponseType.stream,
+          receiveTimeout: const Duration(seconds: 4),
+          sendTimeout: const Duration(seconds: 4),
+        ),
+      );
+      final code = res.statusCode ?? 0;
+      final status = code >= 200 && code < 400
+          ? MediaUnlockStatus.unlocked
+          : MediaUnlockStatus.blocked;
+      return MediaUnlockResult(
+        platform: MediaPlatform.roblox,
+        status: status,
+        latency: sw.elapsedMilliseconds,
+      );
+    } catch (_) {
+      return MediaUnlockResult(
+        platform: MediaPlatform.roblox,
+        status: MediaUnlockStatus.failed,
+        latency: sw.elapsedMilliseconds,
+      );
+    } finally {
+      dio.close(force: true);
+    }
+  }
+
   Future<MediaUnlockResult> checkGemini() async {
     final sw = Stopwatch()..start();
     final dio = _createDio(followRedirects: true);
@@ -1659,6 +1693,7 @@ class MediaUnlockChecker {
         _checkCloudflareTrace(MediaPlatform.ubisoft, 'store.ubisoft.com'),
       MediaPlatform.humblebundle =>
         _checkCloudflareTrace(MediaPlatform.humblebundle, 'humblebundle.com'),
+      MediaPlatform.roblox => checkRoblox(),
       MediaPlatform.coinbase =>
         _checkCloudflareTrace(MediaPlatform.coinbase, 'www.coinbase.com'),
       MediaPlatform.okx =>

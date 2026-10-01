@@ -158,6 +158,7 @@ const _$MediaPlatformEnumMap = {
   MediaPlatform.epic: 'epic',
   MediaPlatform.ubisoft: 'ubisoft',
   MediaPlatform.humblebundle: 'humblebundle',
+  MediaPlatform.roblox: 'roblox',
   MediaPlatform.coinbase: 'coinbase',
   MediaPlatform.okx: 'okx',
   MediaPlatform.kraken: 'kraken',

@@ -198,6 +198,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "defaultText": MessageLookupByLibrary.simpleMessage("デフォルト"),
     "delay": MessageLookupByLibrary.simpleMessage("遅延"),
     "delaySort": MessageLookupByLibrary.simpleMessage("遅延順"),
+    "delayTestConcurrency": MessageLookupByLibrary.simpleMessage(
+      "URLテストの同時実行数",
+    ),
+    "delayTestConcurrencyTip": MessageLookupByLibrary.simpleMessage(
+      "0〜1000の数値を入力してください（0で無制限）",
+    ),
     "delete": MessageLookupByLibrary.simpleMessage("削除"),
     "deleteMultipTip": m1,
     "deleteTip": m2,
@@ -754,6 +760,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "ハンドシェイクなどの余分な遅延を削除",
     ),
     "unknown": MessageLookupByLibrary.simpleMessage("不明"),
+    "unlimitedConcurrency": MessageLookupByLibrary.simpleMessage("無制限"),
     "unlocked": MessageLookupByLibrary.simpleMessage("完了"),
     "unnamed": MessageLookupByLibrary.simpleMessage("無題"),
     "update": MessageLookupByLibrary.simpleMessage("更新"),

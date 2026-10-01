@@ -270,6 +270,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "defaultText": MessageLookupByLibrary.simpleMessage("По умолчанию"),
     "delay": MessageLookupByLibrary.simpleMessage("Задержка"),
     "delaySort": MessageLookupByLibrary.simpleMessage("Сортировка по задержке"),
+    "delayTestConcurrency": MessageLookupByLibrary.simpleMessage(
+      "Одновременные тесты URL",
+    ),
+    "delayTestConcurrencyTip": MessageLookupByLibrary.simpleMessage(
+      "Введите число от 0 до 1000; 0 — без лимита",
+    ),
     "delete": MessageLookupByLibrary.simpleMessage("Удалить"),
     "deleteMultipTip": m1,
     "deleteTip": m2,
@@ -1033,6 +1039,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Не учитывать дополнительные задержки (например, рукопожатие)",
     ),
     "unknown": MessageLookupByLibrary.simpleMessage("Неизвестно"),
+    "unlimitedConcurrency": MessageLookupByLibrary.simpleMessage("Без лимита"),
     "unlocked": MessageLookupByLibrary.simpleMessage("Завершено"),
     "unnamed": MessageLookupByLibrary.simpleMessage("Без имени"),
     "update": MessageLookupByLibrary.simpleMessage("Обновить"),

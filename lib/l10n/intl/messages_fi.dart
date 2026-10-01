@@ -155,6 +155,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "delaySort": MessageLookupByLibrary.simpleMessage(
       "Lajittele viiveen mukaan",
     ),
+    "delayTestConcurrency": MessageLookupByLibrary.simpleMessage(
+      "Samanaikaiset URL-testit",
+    ),
+    "delayTestConcurrencyTip": MessageLookupByLibrary.simpleMessage(
+      "Anna luku väliltä 0–1000; 0 poistaa rajan",
+    ),
     "delete": MessageLookupByLibrary.simpleMessage("Poista"),
     "detectionTip": MessageLookupByLibrary.simpleMessage(
       "Tiedot perustuvat kolmannen osapuolen palveluun ja ovat suuntaa antavia.",
@@ -486,6 +492,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "unavailable": MessageLookupByLibrary.simpleMessage("Ei saatavilla"),
     "unknown": MessageLookupByLibrary.simpleMessage("Tuntematon"),
+    "unlimitedConcurrency": MessageLookupByLibrary.simpleMessage(
+      "Rajoittamaton",
+    ),
     "unlocked": MessageLookupByLibrary.simpleMessage("Valmis"),
     "update": MessageLookupByLibrary.simpleMessage("Päivitä"),
     "updateAllGeoData": MessageLookupByLibrary.simpleMessage(

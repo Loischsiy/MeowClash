@@ -40,12 +40,24 @@ class AppController {
   final WidgetRef _ref;
   Future<void>? _groupsRefresh;
   int _profileGeneration = 0;
-  late final delayTests = DelayTestRunner(
-    probe: (target) => clashCore.getDelay(target.url, target.name),
+  late final DelayTestRunner delayTests = DelayTestRunner(
+    concurrency: delayTestConcurrency,
+    probe: (target) => clashCore.getDelay(target.url, target.name,
+        concurrency: delayTests.concurrency),
     onDelay: (delay) {
       if (context.mounted) setDelay(delay);
     },
   );
+
+  /// Effective URL-test limit: the user's setting, or the platform default
+  /// (higher on desktop). 0 = unlimited.
+  int get delayTestConcurrency => DelayTestRunner.resolve(
+        _ref.read(appSettingProvider).delayTestConcurrency,
+        isDesktop: system.isDesktop,
+      );
+
+  void applyDelayTestConcurrency() =>
+      delayTests.concurrency = delayTestConcurrency;
 
   ProxyDelaySnapshot getProxyDelaySnapshot() => ProxyDelaySnapshot(
         groups: _ref.read(proxyGroupsByNameProvider),

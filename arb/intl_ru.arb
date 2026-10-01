@@ -603,5 +603,8 @@
   "goRuntimeMemory": "Среда Go",
   "peakMemory": "Пик оболочки",
   "sharedProcessMemoryHint": "Ядро работает в процессе приложения, поэтому RSS оболочки включает ядро.",
-  "releaseMemory": "Освободить память"
+  "releaseMemory": "Освободить память",
+  "delayTestConcurrency": "Одновременные тесты URL",
+  "unlimitedConcurrency": "Без лимита",
+  "delayTestConcurrencyTip": "Введите число от 0 до 1000; 0 — без лимита"
 }

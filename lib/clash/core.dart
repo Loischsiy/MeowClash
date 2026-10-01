@@ -331,8 +331,10 @@ class ClashCore {
     await clashInterface.stopListener();
   }
 
-  Future<Delay> getDelay(String url, String proxyName) async {
-    final data = await clashInterface.asyncTestDelay(url, proxyName);
+  Future<Delay> getDelay(String url, String proxyName,
+      {int? concurrency}) async {
+    final data = await clashInterface.asyncTestDelay(url, proxyName,
+        concurrency: concurrency);
     return Delay.fromJson(json.decode(data));
   }
 

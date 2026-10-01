@@ -285,5 +285,8 @@
   "goRuntimeMemory": "Go-ajonaikainen",
   "peakMemory": "Kuoren huippu",
   "sharedProcessMemoryHint": "Ydin toimii sovelluksen prosessissa, joten kuoren RSS sisältää ytimen.",
-  "releaseMemory": "Vapauta muistia"
+  "releaseMemory": "Vapauta muistia",
+  "delayTestConcurrency": "Samanaikaiset URL-testit",
+  "unlimitedConcurrency": "Rajoittamaton",
+  "delayTestConcurrencyTip": "Anna luku väliltä 0–1000; 0 poistaa rajan"
 }

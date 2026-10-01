@@ -23,6 +23,7 @@ double getItemHeight(ProxyCardType proxyCardType) {
 Future<void> proxyDelayTest(Proxy proxy, [String? testUrl]) async {
   final appController = globalState.appController;
   final snapshot = appController.getProxyDelaySnapshot();
+  appController.applyDelayTestConcurrency();
   await appController.delayTests.test(snapshot.target(proxy.name, testUrl));
 }
 
@@ -39,7 +40,8 @@ Future<void> delayTestGroups(Iterable<Group> groups) {
 
 Future<void> _runDelayTargets(Iterable<DelayTestTarget> targets) async {
   final appController = globalState.appController;
-  final runner = appController.delayTests;
+  final runner = appController.delayTests
+    ..concurrency = appController.delayTestConcurrency;
   final generation = runner.generation;
   await runner.testAll(targets);
   if (generation != runner.generation || !appController.context.mounted) return;

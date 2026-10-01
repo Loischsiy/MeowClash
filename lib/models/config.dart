@@ -131,6 +131,8 @@ class AppSettingProps with _$AppSettingProps {
     @Default(false) bool openLogs,
     @Default(true) bool closeConnections,
     @Default(defaultTestUrl) String testUrl,
+    // Simultaneous URL tests; null = platform default, 0 = unlimited.
+    int? delayTestConcurrency,
     @Default(true) bool isAnimateToPage,
     @Default(true) bool autoCheckUpdate,
     @Default(false) bool showLabel,

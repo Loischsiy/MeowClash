@@ -13,49 +13,109 @@ import (
 	P "github.com/metacubex/mihomo/constant/provider"
 )
 
-func TestManualDelayConcurrency(t *testing.T) {
-	if manualDelayConcurrency != 10 || cap(manualDelaySlots) != 10 {
-		t.Fatalf("manual delay limit=%d, slots=%d; want 10", manualDelayConcurrency, cap(manualDelaySlots))
+func TestManualDelayDefaultLimit(t *testing.T) {
+	if defaultDelayConcurrency != 10 {
+		t.Fatalf("default manual delay limit=%d; want 10", defaultDelayConcurrency)
+	}
+	if limiter := newDelayLimiter(-5); limiter.limit != 0 {
+		t.Fatalf("negative limit=%d; want 0 (unlimited)", limiter.limit)
 	}
 }
 
-func TestDelaySlotsBoundConcurrency(t *testing.T) {
-	slots := make(chan struct{}, manualDelayConcurrency)
+func measureDelayLimiter(t *testing.T, limiter *delayLimiter, workers int) int32 {
+	t.Helper()
 	var active, maximum atomic.Int32
-	var workers sync.WaitGroup
-	for i := 0; i < 100; i++ {
-		workers.Add(1)
+	var group sync.WaitGroup
+	start := make(chan struct{})
+	for i := 0; i < workers; i++ {
+		group.Add(1)
 		go func() {
-			defer workers.Done()
-			if !acquireDelaySlot(context.Background(), slots) {
+			defer group.Done()
+			<-start
+			if !limiter.acquire(context.Background()) {
 				t.Error("acquire failed")
 				return
 			}
 			n := active.Add(1)
 			for old := maximum.Load(); n > old && !maximum.CompareAndSwap(old, n); old = maximum.Load() {
 			}
-			time.Sleep(time.Millisecond)
+			time.Sleep(5 * time.Millisecond)
 			active.Add(-1)
-			<-slots
+			limiter.release()
 		}()
 	}
-	workers.Wait()
-	if maximum.Load() > int32(manualDelayConcurrency) || len(slots) != 0 {
-		t.Fatalf("max=%d slots=%d", maximum.Load(), len(slots))
+	close(start)
+	group.Wait()
+	if limiter.active != 0 {
+		t.Fatalf("leaked %d slots", limiter.active)
+	}
+	return maximum.Load()
+}
+
+func TestDelayLimiterBoundsConcurrency(t *testing.T) {
+	if maximum := measureDelayLimiter(t, newDelayLimiter(10), 100); maximum > 10 {
+		t.Fatalf("max=%d; want <= 10", maximum)
 	}
 }
 
+func TestDelayLimiterUnlimited(t *testing.T) {
+	if maximum := measureDelayLimiter(t, newDelayLimiter(0), 50); maximum <= 10 {
+		t.Fatalf("max=%d; unlimited limiter still capped", maximum)
+	}
+}
+
+func TestDelayLimiterRaiseWakesQueuedTasks(t *testing.T) {
+	limiter := newDelayLimiter(1)
+	if !limiter.acquire(context.Background()) {
+		t.Fatal("first acquire failed")
+	}
+	acquired := make(chan bool, 1)
+	go func() { acquired <- limiter.acquire(context.Background()) }()
+	select {
+	case <-acquired:
+		t.Fatal("second task passed a full limiter")
+	case <-time.After(10 * time.Millisecond):
+	}
+	limiter.setLimit(2)
+	select {
+	case ok := <-acquired:
+		if !ok {
+			t.Fatal("queued task failed after raise")
+		}
+	case <-time.After(time.Second):
+		t.Fatal("raising the limit did not wake the queued task")
+	}
+	limiter.release()
+	limiter.release()
+}
+
 func TestDelayQueueHonorsDeadline(t *testing.T) {
-	slots := make(chan struct{}, 1)
-	slots <- struct{}{}
+	limiter := newDelayLimiter(1)
+	if !limiter.acquire(context.Background()) {
+		t.Fatal("first acquire failed")
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Millisecond)
 	defer cancel()
-	if acquireDelaySlot(ctx, slots) {
+	if limiter.acquire(ctx) {
 		t.Fatal("expired queued task acquired slot")
 	}
-	<-slots
-	if acquireDelaySlot(ctx, slots) {
+	limiter.release()
+	if limiter.acquire(ctx) {
 		t.Fatal("already expired task acquired a free slot")
+	}
+	if limiter.active != 0 {
+		t.Fatalf("leaked %d slots", limiter.active)
+	}
+}
+
+func TestDelayParamsConcurrencyIsOptional(t *testing.T) {
+	var absent, unlimited TestDelayParams
+	if err := json.Unmarshal([]byte(`{"proxy-name":"a"}`), &absent); err != nil || absent.Concurrency != nil {
+		t.Fatalf("absent concurrency: %v %v", err, absent.Concurrency)
+	}
+	if err := json.Unmarshal([]byte(`{"proxy-name":"a","concurrency":0}`), &unlimited); err != nil ||
+		unlimited.Concurrency == nil || *unlimited.Concurrency != 0 {
+		t.Fatalf("explicit unlimited: %v %v", err, unlimited.Concurrency)
 	}
 }
 

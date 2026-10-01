@@ -39,7 +39,9 @@ mixin _$AppSettingProps {
   bool get autoRun => throw _privateConstructorUsedError;
   bool get openLogs => throw _privateConstructorUsedError;
   bool get closeConnections => throw _privateConstructorUsedError;
-  String get testUrl => throw _privateConstructorUsedError;
+  String get testUrl =>
+      throw _privateConstructorUsedError; // Simultaneous URL tests; null = platform default, 0 = unlimited.
+  int? get delayTestConcurrency => throw _privateConstructorUsedError;
   bool get isAnimateToPage => throw _privateConstructorUsedError;
   bool get autoCheckUpdate => throw _privateConstructorUsedError;
   bool get showLabel => throw _privateConstructorUsedError;
@@ -86,6 +88,7 @@ abstract class $AppSettingPropsCopyWith<$Res> {
       bool openLogs,
       bool closeConnections,
       String testUrl,
+      int? delayTestConcurrency,
       bool isAnimateToPage,
       bool autoCheckUpdate,
       bool showLabel,
@@ -129,6 +132,7 @@ class _$AppSettingPropsCopyWithImpl<$Res, $Val extends AppSettingProps>
     Object? openLogs = null,
     Object? closeConnections = null,
     Object? testUrl = null,
+    Object? delayTestConcurrency = freezed,
     Object? isAnimateToPage = null,
     Object? autoCheckUpdate = null,
     Object? showLabel = null,
@@ -203,6 +207,10 @@ class _$AppSettingPropsCopyWithImpl<$Res, $Val extends AppSettingProps>
           ? _value.testUrl
           : testUrl // ignore: cast_nullable_to_non_nullable
               as String,
+      delayTestConcurrency: freezed == delayTestConcurrency
+          ? _value.delayTestConcurrency
+          : delayTestConcurrency // ignore: cast_nullable_to_non_nullable
+              as int?,
       isAnimateToPage: null == isAnimateToPage
           ? _value.isAnimateToPage
           : isAnimateToPage // ignore: cast_nullable_to_non_nullable
@@ -277,6 +285,7 @@ abstract class _$$AppSettingPropsImplCopyWith<$Res>
       bool openLogs,
       bool closeConnections,
       String testUrl,
+      int? delayTestConcurrency,
       bool isAnimateToPage,
       bool autoCheckUpdate,
       bool showLabel,
@@ -318,6 +327,7 @@ class __$$AppSettingPropsImplCopyWithImpl<$Res>
     Object? openLogs = null,
     Object? closeConnections = null,
     Object? testUrl = null,
+    Object? delayTestConcurrency = freezed,
     Object? isAnimateToPage = null,
     Object? autoCheckUpdate = null,
     Object? showLabel = null,
@@ -392,6 +402,10 @@ class __$$AppSettingPropsImplCopyWithImpl<$Res>
           ? _value.testUrl
           : testUrl // ignore: cast_nullable_to_non_nullable
               as String,
+      delayTestConcurrency: freezed == delayTestConcurrency
+          ? _value.delayTestConcurrency
+          : delayTestConcurrency // ignore: cast_nullable_to_non_nullable
+              as int?,
       isAnimateToPage: null == isAnimateToPage
           ? _value.isAnimateToPage
           : isAnimateToPage // ignore: cast_nullable_to_non_nullable
@@ -462,6 +476,7 @@ class _$AppSettingPropsImpl implements _AppSettingProps {
       this.openLogs = false,
       this.closeConnections = true,
       this.testUrl = defaultTestUrl,
+      this.delayTestConcurrency,
       this.isAnimateToPage = true,
       this.autoCheckUpdate = true,
       this.showLabel = false,
@@ -537,6 +552,9 @@ class _$AppSettingPropsImpl implements _AppSettingProps {
   @override
   @JsonKey()
   final String testUrl;
+// Simultaneous URL tests; null = platform default, 0 = unlimited.
+  @override
+  final int? delayTestConcurrency;
   @override
   @JsonKey()
   final bool isAnimateToPage;
@@ -573,7 +591,7 @@ class _$AppSettingPropsImpl implements _AppSettingProps {
 
   @override
   String toString() {
-    return 'AppSettingProps(locale: $locale, dashboardWidgets: $dashboardWidgets, pinnedMediaPlatforms: $pinnedMediaPlatforms, mediaUnlockMoreStreamingPlatforms: $mediaUnlockMoreStreamingPlatforms, mediaUnlockExtraDetails: $mediaUnlockExtraDetails, mediaUnlockRefreshOnNodeChange: $mediaUnlockRefreshOnNodeChange, mediaUnlockColorfulIcons: $mediaUnlockColorfulIcons, mediaUnlockRefreshByCategory: $mediaUnlockRefreshByCategory, onlyStatisticsProxy: $onlyStatisticsProxy, autoLaunch: $autoLaunch, silentLaunch: $silentLaunch, autoRun: $autoRun, openLogs: $openLogs, closeConnections: $closeConnections, testUrl: $testUrl, isAnimateToPage: $isAnimateToPage, autoCheckUpdate: $autoCheckUpdate, showLabel: $showLabel, disclaimerAccepted: $disclaimerAccepted, minimizeOnExit: $minimizeOnExit, hidden: $hidden, developerMode: $developerMode, overrideProviderSettings: $overrideProviderSettings, overrideNetworkSettings: $overrideNetworkSettings, chainMode: $chainMode, recoveryStrategy: $recoveryStrategy)';
+    return 'AppSettingProps(locale: $locale, dashboardWidgets: $dashboardWidgets, pinnedMediaPlatforms: $pinnedMediaPlatforms, mediaUnlockMoreStreamingPlatforms: $mediaUnlockMoreStreamingPlatforms, mediaUnlockExtraDetails: $mediaUnlockExtraDetails, mediaUnlockRefreshOnNodeChange: $mediaUnlockRefreshOnNodeChange, mediaUnlockColorfulIcons: $mediaUnlockColorfulIcons, mediaUnlockRefreshByCategory: $mediaUnlockRefreshByCategory, onlyStatisticsProxy: $onlyStatisticsProxy, autoLaunch: $autoLaunch, silentLaunch: $silentLaunch, autoRun: $autoRun, openLogs: $openLogs, closeConnections: $closeConnections, testUrl: $testUrl, delayTestConcurrency: $delayTestConcurrency, isAnimateToPage: $isAnimateToPage, autoCheckUpdate: $autoCheckUpdate, showLabel: $showLabel, disclaimerAccepted: $disclaimerAccepted, minimizeOnExit: $minimizeOnExit, hidden: $hidden, developerMode: $developerMode, overrideProviderSettings: $overrideProviderSettings, overrideNetworkSettings: $overrideNetworkSettings, chainMode: $chainMode, recoveryStrategy: $recoveryStrategy)';
   }
 
   @override
@@ -611,6 +629,8 @@ class _$AppSettingPropsImpl implements _AppSettingProps {
             (identical(other.closeConnections, closeConnections) ||
                 other.closeConnections == closeConnections) &&
             (identical(other.testUrl, testUrl) || other.testUrl == testUrl) &&
+            (identical(other.delayTestConcurrency, delayTestConcurrency) ||
+                other.delayTestConcurrency == delayTestConcurrency) &&
             (identical(other.isAnimateToPage, isAnimateToPage) ||
                 other.isAnimateToPage == isAnimateToPage) &&
             (identical(other.autoCheckUpdate, autoCheckUpdate) ||
@@ -622,8 +642,7 @@ class _$AppSettingPropsImpl implements _AppSettingProps {
             (identical(other.minimizeOnExit, minimizeOnExit) ||
                 other.minimizeOnExit == minimizeOnExit) &&
             (identical(other.hidden, hidden) || other.hidden == hidden) &&
-            (identical(other.developerMode, developerMode) ||
-                other.developerMode == developerMode) &&
+            (identical(other.developerMode, developerMode) || other.developerMode == developerMode) &&
             (identical(other.overrideProviderSettings, overrideProviderSettings) || other.overrideProviderSettings == overrideProviderSettings) &&
             (identical(other.overrideNetworkSettings, overrideNetworkSettings) || other.overrideNetworkSettings == overrideNetworkSettings) &&
             (identical(other.chainMode, chainMode) || other.chainMode == chainMode) &&
@@ -649,6 +668,7 @@ class _$AppSettingPropsImpl implements _AppSettingProps {
         openLogs,
         closeConnections,
         testUrl,
+        delayTestConcurrency,
         isAnimateToPage,
         autoCheckUpdate,
         showLabel,
@@ -698,6 +718,7 @@ abstract class _AppSettingProps implements AppSettingProps {
       final bool openLogs,
       final bool closeConnections,
       final String testUrl,
+      final int? delayTestConcurrency,
       final bool isAnimateToPage,
       final bool autoCheckUpdate,
       final bool showLabel,
@@ -744,7 +765,10 @@ abstract class _AppSettingProps implements AppSettingProps {
   @override
   bool get closeConnections;
   @override
-  String get testUrl;
+  String
+      get testUrl; // Simultaneous URL tests; null = platform default, 0 = unlimited.
+  @override
+  int? get delayTestConcurrency;
   @override
   bool get isAnimateToPage;
   @override

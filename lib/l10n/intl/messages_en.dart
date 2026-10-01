@@ -261,6 +261,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "defaultText": MessageLookupByLibrary.simpleMessage("Default"),
     "delay": MessageLookupByLibrary.simpleMessage("Delay"),
     "delaySort": MessageLookupByLibrary.simpleMessage("Sort by delay"),
+    "delayTestConcurrency": MessageLookupByLibrary.simpleMessage(
+      "Concurrent URL tests",
+    ),
+    "delayTestConcurrencyTip": MessageLookupByLibrary.simpleMessage(
+      "Enter a number from 0 to 1000; 0 removes the limit",
+    ),
     "delete": MessageLookupByLibrary.simpleMessage("Delete"),
     "deleteMultipTip": m1,
     "deleteTip": m2,
@@ -988,6 +994,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Remove extra delays such as handshaking",
     ),
     "unknown": MessageLookupByLibrary.simpleMessage("Unknown"),
+    "unlimitedConcurrency": MessageLookupByLibrary.simpleMessage("Unlimited"),
     "unlocked": MessageLookupByLibrary.simpleMessage("Completed"),
     "unnamed": MessageLookupByLibrary.simpleMessage("Unnamed"),
     "update": MessageLookupByLibrary.simpleMessage("Update"),

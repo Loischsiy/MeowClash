@@ -3,8 +3,11 @@
 Router: `AGENTS.md`. Non-obvious runtime contracts — breaking one looks like a UI bug, not a build
 failure.
 
-- **Manual delay tests** (`lib/services/delay_test_runner.dart`): one shared queue with concurrency
-  capped at **10** on every platform; single-node, group and all-group checks share that limit.
+- **Manual delay tests** (`lib/services/delay_test_runner.dart`): one shared queue; single-node, group
+  and all-group checks share its limit. Default **32** on Windows/macOS/Linux, **10** on Android/iOS;
+  `AppSettingProps.delayTestConcurrency` overrides it (`null` = platform default, `0` = unlimited,
+  max 1000). Each native request carries `concurrency`, and `core/delay.go` resizes its process-wide
+  limiter to match (requests without it keep the current limit, initially 10).
   Duplicate effective `(proxy, URL)` targets share in-flight work, and native tests have a **5 s**
   deadline that includes queue wait. Profile/core changes discard queued work and ignore late responses,
   settling any started loading indicator. Delay updates coalesce for **50 ms** and copy only changed URL

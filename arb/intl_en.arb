@@ -602,5 +602,8 @@
   "goRuntimeMemory": "Go runtime",
   "peakMemory": "Shell peak",
   "sharedProcessMemoryHint": "The core runs inside the app process, so the shell RSS includes the core.",
-  "releaseMemory": "Free memory"
+  "releaseMemory": "Free memory",
+  "delayTestConcurrency": "Concurrent URL tests",
+  "unlimitedConcurrency": "Unlimited",
+  "delayTestConcurrencyTip": "Enter a number from 0 to 1000; 0 removes the limit"
 }

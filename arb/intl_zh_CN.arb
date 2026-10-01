@@ -575,5 +575,8 @@
   "goRuntimeMemory": "Go 运行时",
   "peakMemory": "外壳峰值",
   "sharedProcessMemoryHint": "内核运行在应用进程内，因此外壳 RSS 包含内核。",
-  "releaseMemory": "释放内存"
+  "releaseMemory": "释放内存",
+  "delayTestConcurrency": "URL 测试并发数",
+  "unlimitedConcurrency": "无限制",
+  "delayTestConcurrencyTip": "请输入 0 到 1000 之间的数字，0 表示不限制"
 }

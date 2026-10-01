@@ -56,6 +56,9 @@ type TestDelayParams struct {
 	ProxyName string `json:"proxy-name"`
 	TestUrl   string `json:"test-url"`
 	Timeout   int64  `json:"timeout"`
+	// Concurrency is the shell's effective URL-test limit; 0 = unlimited,
+	// absent = keep the current limit.
+	Concurrency *int `json:"concurrency,omitempty"`
 }
 
 type ExternalProvider struct {

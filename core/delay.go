@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"sync"
 	"time"
 
 	"github.com/metacubex/mihomo/common/utils"
@@ -12,10 +13,12 @@ import (
 	"github.com/metacubex/mihomo/tunnel"
 )
 
-// Keep in sync with DelayTestRunner.defaultConcurrency in Flutter.
-const manualDelayConcurrency = 10
+// Ceiling for requests that do not carry "concurrency" (older shells).
+// Keep in sync with DelayTestRunner.mobileDefaultConcurrency in Flutter.
+// Flutter sends its effective limit with every request; 0 means unlimited.
+const defaultDelayConcurrency = 10
 
-var manualDelaySlots = make(chan struct{}, manualDelayConcurrency)
+var manualDelayLimiter = newDelayLimiter(defaultDelayConcurrency)
 var manualDelayProxies proxyLookupCache // guarded by runLock
 
 func delayTimeout(milliseconds int64) time.Duration {
@@ -25,20 +28,71 @@ func delayTimeout(milliseconds int64) time.Duration {
 	return time.Duration(milliseconds) * time.Millisecond
 }
 
-func acquireDelaySlot(ctx context.Context, slots chan struct{}) bool {
-	if ctx.Err() != nil {
-		return false
+// delayLimiter is a process-wide semaphore whose size can change while tests
+// are queued. A limit of 0 disables the ceiling.
+type delayLimiter struct {
+	mu      sync.Mutex
+	limit   int
+	active  int
+	changed chan struct{} // closed and replaced whenever a slot may be free
+}
+
+func newDelayLimiter(limit int) *delayLimiter {
+	return &delayLimiter{limit: nonNegative(limit), changed: make(chan struct{})}
+}
+
+func nonNegative(value int) int {
+	if value < 0 {
+		return 0
 	}
-	select {
-	case slots <- struct{}{}:
+	return value
+}
+
+func (l *delayLimiter) wakeLocked() {
+	close(l.changed)
+	l.changed = make(chan struct{})
+}
+
+func (l *delayLimiter) setLimit(limit int) {
+	limit = nonNegative(limit)
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	if l.limit != limit {
+		l.limit = limit
+		l.wakeLocked()
+	}
+}
+
+func (l *delayLimiter) acquire(ctx context.Context) bool {
+	for {
 		if ctx.Err() != nil {
-			<-slots
 			return false
 		}
-		return true
-	case <-ctx.Done():
-		return false
+		l.mu.Lock()
+		if l.limit == 0 || l.active < l.limit {
+			l.active++
+			l.mu.Unlock()
+			if ctx.Err() != nil {
+				l.release()
+				return false
+			}
+			return true
+		}
+		changed := l.changed
+		l.mu.Unlock()
+		select {
+		case <-changed:
+		case <-ctx.Done():
+			return false
+		}
 	}
+}
+
+func (l *delayLimiter) release() {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	l.active--
+	l.wakeLocked()
 }
 
 // The response belongs to the initiating request. Do not additionally send an
@@ -49,6 +103,9 @@ func handleAsyncTestDelay(paramsString string, fn func(string)) {
 	if err := json.Unmarshal([]byte(paramsString), &params); err != nil {
 		fn("")
 		return
+	}
+	if params.Concurrency != nil {
+		manualDelayLimiter.setLimit(*params.Concurrency)
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), delayTimeout(params.Timeout))
 	go func() {
@@ -66,10 +123,10 @@ func handleAsyncTestDelay(paramsString string, fn func(string)) {
 			data, _ := json.Marshal(result)
 			fn(string(data))
 		}()
-		if !acquireDelaySlot(ctx, manualDelaySlots) {
+		if !manualDelayLimiter.acquire(ctx) {
 			return
 		}
-		defer func() { <-manualDelaySlots }()
+		defer manualDelayLimiter.release()
 
 		proxy := lookupDelayProxy(params.ProxyName)
 		if proxy == nil || ctx.Err() != nil {

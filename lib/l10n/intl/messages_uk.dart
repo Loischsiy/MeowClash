@@ -277,6 +277,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "delaySort": MessageLookupByLibrary.simpleMessage(
       "Сортування за затримкою",
     ),
+    "delayTestConcurrency": MessageLookupByLibrary.simpleMessage(
+      "Одночасні тести URL",
+    ),
+    "delayTestConcurrencyTip": MessageLookupByLibrary.simpleMessage(
+      "Введіть число від 0 до 1000; 0 — без обмежень",
+    ),
     "delete": MessageLookupByLibrary.simpleMessage("Видалити"),
     "deleteMultipTip": m1,
     "deleteTip": m2,
@@ -1044,6 +1050,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Не враховувати додаткові затримки (наприклад, рукостискання)",
     ),
     "unknown": MessageLookupByLibrary.simpleMessage("Невідомо"),
+    "unlimitedConcurrency": MessageLookupByLibrary.simpleMessage(
+      "Без обмежень",
+    ),
     "unlocked": MessageLookupByLibrary.simpleMessage("Завершено"),
     "unnamed": MessageLookupByLibrary.simpleMessage("Без імені"),
     "update": MessageLookupByLibrary.simpleMessage("Оновити"),

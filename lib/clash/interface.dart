@@ -24,7 +24,8 @@ mixin ClashInterface {
 
   FutureOr<Result> getConfig(String path);
 
-  Future<String> asyncTestDelay(String url, String proxyName);
+  Future<String> asyncTestDelay(String url, String proxyName,
+      {int? concurrency});
 
   FutureOr<String> updateConfig(UpdateParams updateParams);
 
@@ -340,11 +341,14 @@ abstract class ClashHandlerInterface with ClashInterface {
     );
 
   @override
-  Future<String> asyncTestDelay(String url, String proxyName) {
+  Future<String> asyncTestDelay(String url, String proxyName,
+      {int? concurrency}) {
     final delayParams = {
       "proxy-name": proxyName,
       "timeout": httpTimeoutDuration.inMilliseconds,
       "test-url": url,
+      // The core resizes its process-wide queue to match; 0 = unlimited.
+      if (concurrency != null) "concurrency": concurrency,
     };
     return invoke<String>(
       method: ActionMethod.asyncTestDelay,

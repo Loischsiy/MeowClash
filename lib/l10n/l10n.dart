@@ -4528,6 +4528,36 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `Concurrent URL tests`
+  String get delayTestConcurrency {
+    return Intl.message(
+      'Concurrent URL tests',
+      name: 'delayTestConcurrency',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unlimited`
+  String get unlimitedConcurrency {
+    return Intl.message(
+      'Unlimited',
+      name: 'unlimitedConcurrency',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter a number from 0 to 1000; 0 removes the limit`
+  String get delayTestConcurrencyTip {
+    return Intl.message(
+      'Enter a number from 0 to 1000; 0 removes the limit',
+      name: 'delayTestConcurrencyTip',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

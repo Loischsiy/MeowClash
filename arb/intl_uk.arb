@@ -603,5 +603,8 @@
   "goRuntimeMemory": "Середовище Go",
   "peakMemory": "Пік оболонки",
   "sharedProcessMemoryHint": "Ядро працює в процесі застосунку, тому RSS оболонки містить ядро.",
-  "releaseMemory": "Звільнити пам'ять"
+  "releaseMemory": "Звільнити пам'ять",
+  "delayTestConcurrency": "Одночасні тести URL",
+  "unlimitedConcurrency": "Без обмежень",
+  "delayTestConcurrencyTip": "Введіть число від 0 до 1000; 0 — без обмежень"
 }

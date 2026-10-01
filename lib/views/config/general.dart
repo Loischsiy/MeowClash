@@ -4,6 +4,7 @@ import 'package:meowclash/common/common.dart';
 import 'package:meowclash/enum/enum.dart';
 import 'package:meowclash/models/models.dart';
 import 'package:meowclash/providers/providers.dart';
+import 'package:meowclash/services/delay_test_runner.dart';
 import 'package:meowclash/state.dart';
 import 'package:meowclash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
@@ -202,6 +203,55 @@ class KeepAliveIntervalItem extends ConsumerWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class DelayTestConcurrencyItem extends ConsumerWidget {
+  const DelayTestConcurrencyItem({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final configured = ref.watch(
+        appSettingProvider.select((state) => state.delayTestConcurrency));
+    final platformDefault =
+        DelayTestRunner.platformDefault(isDesktop: system.isDesktop);
+    final effective =
+        DelayTestRunner.resolve(configured, isDesktop: system.isDesktop);
+    final valueText = effective == DelayTestRunner.unlimited
+        ? appLocalizations.unlimitedConcurrency
+        : '$effective';
+    return ListItem.input(
+      leading: const Icon(Icons.speed_outlined),
+      title: Text(appLocalizations.delayTestConcurrency),
+      subtitle: Text(configured == null
+          ? '$valueText (${appLocalizations.defaultText})'
+          : valueText),
+      delegate: InputDelegate(
+        title: appLocalizations.delayTestConcurrency,
+        resetValue: '$platformDefault',
+        value: '$effective',
+        validator: (value) {
+          final intValue = int.tryParse(value?.trim() ?? '');
+          if (intValue == null ||
+              intValue < 0 ||
+              intValue > DelayTestRunner.maxConcurrency) {
+            return appLocalizations.delayTestConcurrencyTip;
+          }
+          return null;
+        },
+        onChanged: (value) {
+          final intValue = int.tryParse(value?.trim() ?? '');
+          if (intValue == null) return;
+          // Entering the platform default stores null so the default keeps
+          // following the platform.
+          final next = intValue == platformDefault ? null : intValue;
+          ref.read(appSettingProvider.notifier).updateState(
+                (state) => state.copyWith(delayTestConcurrency: next),
+              );
+          globalState.appController.applyDelayTestConcurrency();
+        },
+      ),
     );
   }
 }
@@ -699,6 +749,7 @@ final generalItems = <Widget>[
   const UaItem(),
   if (system.isDesktop) const KeepAliveIntervalItem(),
   const TestUrlItem(),
+  const DelayTestConcurrencyItem(),
   const PortItem(),
   const HostsItem(),
   const SendHeadersToggle(),

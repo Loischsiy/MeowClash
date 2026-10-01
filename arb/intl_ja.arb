@@ -575,5 +575,8 @@
   "goRuntimeMemory": "Goランタイム",
   "peakMemory": "シェルのピーク",
   "sharedProcessMemoryHint": "コアはアプリのプロセス内で動作するため、シェルのRSSにはコアが含まれます。",
-  "releaseMemory": "メモリを解放"
+  "releaseMemory": "メモリを解放",
+  "delayTestConcurrency": "URLテストの同時実行数",
+  "unlimitedConcurrency": "無制限",
+  "delayTestConcurrencyTip": "0〜1000の数値を入力してください（0で無制限）"
 }

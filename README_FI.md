@@ -48,6 +48,7 @@
 - **Lähtevän liikenteen tilat**: Tukee `Rule`-, `Global`- ja `Direct`-reititystä.
 - **Reaaliaikaiset tilastot**: Dynaamiset verkon nopeuskaaviot (lähetys/lataus) ja kokonaisliikenteen seuranta.
 - **Välityspalveluntarjoajan hallinta**: Lajittele välityspalvelinsolmut viiveen, nimen tai oletusasetusten mukaan.
+- **Samanaikaiset URL-testit**: 32 rinnakkaista viivetestiä Windowsissa, macOS:ssä ja Linuxissa, 10 Androidissa ja iOS:ssä; rajaa voi muuttaa asetuksissa, 0 poistaa sen.
 - **Yhteyksien automaattinen sulkeminen**: Katkaise aktiiviset yhteydet automaattisesti vaihtaessasi välityspalvelinsolmua.
 - **Välityspalvelinketjut (ketjutustila)**: Rakenna monivaiheisia ketjuja (sisääntulo → ulostulo), jotka reitittävät liikenteen usean välityspalvelimen kautta järjestyksessä `dialer-proxy`-asetuksella. Ota **ketjutustila** käyttöön suoraan Välityspalvelimet-sivulta, jotta kaikki liikenne kulkee valitun ketjun kautta tilaussääntöjen säilyessä ennallaan. Kun tila poistetaan käytöstä (tai kaikki ketjut poistetaan), sovellus palaa automaattisesti normaaliin tilaan.
 

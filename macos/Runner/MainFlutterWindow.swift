@@ -7,6 +7,17 @@ import LaunchAtLogin
 /// (lib/widgets/adaptive/adaptive_sidebar.dart) shows the desktop through the
 /// window, like Finder. Flutter paints opaque everywhere else, so the material
 /// is visible only where Dart leaves pixels transparent.
+///
+/// Layers, bottom to top:
+/// 1. `NSVisualEffectView(.sidebar, .behindWindow)` — blurred desktop; the
+///    only layer before macOS 26.
+/// 2. macOS 26+: `NSGlassEffectView` over it, so the sidebar follows
+///    System Settings › Appearance › Liquid Glass (Clear … Tinted) and
+///    Reduce Transparency like system sidebars do.
+/// 3. Transparent Flutter view (glass `contentView` on macOS 26+).
+///
+/// Compare with the old material: `defaults write com.meowclash.app
+/// MeowClashGlassBackdrop legacy` (delete the key to restore).
 final class GlassContainerViewController: NSViewController {
     let flutterViewController: FlutterViewController
 
@@ -29,9 +40,33 @@ final class GlassContainerViewController: NSViewController {
 
         addChild(flutterViewController)
         let flutterView = flutterViewController.view
-        flutterView.frame = material.bounds
         flutterView.autoresizingMask = [.width, .height]
-        material.addSubview(flutterView)
+
+        if let glass = Self.makeLiquidGlass(around: flutterView) {
+            glass.frame = material.bounds
+            glass.autoresizingMask = [.width, .height]
+            material.addSubview(glass)
+        } else {
+            flutterView.frame = material.bounds
+            material.addSubview(flutterView)
+        }
+    }
+
+    private static func makeLiquidGlass(around content: NSView) -> NSView? {
+        if UserDefaults.standard.string(forKey: "MeowClashGlassBackdrop") == "legacy" {
+            return nil
+        }
+        #if compiler(>=6.2)
+        if #available(macOS 26.0, *) {
+            let glass = NSGlassEffectView()
+            glass.style = .regular
+            // The window already clips to its own rounded corners.
+            glass.cornerRadius = 0
+            glass.contentView = content
+            return glass
+        }
+        #endif
+        return nil
     }
 }
 

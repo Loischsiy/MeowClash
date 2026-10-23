@@ -143,7 +143,7 @@
 ### 7. Нативное стекло окна macOS — PR `feat(macos): native glass window backdrop`
 - [x] `MainFlutterWindow.swift` — `FlutterViewController.backgroundColor = .clear`, под ним
       `NSVisualEffectView` (`.sidebar`, `.behindWindow`) в `GlassContainerViewController`.
-- [ ] на macOS 26 — `NSGlassEffectView`
+- [x] на macOS 26 — `NSGlassEffectView`
       под `#if compiler(>=6.2)` + `if #available(macOS 26, *)` (deployment target 11.0).
 - [ ] Reduce Transparency на macOS → AppKit сам делает материал непрозрачным; проверить, что Flutter-хром тоже.
 - [ ] Иконка строки меню — шаблонный SF Symbol (уже есть), стиль меню совпадает.
@@ -208,3 +208,7 @@
   analyze `lib test` 530 / 0 errors, `flutter test` 203 / 1 skipped.
 - 2026-10-24: владелец запустил свежую macOS-сборку — полупрозрачная боковая панель (нативный
   `NSVisualEffectView`) работает, светофор поверх панели, логотип под ним, контент непрозрачный (как задумано).
+- 2026-10-24: владелец: ползунок «Liquid Glass» (Настройки › Оформление) не влиял на панель — `NSVisualEffectView`
+  его не слушает. Добавлен `NSGlassEffectView` (macOS 26+, `#if compiler(>=6.2)`) поверх материала, Flutter — его
+  `contentView`; сравнить со старым: `defaults write com.meowclash.app MeowClashGlassBackdrop legacy`.
+  Проверено `swiftc -typecheck` (macOS 12 target); запуск — за владельцем.

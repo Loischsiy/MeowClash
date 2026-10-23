@@ -45,6 +45,7 @@
 
 ### ⚙️ Välityspalvelinydin (ClashMeta / mihomo)
 - **Tehokas ydin**: Käyttää tehokasta Go-pohjaista `mihomo`-ydintä.
+- **Outlinen Shadowsocks-etuliitteet**: Clash YAML -määrityksissä ja tuoduissa `ss://`-linkeissä tuetaan TCP-suolan etuliitettä (`prefix`) ja UDP-suolan etuliitettä (`udp-prefix`). Etuliitteet edellyttävät AEAD-salausta eivätkä toimi `2022-blake3-*`-salausten kanssa. Outline `ssconf://`-käyttöavaimia ei voi tuoda suoraan; muunna ne ensin Clash YAML -profiiliksi.
 - **Lähtevän liikenteen tilat**: Tukee `Rule`-, `Global`- ja `Direct`-reititystä.
 - **Reaaliaikaiset tilastot**: Dynaamiset verkon nopeuskaaviot (lähetys/lataus) ja kokonaisliikenteen seuranta.
 - **Välityspalveluntarjoajan hallinta**: Lajittele välityspalvelinsolmut viiveen, nimen tai oletusasetusten mukaan.

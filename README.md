@@ -45,6 +45,7 @@
 
 ### ⚙️ Proxy Engine (ClashMeta / mihomo)
 - **High-Performance Core**: Uses the powerful Go-based `mihomo` core under the hood.
+- **Outline Shadowsocks prefixes**: Supports TCP salt prefixes (`prefix`) and UDP salt prefixes (`udp-prefix`) in Clash YAML and imported `ss://` links. Prefixes require an AEAD cipher and are not supported with `2022-blake3-*` ciphers. Outline `ssconf://` access-key URLs are not imported directly; convert them to a Clash YAML profile first.
 - **Outbound Modes**: Supports `Rule`, `Global`, and `Direct` routing.
 - **Real-Time Statistics**: Dynamic network speed charts (Upload/Download) and overall traffic monitoring.
 - **Proxy Provider Controls**: Sort proxy nodes by delay, name, or default configuration.

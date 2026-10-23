@@ -45,6 +45,7 @@
 
 ### ⚙️ 代理引擎 (ClashMeta / mihomo)
 - **高性能内核**: 底层使用强大的 Go 语言编写的 `mihomo` 内核。
+- **Outline Shadowsocks 前缀**：Clash YAML 配置和导入的 `ss://` 链接支持 TCP 盐前缀 (`prefix`) 与 UDP 盐前缀 (`udp-prefix`)。前缀需要使用 AEAD 加密，不支持 `2022-blake3-*` 加密。Outline `ssconf://` 动态访问链接暂不支持直接导入，请先将其转换为 Clash YAML 配置。
 - **出站模式**: 支持「规则」(Rule)、「全局」(Global) 和「直连」(Direct) 路由模式。
 - **实时统计**: 动态网络速度图表（上传/下载）及总体流量监测。
 - **代理组控制**: 可按延迟、名称或默认配置对节点进行排序。

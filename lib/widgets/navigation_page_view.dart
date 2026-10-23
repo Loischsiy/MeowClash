@@ -27,15 +27,8 @@ class NavigationPageView extends StatefulWidget {
   State<NavigationPageView> createState() => _NavigationPageViewState();
 }
 
-class _NavigationPageViewState extends State<NavigationPageView>
-    with SingleTickerProviderStateMixin {
-  // Pages more than one step apart are reached with jumpToPage, so the
-  // destination fades in instead of appearing as a hard cut.
-  static const _fadeDuration = Duration(milliseconds: 220);
-
+class _NavigationPageViewState extends State<NavigationPageView> {
   late final PageController _controller;
-  late final AnimationController _fadeController;
-  late final Animation<double> _fade;
   int _navigationGeneration = 0;
 
   int get _index => max(0, min(widget.selectedIndex, widget.itemCount - 1));
@@ -44,12 +37,6 @@ class _NavigationPageViewState extends State<NavigationPageView>
   void initState() {
     super.initState();
     _controller = PageController(initialPage: _index);
-    _fadeController = AnimationController(
-      vsync: this,
-      duration: _fadeDuration,
-      value: 1,
-    );
-    _fade = _fadeController.drive(CurveTween(curve: Curves.easeOut));
   }
 
   @override
@@ -73,21 +60,20 @@ class _NavigationPageViewState extends State<NavigationPageView>
     if (current == target) return;
     final generation = _navigationGeneration;
     final animate = widget.animate && !MediaQuery.disableAnimationsOf(context);
-    if (animate && (current - target).abs() <= 1) {
+    if (animate) {
+      final diff = (current - target).abs();
+      // Cap long jumps at 700 ms so distant tabs don't feel slow.
+      final duration = Duration(
+        milliseconds:
+            (kTabScrollDuration.inMilliseconds * diff).clamp(300, 700).round(),
+      );
       await _controller.animateToPage(
         target,
-        duration: kTabScrollDuration,
-        curve: Curves.easeOut,
+        duration: duration,
+        curve: diff > 1 ? Curves.easeInOutCubic : Curves.easeOut,
       );
     } else {
-      // Scrolling across skipped pages would build every page in between,
-      // so keep the jump and fade the destination in.
       _controller.jumpToPage(target);
-      if (animate) {
-        unawaited(_fadeController.forward(from: 0));
-      } else {
-        _fadeController.value = 1;
-      }
     }
     if (mounted && generation == _navigationGeneration) {
       FocusManager.instance.primaryFocus?.unfocus();
@@ -97,7 +83,6 @@ class _NavigationPageViewState extends State<NavigationPageView>
   @override
   void dispose() {
     _navigationGeneration++;
-    _fadeController.dispose();
     _controller.dispose();
     super.dispose();
   }
@@ -134,6 +119,6 @@ class _NavigationPageViewState extends State<NavigationPageView>
         );
       },
     );
-    return FadeTransition(opacity: _fade, child: pageView);
+    return pageView;
   }
 }

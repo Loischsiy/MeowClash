@@ -36,19 +36,9 @@ class _TickerPageState extends State<_TickerPage>
       Center(child: Text('page-${widget.index}'));
 }
 
-double _fadeOpacity(WidgetTester tester) => tester
-    .widget<FadeTransition>(
-      find.descendant(
-        of: find.byType(NavigationPageView),
-        matching: find.byType(FadeTransition),
-      ),
-    )
-    .opacity
-    .value;
-
 void main() {
   testWidgets(
-      'far navigation builds no intermediate pages and stops hidden tickers',
+      'far navigation slides through intermediate pages and stops hidden tickers',
       (tester) async {
     final initialized = <int, int>{};
     final ticks = <int, int>{};
@@ -71,16 +61,25 @@ void main() {
     expect(initialized.keys, [0]);
     await tester.pumpWidget(host(4));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
-    expect(initialized.keys.toSet(), {0, 4});
+    await tester.pump(const Duration(milliseconds: 350));
+    final pageController =
+        tester.widget<PageView>(find.byType(PageView)).controller!;
+    expect(pageController.page, greaterThan(1));
+    expect(pageController.page, lessThan(4));
+    expect(initialized.keys, contains(2));
+    await tester.pump(const Duration(milliseconds: 350));
+    expect(pageController.page, closeTo(4, 0.001));
     final oldTicks = ticks[0];
-    final activeTicks = ticks[4]!;
+    final activeTicks = ticks[4] ?? 0;
     await tester.pump(const Duration(milliseconds: 100));
     expect(ticks[0], oldTicks);
     expect(ticks[4], greaterThan(activeTicks));
     await tester.pumpWidget(host(0));
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 800));
+    await tester.pump();
     expect(initialized[0], 1, reason: 'visited pages retain their state');
+    expect(pageController.page, closeTo(0, 0.001));
     expect(find.text('page-0'), findsOneWidget);
     await tester.pumpWidget(const SizedBox.shrink());
     expect(tester.takeException(), isNull);
@@ -109,7 +108,17 @@ void main() {
     expect(position, lessThan(1));
     await tester.pumpWidget(host(3));
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 40));
+    final interruptedPosition =
+        tester.widget<PageView>(find.byType(PageView)).controller!.page!;
+    expect(interruptedPosition, greaterThan(position));
+    expect(interruptedPosition, lessThan(3));
     await tester.pumpWidget(host(1));
+    await tester.pump();
+    expect(
+      tester.widget<PageView>(find.byType(PageView)).controller!.page,
+      closeTo(interruptedPosition, 0.05),
+    );
     await tester.pumpAndSettle();
     expect(find.text('page-1'), findsOneWidget);
     await tester.pumpWidget(host(99, count: 2));
@@ -138,7 +147,7 @@ void main() {
   });
 
   testWidgets(
-      'far navigation fades the destination in unless animation is disabled',
+      'long navigation slides without fading and disabled animation jumps',
       (tester) async {
     Widget host(int index, {bool animate = true}) => MaterialApp(
             home: Scaffold(
@@ -152,19 +161,26 @@ void main() {
         )));
     await tester.pumpWidget(host(0));
     await tester.pumpAndSettle();
-    expect(_fadeOpacity(tester), 1);
-    await tester.pumpWidget(host(3));
+    expect(
+        find.descendant(
+          of: find.byType(NavigationPageView),
+          matching: find.byType(FadeTransition),
+        ),
+        findsNothing);
+    await tester.pumpWidget(host(2));
     await tester.pump(); // Run the post-frame jump before the clock advances.
-    await tester.pump(const Duration(milliseconds: 40));
-    expect(find.text('page-3'), findsOneWidget);
-    expect(_fadeOpacity(tester), greaterThan(0));
-    expect(_fadeOpacity(tester), lessThan(1));
-    await tester.pumpAndSettle();
-    expect(_fadeOpacity(tester), 1);
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(tester.widget<PageView>(find.byType(PageView)).controller!.page,
+        closeTo(1, 0.05));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('page-2'), findsOneWidget);
+    expect(tester.widget<PageView>(find.byType(PageView)).controller!.page,
+        closeTo(2, 0.001));
     await tester.pumpWidget(host(0, animate: false));
     await tester.pump();
     expect(find.text('page-0'), findsOneWidget);
-    expect(_fadeOpacity(tester), 1);
+    expect(tester.widget<PageView>(find.byType(PageView)).controller!.page,
+        closeTo(0, 0.001));
     expect(tester.takeException(), isNull);
   });
 }

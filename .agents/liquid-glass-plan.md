@@ -100,7 +100,7 @@
 - [x] `lib/manager/window_manager.dart` — подписка `windowManager.addListener` и на macOS;
       `WindowHeaderContainer` на macOS даёт drag-область высотой `kHeaderHeight` без своих кнопок.
 - [x] `lib/application.dart` — убрать `FittedBox` 500×800 для macOS.
-- [ ] `lib/pages/home.dart` — логотип в боковой панели на macOS (или оставить скрытым под светофором — решить по виду).
+- [x] `lib/pages/home.dart` — логотип в боковой панели на macOS: виден под светофором, оставлен (скриншот владельца 2026-10-24).
 - [x] `test/statusbar_visibility_test.dart` — обновить под окно (сейчас моделирует popover).
 - [x] Документация: `.agents/platform-gotchas.md` (раздел macOS); в `runtime-contracts.md` и README popover не упоминался.
 - Готово, когда: окно открывается/прячется из иконки и Dock, Cmd+Q/Cmd+W/Cmd+H работают,
@@ -206,3 +206,5 @@
   **Не запускать CLI-сборку iOS, пока проект открыт в Xcode:** Flutter перегенерирует SwiftPM-пакет плагинов,
   и Xcode 27.1 падает с ассертом `IDEContainer _retainedContainerAtFilePath` (случилось 02:37).
   analyze `lib test` 530 / 0 errors, `flutter test` 203 / 1 skipped.
+- 2026-10-24: владелец запустил свежую macOS-сборку — полупрозрачная боковая панель (нативный
+  `NSVisualEffectView`) работает, светофор поверх панели, логотип под ним, контент непрозрачный (как задумано).

@@ -2,12 +2,23 @@
 
 All notable changes to **MeowClash** will be documented in this file.
 
+## [v1.1.2]
+
+### ✨ New Features
+- **Meta AI Check**: Added Meta AI to the AI category. The status is Meta AI's own access verdict for this node (allowed, blocked by country, or anti-abuse limited), and the country shown is the exit country from Cloudflare's trace.
+- **Outline Shadowsocks Prefixes**: Added support for TCP salt prefixes (`prefix`) and UDP salt prefixes (`udp-prefix`) in Clash YAML and imported `ss://` links. Prefixes require an AEAD cipher and are not supported with `2022-blake3-*` ciphers. Outline `ssconf://` access-key URLs must first be converted to a Clash YAML profile.
+
+### 🚀 Improvements
+- **Core**: Updated mihomo proxy engine to version 1.19.33 and refreshed Go dependencies.
+
+### 🧹 Internal
+- Added a core regression test for Shadowsocks TCP salt prefixes and refreshed the Nix vendor hash.
+
 ## [v1.1.1]
 
 ### ✨ New Features
 - **Site Availability Widget**: Added dashboard cards and a full categorized page (ported from Bettbox) that check AI, streaming, social, developer, gaming, and crypto services through the current node. Blocked or unreachable sites show a block icon and "Unavailable" instead of latency; checks run only while the core is running and pause in the background.
 - **Roblox Check**: Added Roblox to the Gaming category with latency to the Roblox gateway (`www.roblox.com`) and the exit country as seen by Roblox's Cloudflare-fronted help centre.
-- **Meta AI Check**: Added Meta AI to the AI category. The status is Meta AI's own access verdict for this node (allowed, blocked by country, or anti-abuse limited), and the country shown is the exit country from Cloudflare's trace.
 - **Core Status Dialog**: Tapping the memory card now opens a core status dialog (ported from Bettbox) with a memory ring, allocated/reclaimable memory, goroutines, heap objects, rule/proxy/provider counts, GEO usage, and separate Flutter shell and core RAM stats. It polls only while open and in the foreground, and manual GC moved from the card tap into the dialog.
 - **URL-Test Concurrency Setting**: Added a General setting to change how many proxy delay tests run in parallel (0 = unlimited, up to 1000); the Go core limiter now follows the value sent with each request.
 

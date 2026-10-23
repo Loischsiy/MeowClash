@@ -19,8 +19,8 @@ class Tray {
     required bool isRunning,
     bool force = false,
   }) async {
-    if (Platform.isAndroid || Platform.isMacOS) {
-      // Skip tray on Android and macOS (macOS uses native status bar)
+    if (Platform.isAndroid || Platform.isIOS || Platform.isMacOS) {
+      // Skip tray on mobile and macOS (macOS uses native status bar)
       return;
     }
     if (Platform.isLinux || force) {
@@ -45,8 +45,8 @@ class Tray {
     required TrayState trayState,
     bool focus = false,
   }) async {
-    if (Platform.isAndroid || Platform.isMacOS) {
-      // Skip tray on Android and macOS (macOS uses native status bar)
+    if (Platform.isAndroid || Platform.isIOS || Platform.isMacOS) {
+      // Skip tray on mobile and macOS (macOS uses native status bar)
       return;
     }
     if (!Platform.isLinux) {

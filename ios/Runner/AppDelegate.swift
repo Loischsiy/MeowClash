@@ -1,19 +1,27 @@
 import Flutter
 import UIKit
 
+// UIScene lifecycle (required since iOS 27 — without it UIKit traps in
+// _UIApplicationEvaluateRuntimeIssueForNoSceneLifecycleAdoption at launch).
+// Info.plist declares FlutterSceneDelegate; the FlutterViewController from
+// Main.storyboard creates the engine implicitly, and plugins plus our own
+// channels are registered in didInitializeImplicitFlutterEngine, because
+// `window` is nil in didFinishLaunching under the scene lifecycle.
 @main
-@objc class AppDelegate: FlutterAppDelegate {
+@objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
     private var iosService: IOSService?
     private var glassAccessibilityChannel: FlutterMethodChannel?
 
     override func application(_ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        GeneratedPluginRegistrant.register(with: self)
-        if let controller = window?.rootViewController as? FlutterViewController {
-            iosService = IOSService(messenger: controller.binaryMessenger)
-            setupGlassAccessibilityChannel(messenger: controller.binaryMessenger)
-        }
         return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+    }
+
+    func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
+        GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
+        let messenger = engineBridge.applicationRegistrar.messenger()
+        iosService = IOSService(messenger: messenger)
+        setupGlassAccessibilityChannel(messenger: messenger)
     }
 
     // Mirrors Reduce Transparency / Reduce Motion / Increase Contrast to the

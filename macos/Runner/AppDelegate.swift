@@ -4,45 +4,29 @@ import window_ext
 import LaunchAtLogin
 
 @main
-class AppDelegate: FlutterAppDelegate, NSPopoverDelegate {
+class AppDelegate: FlutterAppDelegate {
     var statusBarController: StatusBarController?
     private var statusBarChannel: FlutterMethodChannel?
     private var glassAccessibilityChannel: FlutterMethodChannel?
     
-    var flutterUIPopover = NSPopover.init()
-    
-    override init() {
-        super.init()
-        flutterUIPopover.behavior = NSPopover.Behavior.transient
-        flutterUIPopover.delegate = self
-    }
-    
+    // MeowClash is a regular window app (Dock icon + app menu) with an extra
+    // menu bar icon. The window starts hidden (`hiddenWindowAtLaunch`) and Dart
+    // shows it unless silent launch is enabled (lib/controller.dart).
     override func applicationDidFinishLaunching(_ aNotification: Notification) {
         NSLog("AppDelegate: applicationDidFinishLaunching called")
         
         setupCoreInApplicationSupport()
-        
         
         guard let mainController = mainFlutterWindow?.contentViewController as? FlutterViewController else {
             NSLog("ERROR: Could not get FlutterViewController from mainFlutterWindow")
             return
         }
         
-        
-        let popoverContainer = PopoverContainerViewController(flutterViewController: mainController)
-        
-        flutterUIPopover.contentSize = NSSize(width: 375, height: 600)
-        
-        flutterUIPopover.contentViewController = popoverContainer
-        
-        statusBarController = StatusBarController.init(flutterUIPopover)
-        
         setupStatusBarChannel(flutterViewController: mainController)
         setupGlassAccessibilityChannel(flutterViewController: mainController)
+        setupAppVisibilityObservers()
         
         super.applicationDidFinishLaunching(aNotification)
-        
-        mainFlutterWindow?.close()
     }
     
     func setupStatusBarChannel(flutterViewController: FlutterViewController) {
@@ -52,10 +36,11 @@ class AppDelegate: FlutterAppDelegate, NSPopoverDelegate {
         )
         
         statusBarChannel = channel
+        statusBarController = StatusBarController(window: mainFlutterWindow, channel: channel)
         channel.setMethodCallHandler { [weak self] (call: FlutterMethodCall, result: @escaping FlutterResult) in
             switch call.method {
             case "isVisible":
-                result(self?.flutterUIPopover.isShown ?? false)
+                result(self?.statusBarController?.isWindowVisible ?? false)
             case "updateIcon":
                 if let args = call.arguments as? [String: Any],
                    let isConnected = args["isConnected"] as? Bool {
@@ -144,15 +129,28 @@ class AppDelegate: FlutterAppDelegate, NSPopoverDelegate {
         return (a << 24) | (r << 16) | (g << 8) | b
     }
 
-    // NSPopover closes automatically on outside clicks/Escape as well as via
-    // the status item. Its delegate covers all paths; the original Flutter
-    // window is closed and cannot be used as a visibility signal.
-    func popoverWillShow(_ notification: Notification) {
-        statusBarChannel?.invokeMethod("visibilityChanged", arguments: true)
+    // Cmd+H hides the whole app without any window event reaching
+    // window_manager, so report it to the UI lifecycle directly. The window
+    // delegate belongs to window_manager; never replace it here.
+    func setupAppVisibilityObservers() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(applicationVisibilityDidChange),
+            name: NSApplication.didHideNotification,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(applicationVisibilityDidChange),
+            name: NSApplication.didUnhideNotification,
+            object: nil
+        )
     }
 
-    func popoverDidClose(_ notification: Notification) {
-        statusBarChannel?.invokeMethod("visibilityChanged", arguments: false)
+    @objc func applicationVisibilityDidChange(_ notification: Notification) {
+        let visible = notification.name == NSApplication.didUnhideNotification
+            && (statusBarController?.isWindowVisible ?? false)
+        statusBarChannel?.invokeMethod("visibilityChanged", arguments: visible)
     }
 
     func setupCoreInApplicationSupport() {
@@ -255,11 +253,12 @@ class AppDelegate: FlutterAppDelegate, NSPopoverDelegate {
       return true
     }
     
+    // Dock click or a second launch from Finder while the window is hidden or
+    // minimized: show it the same way the menu bar icon does.
     override func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
         if !flag, let controller = statusBarController {
-            if !flutterUIPopover.isShown {
-                controller.showPopover(self)
-            }
+            controller.showWindow()
+            return false
         }
         return true
     }

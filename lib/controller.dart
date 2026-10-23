@@ -1214,13 +1214,11 @@ class AppController {
       commonPrint.log("AppController: Starting auto-check update...");
       unawaited(autoCheckUpdate());
 
-      if (!Platform.isMacOS) {
-        commonPrint.log("AppController: Handling window visibility...");
-        if (!_ref.read(appSettingProvider).silentLaunch) {
-          window?.show();
-        } else {
-          window?.hide();
-        }
+      commonPrint.log("AppController: Handling window visibility...");
+      if (!_ref.read(appSettingProvider).silentLaunch) {
+        window?.show();
+      } else {
+        window?.hide();
       }
 
       commonPrint.log("AppController: Handling preferences...");
@@ -1239,7 +1237,7 @@ class AppController {
       // The Linux runner no longer shows the window natively at startup (see
       // linux/my_application.cc) — visibility is decided here in Dart. Make
       // sure a failed init doesn't leave the app invisible.
-      if (!Platform.isMacOS && !_ref.read(appSettingProvider).silentLaunch) {
+      if (!_ref.read(appSettingProvider).silentLaunch) {
         window?.show();
       }
     }
@@ -1562,8 +1560,6 @@ class AppController {
   }
 
   Future<void> updateVisible() async {
-    if (Platform.isMacOS) return;
-
     final visible = await window?.isVisible;
     if (visible != null && !visible) {
       window?.show();

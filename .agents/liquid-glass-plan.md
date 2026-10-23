@@ -83,25 +83,26 @@
 - Готово, когда: analyze `lib test` без новых диагностик, все тесты зелёные, goldens закоммичены.
 
 ### 2. macOS: обычное окно вместо popover — PR `feat(macos): run as a regular window`
-- [ ] `macos/Runner/Info.plist` — убрать `LSUIElement` (иконка в Dock, системное меню приложения).
-- [ ] `macos/Runner/AppDelegate.swift` — убрать `NSPopover`/`PopoverContainerViewController`;
+- [x] `macos/Runner/Info.plist` — убрать `LSUIElement` (иконка в Dock, системное меню приложения).
+- [x] `macos/Runner/AppDelegate.swift` — убрать `NSPopover`/`PopoverContainerViewController`;
       не закрывать главное окно на старте; `applicationShouldHandleReopen` → показать окно;
       канал `status_bar_icon`: `isVisible` = видимость окна, `visibilityChanged` из
       `NSWindowDelegate` (miniaturize/occlusion/close→hide).
-- [ ] `macos/Runner/StatusBarController.swift` — левый клик: показать/спрятать окно
+- [x] `macos/Runner/StatusBarController.swift` — левый клик: показать/спрятать окно
       (`NSApp.activate` + `makeKeyAndOrderFront`); правый клик: меню «Показать MeowClash», «Выход».
-- [ ] `macos/Runner/MainFlutterWindow.swift` — `fullSizeContentView`, `titlebarAppearsTransparent`,
-      `titleVisibility = .hidden`, unified `NSToolbar` (светофор сдвигается как в нативных приложениях),
-      минимальный размер как в `Window.init`.
-- [ ] `lib/common/window.dart` — macOS через `windowManager` (размер/позиция/`setPreventClose`),
+- [x] `macos/Runner/MainFlutterWindow.swift` — `fullSizeContentView`, `titlebarAppearsTransparent`,
+      `titleVisibility = .hidden`, минимальный размер как в `Window.init`.
+      **Отложено в шаг 4/7:** unified `NSToolbar` — вместе с `AdaptiveAppBar`; пока заголовок 28 pt = `kHeaderHeight`.
+- [x] Window › Close (Cmd+W, `performClose:`) в `MainMenu.xib` — раньше пункта не было.
+- [x] `lib/common/window.dart` — macOS через `windowManager` (размер/позиция/`setPreventClose`),
       как на других десктопах; `show/hide/isVisible` перестают быть no-op.
-- [ ] `lib/controller.dart` — убрать macOS-исключения вокруг `window?.show()/hide()`, `updateVisible`.
-- [ ] `lib/manager/window_manager.dart` — подписка `windowManager.addListener` и на macOS;
+- [x] `lib/controller.dart` — убрать macOS-исключения вокруг `window?.show()/hide()`, `updateVisible`.
+- [x] `lib/manager/window_manager.dart` — подписка `windowManager.addListener` и на macOS;
       `WindowHeaderContainer` на macOS даёт drag-область высотой `kHeaderHeight` без своих кнопок.
-- [ ] `lib/application.dart` — убрать `FittedBox` 500×800 для macOS.
+- [x] `lib/application.dart` — убрать `FittedBox` 500×800 для macOS.
 - [ ] `lib/pages/home.dart` — логотип в боковой панели на macOS (или оставить скрытым под светофором — решить по виду).
-- [ ] `test/statusbar_visibility_test.dart` — обновить под окно (сейчас моделирует popover).
-- [ ] Документация: `.agents/platform-gotchas.md` / `.agents/runtime-contracts.md` (macOS теперь окно), 6 README, если там описан popover.
+- [x] `test/statusbar_visibility_test.dart` — обновить под окно (сейчас моделирует popover).
+- [x] Документация: `.agents/platform-gotchas.md` (раздел macOS); в `runtime-contracts.md` и README popover не упоминался.
 - Готово, когда: окно открывается/прячется из иконки и Dock, Cmd+Q/Cmd+W/Cmd+H работают,
   `silentLaunch` прячет окно, UI на ширине >600 переключается в режим с боковой панелью.
 
@@ -176,3 +177,10 @@
   из App Store, затем `xcode-select -s /Applications/Xcode.app` и `xcodebuild -runFirstLaunch` (от администратора).
   Для симулятора iOS: `ios/build_core.sh` собирает ядро только под `iphoneos arm64`, а VPN (PacketTunnel)
   в симуляторе не работает — для проверки UI нужен отдельный dev-путь (см. шаг 9).
+- 2026-10-24: Xcode 27.1 установлен. Шаг 2 — код готов: обычное окно + Dock, иконка строки меню
+  просит Dart показать/спрятать окно (`showWindow`/`hideWindow`, нативный фолбэк), Cmd+W добавлен.
+  Проверено: `analyze lib test` 530 / 0 errors, `flutter test` 199 / 1 skipped, Swift `-typecheck`
+  против `FlutterMacOS.framework` (плагины заглушены). **Не проверено запуском:** `flutter build macos`
+  из песочницы агента не идёт (нет записи в `~/Library` → SwiftPM не компилирует манифест `LaunchAtLogin`).
+  Нужен прогон владельцем. Найдено попутно: Xcode 27 отвергает `MACOSX_DEPLOYMENT_TARGET = 11.0`
+  (минимум 12.0) — решение за владельцем. Логотип в боковой панели — решить после просмотра.

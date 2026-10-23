@@ -2,128 +2,148 @@ import AppKit
 import Cocoa
 import FlutterMacOS
 
-class PopoverContainerViewController: NSViewController {
-    let flutterViewController: FlutterViewController
-    
-    init(flutterViewController: FlutterViewController) {
-        self.flutterViewController = flutterViewController
-        super.init(nibName: nil, bundle: nil)
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-    override func loadView() {
-        self.view = NSView(frame: NSRect(x: 0, y: 0, width: 375, height: 600))
-                
-        addChild(flutterViewController)
-        flutterViewController.view.frame = self.view.bounds
-        flutterViewController.view.autoresizingMask = [.width, .height]
-        self.view.addSubview(flutterViewController.view)
-    }
-}
+/// Menu bar icon of the regular MeowClash window.
+///
+/// Left click shows or hides the window, right click opens a small menu.
+/// Showing and hiding go through Dart (`status_bar_icon` channel,
+/// `lib/common/statusbar.dart`) so render suspension, the Dock icon and the UI
+/// lifecycle follow the same path as the tray on Windows/Linux. When Dart does
+/// not answer (an older Dart bundle during development) the window is toggled
+/// natively instead.
+class StatusBarController: NSObject {
+    private let statusItem: NSStatusItem
+    private weak var window: NSWindow?
+    private let channel: FlutterMethodChannel
+    private let contextMenu = NSMenu()
 
-class StatusBarController {
-    private var statusBar: NSStatusBar
-    private var statusItem: NSStatusItem
-    private var popover: NSPopover
-    private var contextMenu: NSMenu?
-    
-    init(_ popover: NSPopover) {
-        self.popover = popover
-        statusBar = NSStatusBar.system
-        statusItem = statusBar.statusItem(withLength: NSStatusItem.squareLength)
-        
-        
-        if let statusBarButton = statusItem.button {
-            
-            if let icon = NSImage(systemSymbolName: "xmark.rectangle", accessibilityDescription: "MeowClash") {
-                let config = NSImage.SymbolConfiguration(scale: .large)
-                let configuredIcon = icon.withSymbolConfiguration(config)
-                statusBarButton.image = configuredIcon
-                statusBarButton.image?.isTemplate = true
-            }
-            
-            statusBarButton.action = #selector(togglePopover(sender:))
-            statusBarButton.target = self
-            
-            statusBarButton.sendAction(on: [.leftMouseUp, .rightMouseUp])
+    init(window: NSWindow?, channel: FlutterMethodChannel) {
+        self.window = window
+        self.channel = channel
+        statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
+        super.init()
+
+        if let button = statusItem.button {
+            button.image = StatusBarController.icon(isVpnConnected: false)
+            button.action = #selector(statusItemClicked(_:))
+            button.target = self
+            button.sendAction(on: [.leftMouseUp, .rightMouseUp])
         } else {
             NSLog("StatusBarController: ERROR - Could not get status bar button!")
         }
-        
+
         setupContextMenu()
     }
-    
+
     private func setupContextMenu() {
-        let menu = NSMenu()
-        
+        let showItem = NSMenuItem(
+            title: "Show MeowClash",
+            action: #selector(showWindowFromMenu),
+            keyEquivalent: ""
+        )
+        showItem.target = self
+        contextMenu.addItem(showItem)
+        contextMenu.addItem(NSMenuItem.separator())
+
         let quitItem = NSMenuItem(
             title: "Quit MeowClash",
             action: #selector(quitApp),
             keyEquivalent: "q"
         )
         quitItem.target = self
-        menu.addItem(quitItem)
-        
-        contextMenu = menu
-        NSLog("StatusBarController: Context menu created")
+        contextMenu.addItem(quitItem)
     }
-    
-    @objc func togglePopover(sender: AnyObject) {
-        if let event = NSApp.currentEvent {
-            if event.type == .rightMouseUp {
-                showContextMenu()
-                return
+
+    @objc func statusItemClicked(_ sender: AnyObject?) {
+        if let event = NSApp.currentEvent, event.type == .rightMouseUp {
+            showContextMenu()
+            return
+        }
+        toggleWindow()
+    }
+
+    /// Frontmost means the user is looking at the window right now: visible,
+    /// not in the Dock and the app is active. A window hidden behind other
+    /// apps is brought forward instead of being hidden.
+    var isWindowFrontmost: Bool {
+        guard let window = window else { return false }
+        return window.isVisible && !window.isMiniaturized && NSApp.isActive
+    }
+
+    var isWindowVisible: Bool {
+        guard let window = window else { return false }
+        return window.isVisible && !window.isMiniaturized
+    }
+
+    func toggleWindow() {
+        if isWindowFrontmost {
+            hideWindow()
+        } else {
+            showWindow()
+        }
+    }
+
+    func showWindow() {
+        request("showWindow") { [weak self] in self?.showWindowNatively() }
+    }
+
+    func hideWindow() {
+        request("hideWindow") { [weak self] in self?.hideWindowNatively() }
+    }
+
+    private func request(_ method: String, fallback: @escaping () -> Void) {
+        channel.invokeMethod(method, arguments: nil) { result in
+            let unanswered = (result as AnyObject?) === FlutterMethodNotImplemented
+            if unanswered || result is FlutterError {
+                fallback()
             }
         }
-        
-        if(popover.isShown) {
-            hidePopover(sender)
-        }
-        else {
-            showPopover(sender)
-        }
     }
-    
+
+    private func showWindowNatively() {
+        guard let window = window else { return }
+        NSApp.setActivationPolicy(.regular)
+        if window.isMiniaturized {
+            window.deminiaturize(nil)
+        }
+        window.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
+        channel.invokeMethod("visibilityChanged", arguments: true)
+    }
+
+    private func hideWindowNatively() {
+        window?.orderOut(nil)
+        channel.invokeMethod("visibilityChanged", arguments: false)
+    }
+
     private func showContextMenu() {
-        if let menu = contextMenu, let button = statusItem.button {
-            statusItem.menu = menu
-            button.performClick(nil)
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                self.statusItem.menu = nil
-            }
+        guard let button = statusItem.button else { return }
+        statusItem.menu = contextMenu
+        button.performClick(nil)
+        // Keep left click as a toggle: the menu is attached only for this click.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            self.statusItem.menu = nil
         }
     }
-    
+
+    @objc func showWindowFromMenu() {
+        showWindow()
+    }
+
     @objc func quitApp() {
-        NSLog("StatusBarController: Quit requested")
         NSApplication.shared.terminate(nil)
     }
-    
-    func showPopover(_ sender: AnyObject) {
-        if let statusBarButton = statusItem.button {
-            popover.show(relativeTo: statusBarButton.bounds, of: statusBarButton, preferredEdge: NSRectEdge.maxY)
-            popover.contentViewController?.view.window?.makeKey()
-        }
-    }
-    
-    func hidePopover(_ sender: AnyObject) {
-        popover.performClose(sender)
-    }
-    
-    func updateIcon(isVpnConnected: Bool) {
-        if let button = statusItem.button {
-            let imageName = isVpnConnected ? "checkmark.rectangle.fill" : "xmark.rectangle"
-            if let icon = NSImage(systemSymbolName: imageName, accessibilityDescription: "MeowClash") {
-                let config = NSImage.SymbolConfiguration(scale: .large)
-                let configuredIcon = icon.withSymbolConfiguration(config)
-                button.image = configuredIcon
-                button.image?.isTemplate = true
-            }
-        }
-    }
-    
 
+    func updateIcon(isVpnConnected: Bool) {
+        statusItem.button?.image = StatusBarController.icon(isVpnConnected: isVpnConnected)
+    }
+
+    private static func icon(isVpnConnected: Bool) -> NSImage? {
+        let name = isVpnConnected ? "checkmark.rectangle.fill" : "xmark.rectangle"
+        guard let icon = NSImage(systemSymbolName: name, accessibilityDescription: "MeowClash") else {
+            return nil
+        }
+        let image = icon.withSymbolConfiguration(NSImage.SymbolConfiguration(scale: .large))
+        image?.isTemplate = true
+        return image
+    }
 }

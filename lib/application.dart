@@ -188,30 +188,14 @@ class ApplicationState extends ConsumerState<Application> {
                   GlobalCupertinoLocalizations.delegate,
                   GlobalWidgetsLocalizations.delegate
                 ],
-                builder: (_, child) {
-                  final Widget app = UiActivityScope(
-                    controller: uiLifecycle,
-                    child: AppEnvManager(
-                      child: _buildPlatformApp(
-                        _buildApp(child!),
-                      ),
+                builder: (_, child) => UiActivityScope(
+                  controller: uiLifecycle,
+                  child: AppEnvManager(
+                    child: _buildPlatformApp(
+                      _buildApp(child!),
                     ),
-                  );
-
-                  if (Platform.isMacOS) {
-                    return FittedBox(
-                      fit: BoxFit.contain,
-                      alignment: Alignment.topCenter,
-                      child: SizedBox(
-                        width: 500,
-                        height: 800,
-                        child: app,
-                      ),
-                    );
-                  }
-
-                  return app;
-                },
+                  ),
+                ),
                 scrollBehavior: BaseScrollBehavior(),
                 title: appName,
                 locale: utils.getLocaleForString(locale),

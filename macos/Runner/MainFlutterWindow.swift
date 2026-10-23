@@ -10,6 +10,16 @@ class MainFlutterWindow: NSWindow {
         self.contentViewController = flutterViewController
         self.setFrame(windowFrame, display: true)
         
+        // Regular macOS window: Flutter draws under a transparent title bar and
+        // the traffic lights sit in the kHeaderHeight strip
+        // (lib/manager/window_manager.dart). Dart applies the same style through
+        // window_manager; setting it here avoids a flash of the default title
+        // bar. Keep minSize in sync with Window.init (lib/common/window.dart).
+        self.titleVisibility = .hidden
+        self.titlebarAppearsTransparent = true
+        self.styleMask.insert(.fullSizeContentView)
+        self.minSize = NSSize(width: 380, height: 400)
+        
         FlutterMethodChannel(
             name: "launch_at_startup", binaryMessenger: flutterViewController.engine.binaryMessenger
         )

@@ -150,7 +150,9 @@
       иначе — размытие из шагов 1–6. Без перехвата слоёв как в FlClashX.
 
 ### 9. Проверка и отчёт
-- [ ] (По желанию владельца) dev-сборка под iOS Simulator только для UI: срез `iphonesimulator arm64`
+- [x] Сделано 2026-10-24: Debug-only путь в `ios/build_core.sh` → `libclash/ios-simulator/` + `[sdk=iphonesimulator*]`
+      в Debug-конфигах pbxproj (ядро собрано, platform 7); `flutter run` на симуляторе — за владельцем.
+      Исходная задача: (По желанию владельца) dev-сборка под iOS Simulator только для UI: срез `iphonesimulator arm64`
       в `MeowCore.xcframework` или заглушка ядра; VPN в симуляторе не заработает. Релизная сборка
       по-прежнему отклоняет симулятор. Быстрая альтернатива без симулятора: запуск macOS-версии
       с `debugDefaultTargetPlatformOverride = TargetPlatform.iOS` показывает iOS-хром в окне Mac.

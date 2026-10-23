@@ -31,6 +31,11 @@ nix build .#checks.x86_64-linux.nixos-vm -L         # NixOS VM test (test/nixos-
   `windows/packaging/exe/inno_setup.iss`, `native/quickjs/CMakeLists.txt` and
   `native/quickjs/msvc_arm64_math.h` for specific strings. Editing any of those files without updating
   that test turns CI red, and vice versa — it proves the text is present, not that the build works.
+- **Goldens** (`test/goldens/*.png`, written by `test/adaptive_chrome_golden_test.dart`) pin the
+  Material chrome that Android, Linux and Windows must keep while the Darwin glass layer evolves. They
+  are generated on macOS with Flutter 3.44.1 — the same host and version as CI. Regenerate
+  (`flutter test --update-goldens <file>`) only for an intended Material change, never to make a
+  Darwin-only change pass.
 - The CI gate is `platform-checks.yaml` — do not assume tests run only locally.
 
 ## Quick verification checklist (before committing)

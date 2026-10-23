@@ -4,6 +4,7 @@ import 'package:meowclash/common/common.dart';
 import 'package:meowclash/enum/enum.dart';
 import 'package:meowclash/models/models.dart';
 import 'package:meowclash/state.dart';
+import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:flutter/material.dart';
 
 import 'scaffold.dart';
@@ -56,12 +57,18 @@ Future<T?> showSheet<T>({
         context: context,
         isScrollControlled: props.isScrollControlled,
         backgroundColor: Colors.transparent,
-        builder: (_) => BackdropFilter(
-          filter: props.blur ? commonFilter : ImageFilter.blur(),
-          child: SafeArea(
-            child: builder(context, SheetType.bottomSheet),
-          ),
-        ),
+        // Glass sheets blur only their own surface (AdaptiveSheetScaffold),
+        // never the whole screen behind the barrier.
+        builder: (_) => AdaptivePlatform.useGlass
+            ? SafeArea(
+                child: builder(context, SheetType.bottomSheet),
+              )
+            : BackdropFilter(
+                filter: props.blur ? commonFilter : ImageFilter.blur(),
+                child: SafeArea(
+                  child: builder(context, SheetType.bottomSheet),
+                ),
+              ),
         showDragHandle: false,
         useSafeArea: props.useSafeArea,
       ),
@@ -72,7 +79,8 @@ Future<T?> showSheet<T>({
         constraints: BoxConstraints(
           maxWidth: props.maxWidth ?? 360,
         ),
-        filter: props.blur ? commonFilter : null,
+        filter: props.blur && !AdaptivePlatform.useGlass ? commonFilter : null,
+        backgroundColor: AdaptivePlatform.useGlass ? Colors.transparent : null,
         builder: (_) => builder(context, SheetType.sideSheet),
       ),
   };
@@ -95,7 +103,8 @@ Future<T?> showExtend<T>(
         constraints: BoxConstraints(
           maxWidth: props.maxWidth ?? 360,
         ),
-        filter: props.blur ? commonFilter : null,
+        filter: props.blur && !AdaptivePlatform.useGlass ? commonFilter : null,
+        backgroundColor: AdaptivePlatform.useGlass ? Colors.transparent : null,
         builder: (context) => builder(context, SheetType.sideSheet),
       ),
   };
@@ -126,9 +135,12 @@ class _AdaptiveSheetScaffoldState extends State<AdaptiveSheetScaffold> {
     final colorScheme = context.colorScheme;
     final bottomSheet = widget.type == SheetType.bottomSheet;
     final sideSheet = widget.type == SheetType.sideSheet;
-    final backgroundColor = sideSheet 
-        ? colorScheme.surface.withValues(alpha: 0.92)
-        : colorScheme.surface.withValues(alpha: 0.92);
+    final useGlass = AdaptivePlatform.useGlass;
+    final backgroundColor = useGlass
+        ? Colors.transparent
+        : sideSheet
+            ? colorScheme.surface.withValues(alpha: 0.92)
+            : colorScheme.surface.withValues(alpha: 0.92);
     final appBar = AppBar(
       forceMaterialTransparency: bottomSheet ? true : false,
       automaticallyImplyLeading: bottomSheet
@@ -148,7 +160,7 @@ class _AdaptiveSheetScaffoldState extends State<AdaptiveSheetScaffold> {
     );
     if (bottomSheet) {
       const handleSize = Size(32, 4);
-      return Container(
+      final sheet = Container(
         clipBehavior: Clip.hardEdge,
         decoration: ShapeDecoration(
           color: backgroundColor,
@@ -181,12 +193,26 @@ class _AdaptiveSheetScaffoldState extends State<AdaptiveSheetScaffold> {
           ],
         ),
       );
+      if (!useGlass) return sheet;
+      return GlassSurface(
+        sigma: GlassTokens.sheetSigma,
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(GlassTokens.sheetRadius),
+        ),
+        shadow: true,
+        child: sheet,
+      );
     }
-    return CommonScaffold(
+    final scaffold = CommonScaffold(
       appBar: appBar,
       backgroundColor: backgroundColor,
       body: widget.body,
       disableBackground: widget.disableBackground,
+    );
+    if (!useGlass) return scaffold;
+    return GlassSurface(
+      sigma: GlassTokens.sheetSigma,
+      child: scaffold,
     );
   }
 }

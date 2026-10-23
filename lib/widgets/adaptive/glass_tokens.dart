@@ -36,6 +36,11 @@ abstract final class GlassTokens {
   // Selection capsule (tab bar item, sidebar row), as alpha of the accent.
   static const double _selectionOpacityLight = 0.16;
   static const double _selectionOpacityDark = 0.24;
+  // With Reduce Transparency the capsule must read on an opaque fill.
+  static const double selectionOpacityOpaque = 0.30;
+  // Hover wash on sidebar rows (macOS pointer).
+  static const double _hoverOpacityLight = 0.06;
+  static const double _hoverOpacityDark = 0.08;
 
   // Corner radii.
   static const double tabBarRadius = 30;
@@ -48,10 +53,20 @@ abstract final class GlassTokens {
   static const double tabBarHeight = 62;
   static const double tabBarHorizontalMargin = 16;
   static const double tabBarBottomGap = 8;
+  static const double tabBarInnerPadding = 4;
+  static const double tabBarIconSize = 24;
+  static const double tabBarLabelGap = 2;
 
   // Geometry of the macOS chrome.
   static const double sidebarWidth = 84;
   static const double sidebarExtendedWidth = 200;
+  static const double sidebarPadding = 10;
+  static const double sidebarRowHeight = 32;
+  static const double sidebarCompactRowHeight = 44;
+  static const double sidebarRowGap = 2;
+  static const double sidebarIconSize = 20;
+  static const double sidebarCompactIconSize = 22;
+  static const double sidebarLogoSize = 28;
   static const double titleBarHeight = 28;
   static const double trafficLightsInset = 78;
 
@@ -79,6 +94,7 @@ abstract final class GlassTokens {
   // Motion. Zeroed by [GlassAccessibility.reduceMotion].
   static const Duration morphDuration = Duration(milliseconds: 240);
   static const Curve morphCurve = Curves.easeOutCubic;
+  static const Duration hoverDuration = Duration(milliseconds: 120);
 
   static bool _isDark(Brightness brightness) => brightness == Brightness.dark;
 
@@ -99,6 +115,9 @@ abstract final class GlassTokens {
 
   static double selectionOpacity(Brightness brightness) =>
       _isDark(brightness) ? _selectionOpacityDark : _selectionOpacityLight;
+
+  static double hoverOpacity(Brightness brightness) =>
+      _isDark(brightness) ? _hoverOpacityDark : _hoverOpacityLight;
 
   static List<BoxShadow> floatingShadow(Brightness brightness) =>
       _isDark(brightness) ? _floatingShadowDark : _floatingShadowLight;

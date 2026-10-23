@@ -3,7 +3,11 @@
 /// `.agents/liquid-glass-plan.md`.
 library;
 
+export 'adaptive_app_bar.dart';
 export 'adaptive_platform.dart';
+export 'adaptive_sidebar.dart';
+export 'adaptive_tab_bar.dart';
 export 'glass_accessibility.dart';
 export 'glass_surface.dart';
+export 'glass_theme.dart';
 export 'glass_tokens.dart';

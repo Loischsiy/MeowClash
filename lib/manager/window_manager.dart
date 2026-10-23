@@ -7,6 +7,7 @@ import 'package:meowclash/providers/config.dart';
 import 'package:meowclash/providers/app.dart';
 import 'package:meowclash/services/ui_lifecycle.dart';
 import 'package:meowclash/state.dart';
+import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:window_ext/window_ext.dart';
@@ -139,8 +140,42 @@ class WindowHeaderContainer extends StatelessWidget {
 
   // On macOS the strip is the transparent title bar: it holds the native
   // traffic lights and is a drag area (see WindowHeader).
+  //
+  // macOS glass: full-size content view. The app is laid out under the title
+  // bar, which becomes a top `MediaQuery` inset: the sidebar runs up behind
+  // the traffic lights and each page's AppBar grows into a unified toolbar
+  // (AdaptiveSidebar / AdaptiveAppBar). The strip stays on top only as an
+  // invisible drag area.
   @override
-  Widget build(BuildContext context) => Consumer(
+  Widget build(BuildContext context) {
+    if (AdaptivePlatform.isMacOSGlass) {
+      final mediaQuery = MediaQuery.of(context);
+      return Stack(
+        children: [
+          MediaQuery(
+            data: mediaQuery.copyWith(
+              padding: mediaQuery.padding.copyWith(
+                top: mediaQuery.padding.top + kHeaderHeight,
+              ),
+              viewPadding: mediaQuery.viewPadding.copyWith(
+                top: mediaQuery.viewPadding.top + kHeaderHeight,
+              ),
+            ),
+            child: child,
+          ),
+          const Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: WindowHeader(),
+          ),
+        ],
+      );
+    }
+    return _buildMaterial();
+  }
+
+  Widget _buildMaterial() => Consumer(
         builder: (_, ref, child) => Stack(
           children: [
             Column(
@@ -280,6 +315,19 @@ class _WindowHeaderState extends State<WindowHeader> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
+
+    if (AdaptivePlatform.isMacOSGlass) {
+      // Invisible: the native title bar is transparent and the content below
+      // paints the chrome. Only window drag and zoom live here.
+      return SizedBox(
+        height: kHeaderHeight,
+        child: GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onPanStart: (_) => windowManager.startDragging(),
+          onDoubleTap: _updateMaximized,
+        ),
+      );
+    }
 
     return Material(
       color: Colors.transparent,

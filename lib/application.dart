@@ -18,6 +18,7 @@ import 'package:meowclash/providers/providers.dart';
 import 'package:meowclash/services/async_polling_loop.dart';
 import 'package:meowclash/services/ui_lifecycle.dart';
 import 'package:meowclash/state.dart';
+import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:meowclash/widgets/suspendable_ui.dart';
 import 'package:meowclash/widgets/visibility_polling.dart';
 
@@ -158,6 +159,15 @@ class ApplicationState extends ConsumerState<Application> {
     );
   }
 
+  /// Native accessibility (Reduce Transparency/Motion, accent color) for the
+  /// Darwin glass chrome; a no-op wrapper on every other platform.
+  Widget _buildGlassScope(Widget child) => AdaptivePlatform.useGlass
+      ? GlassAccessibilityScope(child: child)
+      : child;
+
+  ThemeData _adaptiveTheme(ThemeData base) =>
+      AdaptivePlatform.useGlass ? GlassTheme.apply(base) : base;
+
   Widget _buildApp(Widget child) => MessageManager(
         child: ThemeManager(
           child: child,
@@ -165,13 +175,20 @@ class ApplicationState extends ConsumerState<Application> {
       );
 
   @override
-  Widget build(BuildContext context) => _buildPlatformState(
+  Widget build(BuildContext context) => _buildGlassScope(_buildPlatformState(
         _buildState(
           Consumer(
-            builder: (_, ref, child) {
+            builder: (ctx, ref, child) {
               final locale =
                   ref.watch(appSettingProvider.select((state) => state.locale));
               final themeProps = ref.watch(themeSettingProvider);
+              // Darwin glass follows the system accent color (macOS) unless
+              // it is "Multicolor"; elsewhere the user's color is untouched.
+              final primaryColor = AdaptivePlatform.useGlass
+                  ? GlassTheme.seedOverride(GlassAccessibility.of(ctx))
+                          ?.toARGB32() ??
+                      themeProps.primaryColor
+                  : themeProps.primaryColor;
               return MaterialApp(
                 debugShowCheckedModeBanner: false,
                 shortcuts: {
@@ -201,30 +218,30 @@ class ApplicationState extends ConsumerState<Application> {
                 locale: utils.getLocaleForString(locale),
                 supportedLocales: AppLocalizations.delegate.supportedLocales,
                 themeMode: themeProps.themeMode,
-                theme: ThemeData(
+                theme: _adaptiveTheme(ThemeData(
                   useMaterial3: true,
                   fontFamily: 'NotoSans',
                   fontFamilyFallback: const ['NotoSans', 'JetBrainsMono'],
                   pageTransitionsTheme: _pageTransitionsTheme,
                   colorScheme: _getAppColorScheme(
                     brightness: Brightness.light,
-                    primaryColor: themeProps.primaryColor,
+                    primaryColor: primaryColor,
                   ),
                   // Reduce animation duration for snappier feel
                   visualDensity: VisualDensity.adaptivePlatformDensity,
-                ),
-                darkTheme: ThemeData(
+                )),
+                darkTheme: _adaptiveTheme(ThemeData(
                   useMaterial3: true,
                   fontFamily: 'NotoSans',
                   fontFamilyFallback: const ['NotoSans', 'JetBrainsMono'],
                   pageTransitionsTheme: _pageTransitionsTheme,
                   colorScheme: _getAppColorScheme(
                     brightness: Brightness.dark,
-                    primaryColor: themeProps.primaryColor,
+                    primaryColor: primaryColor,
                   ).toPureBlack(themeProps.pureBlack),
                   // Reduce animation duration for snappier feel
                   visualDensity: VisualDensity.adaptivePlatformDensity,
-                ),
+                )),
                 home: child,
               );
             },
@@ -242,7 +259,7 @@ class ApplicationState extends ConsumerState<Application> {
             ),
           ),
         ),
-      );
+      ));
 
   @override
   Future<void> dispose() async {

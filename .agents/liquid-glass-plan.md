@@ -107,25 +107,28 @@
   `silentLaunch` прячет окно, UI на ширине >600 переключается в режим с боковой панелью.
 
 ### 3. Тема для Darwin — PR `feat(ui): darwin glass theme`
-- [ ] `lib/widgets/adaptive/glass_theme.dart` — `buildGlassTheme(ThemeData base, GlassAccessibility a11y)`:
+- [x] `lib/widgets/adaptive/glass_theme.dart` — `buildGlassTheme(ThemeData base, GlassAccessibility a11y)`:
       тот же `ColorScheme`, но seed = системный акцент; прозрачные `scaffoldBackgroundColor`
       для хрома, `NavigationBarTheme`/`NavigationRailTheme`/`BottomSheetTheme`/`PopupMenuTheme` под стекло.
-- [ ] `lib/application.dart` — `theme`/`darkTheme` через `useGlass ? buildGlassTheme(...) : <как сейчас>`,
+- [x] `lib/application.dart` — `theme`/`darkTheme` через `useGlass ? buildGlassTheme(...) : <как сейчас>`,
       обёртка `GlassAccessibilityScope` над `MaterialApp.builder`. Ветка не-Darwin — байт-в-байт прежняя.
 
 ### 4. Навигационный хром — PR `feat(ui): glass navigation chrome on Darwin`
-- [ ] `AdaptiveTabBar` (`lib/widgets/adaptive/adaptive_tab_bar.dart`) — iOS/mobile: плавающая
+- [x] `AdaptiveTabBar` (`lib/widgets/adaptive/adaptive_tab_bar.dart`) — iOS/mobile: плавающая
       стеклянная капсула над safe area, контент прокручивается под ней (`extendBody`).
       Материал-ветка = нынешний `NavigationBar` из `home.dart`, перенесённый без изменений.
-- [ ] `AdaptiveSidebar` (`adaptive_sidebar.dart`) — macOS: прозрачный фон поверх нативного
+- [x] `AdaptiveSidebar` (`adaptive_sidebar.dart`) — macOS: прозрачный фон поверх нативного
       `NSVisualEffectView(.sidebar)` (шаг 7), выделение — акцентная капсула. Материал-ветка = нынешний `NavigationRail`.
-- [ ] `AdaptiveAppBar` (`adaptive_app_bar.dart`) — стеклянный тулбар; на macOS учитывает светофор и drag-область.
-- [ ] `AdaptiveScaffold` (`adaptive_scaffold.dart`) — тонкая обёртка над `CommonScaffold`.
-- [ ] `lib/pages/home.dart`, `lib/widgets/scaffold.dart` — переключить на обёртки.
-- [ ] Goldens Android/Linux/Windows из шага 1 не изменились.
+- [x] `AdaptiveAppBar` (`adaptive_app_bar.dart`) — стеклянный тулбар; на macOS учитывает светофор и drag-область.
+- [x] ~~`AdaptiveScaffold`~~ — не понадобился: `CommonScaffold` сам оборачивает заголовок в `AdaptiveAppBar`
+      и включает `extendBody` под таб-бар.
+- [x] `lib/pages/home.dart`, `lib/widgets/scaffold.dart` — переключить на обёртки.
+- [x] Goldens Android/Linux/Windows из шага 1 не изменились.
 
 ### 5. Листы — PR `feat(ui): glass sheets on Darwin`
-- [ ] `AdaptiveSheet` / правка `lib/widgets/sheet.dart` и `side_sheet.dart`: стеклянная кромка
+- [x] `lib/widgets/sheet.dart` — один `GlassSurface` на листе вместо `BackdropFilter` над всем листом (Darwin).
+- [ ] `side_sheet.dart` — то же для боковых листов (широкий экран macOS).
+- Исходная формулировка: `AdaptiveSheet` / правка `lib/widgets/sheet.dart` и `side_sheet.dart`: стеклянная кромка
       и фон листа; размытие только на самом листе (сейчас `BackdropFilter` оборачивает весь лист —
       на Darwin заменить на один `GlassSurface`, на остальных оставить как есть).
 
@@ -138,8 +141,9 @@
 - [ ] Остальные платформы — нынешний `CommonPopupMenu`.
 
 ### 7. Нативное стекло окна macOS — PR `feat(macos): native glass window backdrop`
-- [ ] `MainFlutterWindow.swift` — `FlutterViewController.backgroundColor = .clear`, под ним
-      `NSVisualEffectView` (`.sidebar`, `.behindWindow`); на macOS 26 — `NSGlassEffectView`
+- [x] `MainFlutterWindow.swift` — `FlutterViewController.backgroundColor = .clear`, под ним
+      `NSVisualEffectView` (`.sidebar`, `.behindWindow`) в `GlassContainerViewController`.
+- [ ] на macOS 26 — `NSGlassEffectView`
       под `#if compiler(>=6.2)` + `if #available(macOS 26, *)` (deployment target 11.0).
 - [ ] Reduce Transparency на macOS → AppKit сам делает материал непрозрачным; проверить, что Flutter-хром тоже.
 - [ ] Иконка строки меню — шаблонный SF Symbol (уже есть), стиль меню совпадает.
@@ -188,3 +192,17 @@
   (минимум 12.0) — решение за владельцем. Логотип в боковой панели — решить после просмотра.
 - 2026-10-24: по согласованию с владельцем минимальная macOS поднята до 12.0 (pbxproj, `macos/Podfile`,
   в `post_install` подам тоже ставится 12.0). Владелец установил iOS Simulator runtime (iOS 27.0/27.1).
+- 2026-10-24: шаги 3, 4, 5 (`sheet.dart`) и основа шага 7 — код подключён к экранам.
+  Владелец увидел на macOS прежний Material — это была сборка 01:11, до подключения обёрток; нужен свежий `flutter run -d macos`.
+- 2026-10-24: **iOS падал на старте** (`EXC_BREAKPOINT` в `_UIApplicationEvaluateRuntimeIssueForNoSceneLifecycleAdoption`):
+  iOS 27 требует UIScene. Исправлено: `UIApplicationSceneManifest` + `FlutterSceneDelegate` в `Info.plist`,
+  `AppDelegate` реализует `FlutterImplicitEngineDelegate` (плагины, `IOSService`, канал стекла — в
+  `didInitializeImplicitFlutterEngine`). Попутно: в симуляторе нет NetworkExtension → `loadManagers()` под
+  `targetEnvironment(simulator)` возвращает `[]`; `SupportPlatform` не знал iOS (дашборд падал с
+  «invalid platform») → добавлен `SupportPlatform.IOS`; `tray.update` вызывал `tray_manager` на iOS → пропуск.
+- 2026-10-24: `flutter build ios --simulator --debug` работает из песочницы агента (~60 с); установка/скриншоты
+  через `xcrun simctl`. Проверено: дашборд рендерится, плавающая стеклянная капсула таб-бара на месте.
+  `flutter build macos` из песочницы по-прежнему нельзя (SwiftPM `sandbox-exec` вложенный, запись в кэш SDK).
+  **Не запускать CLI-сборку iOS, пока проект открыт в Xcode:** Flutter перегенерирует SwiftPM-пакет плагинов,
+  и Xcode 27.1 падает с ассертом `IDEContainer _retainedContainerAtFilePath` (случилось 02:37).
+  analyze `lib test` 530 / 0 errors, `flutter test` 203 / 1 skipped.

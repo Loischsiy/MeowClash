@@ -3,11 +3,50 @@ import FlutterMacOS
 import window_manager
 import LaunchAtLogin
 
+/// Hosts Flutter above a native sidebar material so the Liquid Glass sidebar
+/// (lib/widgets/adaptive/adaptive_sidebar.dart) shows the desktop through the
+/// window, like Finder. Flutter paints opaque everywhere else, so the material
+/// is visible only where Dart leaves pixels transparent.
+final class GlassContainerViewController: NSViewController {
+    let flutterViewController: FlutterViewController
+
+    init(flutterViewController: FlutterViewController) {
+        self.flutterViewController = flutterViewController
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) is not supported")
+    }
+
+    override func loadView() {
+        let material = NSVisualEffectView()
+        material.material = .sidebar
+        material.blendingMode = .behindWindow
+        material.state = .followsWindowActiveState
+        view = material
+
+        addChild(flutterViewController)
+        let flutterView = flutterViewController.view
+        flutterView.frame = material.bounds
+        flutterView.autoresizingMask = [.width, .height]
+        material.addSubview(flutterView)
+    }
+}
+
 class MainFlutterWindow: NSWindow {
+    private(set) var flutterViewController: FlutterViewController?
+
     override func awakeFromNib() {
         let flutterViewController = FlutterViewController()
+        // Transparent Flutter layer over the native material (see above).
+        flutterViewController.backgroundColor = .clear
+        self.flutterViewController = flutterViewController
         let windowFrame = self.frame
-        self.contentViewController = flutterViewController
+        self.contentViewController = GlassContainerViewController(
+            flutterViewController: flutterViewController
+        )
         self.setFrame(windowFrame, display: true)
         
         // Regular macOS window: Flutter draws under a transparent title bar and

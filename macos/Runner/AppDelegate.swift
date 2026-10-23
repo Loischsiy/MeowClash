@@ -17,7 +17,7 @@ class AppDelegate: FlutterAppDelegate {
         
         setupCoreInApplicationSupport()
         
-        guard let mainController = mainFlutterWindow?.contentViewController as? FlutterViewController else {
+        guard let mainController = (mainFlutterWindow as? MainFlutterWindow)?.flutterViewController else {
             NSLog("ERROR: Could not get FlutterViewController from mainFlutterWindow")
             return
         }

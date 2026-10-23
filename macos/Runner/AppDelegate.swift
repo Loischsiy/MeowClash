@@ -7,6 +7,7 @@ import LaunchAtLogin
 class AppDelegate: FlutterAppDelegate, NSPopoverDelegate {
     var statusBarController: StatusBarController?
     private var statusBarChannel: FlutterMethodChannel?
+    private var glassAccessibilityChannel: FlutterMethodChannel?
     
     var flutterUIPopover = NSPopover.init()
     
@@ -37,6 +38,7 @@ class AppDelegate: FlutterAppDelegate, NSPopoverDelegate {
         statusBarController = StatusBarController.init(flutterUIPopover)
         
         setupStatusBarChannel(flutterViewController: mainController)
+        setupGlassAccessibilityChannel(flutterViewController: mainController)
         
         super.applicationDidFinishLaunching(aNotification)
         
@@ -70,6 +72,78 @@ class AppDelegate: FlutterAppDelegate, NSPopoverDelegate {
         NSLog("StatusBar channel set up successfully")
     }
     
+    // Mirrors Reduce Transparency / Reduce Motion / Increase Contrast and the
+    // system accent color to the Flutter glass chrome
+    // (lib/widgets/adaptive/glass_accessibility.dart).
+    func setupGlassAccessibilityChannel(flutterViewController: FlutterViewController) {
+        let channel = FlutterMethodChannel(
+            name: "meowclash/glass_accessibility",
+            binaryMessenger: flutterViewController.engine.binaryMessenger
+        )
+        glassAccessibilityChannel = channel
+        channel.setMethodCallHandler { [weak self] (call: FlutterMethodCall, result: @escaping FlutterResult) in
+            switch call.method {
+            case "snapshot":
+                result(self?.glassAccessibilitySnapshot())
+            default:
+                result(FlutterMethodNotImplemented)
+            }
+        }
+        NSWorkspace.shared.notificationCenter.addObserver(
+            self,
+            selector: #selector(glassAccessibilityDidChange),
+            name: NSWorkspace.accessibilityDisplayOptionsDidChangeNotification,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(glassAccessibilityDidChange),
+            name: NSColor.systemColorsDidChangeNotification,
+            object: nil
+        )
+        DistributedNotificationCenter.default().addObserver(
+            self,
+            selector: #selector(glassAccessibilityDidChange),
+            name: NSNotification.Name("AppleColorPreferencesChangedNotification"),
+            object: nil
+        )
+    }
+
+    @objc func glassAccessibilityDidChange(_ notification: Notification) {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            self.glassAccessibilityChannel?.invokeMethod("changed", arguments: self.glassAccessibilitySnapshot())
+        }
+    }
+
+    func glassAccessibilitySnapshot() -> [String: Any] {
+        let workspace = NSWorkspace.shared
+        var snapshot: [String: Any] = [
+            "reduceTransparency": workspace.accessibilityDisplayShouldReduceTransparency,
+            "reduceMotion": workspace.accessibilityDisplayShouldReduceMotion,
+            "increaseContrast": workspace.accessibilityDisplayShouldIncreaseContrast,
+        ]
+        if let accent = systemAccentARGB() {
+            snapshot["accentColor"] = accent
+        }
+        return snapshot
+    }
+
+    // `AppleAccentColor` is absent from the global domain when the user picks
+    // "Multicolor": macOS then defers to the app, so MeowClash keeps its own
+    // brand color and no accent is sent.
+    func systemAccentARGB() -> Int? {
+        guard UserDefaults.standard.object(forKey: "AppleAccentColor") != nil,
+              let color = NSColor.controlAccentColor.usingColorSpace(.sRGB) else {
+            return nil
+        }
+        let a = Int((color.alphaComponent * 255).rounded())
+        let r = Int((color.redComponent * 255).rounded())
+        let g = Int((color.greenComponent * 255).rounded())
+        let b = Int((color.blueComponent * 255).rounded())
+        return (a << 24) | (r << 16) | (g << 8) | b
+    }
+
     // NSPopover closes automatically on outside clicks/Escape as well as via
     // the status item. Its delegate covers all paths; the original Flutter
     // window is closed and cannot be used as a visibility signal.

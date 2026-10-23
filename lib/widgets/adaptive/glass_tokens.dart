@@ -1,0 +1,108 @@
+import 'package:flutter/widgets.dart';
+
+/// The one place for every number of the Darwin glass chrome.
+///
+/// Widgets read blur strength, tint opacity, specular rim, radii, shadows and
+/// motion from here; no glass value is written inline anywhere else. Values
+/// that differ by appearance are resolved through [Brightness].
+abstract final class GlassTokens {
+  // Blur sigmas (logical px). Chrome only: never applied to scrolling content.
+  static const double sidebarSigma = 30;
+  static const double barSigma = 24;
+  static const double sheetSigma = 32;
+  static const double menuSigma = 20;
+
+  // Tint laid over the blurred backdrop, as alpha of the surface color.
+  static const double _tintOpacityLight = 0.64;
+  static const double _tintOpacityDark = 0.52;
+
+  // Tint used where the macOS window already sits on native AppKit glass, so
+  // the Flutter layer only needs a faint wash to keep text legible.
+  static const double _nativeBackdropTintLight = 0.18;
+  static const double _nativeBackdropTintDark = 0.14;
+
+  // Specular rim: a 1px edge, brighter at the top, as light catches glass.
+  static const double rimWidth = 1;
+  static const double _rimTopOpacityLight = 0.72;
+  static const double _rimTopOpacityDark = 0.26;
+  static const double _rimBottomOpacityLight = 0.10;
+  static const double _rimBottomOpacityDark = 0.05;
+
+  // Hairline separating chrome from content (title bar, tab bar, sidebar).
+  static const double hairlineWidth = 0.5;
+  static const double _hairlineOpacityLight = 0.10;
+  static const double _hairlineOpacityDark = 0.16;
+
+  // Selection capsule (tab bar item, sidebar row), as alpha of the accent.
+  static const double _selectionOpacityLight = 0.16;
+  static const double _selectionOpacityDark = 0.24;
+
+  // Corner radii.
+  static const double tabBarRadius = 30;
+  static const double sheetRadius = 26;
+  static const double menuRadius = 14;
+  static const double selectionRadius = 10;
+  static const double sidebarRowRadius = 8;
+
+  // Geometry of the floating iOS tab bar.
+  static const double tabBarHeight = 62;
+  static const double tabBarHorizontalMargin = 16;
+  static const double tabBarBottomGap = 8;
+
+  // Geometry of the macOS chrome.
+  static const double sidebarWidth = 84;
+  static const double sidebarExtendedWidth = 200;
+  static const double titleBarHeight = 28;
+  static const double trafficLightsInset = 78;
+
+  // Shadows cast by floating glass (tab bar, menus, sheets).
+  static const List<BoxShadow> _floatingShadowLight = [
+    BoxShadow(
+      color: Color(0x1F000000),
+      blurRadius: 24,
+      offset: Offset(0, 8),
+    ),
+    BoxShadow(
+      color: Color(0x0F000000),
+      blurRadius: 4,
+      offset: Offset(0, 1),
+    ),
+  ];
+  static const List<BoxShadow> _floatingShadowDark = [
+    BoxShadow(
+      color: Color(0x66000000),
+      blurRadius: 28,
+      offset: Offset(0, 10),
+    ),
+  ];
+
+  // Motion. Zeroed by [GlassAccessibility.reduceMotion].
+  static const Duration morphDuration = Duration(milliseconds: 240);
+  static const Curve morphCurve = Curves.easeOutCubic;
+
+  static bool _isDark(Brightness brightness) => brightness == Brightness.dark;
+
+  static double tintOpacity(Brightness brightness) =>
+      _isDark(brightness) ? _tintOpacityDark : _tintOpacityLight;
+
+  static double nativeBackdropTint(Brightness brightness) =>
+      _isDark(brightness) ? _nativeBackdropTintDark : _nativeBackdropTintLight;
+
+  static double rimTopOpacity(Brightness brightness) =>
+      _isDark(brightness) ? _rimTopOpacityDark : _rimTopOpacityLight;
+
+  static double rimBottomOpacity(Brightness brightness) =>
+      _isDark(brightness) ? _rimBottomOpacityDark : _rimBottomOpacityLight;
+
+  static double hairlineOpacity(Brightness brightness) =>
+      _isDark(brightness) ? _hairlineOpacityDark : _hairlineOpacityLight;
+
+  static double selectionOpacity(Brightness brightness) =>
+      _isDark(brightness) ? _selectionOpacityDark : _selectionOpacityLight;
+
+  static List<BoxShadow> floatingShadow(Brightness brightness) =>
+      _isDark(brightness) ? _floatingShadowDark : _floatingShadowLight;
+
+  static Duration motion(Duration duration, {required bool reduceMotion}) =>
+      reduceMotion ? Duration.zero : duration;
+}

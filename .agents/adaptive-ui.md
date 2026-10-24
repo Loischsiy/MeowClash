@@ -30,8 +30,9 @@ pixel-for-pixel. Code: `lib/widgets/adaptive/` (import `adaptive.dart`).
 - One screen per PR. Each screen gets Material goldens taken **before** the glass work
   (`test/material_<screen>_golden_test.dart`) and a glass test that counts `BackdropFilter`s on a
   100+ item list (`test/adaptive_<screen>_glass_test.dart`).
-- Content primitives: `AdaptiveCard` (translucent, no blur; selection = accent fill + outline,
-  `checked` = check badge), `AdaptiveDelayBadge` (pill, `CupertinoActivityIndicator`, bolt),
+- Content primitives: `AdaptiveCard` (translucent, no blur; selection = light accent tint + faint
+  accent hairline, never a thick outline; `checked` = check badge; the 1.5 px accent ring is keyboard
+  focus only), `AdaptiveDelayBadge` (pill, `CupertinoActivityIndicator`, bolt),
   `AdaptiveGroupHeader` (collapsible group row; blurred only while `pinned`),
   `AdaptiveGroupSelector` (floating glass group bar over a `TabController`),
   `AdaptiveFloatingButton` (glass circle, `busy` spinner), `AdaptiveEmptyState`,
@@ -39,6 +40,11 @@ pixel-for-pixel. Code: `lib/widgets/adaptive/` (import `adaptive.dart`).
 - Blur budget of a scrolling screen is constant: only a pinned header / floating bar / floating
   button may be a `GlassSurface`. A pinned list header is a `SliverPersistentHeader` that swaps to its
   glass variant only when `shrinkOffset > 0`, so at rest the list has zero blur.
+- Glass content text uses the Apple type scale from `GlassTextStyles` (sizes/line heights are
+  `GlassTokens.card*` / `delayBadge*` / `group*`, per macOS and iOS), not the Material `TextTheme`
+  sizes. Fixed-height rows must measure the same style: `Measure.heightOf(style)` (see
+  `proxyCardLineHeights` in `lib/views/proxies/common.dart`); the Material branch keeps
+  `measure.bodyMediumHeight` & co. so its goldens do not move.
 - A floating bar over content: the host stacks it over the pages and pads the scroll view by the
   primitive's `contentInset` (0 off Darwin, so the Material padding is unchanged).
 - Proxies screen: in the list mode the expanded group header pins; in the tab mode the grid scrolls

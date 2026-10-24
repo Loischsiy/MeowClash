@@ -47,6 +47,12 @@
 - [x] 10a. Фикс переполнения заголовка группы (эмодзи в подзаголовке): тест, analyze, коммит
 - [ ] 11. iOS-симулятор: скриншоты светлая/тёмная — ЗАБЛОКИРОВАНО для агента (`simctl boot` падает), делает пользователь
 - [x] 12. Обновить .agents/adaptive-ui.md (новые примитивы, правила экрана)
+- [x] 14. Доводка под Apple (запрос пользователя 2026-10-24, «стекла мало, не похоже на Apple»), в ЭТОМ PR:
+  - [x] 14.0 (сессия 4) Код 14.1 и тесты 14.2 найдены незакоммиченными: glass_text_styles.dart, токены типошкалы, Measure.heightOf, proxyCardLineHeights, правки card/common/list, adaptive_card/delay_badge/group_header, 5 новых тестов
+  - [x] 14.1a Ревью диффа: Material-ветки не задеты (особенно `ProxyGroupCard` в list.dart, `getItemHeight`)
+  - [x] 14.1b Тесты стекла + Material-голдены + perf-тест + analyze `lib test` → коммит `feat(ui): Apple type scale and quiet selection for glass proxy cards`
+  - [x] 14.2 Прокрутка под закреплёнными полосами (п.4): прогнать тесты «cards scroll under…» / «grid scrolls under…» во всех режимах, доделать недостающее → коммит `test(ui): …` / `feat(ui): …`
+  - [x] 14.3 Полный `flutter test`, обновить adaptive-ui.md (типошкала, выделение) и черновик PR → коммит `docs(agents): …`
 - [x] 13a. Черновик текста PR — `.agent/pr-liquid-glass-proxies.md` (в .gitignore), TODO на скриншоты/замеры/фолбэки на устройстве
 - [ ] 13b. ЖДЁМ ПОЛЬЗОВАТЕЛЯ: скриншоты macOS + iOS (светлая/тёмная), замер прокрутки 100+ прокси в DevTools (main vs ветка), проверка Reduce Transparency/Motion на устройствах → вписать в черновик
 - [ ] 13c. Удалить этот трекер последним коммитом (`chore(agents): drop the phase 2 proxies tracker`), пуш ветки и PR — пользователь (git push из среды заблокирован)
@@ -67,8 +73,15 @@
 - 2026-10-24 (сессия 3): тест падал с LateInitializationError (`globalState.measure` читался до `host()`), перенесён в `Builder`. Без фикса красный (RenderFlex overflowed by 6 px), с фиксом зелёный. `flutter test` 276 passed / 1 skipped; analyze `lib test` — 0 ошибок, 0 новых замечаний. Коммит `fix(ui): group header absorbs emoji-tall subtitles`.
 - 2026-10-24 (сессия 3): черновик PR в `.agent/pr-liquid-glass-proxies.md`. Код экрана готов; остались только шаги 11/13b/13c со стороны пользователя.
 - 2026-10-24 (сессия 3): ПОБОЧНЫЙ БАГ фазы 1 (не этот PR): на iOS «Edit/Add profile» серые. `showExtend` на mobile пушит `SheetType.page` непрозрачным маршрутом, а `AdaptiveSheetScaffold` рисует его стеклом (прозрачный фон + GlassSurface) — тонировка поверх пустоты. Тест `adaptive_sheet_test.dart` покрывал только sideSheet/bottomSheet. Фикс в отдельной ветке `fix/glass-sheet-pages` от main (см. «Побочные задачи»).
+- 2026-10-24 (сессия 4): ревью незакоммиченного 14.1 — Material-пути (`_buildMaterial`, `getItemHeight`, Material-бейдж) не тронуты, новые стили только под `useGlass`. Тесты стекла + Material-голдены + perf: 43 passed. Тесты прокрутки под полосами (список и вкладки) расширены с одной платформы на macOS+iOS — зелёные; доделывать в коде п.4 нечего (`AdaptiveGroupSelector.floats` = вся Darwin). Новое замечание analyze `prefer_const_constructors` в тесте исправлено. Запущен полный `flutter test` + analyze.
+- 2026-10-24 (сессия 4): `flutter test` 284 passed / 1 skipped; analyze `lib test` — 0 ошибок, 0 новых замечаний. Коммит `9a47e76 feat(ui): Apple type scale and quiet selection for glass proxy cards` (код 14.1 + тесты 14.1/14.2). 14.2: код не понадобился, только тесты. adaptive-ui.md (типошкала, выделение) и черновик PR обновлены. Шаг 14 закрыт; дальше — побочная задача `feat/darwin-system-font`.
 
 ## Побочные задачи (отдельные ветки)
+
+Порядок после шага 14 (согласовано 2026-10-24): сначала шрифт, потом панель. Оба — хром фазы 1, отдельные ветки от main.
+
+- [ ] `feat/darwin-system-font` (п.1): на macOS/iOS не задавать NotoSans → системный San Francisco; Android/Win/Linux — NotoSans как было (голдены). Учесть настройку шрифта в views/theme.dart.
+- [ ] `feat/glass-toolbar` (п.2): панель как в macOS 26 — компактный заголовок, кнопки в стеклянных капсулах, контент прокручивается под панелью. Перед кодом — короткий план пользователю (задевает все экраны).
 
 - [x] `fix/glass-sheet-pages` от main: для `SheetType.page` без стекла, непрозрачный фон темы + тест, analyze, flutter test, коммит. Готово: `b75e81b fix(ui): opaque Darwin page for full-screen sheets` (тест без фикса красный, с фиксом зелёный; `flutter test` на ветке зелёный; Material-голдены хрома совпадают; новых замечаний analyze нет). Правило добавлено в `.agents/adaptive-ui.md` на той же ветке.
 - [ ] Пользователь: пуш `fix/glass-sheet-pages` и отдельный PR (маленький, можно влить до PR «Прокси»). После вливания — rebase `feat/liquid-glass-proxies` на main.

@@ -37,12 +37,12 @@
 - [x] 1. Изучить код экрана (tab.dart, list.dart, card.dart, common.dart, proxies.dart), CommonCard, NullStatus, существующие тесты/голдены
 - [x] 2. Проверить, что тулчейн работает из среды агента (flutter test, analyze) — зафиксировать ограничения
 - [x] 3. Эталонные голдены Material экрана «Прокси» на чистом коде (оба режима, типы карточек, пустое состояние) → `test/goldens/`, отдельный коммит
-- [ ] 4. Токены в glass_tokens.dart (карточка, пилюля, полоса групп, круглая кнопка, пустое состояние)
-- [ ] 5. AdaptiveCard + AdaptiveDelayBadge, подключить в card.dart
-- [ ] 6. AdaptiveGroupHeader, подключить в list.dart; закреплённый стеклянный заголовок (решение 1)
-- [ ] 7. AdaptiveGroupSelector, подключить в tab.dart; сетка под полосой (решение 2)
-- [ ] 8. AdaptiveFloatingButton (кнопка теста), AdaptiveEmptyState, AdaptiveActivityIndicator
-- [ ] 9. Тесты стекла: число слоёв блюра на 100+ прокси, фолбэки (Reduce Transparency/Motion, kill switch), переключение платформ
+- [x] 4. Токены в glass_tokens.dart (карточка, пилюля, полоса групп, круглая кнопка, пустое состояние)
+- [x] 5. AdaptiveCard + AdaptiveDelayBadge, подключить в card.dart
+- [x] 6. AdaptiveGroupHeader, подключить в list.dart; закреплённый стеклянный заголовок (решение 1)
+- [x] 7. AdaptiveGroupSelector, подключить в tab.dart; сетка под полосой (решение 2)
+- [x] 8. AdaptiveFloatingButton (кнопка теста), AdaptiveEmptyState, AdaptiveActivityIndicator
+- [x] 9. Тесты стекла: число слоёв блюра на 100+ прокси, фолбэки (Reduce Transparency/Motion, kill switch), переключение платформ
 - [ ] 10. Голдены Material совпадают; analyze без новых замечаний; flutter test зелёный; proxy_list_performance_test проходит
 - [ ] 11. iOS-симулятор: скриншоты светлая/тёмная (если доступен из среды)
 - [ ] 12. Обновить .agents/adaptive-ui.md (новые примитивы, правила экрана)
@@ -53,6 +53,9 @@
 - 2026-10-24: ветка `feat/liquid-glass-proxies` от `4f378b9`, трекер создан.
 - 2026-10-24: код изучен; тулчейн работает через `.agent/flutterw`; база: test 241 passed / 1 skipped, analyze `lib test` 0 errors.
 - 2026-10-24: `test/material_proxies_golden_test.dart` + 20 эталонов `test/goldens/material_proxies_*.png` — коммит `test(ui): Material baseline goldens for the proxies screen`.
+- 2026-10-24 (сессия 2): найдено незакоммиченное: токены, adaptive_card/delay_badge/floating_button/group_header/group_selector/status, glass_icon_button, правки card/list/tab.dart. Начата проверка.
+- 2026-10-24 (сессия 2): Material-голдены прокси/хрома совпадают, perf-тест проходит, analyze — 0 ошибок, новое замечание только omit_local_variable_types в adaptive_card.dart (исправлено). Material-кнопка теста больше не делает лишний setState.
+- 2026-10-24 (сессия 2): `test/adaptive_proxies_glass_test.dart` — 14 тестов (150 прокси на группу: список 0 блюров в покое / 1 после прокрутки, вкладки ровно 1; Reduce Transparency, kill switch, Reduce Motion, Material-ветки) — зелёные. Коммиты шагов 4–9: см. git log.
 
 ## Заметки / ограничения среды
 

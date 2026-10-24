@@ -78,8 +78,10 @@
       reduceTransparency; отсутствие канала (`MissingPluginException`) не падает.
 - [x] `test/adaptive_chrome_golden_test.dart` + `test/goldens/` — эталоны текущих нижней панели вкладок
       (android) и боковой `NavigationRail` (windows), light/dark, сняты **до** шагов 3–6.
-- [ ] Дополнить goldens заголовком (`CommonScaffold` app bar) и нижним листом (`showSheet`) —
-      сделать **до** шагов 4 и 5 соответственно.
+- [x] Дополнить goldens заголовком (`CommonScaffold` app bar) и нижним листом (`showSheet`).
+      Сделано задним числом: `test/material_chrome_golden_test.dart` (экран с заголовком и навигацией
+      mobile/desktop, нижний и боковой лист, меню; light/dark) — эталоны сняты в worktree на `fd102ce`
+      (до хрома) и без изменений проходят на текущей ветке.
 - Готово, когда: analyze `lib test` без новых диагностик, все тесты зелёные, goldens закоммичены.
 
 ### 2. macOS: обычное окно вместо popover — PR `feat(macos): run as a regular window`
@@ -238,3 +240,5 @@
   `AdaptiveTabBar.bottomInset` — для этапа 2. `test/adaptive_tab_bar_inset_test.dart` (+3, без фикса падает).
   `flutter test` 219 / 1 skipped, analyze 529 / 0 errors. macOS 27 прячет SF Symbols в меню — оставлено системное
   поведение, решение за владельцем.
+- 2026-10-24: goldens Material-хрома дополнены (+10): эталоны сгенерированы на `fd102ce` (до шагов 3–6),
+  текущий код совпадает пиксель-в-пиксель. `flutter test` 229 / 1 skipped, analyze 529 / 0 errors.

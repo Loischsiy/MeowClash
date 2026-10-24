@@ -11,10 +11,12 @@ import 'package:meowclash/l10n/l10n.dart';
 import 'package:meowclash/models/models.dart';
 import 'package:meowclash/providers/providers.dart';
 import 'package:meowclash/state.dart';
+import 'package:meowclash/views/proxies/common.dart';
 import 'package:meowclash/views/proxies/list.dart';
 import 'package:meowclash/views/proxies/tab.dart';
 import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:meowclash/widgets/card.dart';
+import 'package:meowclash/widgets/text.dart';
 
 import 'performance_test_support.dart';
 
@@ -31,6 +33,9 @@ void main() {
   final darwin = TargetPlatformVariant.only(TargetPlatform.macOS);
   final ios = TargetPlatformVariant.only(TargetPlatform.iOS);
   final android = TargetPlatformVariant.only(TargetPlatform.android);
+  const apple = TargetPlatformVariant(
+    {TargetPlatform.macOS, TargetPlatform.iOS},
+  );
 
   tearDown(() {
     AdaptivePlatform.debugUseGlassOverride = null;
@@ -160,6 +165,20 @@ void main() {
       await tester.pumpWidget(const SizedBox.shrink());
     }, variant: darwin);
 
+    testWidgets('cards scroll under the stuck group header', (tester) async {
+      await setUp(tester, type: ProxiesType.list);
+      await pumpScreen(tester, host(const ProxiesListView()));
+      await scrollList(tester, 600);
+      final header = tester.getRect(find.byType(GlassSurface).first);
+      expect(header.top, lessThanOrEqualTo(GlassTokens.groupHeaderMargin));
+      final under = tester
+          .widgetList(find.byType(AdaptiveCard))
+          .map((card) => tester.getRect(find.byWidget(card)))
+          .where((rect) => rect.overlaps(header));
+      expect(under, isNotEmpty);
+      await tester.pumpWidget(const SizedBox.shrink());
+    }, variant: apple);
+
     testWidgets('Reduce Transparency keeps the stuck header opaque',
         (tester) async {
       await setUp(tester, type: ProxiesType.list);
@@ -197,6 +216,87 @@ void main() {
     }, variant: android);
   });
 
+  group('cards', () {
+    Finder name(String proxy) =>
+        find.byWidgetPredicate((w) => w is EmojiText && w.text == proxy);
+    Finder cardOf(String proxy) =>
+        find.ancestor(of: name(proxy), matching: find.byType(AdaptiveCard));
+
+    testWidgets('names, descriptions and delays use the Apple type scale',
+        (tester) async {
+      await setUp(tester, type: ProxiesType.tab);
+      await pumpScreen(tester, host(const ProxiesTabView()));
+      final mac = defaultTargetPlatform == TargetPlatform.macOS;
+
+      final title = tester.widget<EmojiText>(name('HK 001')).style!;
+      expect(title.fontSize, mac ? 13 : 15);
+      expect(title.fontSize! * title.height!, mac ? 16 : 20);
+      expect(title.fontWeight, FontWeight.w500);
+      final desc = tester
+          .widgetList<EmojiText>(find.descendant(
+            of: cardOf('HK 001'),
+            matching: find.byType(EmojiText),
+          ))
+          .last
+          .style!;
+      expect(desc.fontSize, mac ? 11 : 13);
+      final badge = tester.widget<Text>(find.text('48 ms')).style!;
+      expect(badge.fontSize, mac ? 11 : 12);
+      expect(badge.fontWeight, FontWeight.w600);
+
+      // The grid extent is measured from the same styles.
+      expect(
+        tester.getSize(cardOf('HK 001')).height,
+        moreOrLessEquals(getItemHeight(ProxyCardType.expand)),
+      );
+      await tester.pumpWidget(const SizedBox.shrink());
+    }, variant: apple);
+
+    testWidgets('selection is a light tint and a hairline, not an outline',
+        (tester) async {
+      await setUp(tester, type: ProxiesType.tab);
+      await pumpScreen(tester, host(const ProxiesTabView()));
+      ShapeDecoration decorationOf(String proxy) => tester
+          .widget<AnimatedContainer>(find.descendant(
+            of: cardOf(proxy),
+            matching: find.byType(AnimatedContainer),
+          ))
+          .decoration! as ShapeDecoration;
+      BorderSide sideOf(ShapeDecoration d) =>
+          (d.shape as RoundedSuperellipseBorder).side;
+
+      final selected = decorationOf('HK 002');
+      final resting = decorationOf('HK 001');
+      expect(sideOf(selected).width, GlassTokens.hairlineWidth);
+      expect(sideOf(resting).width, GlassTokens.hairlineWidth);
+      expect(selected.color, isNot(resting.color));
+      expect(
+        find.descendant(
+          of: cardOf('HK 002'),
+          matching: find.byIcon(Icons.check_rounded),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: cardOf('HK 001'),
+          matching: find.byIcon(Icons.check_rounded),
+        ),
+        findsNothing,
+      );
+      await tester.pumpWidget(const SizedBox.shrink());
+    }, variant: darwin);
+
+    testWidgets('group header uses the Apple title scale', (tester) async {
+      await setUp(tester, type: ProxiesType.list);
+      await pumpScreen(tester, host(const ProxiesListView()));
+      final title = tester.widget<Text>(find.text('Select').first).style!;
+      expect(title.fontSize, 15);
+      expect(title.fontWeight, FontWeight.w600);
+      await tester.pumpWidget(const SizedBox.shrink());
+    }, variant: darwin);
+  });
+
   group('tab mode', () {
     testWidgets('the group bar is the only blur over $proxyCount proxies',
         (tester) async {
@@ -220,6 +320,22 @@ void main() {
       expect(firstCard.top, greaterThanOrEqualTo(bar.bottom));
       await tester.pumpWidget(const SizedBox.shrink());
     }, variant: ios);
+
+    testWidgets('the grid scrolls under the floating bar', (tester) async {
+      await setUp(tester, type: ProxiesType.tab);
+      await pumpScreen(tester, host(const ProxiesTabView()));
+      final bar = tester.getRect(find.byType(GlassSurface).first);
+      await tester.drag(find.byType(GridView), const Offset(0, -500));
+      await tester.pump(const Duration(milliseconds: 300));
+      final under = tester
+          .widgetList(find.byType(AdaptiveCard))
+          .map((card) => tester.getRect(find.byWidget(card)))
+          .where((rect) => rect.overlaps(bar));
+      expect(under, isNotEmpty);
+      // ...and the bar stays on top of them.
+      expect(tester.getRect(find.byType(GlassSurface).first), bar);
+      await tester.pumpWidget(const SizedBox.shrink());
+    }, variant: apple);
 
     testWidgets('Reduce Transparency makes the group bar opaque',
         (tester) async {
@@ -267,24 +383,28 @@ void main() {
 
     testWidgets('group header absorbs a subtitle taller than measured',
         (tester) async {
-      // Emoji (Twemoji) spans are taller than the measured labelMedium line.
+      // Emoji (Twemoji) spans are taller than the measured subtitle line.
       await setUp(tester, type: ProxiesType.list);
       await pumpScreen(
         tester,
         // globalState.measure is set by host() during the build.
         host(Builder(builder: (context) {
           final measure = globalState.measure;
+          final textTheme = Theme.of(context).textTheme;
+          final subtitleHeight =
+              measure.heightOf(GlassTextStyles.groupSubtitle(textTheme));
           return Align(
             alignment: Alignment.topCenter,
             child: SizedBox(
               height: AdaptiveGroupHeader.extent(
-                titleHeight: measure.titleMediumHeight,
-                subtitleHeight: measure.labelMediumHeight,
+                titleHeight:
+                    measure.heightOf(GlassTextStyles.groupTitle(textTheme)),
+                subtitleHeight: subtitleHeight,
               ),
               child: AdaptiveGroupHeader(
                 materialBuilder: (_) => const SizedBox.shrink(),
                 title: 'Proxy',
-                subtitle: SizedBox(height: measure.labelMediumHeight + 6),
+                subtitle: SizedBox(height: subtitleHeight + 6),
                 expanded: true,
                 onToggle: () {},
                 onTest: () {},

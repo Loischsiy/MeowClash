@@ -18,5 +18,6 @@ export 'glass_accessibility.dart';
 export 'glass_icon_button.dart';
 export 'glass_refraction.dart';
 export 'glass_surface.dart';
+export 'glass_text_styles.dart';
 export 'glass_theme.dart';
 export 'glass_tokens.dart';

@@ -102,15 +102,48 @@ abstract final class GlassTokens {
   // Text and icons of disabled menu rows, as alpha of the foreground.
   static const double disabledOpacity = 0.30;
 
+  // Type scale of glass content, after the Apple HIG text styles: macOS
+  // body 13 / caption 11 / title3 15, iOS subheadline 15 / footnote 13 /
+  // caption 12 / headline 17. Sizes and line heights in logical px, resolved
+  // per platform by `GlassTextStyles`.
+  static const double cardTitleSizeMac = 13;
+  static const double cardTitleLineMac = 16;
+  static const double cardTitleSizeIos = 15;
+  static const double cardTitleLineIos = 20;
+  // Proxy description; one line, as tall as the delay badge beside it.
+  static const double cardSubtitleSizeMac = 11;
+  static const double cardSubtitleLineMac = 16;
+  static const double cardSubtitleSizeIos = 13;
+  static const double cardSubtitleLineIos = 18;
+  // Delay badge label; the line height is the height of the capsule.
+  static const double delayBadgeSizeMac = 11;
+  static const double delayBadgeLineMac = 16;
+  static const double delayBadgeSizeIos = 12;
+  static const double delayBadgeLineIos = 18;
+  static const double groupTitleSizeMac = 15;
+  static const double groupTitleLineMac = 20;
+  static const double groupTitleSizeIos = 17;
+  static const double groupTitleLineIos = 22;
+  static const double groupSubtitleSizeMac = 11;
+  static const double groupSubtitleLineMac = 14;
+  static const double groupSubtitleSizeIos = 13;
+  static const double groupSubtitleLineIos = 18;
+
   // Content cards (proxy nodes). They scroll, so they never blur: a
-  // translucent fill over the window background, a hairline edge, and the
-  // accent for the selected card.
+  // translucent fill over the window background and a hairline edge, quieter
+  // than the chrome's. The selected card is a light accent tint with a faint
+  // accent edge — no thick outline; the check badge marks the choice.
   static const double cardRadius = 12;
   static const double _cardFillOpacityLight = 0.72;
   static const double _cardFillOpacityDark = 0.46;
-  static const double _cardSelectedOpacityLight = 0.14;
-  static const double _cardSelectedOpacityDark = 0.22;
-  static const double cardSelectedBorderWidth = 1.5;
+  static const double _cardHairlineOpacityLight = 0.06;
+  static const double _cardHairlineOpacityDark = 0.08;
+  static const double _cardSelectedOpacityLight = 0.12;
+  static const double _cardSelectedOpacityDark = 0.20;
+  // Edge of the selected card, as alpha of the accent; hairline wide.
+  static const double cardSelectedEdgeOpacity = 0.45;
+  // Keyboard focus ring (macOS full keyboard access).
+  static const double cardFocusBorderWidth = 1.5;
   // Check badge of the user's choice, in the top-end corner of the card.
   static const double cardCheckSize = 18;
   static const double cardCheckIconSize = 12;
@@ -215,6 +248,11 @@ abstract final class GlassTokens {
 
   static double cardFillOpacity(Brightness brightness) =>
       _isDark(brightness) ? _cardFillOpacityDark : _cardFillOpacityLight;
+
+  static double cardHairlineOpacity(Brightness brightness) =>
+      _isDark(brightness)
+          ? _cardHairlineOpacityDark
+          : _cardHairlineOpacityLight;
 
   static double cardSelectedOpacity(Brightness brightness) =>
       _isDark(brightness)

@@ -9,9 +9,10 @@ import 'glass_tokens.dart';
 ///
 /// * Darwin: a translucent rounded card with a hairline edge, **no blur** —
 ///   it scrolls, and a grid can hold hundreds of them. The selected card is
-///   tinted with the accent and outlined; [checked] adds a check badge in the
-///   top-end corner. macOS gets a hover wash, keyboard focus gets an accent
-///   outline, and Reduce Transparency makes the fill opaque.
+///   a light accent tint with a faint accent hairline (no thick outline);
+///   [checked] adds a check badge in the top-end corner. macOS gets a hover
+///   wash, keyboard focus gets an accent ring, and Reduce Transparency makes
+///   the fill opaque.
 /// * Everything else: `CommonCard`, unchanged.
 class AdaptiveCard extends StatelessWidget {
   const AdaptiveCard({
@@ -123,16 +124,24 @@ class _GlassCardState extends State<_GlassCard> {
         fill,
       );
     }
-    final side = widget.isSelected || _focused
-        ? BorderSide(
-            color: accent,
-            width: GlassTokens.cardSelectedBorderWidth,
-          )
-        : BorderSide(
-            color: (dark ? Colors.white : Colors.black)
-                .withValues(alpha: GlassTokens.hairlineOpacity(brightness)),
-            width: GlassTokens.hairlineWidth,
-          );
+    final BorderSide side;
+    if (_focused) {
+      side = BorderSide(
+        color: accent,
+        width: GlassTokens.cardFocusBorderWidth,
+      );
+    } else if (widget.isSelected) {
+      side = BorderSide(
+        color: accent.withValues(alpha: GlassTokens.cardSelectedEdgeOpacity),
+        width: GlassTokens.hairlineWidth,
+      );
+    } else {
+      side = BorderSide(
+        color: (dark ? Colors.white : Colors.black)
+            .withValues(alpha: GlassTokens.cardHairlineOpacity(brightness)),
+        width: GlassTokens.hairlineWidth,
+      );
+    }
 
     var content = widget.child;
     if (widget.checked) {

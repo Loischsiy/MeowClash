@@ -143,8 +143,12 @@ class _ProxyGroupSliverState extends ConsumerState<_ProxyGroupSliver> {
               group: group,
               expanded: widget.expanded,
               extent: AdaptiveGroupHeader.extent(
-                titleHeight: measure.titleMediumHeight,
-                subtitleHeight: measure.labelMediumHeight,
+                titleHeight: measure.heightOf(
+                  GlassTextStyles.groupTitle(context.textTheme),
+                ),
+                subtitleHeight: measure.heightOf(
+                  GlassTextStyles.groupSubtitle(context.textTheme),
+                ),
               ),
             ),
           )
@@ -346,9 +350,8 @@ class _ProxyGroupCardState extends State<ProxyGroupCard> {
                     proxyName,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.labelMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
+                    style: GlassTextStyles.groupSubtitle(theme.textTheme)
+                        .copyWith(color: theme.colorScheme.onSurfaceVariant),
                   );
                 },
               ),

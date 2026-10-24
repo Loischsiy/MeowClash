@@ -6,12 +6,20 @@ class Measure {
 
   Measure.of(this.context, double textScaleFactor)
       : _measureMap = {},
+        _styleHeights = {},
         _textScaler = TextScaler.linear(
           textScaleFactor,
         );
   final TextScaler _textScaler;
   final BuildContext context;
   final Map<String, double> _measureMap;
+  final Map<TextStyle, double> _styleHeights;
+
+  /// Height of one line of [style], cached per style.
+  double heightOf(TextStyle style) => _styleHeights.putIfAbsent(
+        style,
+        () => computeTextSize(Text("X", style: style)).height,
+      );
 
   Size computeTextSize(
     Text text, {

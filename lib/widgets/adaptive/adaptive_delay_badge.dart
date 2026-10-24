@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'adaptive_platform.dart';
 import 'glass_accessibility.dart';
+import 'glass_text_styles.dart';
 import 'glass_tokens.dart';
 
 /// Latency of one proxy: `null` = not tested yet, `0` = test running,
@@ -26,7 +27,8 @@ class AdaptiveDelayBadge extends StatelessWidget {
   /// Color of the measured delay (`utils.getDelayColor`).
   final Color? color;
 
-  /// Line height the badge must fit in (`measure.labelSmallHeight`).
+  /// Line height the badge must fit in (`labelSmall` on Material, the
+  /// [GlassTextStyles.delayBadge] line on Darwin).
   final double height;
 
   final VoidCallback onTest;
@@ -119,11 +121,9 @@ class AdaptiveDelayBadge extends StatelessWidget {
               _label(delay),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.labelSmall?.copyWith(
+              style: GlassTextStyles.delayBadge(theme.textTheme).copyWith(
                 color: tint,
-                fontWeight: FontWeight.w600,
                 height: 1,
-                fontFeatures: const [FontFeature.tabularFigures()],
               ),
             ),
           ),

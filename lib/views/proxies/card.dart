@@ -25,7 +25,13 @@ class ProxyCard extends StatelessWidget {
   final ProxyCardType type;
   final String? testUrl;
 
-  Measure get measure => globalState.measure;
+  /// Name / description / delay line heights (Apple type scale on Darwin).
+  ({double title, double desc, double delay}) get _lines =>
+      proxyCardLineHeights;
+
+  TextStyle? _titleStyle(BuildContext context) => AdaptivePlatform.useGlass
+      ? GlassTextStyles.cardTitle(context.textTheme)
+      : context.textTheme.bodyMedium;
 
   void _handleTestCurrentDelay() {
     proxyDelayTest(
@@ -68,7 +74,7 @@ class ProxyCard extends StatelessWidget {
   }
 
   Widget _buildDelayText() => SizedBox(
-      height: measure.labelSmallHeight,
+      height: _lines.delay,
       child: Consumer(
         builder: (context, ref, __) {
           final delay = ref.watch(getDelayProvider(
@@ -78,7 +84,7 @@ class ProxyCard extends StatelessWidget {
           return AdaptiveDelayBadge(
             delay: delay,
             color: utils.getDelayColor(delay),
-            height: measure.labelSmallHeight,
+            height: _lines.delay,
             onTest: _handleTestCurrentDelay,
           );
         },
@@ -109,7 +115,7 @@ class ProxyCard extends StatelessWidget {
           );
         },
         child: SizedBox(
-          height: measure.bodyMediumHeight * 1,
+          height: _lines.title * 1,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -119,7 +125,7 @@ class ProxyCard extends StatelessWidget {
                   proxy.name,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: context.textTheme.bodyMedium,
+                  style: _titleStyle(context),
                 ),
               ),
               const SizedBox(width: 8),
@@ -132,22 +138,22 @@ class ProxyCard extends StatelessWidget {
     final Widget text;
     if (type == ProxyCardType.min) {
       text = SizedBox(
-        height: measure.bodyMediumHeight * 1,
+        height: _lines.title * 1,
         child: EmojiText(
           proxy.name,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: context.textTheme.bodyMedium,
+          style: _titleStyle(context),
         ),
       );
     } else {
       text = SizedBox(
-        height: measure.bodyMediumHeight * 2,
+        height: _lines.title * 2,
         child: EmojiText(
           proxy.name,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
-          style: context.textTheme.bodyMedium,
+          style: _titleStyle(context),
         ),
       );
     }
@@ -178,7 +184,7 @@ class ProxyCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final measure = globalState.measure;
+    final lines = _lines;
     final delayText = _buildDelayText();
     final proxyNameText = _buildProxyNameText(context);
     return Stack(
@@ -223,7 +229,7 @@ class ProxyCard extends StatelessWidget {
                   ),
                   if (type == ProxyCardType.expand) ...[
                     SizedBox(
-                      height: measure.bodySmallHeight,
+                      height: lines.desc,
                       child: _ProxyDesc(
                         proxy: proxy,
                       ),
@@ -234,7 +240,7 @@ class ProxyCard extends StatelessWidget {
                     delayText,
                   ] else
                     SizedBox(
-                      height: measure.bodySmallHeight,
+                      height: lines.desc,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.center,
@@ -364,9 +370,13 @@ class _ProxyDesc extends ConsumerWidget {
     return EmojiText(
       desc,
       overflow: TextOverflow.ellipsis,
-      style: context.textTheme.bodySmall?.copyWith(
-        color: context.textTheme.bodySmall?.color?.opacity80,
-      ),
+      style: AdaptivePlatform.useGlass
+          ? GlassTextStyles.cardSubtitle(context.textTheme).copyWith(
+              color: context.colorScheme.onSurfaceVariant,
+            )
+          : context.textTheme.bodySmall?.copyWith(
+              color: context.textTheme.bodySmall?.color?.opacity80,
+            ),
     );
   }
 }

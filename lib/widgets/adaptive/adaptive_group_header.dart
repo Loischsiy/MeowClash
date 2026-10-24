@@ -6,6 +6,7 @@ import 'adaptive_platform.dart';
 import 'glass_accessibility.dart';
 import 'glass_icon_button.dart';
 import 'glass_surface.dart';
+import 'glass_text_styles.dart';
 import 'glass_tokens.dart';
 
 /// Header of a collapsible group in a scrolling list (proxy groups).
@@ -52,7 +53,8 @@ class AdaptiveGroupHeader extends StatelessWidget {
   final bool pinned;
 
   /// Height of the Darwin header for [titleHeight] / [subtitleHeight] (the
-  /// measured `titleMedium` / `labelMedium` lines).
+  /// measured [GlassTextStyles.groupTitle] / [GlassTextStyles.groupSubtitle]
+  /// lines).
   static double extent({
     required double titleHeight,
     required double subtitleHeight,
@@ -103,9 +105,7 @@ class AdaptiveGroupHeader extends StatelessWidget {
                   title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: GlassTextStyles.groupTitle(theme.textTheme),
                 ),
                 const SizedBox(height: GlassTokens.groupHeaderTitleGap),
                 // Flexible: emoji spans (Twemoji) are a bit taller than the
@@ -114,9 +114,8 @@ class AdaptiveGroupHeader extends StatelessWidget {
                   child: DefaultTextStyle.merge(
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.labelMedium?.copyWith(
-                      color: scheme.onSurfaceVariant,
-                    ),
+                    style: GlassTextStyles.groupSubtitle(theme.textTheme)
+                        .copyWith(color: scheme.onSurfaceVariant),
                     child: subtitle ?? const SizedBox.shrink(),
                   ),
                 ),
@@ -167,8 +166,9 @@ class AdaptiveGroupHeader extends StatelessWidget {
           shape: RoundedSuperellipseBorder(
             borderRadius: radius,
             side: BorderSide(
-              color: (dark ? Colors.white : Colors.black)
-                  .withValues(alpha: GlassTokens.hairlineOpacity(brightness)),
+              color: (dark ? Colors.white : Colors.black).withValues(
+                alpha: GlassTokens.cardHairlineOpacity(brightness),
+              ),
               width: GlassTokens.hairlineWidth,
             ),
           ),

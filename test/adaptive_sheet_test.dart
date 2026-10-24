@@ -41,4 +41,37 @@ void main() {
       debugDefaultTargetPlatformOverride = null;
     });
   }
+
+  // On phones `showExtend` pushes the sheet as an opaque full-screen page:
+  // there is nothing behind it to blur, so glass would paint a flat grey tint.
+  testWidgets('page: Darwin page is opaque, without glass', (tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    AdaptivePlatform.debugUseGlassOverride = true;
+    await tester.pumpWidget(_app(SheetType.page));
+    expect(find.byType(GlassSurface), findsNothing);
+    expect(find.byType(BackdropFilter), findsNothing);
+    final context = tester.element(find.text('Sheet'));
+    final scaffold = tester.widget<Scaffold>(find
+        .ancestor(of: find.text('Sheet'), matching: find.byType(Scaffold))
+        .first);
+    final background = scaffold.backgroundColor ??
+        Theme.of(context).scaffoldBackgroundColor;
+    expect(background.a, 1.0);
+    debugDefaultTargetPlatformOverride = null;
+  });
+
+  testWidgets('page: Material branch keeps its translucent surface',
+      (tester) async {
+    AdaptivePlatform.debugUseGlassOverride = false;
+    await tester.pumpWidget(_app(SheetType.page));
+    expect(find.byType(GlassSurface), findsNothing);
+    final context = tester.element(find.text('Sheet'));
+    final scaffold = tester.widget<Scaffold>(find
+        .ancestor(of: find.text('Sheet'), matching: find.byType(Scaffold))
+        .first);
+    expect(
+      scaffold.backgroundColor,
+      Theme.of(context).colorScheme.surface.withValues(alpha: 0.92),
+    );
+  });
 }

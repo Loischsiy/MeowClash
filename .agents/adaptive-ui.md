@@ -23,6 +23,9 @@ pixel-for-pixel. Code: `lib/widgets/adaptive/` (import `adaptive.dart`).
   shows through (macOS sidebar and title bar, zero `BackdropFilter`).
 - Sheets: on Darwin `showSheet` / `showExtend` skip the old full-screen `BackdropFilter` and
   `AdaptiveSheetScaffold` blurs only its own surface.
+- `SheetType.page` (phones, `showExtend`) is an opaque full-screen route with nothing behind it to
+  blur: `AdaptiveSheetScaffold` renders it without glass, on the theme's opaque page background.
+  Glass there would only tint an empty backdrop flat grey.
 - All numbers (sigmas, radii, opacities, sizes, durations) live in `glass_tokens.dart`.
 
 ## Accessibility and fallbacks

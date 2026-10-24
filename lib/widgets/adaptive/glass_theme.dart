@@ -9,12 +9,24 @@ import 'glass_accessibility.dart';
 /// keeps its identity; only the seed follows the system accent on macOS (when
 /// it is not "Multicolor"), and chrome-level components become transparent so
 /// the glass surfaces of the adaptive layer show through. Content widgets are
-/// not restyled here (phase 2).
+/// not restyled here (phase 2). The bundled NotoSans is not used on Darwin:
+/// see [fontFamily].
 abstract final class GlassTheme {
   /// The seed to use instead of the user-picked primary color, or `null` to
   /// keep the app's own color (macOS "Multicolor", iOS, non-Darwin).
   static Color? seedOverride(GlassAccessibility accessibility) =>
       AdaptivePlatform.useGlass ? accessibility.accentColor : null;
+
+  /// App font family: `null` on Darwin, so `ThemeData` keeps the Cupertino
+  /// typography (the system San Francisco); [materialFamily] elsewhere.
+  static String? fontFamily(String materialFamily) =>
+      AdaptivePlatform.useGlass ? null : materialFamily;
+
+  /// Font fallbacks: `null` on Darwin, so glyphs San Francisco lacks come
+  /// from the system cascade (PingFang, Hiragino, Apple Color Emoji...);
+  /// [materialFallback] elsewhere.
+  static List<String>? fontFamilyFallback(List<String> materialFallback) =>
+      AdaptivePlatform.useGlass ? null : materialFallback;
 
   static ThemeData apply(ThemeData base) => base.copyWith(
         // Apple controls highlight, they do not ripple.

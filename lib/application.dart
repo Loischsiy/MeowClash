@@ -219,8 +219,10 @@ class ApplicationState extends ConsumerState<Application> {
                 themeMode: themeProps.themeMode,
                 theme: _adaptiveTheme(ThemeData(
                   useMaterial3: true,
-                  fontFamily: 'NotoSans',
-                  fontFamilyFallback: const ['NotoSans', 'JetBrainsMono'],
+                  fontFamily: GlassTheme.fontFamily('NotoSans'),
+                  fontFamilyFallback: GlassTheme.fontFamilyFallback(
+                    const ['NotoSans', 'JetBrainsMono'],
+                  ),
                   pageTransitionsTheme: _pageTransitionsTheme,
                   colorScheme: _getAppColorScheme(
                     brightness: Brightness.light,
@@ -231,8 +233,10 @@ class ApplicationState extends ConsumerState<Application> {
                 )),
                 darkTheme: _adaptiveTheme(ThemeData(
                   useMaterial3: true,
-                  fontFamily: 'NotoSans',
-                  fontFamilyFallback: const ['NotoSans', 'JetBrainsMono'],
+                  fontFamily: GlassTheme.fontFamily('NotoSans'),
+                  fontFamilyFallback: GlassTheme.fontFamilyFallback(
+                    const ['NotoSans', 'JetBrainsMono'],
+                  ),
                   pageTransitionsTheme: _pageTransitionsTheme,
                   colorScheme: _getAppColorScheme(
                     brightness: Brightness.dark,

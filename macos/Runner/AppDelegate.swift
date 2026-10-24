@@ -8,6 +8,8 @@ class AppDelegate: FlutterAppDelegate {
     var statusBarController: StatusBarController?
     private var statusBarChannel: FlutterMethodChannel?
     private var glassAccessibilityChannel: FlutterMethodChannel?
+    private var contextMenuChannel: FlutterMethodChannel?
+    private let contextMenuPresenter = ContextMenuPresenter()
     
     // MeowClash is a regular window app (Dock icon + app menu) with an extra
     // menu bar icon. The window starts hidden (`hiddenWindowAtLaunch`) and Dart
@@ -24,6 +26,7 @@ class AppDelegate: FlutterAppDelegate {
         
         setupStatusBarChannel(flutterViewController: mainController)
         setupGlassAccessibilityChannel(flutterViewController: mainController)
+        setupContextMenuChannel(flutterViewController: mainController)
         setupAppVisibilityObservers()
         
         super.applicationDidFinishLaunching(aNotification)
@@ -92,6 +95,37 @@ class AppDelegate: FlutterAppDelegate {
             name: NSNotification.Name("AppleColorPreferencesChangedNotification"),
             object: nil
         )
+    }
+
+    // Native context menus for the Flutter chrome
+    // (lib/widgets/adaptive/adaptive_context_menu.dart). `show` pops an NSMenu
+    // up at a point in Flutter logical coordinates (points, origin top-left)
+    // and replies with the chosen item index, or -1 when it was dismissed.
+    func setupContextMenuChannel(flutterViewController: FlutterViewController) {
+        let channel = FlutterMethodChannel(
+            name: "meowclash/context_menu",
+            binaryMessenger: flutterViewController.engine.binaryMessenger
+        )
+        contextMenuChannel = channel
+        channel.setMethodCallHandler { [weak self, weak flutterViewController] (call: FlutterMethodCall, result: @escaping FlutterResult) in
+            guard call.method == "show" else {
+                result(FlutterMethodNotImplemented)
+                return
+            }
+            guard let self = self,
+                  let view = flutterViewController?.view,
+                  view.window != nil,
+                  let args = call.arguments as? [String: Any],
+                  let items = args["items"] as? [[String: Any]],
+                  let x = (args["x"] as? NSNumber)?.doubleValue,
+                  let y = (args["y"] as? NSNumber)?.doubleValue else {
+                result(FlutterError(code: "INVALID_ARGS", message: "Invalid arguments", details: nil))
+                return
+            }
+            self.contextMenuPresenter.present(items: items, at: NSPoint(x: x, y: y), in: view) { index in
+                result(index)
+            }
+        }
     }
 
     @objc func glassAccessibilityDidChange(_ notification: Notification) {
@@ -261,5 +295,85 @@ class AppDelegate: FlutterAppDelegate {
             return false
         }
         return true
+    }
+}
+
+/// Builds and shows the NSMenu behind `meowclash/context_menu`. Lives here, not
+/// in its own file, so the Xcode project needs no new source entry.
+final class ContextMenuPresenter: NSObject, NSMenuDelegate {
+    private struct DestructiveItem {
+        let title: String
+        let image: NSImage?
+    }
+
+    private var selectedIndex = -1
+    private var destructiveItems: [NSMenuItem: DestructiveItem] = [:]
+
+    /// `popUp` runs its own tracking loop and returns once the menu closes.
+    /// The reply is sent on the next run-loop turn, after AppKit has delivered
+    /// the item action.
+    func present(items: [[String: Any]], at point: NSPoint, in view: NSView, completion: @escaping (Int) -> Void) {
+        selectedIndex = -1
+        destructiveItems.removeAll()
+        let menu = NSMenu()
+        menu.autoenablesItems = false
+        menu.delegate = self
+        for (index, item) in items.enumerated() {
+            let title = item["title"] as? String ?? ""
+            let enabled = item["enabled"] as? Bool ?? true
+            let destructive = item["destructive"] as? Bool ?? false
+            // HIG: destructive actions form their own group at the end.
+            if destructive, let last = menu.items.last, !last.isSeparatorItem {
+                menu.addItem(.separator())
+            }
+            let menuItem = NSMenuItem(title: title, action: #selector(itemSelected(_:)), keyEquivalent: "")
+            menuItem.target = self
+            menuItem.tag = index
+            menuItem.isEnabled = enabled
+            var image: NSImage?
+            if let symbol = item["symbol"] as? String {
+                image = NSImage(systemSymbolName: symbol, accessibilityDescription: nil)
+            }
+            menuItem.image = image
+            if destructive && enabled {
+                let info = DestructiveItem(title: title, image: image)
+                destructiveItems[menuItem] = info
+                style(menuItem, info, highlighted: false)
+            }
+            menu.addItem(menuItem)
+        }
+        let location = NSPoint(x: point.x, y: view.isFlipped ? point.y : view.bounds.height - point.y)
+        menu.popUp(positioning: nil, at: location, in: view)
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else {
+                completion(-1)
+                return
+            }
+            self.destructiveItems.removeAll()
+            completion(self.selectedIndex)
+        }
+    }
+
+    @objc private func itemSelected(_ sender: NSMenuItem) {
+        selectedIndex = sender.tag
+    }
+
+    // Red text would be unreadable on the accent-colored highlight, so the
+    // highlighted destructive item switches to the standard selected color.
+    func menu(_ menu: NSMenu, willHighlight item: NSMenuItem?) {
+        for (menuItem, info) in destructiveItems {
+            style(menuItem, info, highlighted: menuItem === item)
+        }
+    }
+
+    private func style(_ item: NSMenuItem, _ info: DestructiveItem, highlighted: Bool) {
+        let color: NSColor = highlighted ? .selectedMenuItemTextColor : .systemRed
+        item.attributedTitle = NSAttributedString(
+            string: info.title,
+            attributes: [.foregroundColor: color, .font: NSFont.menuFont(ofSize: 0)]
+        )
+        if let image = info.image {
+            item.image = image.withSymbolConfiguration(NSImage.SymbolConfiguration(paletteColors: [color])) ?? image
+        }
     }
 }

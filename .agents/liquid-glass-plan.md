@@ -135,12 +135,19 @@
       на Darwin заменить на один `GlassSurface`, на остальных оставить как есть).
 
 ### 6. Контекстные меню — PR `feat(ui): native context menus on macOS`
-- [ ] `AdaptiveContextMenu` (`adaptive_context_menu.dart`), подключить в `lib/widgets/popup.dart`
-      (`CommonPopupMenu`).
-- [ ] macOS: канал `meowclash/context_menu` → `NSMenu.popUp(positioning:at:in:)` в `AppDelegate.swift`
-      (текст, SF Symbol, disabled, danger-пункт; возвращает индекс).
-- [ ] iOS: стеклянное Flutter-меню на `GlassSurface`.
-- [ ] Остальные платформы — нынешний `CommonPopupMenu`.
+- [x] `AdaptiveContextMenu` (`adaptive_context_menu.dart`), подключить в `lib/widgets/popup.dart`
+      (`CommonPopupMenu` строит его, `CommonPopupBox._open` на macOS сначала пробует натив).
+      Красный пункт: `PopupMenuItemData.type = PopupMenuItemType.danger` (enum уже был, не использовался;
+      поле необязательное, Material его не рисует) — проставлен у «Удалить» в профилях и скриптах.
+- [x] macOS: канал `meowclash/context_menu` → `NSMenu.popUp(positioning:at:in:)` в `AppDelegate.swift`
+      (`ContextMenuPresenter`: текст, SF Symbol по таблице `sfSymbolFor`, disabled, danger-пункт — красный,
+      отдельной группой, белый при подсветке; возвращает индекс или -1). Меню под кнопкой, слева по её краю.
+      Ошибка/нет канала → Flutter-стеклянное меню.
+- [x] iOS: стеклянное Flutter-меню на одном `GlassSurface` (`menuSigma`), иконка справа, как в iOS;
+      открытие — только масштаб (без `Opacity` над размытием), закрытие мгновенное, Reduce Motion — без анимации.
+- [x] Остальные платформы — нынешний `CommonPopupMenu` (ветка Material и переход маршрута не тронуты).
+- [ ] Проверка запуском владельцем: macOS (⋯ у профиля → системное меню с иконками, «Удалить» красный),
+      iOS-симулятор (стеклянное меню).
 
 ### 7. Нативное стекло окна macOS — PR `feat(macos): native glass window backdrop`
 - [x] `MainFlutterWindow.swift` — `FlutterViewController.backgroundColor = .clear`, под ним
@@ -219,3 +226,7 @@
 - 2026-10-24: владелец проверил `NSGlassEffectView` на macOS 27: боковая панель следует ползунку Liquid Glass
   («Прозрачный» — сильнее просвечивает обои, «Тонированный» — плотнее), как системные сайдбары.
 - 2026-10-24: шаг 5 закрыт (боковые листы уже стеклянные через `AdaptiveSheetScaffold`), +4 теста на «ровно один BackdropFilter».
+- 2026-10-24: шаг 6 — код готов: `NSMenu` на macOS, стеклянное меню на iOS, Material без изменений.
+  `test/adaptive_context_menu_test.dart` (+9). analyze `lib test` 529 / 0 errors (−1: порядок импортов в `popup.dart`),
+  `flutter test` 216 / 1 skipped, goldens не изменились. Swift `-typecheck` (macOS 12, плагины заглушены) чистый.
+  Запуском не проверено — за владельцем.

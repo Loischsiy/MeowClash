@@ -70,6 +70,27 @@ abstract final class GlassTokens {
   static const double titleBarHeight = 28;
   static const double trafficLightsInset = 78;
 
+  // Geometry of the Flutter glass context menu (iOS, and macOS when the
+  // native NSMenu channel is unavailable).
+  static const double menuMinWidth = 200;
+  static const double menuMaxWidth = 280;
+  static const double menuVerticalPadding = 6;
+  static const double menuRowHeight = 44;
+  static const double menuRowInset = 6;
+  static const double menuRowPadding = 12;
+  static const double menuRowRadius = 8;
+  static const double menuIconSize = 20;
+  static const double menuIconGap = 16;
+  static const double menuGroupGap = 6;
+  // Distance between the menu and the control that opened it.
+  static const double menuAnchorGap = 4;
+  // The menu grows from this scale to 1 while opening.
+  static const double menuOpenScale = 0.85;
+  static const double _menuPressedOpacityLight = 0.10;
+  static const double _menuPressedOpacityDark = 0.14;
+  // Text and icons of disabled menu rows, as alpha of the foreground.
+  static const double disabledOpacity = 0.30;
+
   // Shadows cast by floating glass (tab bar, menus, sheets).
   static const List<BoxShadow> _floatingShadowLight = [
     BoxShadow(
@@ -118,6 +139,9 @@ abstract final class GlassTokens {
 
   static double hoverOpacity(Brightness brightness) =>
       _isDark(brightness) ? _hoverOpacityDark : _hoverOpacityLight;
+
+  static double menuPressedOpacity(Brightness brightness) =>
+      _isDark(brightness) ? _menuPressedOpacityDark : _menuPressedOpacityLight;
 
   static List<BoxShadow> floatingShadow(Brightness brightness) =>
       _isDark(brightness) ? _floatingShadowDark : _floatingShadowLight;

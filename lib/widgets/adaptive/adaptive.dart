@@ -4,6 +4,7 @@
 library;
 
 export 'adaptive_app_bar.dart';
+export 'adaptive_context_menu.dart';
 export 'adaptive_platform.dart';
 export 'adaptive_sidebar.dart';
 export 'adaptive_tab_bar.dart';

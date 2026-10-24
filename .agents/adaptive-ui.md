@@ -25,6 +25,28 @@ pixel-for-pixel. Code: `lib/widgets/adaptive/` (import `adaptive.dart`).
   `AdaptiveSheetScaffold` blurs only its own surface.
 - All numbers (sigmas, radii, opacities, sizes, durations) live in `glass_tokens.dart`.
 
+## Inner screens (phase 2)
+
+- One screen per PR. Each screen gets Material goldens taken **before** the glass work
+  (`test/material_<screen>_golden_test.dart`) and a glass test that counts `BackdropFilter`s on a
+  100+ item list (`test/adaptive_<screen>_glass_test.dart`).
+- Content primitives: `AdaptiveCard` (translucent, no blur; selection = accent fill + outline,
+  `checked` = check badge), `AdaptiveDelayBadge` (pill, `CupertinoActivityIndicator`, bolt),
+  `AdaptiveGroupHeader` (collapsible group row; blurred only while `pinned`),
+  `AdaptiveGroupSelector` (floating glass group bar over a `TabController`),
+  `AdaptiveFloatingButton` (glass circle, `busy` spinner), `AdaptiveEmptyState`,
+  `AdaptiveActivityIndicator`, `GlassIconButton` (Darwin-only symbol button).
+- Blur budget of a scrolling screen is constant: only a pinned header / floating bar / floating
+  button may be a `GlassSurface`. A pinned list header is a `SliverPersistentHeader` that swaps to its
+  glass variant only when `shrinkOffset > 0`, so at rest the list has zero blur.
+- A floating bar over content: the host stacks it over the pages and pads the scroll view by the
+  primitive's `contentInset` (0 off Darwin, so the Material padding is unchanged).
+- Proxies screen: in the list mode the expanded group header pins; in the tab mode the grid scrolls
+  under `AdaptiveGroupSelector`. The Darwin check badge replaces `_ProxyComputedMark`. Proxy-screen
+  sheets (settings, providers, group picker, icons) are still Material-in-glass-sheet — next PR.
+- `proxy_list_performance_test.dart` looks for `IconButton` inside `ProxyGroupCard` and for
+  `FloatingActionButton`: keep them in the Material branches.
+
 ## Accessibility and fallbacks
 
 - `GlassAccessibility.of(context)`: Reduce Transparency, Reduce Motion, Increase Contrast and the

@@ -18,8 +18,10 @@ class AdaptiveDestination {
 /// Bottom navigation of the mobile layout.
 ///
 /// * Darwin: a floating Liquid Glass capsule above the home indicator. The
-///   page scrolls underneath it (`Scaffold.extendBody`, see
-///   [AdaptiveTabBar.extendsBody]).
+///   hosting scaffold uses `Scaffold.extendBody` (see
+///   [AdaptiveTabBar.extendsBody]) so the capsule floats over the page
+///   background, while `CommonScaffold` keeps the page content above it:
+///   nothing (e.g. the dashboard start button) may end up under the bar.
 /// * Everything else: the Material 3 `NavigationBar` exactly as before.
 class AdaptiveTabBar extends StatelessWidget {
   const AdaptiveTabBar({
@@ -35,6 +37,15 @@ class AdaptiveTabBar extends StatelessWidget {
 
   /// Whether the scaffold hosting the bar should lay its body out behind it.
   static bool get extendsBody => AdaptivePlatform.useGlass;
+
+  /// Bottom space the floating bar occupies (capsule + gap or home
+  /// indicator) when [extendsBody] is on; 0 otherwise.
+  static double bottomInset(BuildContext context) {
+    if (!extendsBody) return 0;
+    final safeBottom = MediaQuery.paddingOf(context).bottom;
+    return GlassTokens.tabBarHeight +
+        (safeBottom > 0 ? safeBottom : GlassTokens.tabBarBottomGap);
+  }
 
   @override
   Widget build(BuildContext context) {

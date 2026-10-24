@@ -462,8 +462,11 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
     
     final extendBody =
         AdaptiveTabBar.extendsBody && widget.bottomNavigationBar != null;
+    // With [extendBody] the Scaffold reports the floating glass tab bar as
+    // bottom padding, so this SafeArea keeps every page above the capsule.
+    // Screens opt into scrolling underneath it in stage 2 (inner screens),
+    // once their scroll views add [AdaptiveTabBar.bottomInset] themselves.
     final body = SafeArea(
-      bottom: !extendBody,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

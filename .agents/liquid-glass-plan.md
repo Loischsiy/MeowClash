@@ -115,7 +115,8 @@
 
 ### 4. Навигационный хром — PR `feat(ui): glass navigation chrome on Darwin`
 - [x] `AdaptiveTabBar` (`lib/widgets/adaptive/adaptive_tab_bar.dart`) — iOS/mobile: плавающая
-      стеклянная капсула над safe area, контент прокручивается под ней (`extendBody`).
+      стеклянная капсула над safe area (`extendBody`). Контент страниц заканчивается над капсулой
+      (`SafeArea` в `CommonScaffold`): прокрутка под бар — в этапе 2, по экранам, через `AdaptiveTabBar.bottomInset`.
       Материал-ветка = нынешний `NavigationBar` из `home.dart`, перенесённый без изменений.
 - [x] `AdaptiveSidebar` (`adaptive_sidebar.dart`) — macOS: прозрачный фон поверх нативного
       `NSVisualEffectView(.sidebar)` (шаг 7), выделение — акцентная капсула. Материал-ветка = нынешний `NavigationRail`.
@@ -146,8 +147,9 @@
 - [x] iOS: стеклянное Flutter-меню на одном `GlassSurface` (`menuSigma`), иконка справа, как в iOS;
       открытие — только масштаб (без `Opacity` над размытием), закрытие мгновенное, Reduce Motion — без анимации.
 - [x] Остальные платформы — нынешний `CommonPopupMenu` (ветка Material и переход маршрута не тронуты).
-- [ ] Проверка запуском владельцем: macOS (⋯ у профиля → системное меню с иконками, «Удалить» красный),
-      iOS-симулятор (стеклянное меню).
+- [x] Проверка запуском владельцем: macOS 27 — системное меню, «Удалить» красный; иконок нет — это
+      поведение macOS 27 (`NSMenu` по умолчанию скрывает SF Symbols, `preferredImageVisibility = .automatic`).
+      iOS (складной iPhone, оба режима) — стеклянное меню с иконками.
 
 ### 7. Нативное стекло окна macOS — PR `feat(macos): native glass window backdrop`
 - [x] `MainFlutterWindow.swift` — `FlutterViewController.backgroundColor = .clear`, под ним
@@ -230,3 +232,9 @@
   `test/adaptive_context_menu_test.dart` (+9). analyze `lib test` 529 / 0 errors (−1: порядок импортов в `popup.dart`),
   `flutter test` 216 / 1 skipped, goldens не изменились. Swift `-typecheck` (macOS 12, плагины заглушены) чистый.
   Запуском не проверено — за владельцем.
+- 2026-10-24: проверка владельцем. Найдено: на узком iOS плавающий таб-бар перекрывал кнопку «Старт» на
+  дашборде (и низ любой страницы) — `SafeArea(bottom: !extendBody)` в `CommonScaffold`. Исправлено: `SafeArea`
+  всегда учитывает низ (Scaffold с `extendBody` отдаёт высоту бара как padding), Android/десктоп не меняются.
+  `AdaptiveTabBar.bottomInset` — для этапа 2. `test/adaptive_tab_bar_inset_test.dart` (+3, без фикса падает).
+  `flutter test` 219 / 1 skipped, analyze 529 / 0 errors. macOS 27 прячет SF Symbols в меню — оставлено системное
+  поведение, решение за владельцем.

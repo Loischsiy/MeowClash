@@ -127,7 +127,9 @@
 
 ### 5. Листы — PR `feat(ui): glass sheets on Darwin`
 - [x] `lib/widgets/sheet.dart` — один `GlassSurface` на листе вместо `BackdropFilter` над всем листом (Darwin).
-- [ ] `side_sheet.dart` — то же для боковых листов (широкий экран macOS).
+- [x] Боковые листы: `side_sheet.dart` правки не потребовал — все вызовы идут через `showSheet`/`showExtend`
+      (прозрачный фон, без `filter` на Darwin) и `AdaptiveSheetScaffold` (один `GlassSurface`). Заголовок листа
+      не проходит через `AdaptiveAppBar` → нет вложенного размытия; закреплено `test/adaptive_sheet_test.dart`.
 - Исходная формулировка: `AdaptiveSheet` / правка `lib/widgets/sheet.dart` и `side_sheet.dart`: стеклянная кромка
       и фон листа; размытие только на самом листе (сейчас `BackdropFilter` оборачивает весь лист —
       на Darwin заменить на один `GlassSurface`, на остальных оставить как есть).
@@ -216,3 +218,4 @@
 - 2026-10-24: владелец проверил «Уменьшить прозрачность» на macOS — боковая панель становится сплошной.
 - 2026-10-24: владелец проверил `NSGlassEffectView` на macOS 27: боковая панель следует ползунку Liquid Glass
   («Прозрачный» — сильнее просвечивает обои, «Тонированный» — плотнее), как системные сайдбары.
+- 2026-10-24: шаг 5 закрыт (боковые листы уже стеклянные через `AdaptiveSheetScaffold`), +4 теста на «ровно один BackdropFilter».

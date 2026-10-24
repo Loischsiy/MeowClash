@@ -612,6 +612,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "remove": MessageLookupByLibrary.simpleMessage("削除"),
     "rename": MessageLookupByLibrary.simpleMessage("リネーム"),
     "renew": MessageLookupByLibrary.simpleMessage("更新"),
+    "repair": MessageLookupByLibrary.simpleMessage("修復"),
     "requestDetails": MessageLookupByLibrary.simpleMessage("リクエストの詳細"),
     "requests": MessageLookupByLibrary.simpleMessage("リクエスト"),
     "requestsDesc": MessageLookupByLibrary.simpleMessage("最近のリクエスト記録を表示"),
@@ -748,6 +749,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "trafficUsage": MessageLookupByLibrary.simpleMessage("トラフィック使用量"),
     "tun": MessageLookupByLibrary.simpleMessage("TUN"),
     "tunDesc": MessageLookupByLibrary.simpleMessage("管理者モードでのみ有効"),
+    "tunRecoveryComplete": MessageLookupByLibrary.simpleMessage(
+      "TUN が有効な状態で正常に終了しなかったことを検出しました — ネットワーク設定を復元しました",
+    ),
+    "tunRecoveryPartial": MessageLookupByLibrary.simpleMessage(
+      "TUN の復元が完了していません。詳細は復元ログを開いてください",
+    ),
+    "tunStartFailed": MessageLookupByLibrary.simpleMessage("TUN の起動に失敗しました"),
     "twoColumns": MessageLookupByLibrary.simpleMessage("2列"),
     "uk": MessageLookupByLibrary.simpleMessage("ウクライナ語"),
     "unableToUpdateCurrentProfileDesc": MessageLookupByLibrary.simpleMessage(

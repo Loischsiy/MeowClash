@@ -161,9 +161,8 @@ class ApplicationState extends ConsumerState<Application> {
 
   /// Native accessibility (Reduce Transparency/Motion, accent color) for the
   /// Darwin glass chrome; a no-op wrapper on every other platform.
-  Widget _buildGlassScope(Widget child) => AdaptivePlatform.useGlass
-      ? GlassAccessibilityScope(child: child)
-      : child;
+  Widget _buildGlassScope(Widget child) =>
+      AdaptivePlatform.useGlass ? GlassAccessibilityScope(child: child) : child;
 
   ThemeData _adaptiveTheme(ThemeData base) =>
       AdaptivePlatform.useGlass ? GlassTheme.apply(base) : base;
@@ -269,7 +268,6 @@ class ApplicationState extends ConsumerState<Application> {
     _autoUpdateProfilesTaskTimer?.cancel();
     _autoUpdateProvidersTaskTimer?.cancel();
     globalState.appController.delayTests.cancel();
-    await clashCore.destroy();
     await globalState.appController.savePreferences();
     await globalState.appController.handleExit();
     super.dispose();

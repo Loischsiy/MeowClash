@@ -538,6 +538,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "remove": MessageLookupByLibrary.simpleMessage("移除"),
     "rename": MessageLookupByLibrary.simpleMessage("重命名"),
     "renew": MessageLookupByLibrary.simpleMessage("续订"),
+    "repair": MessageLookupByLibrary.simpleMessage("修复"),
     "requestDetails": MessageLookupByLibrary.simpleMessage("请求详情"),
     "requests": MessageLookupByLibrary.simpleMessage("请求"),
     "requestsDesc": MessageLookupByLibrary.simpleMessage("查看最近请求记录"),
@@ -660,6 +661,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "trafficUsage": MessageLookupByLibrary.simpleMessage("流量统计"),
     "tun": MessageLookupByLibrary.simpleMessage("虚拟网卡"),
     "tunDesc": MessageLookupByLibrary.simpleMessage("仅在管理员模式生效"),
+    "tunRecoveryComplete": MessageLookupByLibrary.simpleMessage(
+      "检测到 TUN 运行时异常关机 — 网络设置已恢复",
+    ),
+    "tunRecoveryPartial": MessageLookupByLibrary.simpleMessage(
+      "TUN 网络恢复未完成。打开恢复日志查看详情",
+    ),
+    "tunStartFailed": MessageLookupByLibrary.simpleMessage("TUN 启动失败"),
     "twoColumns": MessageLookupByLibrary.simpleMessage("两列"),
     "uk": MessageLookupByLibrary.simpleMessage("乌克兰语"),
     "unableToUpdateCurrentProfileDesc": MessageLookupByLibrary.simpleMessage(

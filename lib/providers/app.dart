@@ -11,6 +11,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'generated/app.g.dart';
 
+final tunStartFailureProvider = StateProvider<String?>((ref) => null);
+
 @riverpod
 class RealTunEnable extends _$RealTunEnable with AutoDisposeNotifierMixin {
   @override

@@ -37,12 +37,20 @@ Future<void> main() async {
     }
 
     final version = await system.version;
+    await globalState.initApp(version);
+    commonPrint.log("[DART] globalState.initApp() completed");
+
+    if (system.isDesktop) {
+      await proxy?.stopProxy();
+    }
+    globalState.startupTunRecovery = await request.recoverTunAtStartup();
+    globalState.tunRecoveryBlocked =
+        globalState.startupTunRecovery?['status'] != null &&
+            globalState.startupTunRecovery?['status'] != 'restored';
+
     commonPrint.log("[DART] Calling clashCore.preload()...");
     await clashCore.preload();
     commonPrint.log("[DART] clashCore.preload() completed");
-
-    await globalState.initApp(version);
-    commonPrint.log("[DART] globalState.initApp() completed");
 
     await android?.init();
     await window?.init(version);
@@ -233,13 +241,15 @@ Future<void> _service(List<String> flags) async {
               profileId: profileId,
               userAgent: globalState.ua,
               config: params.config,
-              credentials: globalState.config.currentProfile?.providerHeaders ?? const {},
+              credentials: globalState.config.currentProfile?.providerHeaders ??
+                  const {},
             );
             final res = await providerUpdates.configure(
               refreshPlan,
               () => clashLibHandler.quickStart(
                 InitParams(homeDir: homeDirPath, version: version),
-                params.copyWith(config: refreshPlan.prepareCoreConfig(params.config)),
+                params.copyWith(
+                    config: refreshPlan.prepareCoreConfig(params.config)),
                 globalState.getCoreState(),
               ),
               succeeded: (result) => result.isEmpty,

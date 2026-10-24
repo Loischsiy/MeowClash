@@ -578,5 +578,9 @@
   "releaseMemory": "メモリを解放",
   "delayTestConcurrency": "URLテストの同時実行数",
   "unlimitedConcurrency": "無制限",
-  "delayTestConcurrencyTip": "0〜1000の数値を入力してください（0で無制限）"
+  "delayTestConcurrencyTip": "0〜1000の数値を入力してください（0で無制限）",
+  "tunRecoveryComplete": "TUN が有効な状態で正常に終了しなかったことを検出しました — ネットワーク設定を復元しました",
+  "tunRecoveryPartial": "TUN の復元が完了していません。詳細は復元ログを開いてください",
+  "tunStartFailed": "TUN の起動に失敗しました",
+  "repair": "修復"
 }

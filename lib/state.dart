@@ -78,6 +78,8 @@ class GlobalState {
   late Config config;
   late AppState appState;
   bool isPre = true;
+  Map<String, dynamic>? startupTunRecovery;
+  bool tunRecoveryBlocked = false;
   String? coreSHA256;
   String? coreVersion;
   late PackageInfo packageInfo;
@@ -212,6 +214,30 @@ class GlobalState {
     }
     startTime ??= DateTime.now();
     await clashCore.startListener();
+    if (Platform.isWindows &&
+        appState.realTunEnable &&
+        config.patchClashConfig.tun.enable) {
+      final device = config.patchClashConfig.tun.device;
+      var healthy = false;
+      final healthDeadline = Stopwatch()..start();
+      while (healthDeadline.elapsed < const Duration(seconds: 10)) {
+        if (await request.checkTunHealth(device)) {
+          healthy = true;
+          break;
+        }
+        if (healthDeadline.elapsed < const Duration(seconds: 10)) {
+          await Future<void>.delayed(const Duration(milliseconds: 500));
+        }
+      }
+      if (!healthy) {
+        final logs = await request.getHelperLogs();
+        commonPrint.log('TUN failed to start; helper logs:\n$logs');
+        await clashCore.stopListener();
+        startTime = null;
+        stopUpdateTasks();
+        return false;
+      }
+    }
     final started = await service?.startVpn();
     if (started == false) {
       startTime = null;
@@ -242,6 +268,9 @@ class GlobalState {
     startTime = null;
     await clashCore.stopListener();
     await service?.stopVpn();
+    if (Platform.isWindows && !await request.finishTun()) {
+      commonPrint.log('TUN recovery lock remains after stopping the listener');
+    }
     stopUpdateTasks();
   }
 

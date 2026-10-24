@@ -393,6 +393,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "releaseMemory": MessageLookupByLibrary.simpleMessage("Vapauta muistia"),
     "remaining": MessageLookupByLibrary.simpleMessage("Jäljellä"),
     "remove": MessageLookupByLibrary.simpleMessage("Poista"),
+    "repair": MessageLookupByLibrary.simpleMessage("Korjaa"),
     "requestDetails": MessageLookupByLibrary.simpleMessage("Pyynnön tiedot"),
     "reset": MessageLookupByLibrary.simpleMessage("Nollaa"),
     "resources": MessageLookupByLibrary.simpleMessage("Resurssit"),
@@ -485,6 +486,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "tun": MessageLookupByLibrary.simpleMessage("TUN"),
     "tunDesc": MessageLookupByLibrary.simpleMessage(
       "Toimii vain järjestelmänvalvojan tilassa",
+    ),
+    "tunRecoveryComplete": MessageLookupByLibrary.simpleMessage(
+      "Odottamaton sammutus havaittiin TUN-tilan ollessa käytössä — verkkoasetukset on palautettu",
+    ),
+    "tunRecoveryPartial": MessageLookupByLibrary.simpleMessage(
+      "TUN-palautus jäi kesken. Avaa palautusloki saadaksesi lisätietoja",
+    ),
+    "tunStartFailed": MessageLookupByLibrary.simpleMessage(
+      "TUN-käynnistys epäonnistui",
     ),
     "uk": MessageLookupByLibrary.simpleMessage("Ukraina"),
     "unableToUpdateCurrentProfileDesc": MessageLookupByLibrary.simpleMessage(

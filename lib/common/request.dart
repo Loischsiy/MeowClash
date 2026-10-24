@@ -11,6 +11,7 @@ import 'package:meowclash/models/ip_details.dart';
 import 'package:meowclash/models/models.dart';
 import 'package:meowclash/services/ip_details_service.dart';
 import 'package:meowclash/state.dart';
+import 'package:path/path.dart' as p;
 
 class Request {
   Request() {
@@ -36,20 +37,22 @@ class Request {
     required String ip,
     required String languageCode,
     CancelToken? cancelToken,
-  }) => _ipDetailsService.lookup(
-    ip: ip,
-    languageCode: languageCode,
-    cancelToken: cancelToken,
-  );
+  }) =>
+      _ipDetailsService.lookup(
+        ip: ip,
+        languageCode: languageCode,
+        cancelToken: cancelToken,
+      );
 
   Future<Response<Uint8List>> getFileResponseForUrl(
     String url, {
     Map<String, dynamic>? headers,
-  }) => guardTlsErrors<Response<Uint8List>>(
-    url,
-    () => _getFileResponseForUrl(url, headers: headers),
-    action: "profile download",
-  );
+  }) =>
+      guardTlsErrors<Response<Uint8List>>(
+        url,
+        () => _getFileResponseForUrl(url, headers: headers),
+        action: "profile download",
+      );
 
   Future<Response<Uint8List>> _getFileResponseForUrl(
     String url, {
@@ -210,7 +213,11 @@ class Request {
     }
   }
 
-  Future<bool> startCoreByHelper(String arg) async {
+  Future<bool> startCoreByHelper(
+    String arg, {
+    required bool tunEnabled,
+    required String tunDevice,
+  }) async {
     try {
       final homeDirPath = await appPath.homeDirPath;
       final response = await _dio
@@ -220,10 +227,12 @@ class Request {
               "path": appPath.corePath,
               "arg": arg,
               "home_dir": homeDirPath,
+              "tun_enabled": tunEnabled,
+              "tun_device": tunDevice,
             }),
             options: Options(responseType: ResponseType.plain),
           )
-          .timeout(const Duration(milliseconds: 2000));
+          .timeout(const Duration(seconds: 60));
       if (response.statusCode != HttpStatus.ok) {
         return false;
       }
@@ -241,13 +250,172 @@ class Request {
             "http://$localhost:$helperPort/stop",
             options: Options(responseType: ResponseType.plain),
           )
-          .timeout(const Duration(milliseconds: 2000));
+          .timeout(const Duration(seconds: 60));
 
       if (response.statusCode != HttpStatus.ok) return false;
       final data = response.data as String;
       return data.isEmpty;
     } catch (_) {
       return false;
+    }
+  }
+
+  Future<bool> prepareTun(String device) => _postTunAction(
+        'prepare',
+        {'device': device},
+      );
+
+  Future<bool> finishTun() => _postTunAction('finish');
+
+  Future<bool> recoverTunNow() => _postTunAction('recover');
+
+  Future<bool> cleanupTun(String device) => _postTunAction(
+        'tuncleanup',
+        {'device': device},
+      );
+
+  Future<bool> checkTunHealth(String device) async {
+    try {
+      final response = await _dio
+          .post(
+            "http://$localhost:$helperPort/tun/health",
+            data: {'device': device},
+            options: Options(responseType: ResponseType.plain),
+          )
+          .timeout(const Duration(seconds: 1));
+      return response.statusCode == HttpStatus.ok && response.data == 'true';
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<bool> helperCoreActive() async {
+    try {
+      final response = await _dio
+          .get<String>(
+            "http://$localhost:$helperPort/session",
+            options: Options(responseType: ResponseType.plain),
+          )
+          .timeout(const Duration(seconds: 2));
+      return response.statusCode == HttpStatus.ok && response.data == 'true';
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<bool> _postTunAction(String action,
+      [Map<String, Object?>? data]) async {
+    try {
+      final response = await _dio
+          .post(
+            "http://$localhost:$helperPort/${action == 'tuncleanup' ? action : 'tun/$action'}",
+            data: data,
+            options: Options(responseType: ResponseType.plain),
+          )
+          .timeout(const Duration(seconds: 30));
+      return response.statusCode == HttpStatus.ok &&
+          (response.data as String).isEmpty;
+    } catch (error) {
+      commonPrint.log('TUN helper request $action failed: $error');
+      return false;
+    }
+  }
+
+  Future<Map<String, dynamic>?> recoverTunAtStartup() async {
+    if (!Platform.isWindows) return null;
+    var helperRunning = await pingHelper();
+    var serviceStarted = false;
+    if (!helperRunning) {
+      serviceStarted = await windows?.tryStartExistingService() == true;
+      if (serviceStarted) {
+        for (var attempt = 0; attempt < 60; attempt++) {
+          if (await pingHelper()) {
+            helperRunning = true;
+            break;
+          }
+          await Future<void>.delayed(const Duration(milliseconds: 500));
+        }
+      }
+    }
+    final coreActive = helperRunning && await helperCoreActive();
+
+    final programData =
+        Platform.environment['PROGRAMDATA'] ?? r'C:\ProgramData';
+    final lockFile = File(p.join(programData, 'MeowClash', 'tun.lock'));
+    final backupFile = File('${lockFile.path}.bak');
+    bool hasRecoveryLock() => lockFile.existsSync() || backupFile.existsSync();
+    if (!coreActive && hasRecoveryLock()) {
+      final recoveryStarted = helperRunning
+          ? await recoverTunNow()
+          : !serviceStarted &&
+              (windows?.runas(appPath.helperPath, '--recover-tun') == true);
+      if (recoveryStarted) {
+        for (var attempt = 0; attempt < 60; attempt++) {
+          if (!hasRecoveryLock()) break;
+          await Future<void>.delayed(const Duration(milliseconds: 500));
+        }
+      }
+    }
+
+    if (serviceStarted && !helperRunning) {
+      return {
+        'status': 'partial',
+        'errors': ['The helper service did not become available for recovery.'],
+      };
+    }
+
+    String? markerJson;
+    if (helperRunning) {
+      try {
+        final response = await _dio
+            .get<String>(
+              "http://$localhost:$helperPort/recovery",
+              options: Options(responseType: ResponseType.plain),
+            )
+            .timeout(const Duration(seconds: 3));
+        markerJson = response.data;
+      } catch (error) {
+        commonPrint.log('Could not read TUN recovery report: $error');
+      }
+    } else {
+      final markerFile =
+          File(p.join(programData, 'MeowClash', 'recovery.json'));
+      if (markerFile.existsSync()) {
+        markerJson = await markerFile.readAsString();
+        await markerFile.delete();
+      }
+    }
+    if (markerJson == null || markerJson.isEmpty) {
+      if (hasRecoveryLock()) {
+        return {
+          'status': 'partial',
+          'errors': ['The TUN recovery lock is still present.'],
+        };
+      }
+      return null;
+    }
+    try {
+      return json.decode(markerJson) as Map<String, dynamic>;
+    } catch (error) {
+      commonPrint.log('Invalid TUN recovery report: $error');
+      return {
+        'status': 'failed',
+        'errors': [markerJson]
+      };
+    }
+  }
+
+  Future<String> getHelperLogs() async {
+    try {
+      final response = await _dio
+          .get<String>(
+            "http://$localhost:$helperPort/logs",
+            options: Options(responseType: ResponseType.plain),
+          )
+          .timeout(const Duration(seconds: 3));
+      return response.data ?? '';
+    } catch (error) {
+      return error.toString();
     }
   }
 

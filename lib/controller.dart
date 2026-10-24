@@ -124,6 +124,7 @@ class AppController {
       await iosVpn!.stop();
       await iosVpn!.restartLocal();
     } else {
+      await clashCore.shutdown();
       await clashService?.reStart();
     }
     await _initCore();
@@ -133,9 +134,10 @@ class AppController {
   }
 
   Future<void> updateStatus(bool isStart) async {
-    await StatusBarManager.updateIcon(isConnected: isStart);
-
     if (isStart) {
+      final requestedTun = Platform.isWindows &&
+          _ref.read(realTunEnableProvider) &&
+          _ref.read(patchClashConfigProvider).tun.enable;
       final started = await globalState.handleStart([
         updateRunTime,
         updateTraffic,
@@ -146,9 +148,15 @@ class AppController {
       if (!started) {
         await StatusBarManager.updateIcon(isConnected: false);
         _ref.read(runTimeProvider.notifier).value = null;
+        if (requestedTun) {
+          _ref.read(tunStartFailureProvider.notifier).state =
+              await request.getHelperLogs();
+        }
         addCheckIpNumDebounce();
         return;
       }
+      await StatusBarManager.updateIcon(isConnected: true);
+      _ref.read(tunStartFailureProvider.notifier).state = null;
       final currentLastModified =
           await _ref.read(currentProfileProvider)?.profileLastModified;
       if (currentLastModified == null || lastProfileModified == null) {
@@ -161,13 +169,29 @@ class AppController {
       }
       applyProfileDebounce();
     } else {
+      await StatusBarManager.updateIcon(isConnected: false);
       await globalState.handleStop();
+      _ref.read(tunStartFailureProvider.notifier).state = null;
       clashCore.resetTraffic();
       _ref.read(trafficsProvider.notifier).clear();
       _ref.read(totalTrafficProvider.notifier).value = Traffic();
       _ref.read(runTimeProvider.notifier).value = null;
       addCheckIpNumDebounce();
     }
+  }
+
+  Future<void> repairTun() async {
+    if (globalState.tunRecoveryBlocked) {
+      if (!await request.recoverTunNow()) {
+        _ref.read(tunStartFailureProvider.notifier).state =
+            await request.getHelperLogs();
+        return;
+      }
+      globalState.tunRecoveryBlocked = false;
+    }
+    _ref.read(tunStartFailureProvider.notifier).state = null;
+    await restartCore();
+    await updateStatus(true);
   }
 
   void updateRunTime() {
@@ -605,12 +629,27 @@ class AppController {
       return;
     }
     final realTunEnable = _ref.read(realTunEnableProvider);
-    final message = await clashCore.updateConfig(
-      updateParams.copyWith.tun(
-        enable: realTunEnable,
-      ),
-    );
-    if (message.isNotEmpty) throw message;
+    if (Platform.isWindows && realTunEnable && globalState.tunRecoveryBlocked) {
+      throw StateError('TUN recovery must be repaired before enabling TUN');
+    }
+    if (Platform.isWindows &&
+        realTunEnable &&
+        !await request
+            .prepareTun(_ref.read(patchClashConfigProvider).tun.device)) {
+      throw StateError('Could not save the TUN network recovery lock');
+    }
+    try {
+      final message = await clashCore.updateConfig(
+        updateParams.copyWith.tun(
+          enable: realTunEnable,
+        ),
+      );
+      if (message.isNotEmpty) throw message;
+    } catch (_) {
+      if (Platform.isWindows && realTunEnable) await request.finishTun();
+      rethrow;
+    }
+    if (Platform.isWindows && !realTunEnable) await request.finishTun();
   }
 
   Future<Result<bool>> _requestAdmin(bool enableTun) async {
@@ -666,18 +705,34 @@ class AppController {
     }
     final realTunEnable = _ref.read(realTunEnableProvider);
     final realPatchConfig = patchConfig.copyWith.tun(enable: realTunEnable);
-    final params = await globalState.getSetupParams(
-      pathConfig: realPatchConfig,
-    );
-    final message = await clashCore.setupConfig(params);
+    if (Platform.isWindows && realTunEnable && globalState.tunRecoveryBlocked) {
+      throw StateError('TUN recovery must be repaired before enabling TUN');
+    }
+    if (Platform.isWindows &&
+        realTunEnable &&
+        !await request.prepareTun(realPatchConfig.tun.device)) {
+      throw StateError('Could not save the TUN network recovery lock');
+    }
+    String message;
+    try {
+      final params = await globalState.getSetupParams(
+        pathConfig: realPatchConfig,
+      );
+      message = await clashCore.setupConfig(params);
+    } catch (_) {
+      if (Platform.isWindows && realTunEnable) await request.finishTun();
+      rethrow;
+    }
     lastProfileModified = await _ref.read(
       currentProfileProvider.select(
         (state) => state?.profileLastModified,
       ),
     );
     if (message.isNotEmpty) {
+      if (Platform.isWindows && realTunEnable) await request.finishTun();
       throw message;
     }
+    if (Platform.isWindows && !realTunEnable) await request.finishTun();
   }
 
   Future _applyProfile() async {
@@ -965,7 +1020,7 @@ class AppController {
       await system.setMacOSDns(true);
       await proxy?.stopProxy();
       await clashCore.shutdown();
-      await clashService?.destroy();
+      await clashCore.destroy();
     } catch (e) {
       commonPrint.log('handleExit error: $e');
     } finally {
@@ -1188,6 +1243,57 @@ class AppController {
 
       commonPrint.log("AppController: Updating tray...");
       updateTray(true);
+
+      final recovery = globalState.startupTunRecovery;
+      if (recovery != null) {
+        globalState.startupTunRecovery = null;
+        final restored = recovery['status'] == 'restored';
+        final restoredItems = recovery['restored'] is List
+            ? recovery['restored'] as List
+            : const <dynamic>[];
+        final errors = recovery['errors'] is List
+            ? recovery['errors'] as List
+            : const <dynamic>[];
+        final lines = <String>[
+          for (final item in restoredItems) '✓ $item',
+          for (final item in errors) '⚠ $item',
+        ];
+        final detail = lines.isEmpty ? recovery.toString() : lines.join('\n');
+        commonPrint.log('TUN recovery report: $detail');
+        ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+          SnackBar(
+            content: Text(
+              restored
+                  ? appLocalizations.tunRecoveryComplete
+                  : appLocalizations.tunRecoveryPartial,
+            ),
+            duration: const Duration(seconds: 8),
+            action: SnackBarAction(
+              label: appLocalizations.logs,
+              onPressed: () {
+                globalState.showCommonDialog<void>(
+                  child: AlertDialog(
+                    title: Text(appLocalizations.logs),
+                    content: SingleChildScrollView(
+                      child: SelectableText(detail),
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: Text(appLocalizations.confirm),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        );
+      }
+      if (globalState.tunRecoveryBlocked) {
+        _ref.read(tunStartFailureProvider.notifier).state =
+            await request.getHelperLogs();
+      }
 
       commonPrint.log("AppController: Initializing core...");
       await _initCore();
@@ -1702,8 +1808,15 @@ class AppController {
       }
       final filePath = join(homeDirPath, entryName);
       final file = File(filePath);
-      await file.create(recursive: true);
-      await file.writeAsBytes(profile.content);
+      await file.parent.create(recursive: true);
+      final temporary =
+          File('$filePath.tmp.${DateTime.now().microsecondsSinceEpoch}');
+      try {
+        await temporary.writeAsBytes(profile.content, flush: true);
+        await temporary.rename(filePath);
+      } finally {
+        if (temporary.existsSync()) await temporary.delete();
+      }
     }
     final clashConfigIndex =
         configs.indexWhere((config) => config.name == "clashConfig.json");

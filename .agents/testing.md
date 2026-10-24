@@ -10,6 +10,7 @@ flutter test test/build_platforms_test.dart         # focused run
 CGO_ENABLED=0 go -C core test ./...                 # Go core tests
 go -C core test -race ./mobilebridge                # iOS bridge, race detector
 python3 -m unittest discover -s test -p 'test_*.py' # release-asset naming
+cargo test --manifest-path services/helper/Cargo.toml # privileged helper schema/recovery logic
 nix build .#checks.x86_64-linux.nixos-vm -L         # NixOS VM test (test/nixos-module.nix)
 ```
 
@@ -23,6 +24,9 @@ nix build .#checks.x86_64-linux.nixos-vm -L         # NixOS VM test (test/nixos-
 - **Go tests stay in `core/`** (`core/*_test.go`, `core/mobilebridge/bridge_test.go`). Go requires test
   files in the same package directory as the code under test, so moving them into `test/` would break
   `go test ./...`.
+- **Rust helper unit tests stay in `services/helper/src/`** — Cargo's unit-test harness compiles the
+  platform-neutral recovery schema beside the crate, while Windows-only system calls remain behind
+  `cfg(target_os = "windows")`.
 - **`macos/RunnerTests/RunnerTests.swift` stays put** — it is an Xcode test target wired into
   `macos/Runner.xcodeproj`.
 - **`native/quickjs/smoke.cpp` is not a test-runner test** but a CMake target (`meow_quickjs_smoke`)

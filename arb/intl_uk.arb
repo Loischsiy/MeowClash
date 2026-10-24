@@ -606,5 +606,9 @@
   "releaseMemory": "Звільнити пам'ять",
   "delayTestConcurrency": "Одночасні тести URL",
   "unlimitedConcurrency": "Без обмежень",
-  "delayTestConcurrencyTip": "Введіть число від 0 до 1000; 0 — без обмежень"
+  "delayTestConcurrencyTip": "Введіть число від 0 до 1000; 0 — без обмежень",
+  "tunRecoveryComplete": "Виявлено некоректне завершення роботи з увімкненим TUN — мережеві налаштування відновлено",
+  "tunRecoveryPartial": "Не вдалося повністю відновити мережу після збою TUN. Відкрийте журнал відновлення для деталей",
+  "tunStartFailed": "Не вдалося запустити TUN",
+  "repair": "Виправити"
 }

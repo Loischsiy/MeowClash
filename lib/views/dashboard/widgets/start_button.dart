@@ -24,8 +24,7 @@ class StartButton extends ConsumerStatefulWidget {
 class _StartButtonState extends ConsumerState<StartButton>
     with TickerProviderStateMixin {
   static const Duration _phaseTransitionDuration = Duration(milliseconds: 650);
-  static const Duration _minTransientPhaseVisible =
-      Duration(milliseconds: 650);
+  static const Duration _minTransientPhaseVisible = Duration(milliseconds: 650);
 
   late final AnimationController _ambientController;
   late final AnimationController _phaseController;
@@ -88,9 +87,8 @@ class _StartButtonState extends ConsumerState<StartButton>
   }
 
   void _handleRuntimeChanged(bool isStart) {
-    final target = isStart
-        ? CatConnectionPhase.connected
-        : CatConnectionPhase.idle;
+    final target =
+        isStart ? CatConnectionPhase.connected : CatConnectionPhase.idle;
     if (_phase == target) return;
 
     final startedAt = _transientStartedAt;
@@ -116,11 +114,10 @@ class _StartButtonState extends ConsumerState<StartButton>
     setState(() {
       _previousPhase = _phase;
       _phase = next;
-      _transientStartedAt =
-          (next == CatConnectionPhase.connecting ||
-                  next == CatConnectionPhase.disconnecting)
-              ? DateTime.now()
-              : null;
+      _transientStartedAt = (next == CatConnectionPhase.connecting ||
+              next == CatConnectionPhase.disconnecting)
+          ? DateTime.now()
+          : null;
     });
     _phaseController
       ..stop()
@@ -310,37 +307,86 @@ class _StatusLine extends ConsumerWidget {
     );
 
     Widget child;
-    switch (phase) {
-      case CatConnectionPhase.connecting:
-      case CatConnectionPhase.disconnecting:
-        final dotCount = ((ambient * 6) % 3).floor() + 1;
-        child = Text(
-          '·' * dotCount,
-          key: ValueKey('cat-status-${phase.name}-$dotCount'),
-          style: textStyle?.copyWith(
-            fontWeight: FontWeight.w700,
-            letterSpacing: 4,
+    final tunFailure = ref.watch(tunStartFailureProvider);
+    if (tunFailure != null) {
+      child = Row(
+        children: [
+          Expanded(
+            child: Text(
+              appLocalizations.tunStartFailed,
+              style: textStyle?.copyWith(
+                color: Theme.of(context).colorScheme.error,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
           ),
-        );
-        break;
-      case CatConnectionPhase.connected:
-        final runTime = ref.watch(runTimeProvider);
-        if (runTime != null) {
-          final text = utils.getTimeText(runTime);
+          IconButton(
+            onPressed: () {
+              globalState.showCommonDialog<void>(
+                child: AlertDialog(
+                  title: Text(appLocalizations.tunStartFailed),
+                  content: SingleChildScrollView(
+                    child: SelectableText(
+                      tunFailure.isEmpty
+                          ? appLocalizations.tunStartFailed
+                          : tunFailure,
+                    ),
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: Text(appLocalizations.confirm),
+                    ),
+                  ],
+                ),
+              );
+            },
+            icon: const Icon(Icons.info_outline_rounded, size: 18),
+            tooltip: appLocalizations.logs,
+            visualDensity: VisualDensity.compact,
+          ),
+          TextButton(
+            onPressed: globalState.appController.repairTun,
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.error,
+            ),
+            child: Text(appLocalizations.repair),
+          ),
+        ],
+      );
+    } else {
+      switch (phase) {
+        case CatConnectionPhase.connecting:
+        case CatConnectionPhase.disconnecting:
+          final dotCount = ((ambient * 6) % 3).floor() + 1;
           child = Text(
-            text,
-            key: ValueKey('cat-status-connected-$text'),
-            style: textStyle,
+            '·' * dotCount,
+            key: ValueKey('cat-status-${phase.name}-$dotCount'),
+            style: textStyle?.copyWith(
+              fontWeight: FontWeight.w700,
+              letterSpacing: 4,
+            ),
           );
-        } else {
-          child = const SizedBox.shrink(
-            key: ValueKey('cat-status-connected-empty'),
-          );
-        }
-        break;
-      case CatConnectionPhase.idle:
-        child = const SizedBox.shrink(key: ValueKey('cat-status-idle'));
-        break;
+          break;
+        case CatConnectionPhase.connected:
+          final runTime = ref.watch(runTimeProvider);
+          if (runTime != null) {
+            final text = utils.getTimeText(runTime);
+            child = Text(
+              text,
+              key: ValueKey('cat-status-connected-$text'),
+              style: textStyle,
+            );
+          } else {
+            child = const SizedBox.shrink(
+              key: ValueKey('cat-status-connected-empty'),
+            );
+          }
+          break;
+        case CatConnectionPhase.idle:
+          child = const SizedBox.shrink(key: ValueKey('cat-status-idle'));
+          break;
+      }
     }
 
     return AnimatedSwitcher(
@@ -477,8 +523,8 @@ class _CatPainter extends CustomPainter {
     _CatTraits traits,
     double ambientRad,
   ) {
-    final wag = math.sin(ambientRad * traits.tailWagSpeed) *
-        traits.tailWagAmplitude;
+    final wag =
+        math.sin(ambientRad * traits.tailWagSpeed) * traits.tailWagAmplitude;
     final tailPaint = Paint()
       ..color = foregroundColor
       ..style = PaintingStyle.stroke
@@ -523,8 +569,7 @@ class _CatPainter extends CustomPainter {
       ..drawCircle(Offset(14 * s, 32 * s), 7 * s, pawPaint);
 
     if (traits.sparkleStrength > 0.3) {
-      final nailPaint = Paint()
-        ..color = foregroundColor.withValues(alpha: 0.4);
+      final nailPaint = Paint()..color = foregroundColor.withValues(alpha: 0.4);
       for (final cx in [-16.0, -14.0, -12.0]) {
         canvas.drawCircle(Offset(cx * s, 34.5 * s), 0.8 * s, nailPaint);
       }
@@ -775,8 +820,7 @@ class _CatPainter extends CustomPainter {
         ..text = TextSpan(
           text: 'z',
           style: TextStyle(
-            color:
-                foregroundColor.withValues(alpha: opacity.clamp(0.0, 1.0)),
+            color: foregroundColor.withValues(alpha: opacity.clamp(0.0, 1.0)),
             fontSize: (10 + 4 * t) * s,
             fontWeight: FontWeight.w700,
           ),
@@ -875,8 +919,7 @@ class _CatTraits {
         headTurnSpeed: _lerpDouble(a.headTurnSpeed, b.headTurnSpeed, t),
         pupilFocus: _lerpDouble(a.pupilFocus, b.pupilFocus, t),
         zStrength: _lerpDouble(a.zStrength, b.zStrength, t),
-        sparkleStrength:
-            _lerpDouble(a.sparkleStrength, b.sparkleStrength, t),
+        sparkleStrength: _lerpDouble(a.sparkleStrength, b.sparkleStrength, t),
         cheekBlush: _lerpDouble(a.cheekBlush, b.cheekBlush, t),
         breathStrength: _lerpDouble(a.breathStrength, b.breathStrength, t),
       );

@@ -35,6 +35,7 @@ make android_arm64 | ios_arm64 | windows_arm64 | linux_arm64 | macLocal | nixAll
 flutter analyze --no-fatal-infos --no-fatal-warnings && flutter test
 CGO_ENABLED=0 go -C core test ./...
 python3 -m unittest discover -s test -p 'test_*.py'
+cargo test --manifest-path services/helper/Cargo.toml
 ```
 
 Plain `flutter analyze` exits non-zero on the repo-wide `info`/`warning` baseline, so the flags above keep
@@ -73,7 +74,8 @@ python3 -m unittest discover -s test -p 'test_*.py' # release-asset naming
 ```
 
 Every test lives in `test/`, except the Go tests, `macos/RunnerTests/RunnerTests.swift` and
-`native/quickjs/smoke.cpp` — see `.agents/testing.md` for why and for the full pre-commit checklist.
+`native/quickjs/smoke.cpp`. Rust helper unit tests stay in `services/helper/src/` so Cargo can test
+the platform-neutral recovery schema — see `.agents/testing.md` for the full pre-commit checklist.
 
 ## Documentation policy — there is no `docs/` folder
 

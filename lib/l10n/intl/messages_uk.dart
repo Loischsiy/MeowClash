@@ -845,6 +845,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "remove": MessageLookupByLibrary.simpleMessage("Видалити"),
     "rename": MessageLookupByLibrary.simpleMessage("Перейменувати"),
     "renew": MessageLookupByLibrary.simpleMessage("Продовжити"),
+    "repair": MessageLookupByLibrary.simpleMessage("Виправити"),
     "requestDetails": MessageLookupByLibrary.simpleMessage("Деталі запиту"),
     "requests": MessageLookupByLibrary.simpleMessage("Запити"),
     "requestsDesc": MessageLookupByLibrary.simpleMessage(
@@ -1035,6 +1036,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "tun": MessageLookupByLibrary.simpleMessage("TUN"),
     "tunDesc": MessageLookupByLibrary.simpleMessage(
       "Доступно лише в режимі адміністратора",
+    ),
+    "tunRecoveryComplete": MessageLookupByLibrary.simpleMessage(
+      "Виявлено некоректне завершення роботи з увімкненим TUN — мережеві налаштування відновлено",
+    ),
+    "tunRecoveryPartial": MessageLookupByLibrary.simpleMessage(
+      "Не вдалося повністю відновити мережу після збою TUN. Відкрийте журнал відновлення для деталей",
+    ),
+    "tunStartFailed": MessageLookupByLibrary.simpleMessage(
+      "Не вдалося запустити TUN",
     ),
     "twoColumns": MessageLookupByLibrary.simpleMessage("Два стовпці"),
     "uk": MessageLookupByLibrary.simpleMessage("Українська"),

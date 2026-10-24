@@ -11,7 +11,6 @@ import 'package:meowclash/state.dart';
 import 'package:path/path.dart';
 
 class ClashService extends ClashHandlerInterface {
-
   factory ClashService() {
     _instance ??= ClashService._internal();
     return _instance!;
@@ -43,7 +42,8 @@ class ClashService extends ClashHandlerInterface {
     runZonedGuarded(() async {
       if (!Platform.isWindows) {
         final tempDirPath = await appPath.tempPath;
-        _unixSocketPath = join(tempDirPath, "MeowClashSocket_${Random().nextInt(10000)}.sock");
+        _unixSocketPath = join(
+            tempDirPath, "MeowClashSocket_${Random().nextInt(10000)}.sock");
       }
       final address = !Platform.isWindows
           ? InternetAddress(
@@ -103,7 +103,13 @@ class ClashService extends ClashHandlerInterface {
           ? "${serverSocket.port}"
           : serverSocket.address.address;
       if (Platform.isWindows && await system.checkIsAdmin()) {
-        final isSuccess = await request.startCoreByHelper(arg);
+        final tun = globalState.config.patchClashConfig.tun;
+        if (tun.enable) await request.cleanupTun(tun.device);
+        final isSuccess = await request.startCoreByHelper(
+          arg,
+          tunEnabled: tun.enable,
+          tunDevice: tun.device,
+        );
         if (isSuccess) {
           _isShuttingDown = false;
           return;
@@ -236,7 +242,15 @@ class ClashService extends ClashHandlerInterface {
       await request.stopCoreByHelper();
     }
     await _destroySocket();
-    process?.kill();
+    final localProcess = process;
+    if (localProcess != null) {
+      localProcess.kill();
+      try {
+        await localProcess.exitCode.timeout(const Duration(seconds: 10));
+      } on TimeoutException {
+        localProcess.kill(ProcessSignal.sigkill);
+      }
+    }
     process = null;
     return true;
   }

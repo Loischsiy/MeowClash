@@ -109,6 +109,12 @@ class ClashCore {
 
   Future<void> shutdown() async {
     await clashInterface.shutdown();
+    if (Platform.isWindows) {
+      await clashService?.shutdown();
+      if (!await request.finishTun()) {
+        commonPrint.log('TUN recovery lock remains after core shutdown');
+      }
+    }
   }
 
   FutureOr<bool> get isInit => clashInterface.isInit;
@@ -260,8 +266,15 @@ class ClashCore {
     ensureCoreInputBytes(decryptedData, name: 'Provider $providerName');
 
     final file = File(providerPath);
-    await file.create(recursive: true);
-    await file.writeAsBytes(decryptedData);
+    await file.parent.create(recursive: true);
+    final temporary =
+        File('$providerPath.tmp.${DateTime.now().microsecondsSinceEpoch}');
+    try {
+      await temporary.writeAsBytes(decryptedData, flush: true);
+      await temporary.rename(providerPath);
+    } finally {
+      if (temporary.existsSync()) await temporary.delete();
+    }
   }
 
   Future<String> updateExternalProvider({

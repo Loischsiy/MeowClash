@@ -13,7 +13,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 typedef UpdatingMap = Map<String, bool>;
 
 class ProvidersView extends ConsumerStatefulWidget {
-
   const ProvidersView({
     super.key,
   });
@@ -23,7 +22,6 @@ class ProvidersView extends ConsumerStatefulWidget {
 }
 
 class _ProvidersViewState extends ConsumerState<ProvidersView> {
-
   Future<void> _updateProviders() async {
     final providers = ref.read(providersProvider);
     final providersNotifier = ref.read(providersProvider.notifier);
@@ -103,7 +101,6 @@ class _ProvidersViewState extends ConsumerState<ProvidersView> {
 }
 
 class ProviderItem extends StatelessWidget {
-
   const ProviderItem({
     super.key,
     required this.provider,
@@ -138,8 +135,16 @@ class ProviderItem extends StatelessWidget {
       final platformFile = await picker.pickerFile();
       final bytes = platformFile?.bytes;
       if (bytes == null || provider.path == null) return;
-      final file = await File(provider.path!).create(recursive: true);
-      await file.writeAsBytes(bytes);
+      final file = File(provider.path!);
+      await file.parent.create(recursive: true);
+      final temporary =
+          File('${file.path}.tmp.${DateTime.now().microsecondsSinceEpoch}');
+      try {
+        await temporary.writeAsBytes(bytes, flush: true);
+        await temporary.rename(file.path);
+      } finally {
+        if (temporary.existsSync()) await temporary.delete();
+      }
       final providerName = provider.name;
       final message = await clashCore.sideLoadExternalProvider(
         providerName: providerName,
@@ -165,63 +170,63 @@ class ProviderItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ListItem(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 4,
-      ),
-      title: Text(provider.name),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(
-            height: 4,
-          ),
-          Text(
-            _buildProviderDesc(),
-          ),
-          const SizedBox(
-            height: 4,
-          ),
-          if (provider.subscriptionInfo != null)
-            SubscriptionInfoView(
-              subscriptionInfo: provider.subscriptionInfo,
-            ),
-          const SizedBox(
-            height: 8,
-          ),
-          Wrap(
-            runSpacing: 6,
-            spacing: 12,
-            children: [
-              CommonChip(
-                avatar: const Icon(Icons.upload),
-                label: appLocalizations.upload,
-                onPressed: _handleSideLoadProvider,
-              ),
-              if (provider.vehicleType == "HTTP")
-                CommonChip(
-                  avatar: const Icon(Icons.sync),
-                  label: appLocalizations.sync,
-                  onPressed: _handleUpdateProvider,
-                ),
-            ],
-          ),
-          const SizedBox(
-            height: 4,
-          ),
-        ],
-      ),
-      trailing: SizedBox(
-        height: 48,
-        width: 48,
-        child: FadeThroughBox(
-          child: provider.isUpdating
-              ? const Padding(
-                  padding: EdgeInsets.all(8),
-                  child: CircularProgressIndicator(),
-                )
-              : const SizedBox(),
+        padding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 4,
         ),
-      ),
-    );
+        title: Text(provider.name),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(
+              height: 4,
+            ),
+            Text(
+              _buildProviderDesc(),
+            ),
+            const SizedBox(
+              height: 4,
+            ),
+            if (provider.subscriptionInfo != null)
+              SubscriptionInfoView(
+                subscriptionInfo: provider.subscriptionInfo,
+              ),
+            const SizedBox(
+              height: 8,
+            ),
+            Wrap(
+              runSpacing: 6,
+              spacing: 12,
+              children: [
+                CommonChip(
+                  avatar: const Icon(Icons.upload),
+                  label: appLocalizations.upload,
+                  onPressed: _handleSideLoadProvider,
+                ),
+                if (provider.vehicleType == "HTTP")
+                  CommonChip(
+                    avatar: const Icon(Icons.sync),
+                    label: appLocalizations.sync,
+                    onPressed: _handleUpdateProvider,
+                  ),
+              ],
+            ),
+            const SizedBox(
+              height: 4,
+            ),
+          ],
+        ),
+        trailing: SizedBox(
+          height: 48,
+          width: 48,
+          child: FadeThroughBox(
+            child: provider.isUpdating
+                ? const Padding(
+                    padding: EdgeInsets.all(8),
+                    child: CircularProgressIndicator(),
+                  )
+                : const SizedBox(),
+          ),
+        ),
+      );
 }

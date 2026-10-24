@@ -1,6 +1,7 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+
 import 'intl/messages_all.dart';
 
 // **************************************************************************
@@ -337,6 +338,41 @@ class AppLocalizations {
       desc: '',
       args: [],
     );
+  }
+
+  /// `Detected an unclean shutdown while TUN was active — network settings have been restored`
+  String get tunRecoveryComplete {
+    return Intl.message(
+      'Detected an unclean shutdown while TUN was active — network settings have been restored',
+      name: 'tunRecoveryComplete',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `TUN recovery was incomplete. Open the recovery log for details`
+  String get tunRecoveryPartial {
+    return Intl.message(
+      'TUN recovery was incomplete. Open the recovery log for details',
+      name: 'tunRecoveryPartial',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `TUN failed to start`
+  String get tunStartFailed {
+    return Intl.message(
+      'TUN failed to start',
+      name: 'tunStartFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Repair`
+  String get repair {
+    return Intl.message('Repair', name: 'repair', desc: '', args: []);
   }
 
   /// `Minimize on exit`

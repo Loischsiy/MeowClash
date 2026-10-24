@@ -795,6 +795,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "remove": MessageLookupByLibrary.simpleMessage("Remove"),
     "rename": MessageLookupByLibrary.simpleMessage("Rename"),
     "renew": MessageLookupByLibrary.simpleMessage("Renew"),
+    "repair": MessageLookupByLibrary.simpleMessage("Repair"),
     "requestDetails": MessageLookupByLibrary.simpleMessage("Request details"),
     "requests": MessageLookupByLibrary.simpleMessage("Requests"),
     "requestsDesc": MessageLookupByLibrary.simpleMessage(
@@ -981,6 +982,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "tun": MessageLookupByLibrary.simpleMessage("TUN"),
     "tunDesc": MessageLookupByLibrary.simpleMessage(
       "only effective in administrator mode",
+    ),
+    "tunRecoveryComplete": MessageLookupByLibrary.simpleMessage(
+      "Detected an unclean shutdown while TUN was active — network settings have been restored",
+    ),
+    "tunRecoveryPartial": MessageLookupByLibrary.simpleMessage(
+      "TUN recovery was incomplete. Open the recovery log for details",
+    ),
+    "tunStartFailed": MessageLookupByLibrary.simpleMessage(
+      "TUN failed to start",
     ),
     "twoColumns": MessageLookupByLibrary.simpleMessage("Two columns"),
     "uk": MessageLookupByLibrary.simpleMessage("Ukrainian"),

@@ -288,5 +288,9 @@
   "releaseMemory": "Vapauta muistia",
   "delayTestConcurrency": "Samanaikaiset URL-testit",
   "unlimitedConcurrency": "Rajoittamaton",
-  "delayTestConcurrencyTip": "Anna luku väliltä 0–1000; 0 poistaa rajan"
+  "delayTestConcurrencyTip": "Anna luku väliltä 0–1000; 0 poistaa rajan",
+  "tunRecoveryComplete": "Odottamaton sammutus havaittiin TUN-tilan ollessa käytössä — verkkoasetukset on palautettu",
+  "tunRecoveryPartial": "TUN-palautus jäi kesken. Avaa palautusloki saadaksesi lisätietoja",
+  "tunStartFailed": "TUN-käynnistys epäonnistui",
+  "repair": "Korjaa"
 }

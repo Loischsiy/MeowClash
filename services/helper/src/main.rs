@@ -7,6 +7,15 @@ mod service;
 
 #[cfg(all(feature = "windows-service", target_os = "windows"))]
 pub fn main() -> windows_service::Result<()> {
+    if std::env::args().any(|argument| argument == "--recover-tun") {
+        return match service::netstate::recover(&|line| eprintln!("{line}")) {
+            Ok(_) => Ok(()),
+            Err(error) => {
+                eprintln!("TUN recovery failed: {error}");
+                std::process::exit(1);
+            }
+        };
+    }
     service::windows::main()
 }
 

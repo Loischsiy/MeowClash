@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:meowclash/common/common.dart';
 import 'package:meowclash/providers/providers.dart';
 import 'package:meowclash/state.dart';
+import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:meowclash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -23,7 +24,6 @@ class ProxiesTabView extends ConsumerStatefulWidget {
 class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
     with TickerProviderStateMixin {
   TabController? _tabController;
-  final _hasMoreButtonNotifier = ValueNotifier<bool>(false);
   GroupNameKeyMap _keyMap = {};
 
   @override
@@ -34,7 +34,6 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
 
   @override
   void dispose() {
-    _hasMoreButtonNotifier.dispose();
     _destroyTabController();
     super.dispose();
   }
@@ -184,8 +183,9 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
     final state = ref.watch(groupNamesStateProvider);
     final groupNames = state.groupNames;
     if (groupNames.isEmpty) {
-      return NullStatus(
+      return AdaptiveEmptyState(
         label: appLocalizations.nullTip(appLocalizations.proxies),
+        icon: Icons.public_rounded,
       );
     }
     final GroupNameKeyMap keyMap = {};
@@ -199,69 +199,34 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
       );
     }).toList();
     _keyMap = keyMap;
+    final selector = AdaptiveGroupSelector(
+      controller: _tabController,
+      labels: groupNames,
+      moreButton: _buildMoreButton(),
+      onMore: _showMoreMenu,
+      moreTooltip: appLocalizations.proxyGroup,
+    );
+    final pages = TabBarView(
+      controller: _tabController,
+      children: children,
+    );
+    if (AdaptiveGroupSelector.floats) {
+      // The grids scroll under the floating glass bar; each pads its top by
+      // AdaptiveGroupSelector.contentInset.
+      return Stack(
+        children: [
+          Positioned.fill(child: pages),
+          Positioned(top: 0, left: 0, right: 0, child: selector),
+        ],
+      );
+    }
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        NotificationListener<ScrollMetricsNotification>(
-          onNotification: (scrollNotification) {
-            _hasMoreButtonNotifier.value =
-                scrollNotification.metrics.maxScrollExtent > 0;
-            return true;
-          },
-          child: ValueListenableBuilder(
-            valueListenable: _hasMoreButtonNotifier,
-            builder: (_, value, child) => Stack(
-                alignment: AlignmentDirectional.centerStart,
-                children: [
-                  TabBar(
-                    controller: _tabController,
-                    padding: EdgeInsets.only(
-                      left: 16,
-                      right: 16 + (value ? 16 : 0),
-                    ),
-                    dividerColor: Colors.transparent,
-                    isScrollable: true,
-                    tabAlignment: TabAlignment.start,
-                    overlayColor:
-                        const WidgetStatePropertyAll(Colors.transparent),
-                    tabs: [
-                      for (final groupName in groupNames)
-                        Tab(
-                          text: groupName,
-                        ),
-                    ],
-                  ),
-                  if (value)
-                    Positioned(
-                      right: 0,
-                      child: child!,
-                    ),
-                ],
-              ),
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                    colors: [
-                      context.colorScheme.surface.opacity10,
-                      context.colorScheme.surface,
-                    ],
-                    stops: const [
-                      0.0,
-                      0.1
-                    ]),
-              ),
-              child: _buildMoreButton(),
-            ),
-          ),
-        ),
+        selector,
         Expanded(
-          child: TabBarView(
-            controller: _tabController,
-            children: children,
-          ),
+          child: pages,
         )
       ],
     );
@@ -331,8 +296,8 @@ class ProxyGroupViewState extends ConsumerState<ProxyGroupView> {
         controller: _controller,
         child: GridView.builder(
           controller: _controller,
-          padding: const EdgeInsets.only(
-            top: 16,
+          padding: EdgeInsets.only(
+            top: 16 + AdaptiveGroupSelector.contentInset,
             left: 16,
             right: 16,
             bottom: 96,
@@ -379,14 +344,24 @@ class _DelayTestButtonState extends State<DelayTestButton>
   late Animation<double> _scale;
   bool _running = false;
 
+  // Only the Darwin button shows the running state; the Material one keeps
+  // animating its scale without rebuilding.
+  void _setRunning(bool value) {
+    if (AdaptivePlatform.useGlass && mounted) {
+      setState(() => _running = value);
+    } else {
+      _running = value;
+    }
+  }
+
   Future<void> _healthcheck() async {
     if (_running) return;
-    _running = true;
+    _setRunning(true);
     _controller.forward();
     try {
       await widget.onClick();
     } finally {
-      _running = false;
+      _setRunning(false);
       if (mounted) _controller.reverse();
     }
   }
@@ -421,7 +396,17 @@ class _DelayTestButtonState extends State<DelayTestButton>
   }
 
   @override
-  Widget build(BuildContext context) => AnimatedBuilder(
+  Widget build(BuildContext context) {
+    if (AdaptivePlatform.useGlass) {
+      // Stays in place with a spinner instead of shrinking away.
+      return AdaptiveFloatingButton(
+        onPressed: _healthcheck,
+        busy: _running,
+        icon: const Icon(Icons.network_ping),
+        glassIcon: const Icon(Icons.speed_rounded),
+      );
+    }
+    return AnimatedBuilder(
       animation: _controller.view,
       builder: (_, child) => SizedBox(
           width: 56,
@@ -431,10 +416,11 @@ class _DelayTestButtonState extends State<DelayTestButton>
             child: child,
           ),
         ),
-      child: FloatingActionButton(
-        heroTag: null,
+      child: AdaptiveFloatingButton(
         onPressed: _healthcheck,
-        child: const Icon(Icons.network_ping),
+        icon: const Icon(Icons.network_ping),
+        glassIcon: const Icon(Icons.speed_rounded),
       ),
     );
+  }
 }

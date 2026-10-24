@@ -102,6 +102,98 @@ abstract final class GlassTokens {
   // Text and icons of disabled menu rows, as alpha of the foreground.
   static const double disabledOpacity = 0.30;
 
+  // Type scale of glass content, after the Apple HIG text styles: macOS
+  // body 13 / caption 11 / title3 15, iOS subheadline 15 / footnote 13 /
+  // caption 12 / headline 17. Sizes and line heights in logical px, resolved
+  // per platform by `GlassTextStyles`.
+  static const double cardTitleSizeMac = 13;
+  static const double cardTitleLineMac = 16;
+  static const double cardTitleSizeIos = 15;
+  static const double cardTitleLineIos = 20;
+  // Proxy description; one line, as tall as the delay badge beside it.
+  static const double cardSubtitleSizeMac = 11;
+  static const double cardSubtitleLineMac = 16;
+  static const double cardSubtitleSizeIos = 13;
+  static const double cardSubtitleLineIos = 18;
+  // Delay badge label; the line height is the height of the capsule.
+  static const double delayBadgeSizeMac = 11;
+  static const double delayBadgeLineMac = 16;
+  static const double delayBadgeSizeIos = 12;
+  static const double delayBadgeLineIos = 18;
+  static const double groupTitleSizeMac = 15;
+  static const double groupTitleLineMac = 20;
+  static const double groupTitleSizeIos = 17;
+  static const double groupTitleLineIos = 22;
+  static const double groupSubtitleSizeMac = 11;
+  static const double groupSubtitleLineMac = 14;
+  static const double groupSubtitleSizeIos = 13;
+  static const double groupSubtitleLineIos = 18;
+
+  // Content cards (proxy nodes). They scroll, so they never blur: a
+  // translucent fill over the window background and a hairline edge, quieter
+  // than the chrome's. The selected card is a light accent tint with a faint
+  // accent edge — no thick outline; the check badge marks the choice.
+  static const double cardRadius = 12;
+  static const double _cardFillOpacityLight = 0.72;
+  static const double _cardFillOpacityDark = 0.46;
+  static const double _cardHairlineOpacityLight = 0.06;
+  static const double _cardHairlineOpacityDark = 0.08;
+  static const double _cardSelectedOpacityLight = 0.12;
+  static const double _cardSelectedOpacityDark = 0.20;
+  // Edge of the selected card, as alpha of the accent; hairline wide.
+  static const double cardSelectedEdgeOpacity = 0.45;
+  // Keyboard focus ring (macOS full keyboard access).
+  static const double cardFocusBorderWidth = 1.5;
+  // Check badge of the user's choice, in the top-end corner of the card.
+  static const double cardCheckSize = 18;
+  static const double cardCheckIconSize = 12;
+  static const double cardCheckInset = 6;
+  // Space the card content leaves free for the check badge.
+  static const double cardCheckReserve = 16;
+
+  // Delay badge: a capsule tinted with the delay color.
+  static const double delayPillHorizontalPadding = 6;
+  static const double _delayPillOpacityLight = 0.14;
+  static const double _delayPillOpacityDark = 0.24;
+  // Spinner radius as a fraction of the badge height.
+  static const double delayIndicatorRadiusFactor = 0.4;
+  // Bolt symbol of an untested proxy, as a fraction of the badge height.
+  static const double delayBoltSizeFactor = 0.85;
+
+  // Group header of the list mode; pinned (blurred) while its group scrolls
+  // under it, a plain translucent card otherwise.
+  static const double groupHeaderRadius = 14;
+  static const double groupHeaderMargin = 4;
+  static const double groupHeaderHorizontalPadding = 12;
+  static const double groupHeaderVerticalPadding = 8;
+  static const double groupHeaderIconSize = 32;
+  static const double groupHeaderIconGap = 12;
+  static const double groupHeaderTitleGap = 2;
+  static const double groupHeaderButtonSize = 32;
+  static const double groupHeaderButtonIconSize = 18;
+  static const double groupHeaderButtonGap = 4;
+
+  // Group selector bar of the tab mode, floating over the proxy grid.
+  static const double groupBarHeight = 44;
+  static const double groupBarHorizontalMargin = 16;
+  static const double groupBarTopMargin = 8;
+  static const double groupBarRadius = 22;
+  static const double groupBarInnerPadding = 4;
+  static const double groupBarItemPadding = 14;
+  static const double groupBarButtonSize = 36;
+  static const double groupBarIconSize = 18;
+
+  // Round floating action (delay test of the current group).
+  static const double floatingButtonSize = 56;
+  static const double floatingButtonIconSize = 24;
+  static const double floatingButtonPressedScale = 0.92;
+
+  // Empty and loading states.
+  static const double emptyStateIconSize = 44;
+  static const double emptyStateGap = 12;
+  static const double emptyStatePadding = 32;
+  static const double activityIndicatorRadius = 10;
+
   // Shadows cast by floating glass (tab bar, menus, sheets).
   static const List<BoxShadow> _floatingShadowLight = [
     BoxShadow(
@@ -153,6 +245,22 @@ abstract final class GlassTokens {
 
   static double menuPressedOpacity(Brightness brightness) =>
       _isDark(brightness) ? _menuPressedOpacityDark : _menuPressedOpacityLight;
+
+  static double cardFillOpacity(Brightness brightness) =>
+      _isDark(brightness) ? _cardFillOpacityDark : _cardFillOpacityLight;
+
+  static double cardHairlineOpacity(Brightness brightness) =>
+      _isDark(brightness)
+          ? _cardHairlineOpacityDark
+          : _cardHairlineOpacityLight;
+
+  static double cardSelectedOpacity(Brightness brightness) =>
+      _isDark(brightness)
+          ? _cardSelectedOpacityDark
+          : _cardSelectedOpacityLight;
+
+  static double delayPillOpacity(Brightness brightness) =>
+      _isDark(brightness) ? _delayPillOpacityDark : _delayPillOpacityLight;
 
   static List<BoxShadow> floatingShadow(Brightness brightness) =>
       _isDark(brightness) ? _floatingShadowDark : _floatingShadowLight;

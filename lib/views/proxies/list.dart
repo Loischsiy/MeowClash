@@ -5,6 +5,7 @@ import 'package:meowclash/enum/enum.dart';
 import 'package:meowclash/models/models.dart';
 import 'package:meowclash/providers/providers.dart';
 import 'package:meowclash/state.dart';
+import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:meowclash/widgets/widgets.dart';
 
 import 'card.dart';
@@ -31,8 +32,10 @@ class _ProxiesListViewState extends ConsumerState<ProxiesListView> {
     final state = ref.watch(proxiesListSelectorStateProvider);
     ref.watch(themeSettingProvider.select((state) => state.textScale));
     if (state.groupNames.isEmpty) {
-      return NullStatus(
-          label: appLocalizations.nullTip(appLocalizations.proxies));
+      return AdaptiveEmptyState(
+        label: appLocalizations.nullTip(appLocalizations.proxies),
+        icon: Icons.public_rounded,
+      );
     }
     return CommonScrollBar(
       controller: _controller,
@@ -128,11 +131,31 @@ class _ProxyGroupSliverState extends ConsumerState<_ProxyGroupSliver> {
     ));
     if (group == null) return const SliverToBoxAdapter();
     final proxies = widget.expanded ? _sortedProxies(group) : const <Proxy>[];
+    final measure = globalState.measure;
     return SliverMainAxisGroup(
       slivers: [
-        SliverToBoxAdapter(
-          child: ProxyGroupCard(group: group, expanded: widget.expanded),
-        ),
+        if (AdaptivePlatform.useGlass)
+          // Pinned while its group scrolls under it; only the stuck header
+          // blurs, so the list keeps one BackdropFilter at most.
+          SliverPersistentHeader(
+            pinned: widget.expanded,
+            delegate: _GlassGroupHeaderDelegate(
+              group: group,
+              expanded: widget.expanded,
+              extent: AdaptiveGroupHeader.extent(
+                titleHeight: measure.heightOf(
+                  GlassTextStyles.groupTitle(context.textTheme),
+                ),
+                subtitleHeight: measure.heightOf(
+                  GlassTextStyles.groupSubtitle(context.textTheme),
+                ),
+              ),
+            ),
+          )
+        else
+          SliverToBoxAdapter(
+            child: ProxyGroupCard(group: group, expanded: widget.expanded),
+          ),
         if (widget.expanded)
           SliverPadding(
             padding: const EdgeInsets.symmetric(vertical: 4),
@@ -168,14 +191,52 @@ class _ProxyGroupSliverState extends ConsumerState<_ProxyGroupSliver> {
   }
 }
 
+class _GlassGroupHeaderDelegate extends SliverPersistentHeaderDelegate {
+  _GlassGroupHeaderDelegate({
+    required this.group,
+    required this.expanded,
+    required this.extent,
+  })  : _resting = ProxyGroupCard(group: group, expanded: expanded),
+        _pinned = ProxyGroupCard(group: group, expanded: expanded, pinned: true);
+
+  final Group group;
+  final bool expanded;
+  final double extent;
+
+  // Built once: while the header is stuck, every scroll frame calls [build];
+  // returning the same instance lets Flutter skip rebuilding the header.
+  final Widget _resting;
+  final Widget _pinned;
+
+  @override
+  double get minExtent => extent;
+
+  @override
+  double get maxExtent => extent;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) =>
+      shrinkOffset > 0 ? _pinned : _resting;
+
+  @override
+  bool shouldRebuild(_GlassGroupHeaderDelegate oldDelegate) =>
+      !identical(oldDelegate.group, group) ||
+      oldDelegate.expanded != expanded ||
+      oldDelegate.extent != extent;
+}
+
 class ProxyGroupCard extends StatefulWidget {
   const ProxyGroupCard({
     super.key,
     required this.group,
     required this.expanded,
+    this.pinned = false,
   });
   final Group group;
   final bool expanded;
+
+  /// Darwin: the header is stuck with its proxies scrolling under it.
+  final bool pinned;
 
   @override
   State<ProxyGroupCard> createState() => _ProxyGroupCardState();
@@ -219,20 +280,9 @@ class _ProxyGroupCardState extends State<ProxyGroupCard> {
               (state) => state.iconStyle,
             ),
           );
-          final icon = ref.watch(proxiesStyleSettingProvider.select((state) {
-            final iconMapEntryList = state.iconMap.entries.toList();
-            final index = iconMapEntryList.indexWhere((item) {
-              try {
-                return RegExp(item.key).hasMatch(groupName);
-              } catch (_) {
-                return false;
-              }
-            });
-            if (index != -1) {
-              return iconMapEntryList[index].value;
-            }
-            return this.icon;
-          }));
+          final icon = ref.watch(proxiesStyleSettingProvider.select(
+            _resolveIcon,
+          ));
           return switch (iconStyle) {
             ProxiesIconStyle.icon => Container(
                 margin: const EdgeInsets.only(
@@ -250,8 +300,72 @@ class _ProxyGroupCardState extends State<ProxyGroupCard> {
         },
       );
 
+  String _resolveIcon(ProxiesStyle state) {
+    final iconMapEntryList = state.iconMap.entries.toList();
+    final index = iconMapEntryList.indexWhere((item) {
+      try {
+        return RegExp(item.key).hasMatch(groupName);
+      } catch (_) {
+        return false;
+      }
+    });
+    if (index != -1) {
+      return iconMapEntryList[index].value;
+    }
+    return icon;
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => AdaptivePlatform.useGlass
+      ? _buildGlass(context)
+      : _buildMaterial(context);
+
+  Widget _buildGlass(BuildContext context) => Consumer(
+        builder: (_, ref, __) {
+          final unfoldSet = ref.watch(unfoldSetProvider);
+          final iconStyle = ref.watch(
+            proxiesStyleSettingProvider.select((state) => state.iconStyle),
+          );
+          final icon = iconStyle == ProxiesIconStyle.icon
+              ? ref.watch(proxiesStyleSettingProvider.select(_resolveIcon))
+              : null;
+          final theme = Theme.of(context);
+          return RepaintBoundary(
+            child: AdaptiveGroupHeader(
+              materialBuilder: _buildMaterial,
+              title: groupName,
+              leading: icon == null
+                  ? null
+                  : CommonTargetIcon(
+                      src: icon,
+                      size: GlassTokens.groupHeaderIconSize,
+                    ),
+              subtitle: Consumer(
+                builder: (_, ref, __) {
+                  final proxyName = ref
+                      .watch(getSelectedProxyNameProvider(groupName))
+                      .getSafeValue("");
+                  if (proxyName.isEmpty) return const SizedBox.shrink();
+                  return EmojiText(
+                    proxyName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GlassTextStyles.groupSubtitle(theme.textTheme)
+                        .copyWith(color: theme.colorScheme.onSurfaceVariant),
+                  );
+                },
+              ),
+              expanded: isExpand,
+              pinned: widget.pinned,
+              testing: isLock,
+              onTest: isLock ? null : _delayTest,
+              onToggle: () => _toggleExpansion(unfoldSet),
+            ),
+          );
+        },
+      );
+
+  Widget _buildMaterial(BuildContext context) {
     final colorScheme = context.colorScheme;
     return Consumer(
       builder: (_, ref, __) {

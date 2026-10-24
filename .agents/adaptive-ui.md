@@ -32,6 +32,36 @@ pixel-for-pixel. Code: `lib/widgets/adaptive/` (import `adaptive.dart`).
   Glass there would only tint an empty backdrop flat grey.
 - All numbers (sigmas, radii, opacities, sizes, durations) live in `glass_tokens.dart`.
 
+## Inner screens (phase 2)
+
+- One screen per PR. Each screen gets Material goldens taken **before** the glass work
+  (`test/material_<screen>_golden_test.dart`) and a glass test that counts `BackdropFilter`s on a
+  100+ item list (`test/adaptive_<screen>_glass_test.dart`).
+- Content primitives: `AdaptiveCard` (translucent, no blur; selection = light accent tint + faint
+  accent hairline, never a thick outline; `checked` = check badge; the 1.5 px accent ring is keyboard
+  focus only), `AdaptiveDelayBadge` (pill, `CupertinoActivityIndicator`, bolt),
+  `AdaptiveGroupHeader` (collapsible group row; blurred only while `pinned`),
+  `AdaptiveGroupSelector` (floating glass group bar over a `TabController`),
+  `AdaptiveFloatingButton` (glass circle, `busy` spinner), `AdaptiveEmptyState`,
+  `AdaptiveActivityIndicator`, `GlassIconButton` (Darwin-only symbol button).
+- Blur budget of a scrolling screen is constant: only a pinned header / floating bar / floating
+  button may be a `GlassSurface`. A pinned list header is a `SliverPersistentHeader` that swaps to its
+  glass variant only when `shrinkOffset > 0`, so at rest the list has zero blur.
+- Glass content text uses the Apple type scale from `GlassTextStyles` (sizes/line heights are
+  `GlassTokens.card*` / `delayBadge*` / `group*`, per macOS and iOS), not the Material `TextTheme`
+  sizes. Fixed-height rows must measure the same style: `Measure.heightOf(style)` (see
+  `proxyCardLineHeights` in `lib/views/proxies/common.dart`); the Material branch keeps
+  `measure.bodyMediumHeight` & co. so its goldens do not move.
+- A floating bar over content: the host stacks it over the pages and pads the scroll view by the
+  primitive's `contentInset` (0 off Darwin, so the Material padding is unchanged).
+- Proxies screen: in the list mode the expanded group header pins; in the tab mode the grid scrolls
+  under `AdaptiveGroupSelector`. The Darwin check badge replaces `_ProxyComputedMark`. Proxy-screen
+  sheets (settings, providers, group picker, icons) are still Material-in-glass-sheet — next PR.
+- `proxy_list_performance_test.dart` looks for `IconButton` inside `ProxyGroupCard` and for
+  `FloatingActionButton`: keep them in the Material branches.
+- Do not use `CupertinoIcons`: `cupertino_icons` is not a dependency, so its font is not bundled and
+  the glyphs render as empty boxes. Use rounded Material symbols (`Icons.*_rounded`) on Darwin too.
+
 ## Accessibility and fallbacks
 
 - `GlassAccessibility.of(context)`: Reduce Transparency, Reduce Motion, Increase Contrast and the

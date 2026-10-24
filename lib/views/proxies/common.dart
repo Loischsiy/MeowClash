@@ -1,22 +1,44 @@
+import 'package:flutter/material.dart';
 import 'package:meowclash/enum/enum.dart';
 import 'package:meowclash/models/models.dart';
 import 'package:meowclash/services/delay_test_runner.dart';
 import 'package:meowclash/state.dart';
+import 'package:meowclash/widgets/adaptive/adaptive.dart';
 
 double get listHeaderHeight {
   final measure = globalState.measure;
   return 20 + measure.titleMediumHeight + 4 + measure.bodyMediumHeight;
 }
 
-double getItemHeight(ProxyCardType proxyCardType) {
+/// Line heights of a proxy card: name, description and delay badge.
+///
+/// Material measures `bodyMedium` / `bodySmall` / `labelSmall`; Darwin glass
+/// measures the Apple type scale of [GlassTextStyles].
+({double title, double desc, double delay}) get proxyCardLineHeights {
   final measure = globalState.measure;
-  final baseHeight =
-      16 + measure.bodyMediumHeight * 2 + measure.bodySmallHeight + 8 + 4;
+  if (!AdaptivePlatform.useGlass) {
+    return (
+      title: measure.bodyMediumHeight,
+      desc: measure.bodySmallHeight,
+      delay: measure.labelSmallHeight,
+    );
+  }
+  final textTheme = Theme.of(measure.context).textTheme;
+  return (
+    title: measure.heightOf(GlassTextStyles.cardTitle(textTheme)),
+    desc: measure.heightOf(GlassTextStyles.cardSubtitle(textTheme)),
+    delay: measure.heightOf(GlassTextStyles.delayBadge(textTheme)),
+  );
+}
+
+double getItemHeight(ProxyCardType proxyCardType) {
+  final lines = proxyCardLineHeights;
+  final baseHeight = 16 + lines.title * 2 + lines.desc + 8 + 4;
   return switch (proxyCardType) {
-    ProxyCardType.expand => baseHeight + measure.labelSmallHeight + 6,
+    ProxyCardType.expand => baseHeight + lines.delay + 6,
     ProxyCardType.shrink => baseHeight,
-    ProxyCardType.min => baseHeight - measure.bodyMediumHeight,
-    ProxyCardType.oneline => 16 + measure.bodyMediumHeight + 4,
+    ProxyCardType.min => baseHeight - lines.title,
+    ProxyCardType.oneline => 16 + lines.title + 4,
   };
 }
 

@@ -44,7 +44,8 @@ pixel-for-pixel. Code: `lib/widgets/adaptive/` (import `adaptive.dart`).
 - Window backdrop (`macos/Runner/MainFlutterWindow.swift`, `GlassContainerViewController`): transparent
   `FlutterViewController` over `NSVisualEffectView(.sidebar, .behindWindow)`; on macOS 26+ an
   `NSGlassEffectView` on top (`#if compiler(>=6.2)` + `#available(macOS 26, *)`). AppKit handles Reduce
-  Transparency for this layer itself.
+  Transparency for this layer itself. Compare with the pre-26 material only:
+  `defaults write com.meowclash.app MeowClashGlassBackdrop legacy` (delete the key to restore).
 - Context menus: `AdaptiveContextMenu.showNative` → `meowclash/context_menu` channel →
   `ContextMenuPresenter` in `macos/Runner/AppDelegate.swift` (`NSMenu.popUp`). Mark destructive entries
   with `PopupMenuItemData.type = PopupMenuItemType.danger` (system red, own group at the end). Map new
@@ -61,10 +62,38 @@ pixel-for-pixel. Code: `lib/widgets/adaptive/` (import `adaptive.dart`).
   pad its scroll view with `AdaptiveTabBar.bottomInset(context)` itself.
 - Context menus: one glass `GlassSurface`, scale-only open, instant close, symbol on the trailing edge.
 
+## Refraction shader (iOS tab bar only)
+
+- `shaders/glass_refraction.frag` (declared under `flutter: shaders:` in `pubspec.yaml`) bends the
+  blurred backdrop along the capsule rim and, more weakly, along the selected-tab capsule. Wired via
+  `GlassSurface(refraction: GlassRefraction(...))`; only `_GlassTabBar` passes it, and only when
+  `AdaptivePlatform.isIOSGlass`. macOS uses native AppKit glass and never gets the shader.
+- Still **one** `BackdropFilterLayer` per surface (`RenderGlassRefraction`):
+  `ImageFilter.compose(outer: shader, inner: blur)`. The selected-tab lens is computed inside the same
+  shader — never stack a second shader `BackdropFilter` (stale content on iOS devices, flutter#187820).
+- Falls back to the plain `BackdropFilter.grouped` blur when `ImageFilter.isShaderFilterSupported` is false
+  (no Impeller), while the program is loading or after it failed, with `opaque` (Reduce Transparency /
+  Increase Contrast) and with the kill switch `--dart-define=MEOWCLASH_GLASS_REFRACTION=false`.
+- Uniform layout is fixed: Dart writes `GlassRefractionShader.uniformCount` floats after the
+  engine-owned `uSize`; change `glassRefractionUniforms` and the `.frag` together
+  (`test/adaptive_refraction_test.dart` checks the count against the compiled program). The backdrop
+  texture is full screen in physical px, so rects are `localToGlobal × devicePixelRatio`.
+- The position is read at paint time; during a route transition the rim/lens may lag a frame behind a
+  moving bar. Strength numbers are `GlassTokens.tabBarRefraction*` / `tabBarLens*`.
+- Compile check without a build: `impellerc` from
+  `<flutter>/bin/cache/artifacts/engine/darwin-x64/` with `--runtime-stage-metal --sksl
+  --include=<that dir>/shader_lib`.
+
 ## Checking without a device
 
 - `flutter test` covers both branches (glass on/off, Reduce Motion / Transparency, channel fallbacks).
+  Refraction tests check the uniforms and the layer tree only (support is forced with
+  `GlassRefractionShader.debugSupportedOverride`); the look of the shader is checked on the simulator or
+  a device.
 - Swift has no unit tests here; type-check edited Runner files with `xcrun swiftc -typecheck` against the
   FlutterMacOS framework, stubbing plugin imports.
 - The iOS simulator only runs the Debug UI build (see `.agents/build.md`); performance numbers
-  must come from real hardware.
+  must come from real hardware. `flutter build ios --simulator --debug` + `xcrun simctl install /
+  launch / io screenshot` works without Xcode open. **Do not run a CLI iOS build while the project is
+  open in Xcode**: Flutter regenerates the plugin package and Xcode 27.1 crashes
+  (`IDEContainer _retainedContainerAtFilePath`).

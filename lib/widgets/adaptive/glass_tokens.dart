@@ -57,6 +57,17 @@ abstract final class GlassTokens {
   static const double tabBarIconSize = 24;
   static const double tabBarLabelGap = 2;
 
+  // Edge refraction of the iOS tab bar (shaders/glass_refraction.frag), in
+  // logical px: how far in from the rim the bevel reaches, how far its
+  // outermost band reads from, and how far red and blue part there. The
+  // selected tab gets a shallower lens of its own.
+  static const double tabBarRefractionBevel = 14;
+  static const double tabBarRefractionDepth = 10;
+  static const double tabBarRefractionDispersion = 0.75;
+  static const double tabBarLensBevel = 8;
+  static const double tabBarLensDepth = 4;
+  static const double tabBarLensDispersion = 0.5;
+
   // Geometry of the macOS chrome.
   static const double sidebarWidth = 84;
   static const double sidebarExtendedWidth = 200;

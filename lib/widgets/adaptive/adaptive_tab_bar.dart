@@ -3,6 +3,7 @@ import 'package:meowclash/common/color.dart';
 
 import 'adaptive_platform.dart';
 import 'glass_accessibility.dart';
+import 'glass_refraction.dart';
 import 'glass_surface.dart';
 import 'glass_tokens.dart';
 
@@ -103,6 +104,23 @@ class _GlassTabBar extends StatelessWidget {
           sigma: GlassTokens.barSigma,
           borderRadius: radius,
           shadow: true,
+          refraction: AdaptivePlatform.isIOSGlass
+              ? GlassRefraction(
+                  bevel: GlassTokens.tabBarRefractionBevel,
+                  depth: GlassTokens.tabBarRefractionDepth,
+                  dispersion: GlassTokens.tabBarRefractionDispersion,
+                  segment: GlassRefractionSegment(
+                    index: selectedIndex,
+                    count: destinations.length,
+                    inset: GlassTokens.tabBarInnerPadding,
+                    radius: GlassTokens.tabBarRadius -
+                        GlassTokens.tabBarInnerPadding,
+                    bevel: GlassTokens.tabBarLensBevel,
+                    depth: GlassTokens.tabBarLensDepth,
+                    dispersion: GlassTokens.tabBarLensDispersion,
+                  ),
+                )
+              : null,
           child: SizedBox(
             height: GlassTokens.tabBarHeight,
             child: Padding(

@@ -41,6 +41,8 @@ lib/                Flutter app code
     proxies/        Proxy list, cards, settings, providers
   widgets/          Reusable UI components (dialogs, cards, grids, charts, inputs, sheets,
                     suspendable_ui, visibility_polling, navigation_page_view, ip_details dialog)
+    adaptive/       Darwin glass chrome vs Material switch (tab bar, sidebar, app bar, context menu,
+                    GlassSurface, glass tokens/theme/accessibility) — see .agents/adaptive-ui.md
 plugins/
   proxy/            Windows plugin for system proxy toggle
   window_ext/       macOS/Windows window management plugin

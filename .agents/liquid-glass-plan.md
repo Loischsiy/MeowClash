@@ -159,7 +159,8 @@
 - [x] на macOS 26 — `NSGlassEffectView`
       под `#if compiler(>=6.2)` + `if #available(macOS 26, *)` (deployment target 11.0).
 - [x] Reduce Transparency на macOS → AppKit сам делает материал непрозрачным; проверить, что Flutter-хром тоже. Проверено владельцем 2026-10-24: панель сплошная.
-- [ ] Иконка строки меню — шаблонный SF Symbol (уже есть), стиль меню совпадает.
+- [x] Иконка строки меню — шаблонный SF Symbol (уже есть), стиль меню совпадает: `StatusBarController`
+      показывает системное `NSMenu`, как и контекстные меню (шаг 6).
 
 ### 8. (Опционально) Преломление как у Liquid Glass — PR `feat(ui): refraction shader for glass chrome`
 - [ ] Лёгкий фрагментный шейдер (`shaders/glass_refraction.frag`, ассет в `pubspec.yaml`) только для
@@ -182,6 +183,8 @@
 - [ ] `flutter analyze` (lib test) без новых диагностик, `flutter test` зелёный.
 - [ ] Перенести правила в `.agents/adaptive-ui.md`, строка в таблицу `AGENTS.md`,
       обновить `.agents/project-structure.md`; удалить этот файл.
+      Сделано: `adaptive-ui.md`, строка в `AGENTS.md`, `project-structure.md`. Осталось: удалить этот файл
+      после проверок владельцем выше (и решения по шагу 8).
 
 ## Журнал
 
@@ -242,3 +245,5 @@
   поведение, решение за владельцем.
 - 2026-10-24: goldens Material-хрома дополнены (+10): эталоны сгенерированы на `fd102ce` (до шагов 3–6),
   текущий код совпадает пиксель-в-пиксель. `flutter test` 229 / 1 skipped, analyze 529 / 0 errors.
+- 2026-10-24: шаг 7 закрыт (иконка строки меню). Правила этапа перенесены в `.agents/adaptive-ui.md`,
+  роутер `AGENTS.md` и `project-structure.md` обновлены; план остаётся до проверок владельцем.

@@ -112,6 +112,7 @@ Every test lives in `test/`, except the Go tests, `macos/RunnerTests/RunnerTests
 | Read when the task touches | Guide |
 |---|---|
 | Folder ownership, `lib/` layout | `.agents/project-structure.md` |
+| macOS/iOS Liquid Glass chrome, `lib/widgets/adaptive/`, Material goldens | `.agents/adaptive-ui.md` |
 | Building, packaging, env vars, running locally | `.agents/build.md` |
 | Bumping mihomo / core version, `vendorHash` | `.agents/core-version.md` |
 | Nix, NixOS module, VM check, TUN mode | `.agents/nix.md` |

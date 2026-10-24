@@ -39,6 +39,7 @@ class GlassSurface extends StatelessWidget {
     this.opaqueColor,
     this.rim = true,
     this.shadow = false,
+    this.shadows,
     this.refraction,
   });
 
@@ -65,11 +66,23 @@ class GlassSurface extends StatelessWidget {
   /// Cast [GlassTokens.floatingShadow] around the shape (floating chrome).
   final bool shadow;
 
+  /// Replaces [GlassTokens.floatingShadow] when [shadow] is set (lighter
+  /// shadows of small chrome such as toolbar capsules).
+  final List<BoxShadow>? shadows;
+
   /// Edge refraction on top of the blur, in the same single backdrop layer.
   /// Applies to [GlassBackdrop.blur] only, and only where
   /// [GlassRefractionShader.supported]; otherwise the surface keeps the plain
   /// blur. The iOS tab bar is the only user.
   final GlassRefraction? refraction;
+
+  /// Whether [context] is painted inside a [GlassSurface] that blurs.
+  ///
+  /// Small glass inside it (e.g. toolbar capsules of a page shown in a glass
+  /// sheet) must not blur again: no blur inside a blurred surface.
+  static bool isOverBlur(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<_GlassBlurScope>()?.blurs ??
+      false;
 
   @override
   Widget build(BuildContext context) {
@@ -98,7 +111,11 @@ class GlassSurface extends StatelessWidget {
               opaque: opaque,
             )
           : null,
-      child: child,
+      // Always present, so toggling [opaque] keeps the child's state.
+      child: _GlassBlurScope(
+        blurs: !opaque && backdrop == GlassBackdrop.blur,
+        child: child,
+      ),
     );
 
     final refraction = this.refraction;
@@ -142,13 +159,23 @@ class GlassSurface extends StatelessWidget {
       surface = CustomPaint(
         painter: _OuterShadowPainter(
           borderRadius: borderRadius,
-          shadows: GlassTokens.floatingShadow(brightness),
+          shadows: shadows ?? GlassTokens.floatingShadow(brightness),
         ),
         child: surface,
       );
     }
     return surface;
   }
+}
+
+class _GlassBlurScope extends InheritedWidget {
+  const _GlassBlurScope({required this.blurs, required super.child});
+
+  final bool blurs;
+
+  @override
+  bool updateShouldNotify(_GlassBlurScope oldWidget) =>
+      oldWidget.blurs != blurs;
 }
 
 ui.RSuperellipse _shape(Rect rect, BorderRadius radius) =>

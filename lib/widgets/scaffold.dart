@@ -35,6 +35,7 @@ class CommonScaffold extends ConsumerStatefulWidget {
     this.appBarEditState,
     this.floatingActionButton,
     this.disableBackground = false,
+    this.scrollUnderToolbar = false,
   });
 
   CommonScaffold.open({
@@ -72,6 +73,12 @@ class CommonScaffold extends ConsumerStatefulWidget {
   final FloatingActionButton? floatingActionButton;
   final bool disableBackground;
 
+  /// Darwin glass toolbar only: the body starts at the top of the window and
+  /// scrolls under the see-through bar, which then paints its scroll-edge
+  /// fade. The page's scroll view must add [AdaptiveAppBar.topInset] to its
+  /// top padding itself, so this is opt-in per page. No effect on Material.
+  final bool scrollUnderToolbar;
+
   @override
   ConsumerState<CommonScaffold> createState() => CommonScaffoldState();
 }
@@ -95,6 +102,11 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
   bool get _isSearch => _appBarState.value.searchState?.isSearch == true;
 
   bool get _isEdit => _appBarState.value.editState?.isEdit == true;
+
+  bool get _scrollUnderToolbar =>
+      widget.scrollUnderToolbar &&
+      AdaptivePlatform.useGlass &&
+      widget.appBar == null;
 
   set onKeywordsUpdate(Function(List<String>)? onKeywordsUpdate) {
     _onKeywordsUpdate = onKeywordsUpdate;
@@ -211,6 +223,14 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
     );
   }
 
+  void _handleStartSearching() {
+    updateSearchState(
+      (state) => state?.copyWith(
+        isSearch: true,
+      ),
+    );
+  }
+
   @override
   void dispose() {
     _appBarState.dispose();
@@ -265,6 +285,14 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
         : widget.leading;
   }
 
+  Widget _buildTitleText() => Text(
+        !_isEdit
+            ? widget.title!
+            : appLocalizations.selectedCountTitle(
+                "${_appBarState.value.editState?.editCount ?? 0}",
+              ),
+      );
+
   Widget _buildTitle(AppBarSearchState? startState) => _isSearch
         ? TextField(
             autofocus: true,
@@ -279,13 +307,7 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
               hintText: appLocalizations.search,
             ),
           )
-        : Text(
-            !_isEdit
-                ? widget.title!
-                : appLocalizations.selectedCountTitle(
-                    "${_appBarState.value.editState?.editCount ?? 0}",
-                  ),
-          );
+        : _buildTitleText();
 
   List<Widget> _buildActions(
     AppBarSearchState? searchState,
@@ -302,13 +324,7 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
 
     final hasSearch = searchState != null;
     final searchButton = IconButton(
-      onPressed: () {
-        updateSearchState(
-          (state) => state?.copyWith(
-            isSearch: true,
-          ),
-        );
-      },
+      onPressed: _handleStartSearching,
       icon: const Icon(Icons.search),
     );
 
@@ -336,8 +352,10 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
   
   }
 
-  Widget _buildAppBarWrap(Widget child) {
-    final appBar = _isSearch ? _buildSearchingAppBarTheme(child) : child;
+  Widget _buildAppBarWrap(Widget child) =>
+      _buildPopScope(_isSearch ? _buildSearchingAppBarTheme(child) : child);
+
+  Widget _buildPopScope(Widget appBar) {
     if (_isEdit || _isSearch) {
       return SystemBackBlock(
         child: CommonPopScope(
@@ -356,12 +374,95 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
     return appBar;
   }
 
+  /// Darwin leading button: what the Material `AppBar` shows or implies.
+  Widget? _buildGlassLeading() {
+    if (_isEdit) {
+      return IconButton(
+        onPressed: _appBarState.value.editState?.onExit,
+        icon: const Icon(Icons.close_rounded),
+      );
+    }
+    if (_isSearch) {
+      return IconButton(
+        onPressed: _handleExitSearching,
+        icon: const BackButtonIcon(),
+      );
+    }
+    if (widget.leading != null) return widget.leading;
+    if (!widget.automaticallyImplyLeading) return null;
+    final route = ModalRoute.of(context);
+    if (route?.impliesAppBarDismissal != true) return null;
+    return route is PageRoute && route.fullscreenDialog
+        ? const CloseButton()
+        : const BackButton();
+  }
+
+  /// A page with no back / close button of its own (a tab root): on iOS its
+  /// title goes to the large title row. Search and edit mode do not count,
+  /// so the bar keeps its height while they come and go.
+  bool get _isRootPage {
+    if (widget.leading != null) return false;
+    if (!widget.automaticallyImplyLeading) return true;
+    return ModalRoute.of(context)?.impliesAppBarDismissal != true;
+  }
+
+  /// Darwin toolbar (macOS 26 / iOS 26): see-through bar, actions in one
+  /// glass capsule, search in its own round capsule or a glass field.
+  Widget _buildGlassAppBar(
+    BuildContext context,
+    AppBarState state, {
+    required bool isTransparent,
+    required bool largeTitle,
+  }) {
+    final searchState = state.searchState;
+    final actions =
+        state.actions.isNotEmpty ? state.actions : widget.actions ?? [];
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: Theme.of(context).appBarTheme.systemOverlayStyle!,
+      child: AdaptiveAppBar(
+        transparent: isTransparent,
+        scrollEdge: _scrollUnderToolbar,
+        largeTitle: largeTitle,
+        onWindowDrag: Platform.isMacOS ? windowManager.startDragging : null,
+        child: _buildPopScope(
+          GlassToolbar(
+            largeTitle: largeTitle,
+            leading: _buildGlassLeading(),
+            title: _buildTitleText(),
+            actions: actions,
+            search: searchState == null
+                ? null
+                : IconButton(
+                    tooltip: appLocalizations.search,
+                    onPressed: _handleStartSearching,
+                    icon: const Icon(Icons.search_rounded),
+                  ),
+            searchField: _isSearch
+                ? GlassToolbarSearchField(
+                    controller: _textController,
+                    hintText: appLocalizations.search,
+                    onChanged: (value) => searchState?.onSearch(value),
+                    onClear: _handleClear,
+                  )
+                : null,
+          ),
+        ),
+      ),
+    );
+  }
+
   PreferredSizeWidget _buildAppBar() {
     final backgroundUrl = widget.disableBackground ? null : ref.watch(backgroundUrlProvider);
     final isTransparent = backgroundUrl != null;
+    final glass = AdaptivePlatform.useGlass && widget.appBar == null;
+    final largeTitle = glass && AdaptiveAppBar.largeTitles && _isRootPage;
     
     return PreferredSize(
-      preferredSize: const Size.fromHeight(kToolbarHeight),
+      preferredSize: Size.fromHeight(
+        glass
+            ? AdaptiveAppBar.preferredHeight(context, largeTitle: largeTitle)
+            : kToolbarHeight,
+      ),
       child: Theme(
         data: Theme.of(context).copyWith(
           appBarTheme: AppBarTheme(
@@ -388,7 +489,14 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
             widget.appBar ??
                 ValueListenableBuilder<AppBarState>(
                   valueListenable: _appBarState,
-                  builder: (_, state, __) => AdaptiveAppBar(
+                  builder: (context, state, __) => glass
+                      ? _buildGlassAppBar(
+                          context,
+                          state,
+                          isTransparent: isTransparent,
+                          largeTitle: largeTitle,
+                        )
+                      : AdaptiveAppBar(
                     transparent: isTransparent,
                     onWindowDrag:
                         Platform.isMacOS ? windowManager.startDragging : null,
@@ -466,13 +574,18 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
     // bottom padding, so this SafeArea keeps every page above the capsule.
     // Screens opt into scrolling underneath it in stage 2 (inner screens),
     // once their scroll views add [AdaptiveTabBar.bottomInset] themselves.
+    // Likewise at the top: with [CommonScaffold.scrollUnderToolbar] the
+    // Scaffold reports the glass toolbar as top padding and the page adds
+    // [AdaptiveAppBar.topInset] to its own scroll view.
+    final scrollUnder = _scrollUnderToolbar;
     final body = SafeArea(
+      top: !scrollUnder,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ValueListenableBuilder(
             valueListenable: _keywordsNotifier,
-            builder: (_, keywords, __) {
+            builder: (context, keywords, __) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 if (_onKeywordsUpdate != null) {
                   _onKeywordsUpdate!(keywords);
@@ -482,9 +595,11 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
                 return const SizedBox();
               }
               return Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 16,
+                padding: EdgeInsets.fromLTRB(
+                  16,
+                  16 + AdaptiveAppBar.topInset(context),
+                  16,
+                  16,
                 ),
                 child: Wrap(
                   runSpacing: 8,
@@ -504,7 +619,17 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
             },
           ),
           Expanded(
-            child: widget.body,
+            // Keyword chips already sit below the toolbar: the page under
+            // them must not add [AdaptiveAppBar.topInset] again.
+            child: ValueListenableBuilder(
+              valueListenable: _keywordsNotifier,
+              builder: (context, keywords, child) => MediaQuery.removePadding(
+                context: context,
+                removeTop: keywords.isNotEmpty,
+                child: child!,
+              ),
+              child: widget.body,
+            ),
           ),
         ],
       ),
@@ -514,6 +639,7 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
       appBar: _buildAppBar(),
       body: body,
       extendBody: extendBody,
+      extendBodyBehindAppBar: scrollUnder,
       resizeToAvoidBottomInset: true,
       backgroundColor: backgroundUrl != null ? Colors.transparent : widget.backgroundColor,
       floatingActionButton: widget.floatingActionButton ??

@@ -14,6 +14,11 @@ import 'package:meowclash/widgets/widgets.dart';
 
 typedef OnSelected = void Function(int index);
 
+/// Pages whose scroll view adds `AdaptiveAppBar.topInset` and so may scroll
+/// under the Darwin glass toolbar. Opt-in: other pages keep their own top
+/// padding and would hide content under the bar.
+const _scrollUnderToolbarPages = {PageLabel.tools};
+
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
@@ -44,6 +49,8 @@ class HomePage extends StatelessWidget {
                 pageLabel.name,
               ),
               sideNavigationBar: sideNavigationBar,
+              scrollUnderToolbar:
+                  _scrollUnderToolbarPages.contains(pageLabel),
               body: child!,
               bottomNavigationBar: bottomNavigationBar,
             );

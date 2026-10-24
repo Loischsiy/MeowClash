@@ -70,7 +70,8 @@
 
 ## Побочные задачи (отдельные ветки)
 
-- [ ] `fix/glass-sheet-pages` от main: для `SheetType.page` без стекла, непрозрачный фон темы + тест, analyze, flutter test, коммит. Затем вернуться на `feat/liquid-glass-proxies`.
+- [x] `fix/glass-sheet-pages` от main: для `SheetType.page` без стекла, непрозрачный фон темы + тест, analyze, flutter test, коммит. Готово: `b75e81b fix(ui): opaque Darwin page for full-screen sheets` (тест без фикса красный, с фиксом зелёный; `flutter test` на ветке зелёный; Material-голдены хрома совпадают; новых замечаний analyze нет). Правило добавлено в `.agents/adaptive-ui.md` на той же ветке.
+- [ ] Пользователь: пуш `fix/glass-sheet-pages` и отдельный PR (маленький, можно влить до PR «Прокси»). После вливания — rebase `feat/liquid-glass-proxies` на main.
 
 ## Заметки / ограничения среды
 

@@ -145,7 +145,7 @@
       `NSVisualEffectView` (`.sidebar`, `.behindWindow`) в `GlassContainerViewController`.
 - [x] на macOS 26 — `NSGlassEffectView`
       под `#if compiler(>=6.2)` + `if #available(macOS 26, *)` (deployment target 11.0).
-- [ ] Reduce Transparency на macOS → AppKit сам делает материал непрозрачным; проверить, что Flutter-хром тоже.
+- [x] Reduce Transparency на macOS → AppKit сам делает материал непрозрачным; проверить, что Flutter-хром тоже. Проверено владельцем 2026-10-24: панель сплошная.
 - [ ] Иконка строки меню — шаблонный SF Symbol (уже есть), стиль меню совпадает.
 
 ### 8. (Опционально) Преломление как у Liquid Glass — PR `feat(ui): refraction shader for glass chrome`
@@ -163,6 +163,7 @@
       Замеры производительности в симуляторе непоказательны (GPU и драйвер Mac) — цифры для PR с iPhone.
 - [ ] macOS и iOS, светлая/тёмная тема — скриншоты в описание PR.
 - [ ] Reduce Transparency / Reduce Motion — проверено на обеих Darwin-платформах.
+      Сделано: Reduce Transparency на macOS. Осталось: Reduce Motion (macOS), оба на iOS.
 - [ ] DevTools timeline до/после: прокрутка списка прокси под размытой боковой панелью (macOS),
       таб-бар (iOS). Цифры (avg/p90/p99 build+raster ms, jank frames) — в описание PR, не в репозиторий.
 - [ ] `flutter analyze` (lib test) без новых диагностик, `flutter test` зелёный.
@@ -212,3 +213,4 @@
   его не слушает. Добавлен `NSGlassEffectView` (macOS 26+, `#if compiler(>=6.2)`) поверх материала, Flutter — его
   `contentView`; сравнить со старым: `defaults write com.meowclash.app MeowClashGlassBackdrop legacy`.
   Проверено `swiftc -typecheck` (macOS 12 target); запуск — за владельцем.
+- 2026-10-24: владелец проверил «Уменьшить прозрачность» на macOS — боковая панель становится сплошной.

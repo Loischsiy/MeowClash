@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
+import 'glass_accessibility.dart';
 import 'glass_surface.dart';
 import 'glass_text_styles.dart';
 import 'glass_tokens.dart';
@@ -163,6 +164,11 @@ class GlassToolbarSearchField extends StatelessWidget {
                   focusedErrorBorder: none,
                   hintText: hintText,
                   hintStyle: style.copyWith(color: scheme.onSurfaceVariant),
+                  // Reduce Motion: the hint goes away at once, no fade.
+                  hintFadeDuration:
+                      GlassAccessibility.of(context).reduceMotion
+                          ? Duration.zero
+                          : null,
                 ),
               ),
             ),

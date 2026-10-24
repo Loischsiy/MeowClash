@@ -44,6 +44,7 @@ Future<GlobalKey<CommonScaffoldState>> _pumpScaffold(
   WidgetTester tester, {
   double top = _macTop,
   bool highContrast = false,
+  bool disableAnimations = false,
   Widget body = const SizedBox.expand(),
   bool scrollUnderToolbar = false,
 }) async {
@@ -59,6 +60,7 @@ Future<GlobalKey<CommonScaffoldState>> _pumpScaffold(
           padding: padding,
           viewPadding: padding,
           highContrast: highContrast,
+          disableAnimations: disableAnimations,
         ),
         child: child!,
       ),
@@ -431,6 +433,122 @@ void main() {
       expect(tester.getRect(find.byType(ListView)).top, kToolbarHeight);
       expect(tester.getTopLeft(find.text('Row 0')).dy, kToolbarHeight);
     }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+  });
+
+  group('glass toolbar fallbacks and blur budget', () {
+    tearDown(() => GlassFlags.backdropBlurEnabled = true);
+
+    Finder solidBar() => find.descendant(
+          of: find.byType(AdaptiveAppBar),
+          matching: find.byWidgetPredicate(
+            (w) =>
+                w is DecoratedBox &&
+                w.decoration is BoxDecoration &&
+                (w.decoration as BoxDecoration).color != null &&
+                (w.decoration as BoxDecoration).border != null,
+          ),
+        );
+
+    testWidgets('kill switch: opaque bar with a hairline, no blur, no fade',
+        (tester) async {
+      GlassFlags.backdropBlurEnabled = false;
+      final key = await _pumpScaffold(
+        tester,
+        body: _insetList(),
+        scrollUnderToolbar: true,
+      );
+      _enableSearch(key, []);
+      await tester.pump();
+      expect(find.byType(GlassToolbarGroup), findsNWidgets(2));
+      expect(find.byType(BackdropFilter), findsNothing);
+      expect(_backdropLayers(tester), 0);
+      expect(solidBar(), findsOneWidget);
+      expect(_fade(), findsNothing);
+      // Same layout as with glass: the page still starts below the bar.
+      expect(
+        tester.getTopLeft(find.text('Row 0')).dy,
+        _macTop + GlassTokens.toolbarHeightMac,
+      );
+    }, variant: _darwin);
+
+    testWidgets('Reduce Transparency under a scrolled page: solid bar',
+        (tester) async {
+      await _pumpScaffold(
+        tester,
+        highContrast: true,
+        body: _insetList(),
+        scrollUnderToolbar: true,
+      );
+      expect(solidBar(), findsOneWidget);
+      expect(_fade(), findsNothing);
+      expect(_backdropLayers(tester), 0);
+    }, variant: _darwin);
+
+    testWidgets('Reduce Motion: search opens and closes in one frame',
+        (tester) async {
+      final key = await _pumpScaffold(tester, disableAnimations: true);
+      _enableSearch(key, []);
+      await tester.pump();
+
+      await tester.tap(find.byIcon(Icons.search_rounded));
+      await tester.pump();
+      expect(find.byType(GlassToolbarSearchField), findsOneWidget);
+      // Nothing in the bar animates (and no Opacity above the capsules).
+      Finder inBar(Type type) => find.descendant(
+            of: find.byType(AdaptiveAppBar),
+            matching: find.byType(type),
+          );
+      expect(inBar(AnimatedSwitcher), findsNothing);
+      expect(inBar(Opacity), findsNothing);
+      // The text field's own hint fade is switched off too.
+      expect(
+        tester
+            .widget<InputDecorator>(inBar(InputDecorator))
+            .decoration
+            .hintFadeDuration,
+        Duration.zero,
+      );
+      await tester.tap(find.byType(BackButtonIcon));
+      await tester.pump();
+      expect(find.byType(GlassToolbarSearchField), findsNothing);
+      expect(find.text('Profiles'), findsOneWidget);
+    }, variant: _darwin);
+
+    testWidgets('busy screen: back + 5 actions + search = 3 blurs',
+        (tester) async {
+      await _pumpScaffold(tester);
+      final navigator = tester.state<NavigatorState>(find.byType(Navigator));
+      unawaited(navigator.push(MaterialPageRoute<void>(
+        builder: (_) => CommonScaffold(
+          key: const ValueKey('busy'),
+          title: 'Proxies',
+          actions: [
+            for (final icon in [
+              Icons.sync,
+              Icons.edit,
+              Icons.speed,
+              Icons.filter_list,
+              Icons.more_vert,
+            ])
+              IconButton(onPressed: () {}, icon: Icon(icon)),
+          ],
+          body: const SizedBox.expand(),
+        ),
+      )));
+      await tester.pumpAndSettle();
+      tester
+          .state<CommonScaffoldState>(find.byKey(const ValueKey('busy')))
+          .updateSearchState((_) => AppBarSearchState(onSearch: (_) {}));
+      await tester.pump();
+
+      // Only the pushed page paints (the route below is offstage).
+      expect(find.byType(GlassToolbarGroup), findsNWidgets(3));
+      expect(_backdropLayers(tester), 3);
+      expect(
+        tester.getSize(find.byType(GlassToolbarGroup).at(1)).width,
+        GlassTokens.toolbarItemSizeMac * 5,
+      );
+    }, variant: _darwin);
   });
 
   group('AdaptiveAppBar', () {

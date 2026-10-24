@@ -147,28 +147,35 @@ class GlassToolbarSearchField extends StatelessWidget {
             ),
             const SizedBox(width: GlassTokens.toolbarSearchIconGap),
             Expanded(
-              child: TextField(
-                autofocus: autofocus,
-                controller: controller,
-                onChanged: onChanged,
-                style: style,
-                textAlignVertical: TextAlignVertical.center,
-                decoration: InputDecoration(
-                  isCollapsed: true,
-                  filled: false,
-                  border: none,
-                  enabledBorder: none,
-                  focusedBorder: none,
-                  disabledBorder: none,
-                  errorBorder: none,
-                  focusedErrorBorder: none,
-                  hintText: hintText,
-                  hintStyle: style.copyWith(color: scheme.onSurfaceVariant),
-                  // Reduce Motion: the hint goes away at once, no fade.
-                  hintFadeDuration:
-                      GlassAccessibility.of(context).reduceMotion
-                          ? Duration.zero
-                          : null,
+              // Desktop's compact VisualDensity makes a collapsed
+              // InputDecorator push its line 4 pt below the field's own
+              // box, so the text sat low in the capsule on macOS. The
+              // capsule fixes the height; the field keeps standard density.
+              child: Theme(
+                data: theme.copyWith(visualDensity: VisualDensity.standard),
+                child: TextField(
+                  autofocus: autofocus,
+                  controller: controller,
+                  onChanged: onChanged,
+                  style: style,
+                  textAlignVertical: TextAlignVertical.center,
+                  decoration: InputDecoration(
+                    isCollapsed: true,
+                    filled: false,
+                    border: none,
+                    enabledBorder: none,
+                    focusedBorder: none,
+                    disabledBorder: none,
+                    errorBorder: none,
+                    focusedErrorBorder: none,
+                    hintText: hintText,
+                    hintStyle: style.copyWith(color: scheme.onSurfaceVariant),
+                    // Reduce Motion: the hint goes away at once, no fade.
+                    hintFadeDuration:
+                        GlassAccessibility.of(context).reduceMotion
+                            ? Duration.zero
+                            : null,
+                  ),
                 ),
               ),
             ),

@@ -214,8 +214,29 @@ void main() {
         const Size(300, GlassTokens.toolbarItemSizeMac),
       );
       expect(find.text('Search'), findsOneWidget);
+      // The text line sits in the middle of the capsule, also with the
+      // compact desktop density the macOS theme uses by default.
+      expect(
+        Theme.of(tester.element(find.byType(GlassToolbarSearchField)))
+            .visualDensity,
+        VisualDensity.compact,
+      );
+      final capsule = tester.getRect(find.byType(GlassSurface));
+      final editable =
+          tester.allRenderObjects.whereType<RenderEditable>().single;
+      final line = editable.localToGlobal(Offset.zero) & editable.size;
+      expect(line.center.dy, capsule.center.dy);
+      expect(tester.getCenter(find.text('Search')).dy, capsule.center.dy);
+      expect(
+        tester.getCenter(find.byIcon(Icons.search_rounded)).dy,
+        capsule.center.dy,
+      );
       await tester.enterText(find.byType(TextField), 'hk');
       expect(changes, ['hk']);
+      expect(
+        (editable.localToGlobal(Offset.zero) & editable.size).center.dy,
+        capsule.center.dy,
+      );
       await tester.tap(find.byIcon(Icons.cancel_rounded));
       expect(clears, 1);
     }, variant: _darwin);

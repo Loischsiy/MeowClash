@@ -135,12 +135,19 @@ class _AdaptiveSheetScaffoldState extends State<AdaptiveSheetScaffold> {
     final colorScheme = context.colorScheme;
     final bottomSheet = widget.type == SheetType.bottomSheet;
     final sideSheet = widget.type == SheetType.sideSheet;
-    final useGlass = AdaptivePlatform.useGlass;
+    // A full-screen page (mobile `showExtend`) is an opaque route: nothing is
+    // painted behind it, so glass would only tint an empty backdrop grey.
+    // Darwin pages use the theme's opaque page background instead.
+    final darwinPage =
+        AdaptivePlatform.useGlass && widget.type == SheetType.page;
+    final useGlass = AdaptivePlatform.useGlass && !darwinPage;
     final backgroundColor = useGlass
         ? Colors.transparent
-        : sideSheet
-            ? colorScheme.surface.withValues(alpha: 0.92)
-            : colorScheme.surface.withValues(alpha: 0.92);
+        : darwinPage
+            ? null
+            : sideSheet
+                ? colorScheme.surface.withValues(alpha: 0.92)
+                : colorScheme.surface.withValues(alpha: 0.92);
     final appBar = AppBar(
       forceMaterialTransparency: bottomSheet ? true : false,
       automaticallyImplyLeading: bottomSheet

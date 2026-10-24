@@ -265,6 +265,37 @@ void main() {
       expect(find.byIcon(Icons.public_rounded), findsOneWidget);
     }, variant: darwin);
 
+    testWidgets('group header absorbs a subtitle taller than measured',
+        (tester) async {
+      // Emoji (Twemoji) spans are taller than the measured labelMedium line.
+      await setUp(tester, type: ProxiesType.list);
+      await pumpScreen(
+        tester,
+        // globalState.measure is set by host() during the build.
+        host(Builder(builder: (context) {
+          final measure = globalState.measure;
+          return Align(
+            alignment: Alignment.topCenter,
+            child: SizedBox(
+              height: AdaptiveGroupHeader.extent(
+                titleHeight: measure.titleMediumHeight,
+                subtitleHeight: measure.labelMediumHeight,
+              ),
+              child: AdaptiveGroupHeader(
+                materialBuilder: (_) => const SizedBox.shrink(),
+                title: 'Proxy',
+                subtitle: SizedBox(height: measure.labelMediumHeight + 6),
+                expanded: true,
+                onToggle: () {},
+                onTest: () {},
+              ),
+            ),
+          );
+        })),
+      );
+      expect(tester.takeException(), isNull);
+    }, variant: darwin);
+
     testWidgets('delay test button is one glass circle', (tester) async {
       await setUp(tester, type: ProxiesType.tab);
       await pumpScreen(

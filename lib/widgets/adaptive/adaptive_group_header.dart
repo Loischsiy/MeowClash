@@ -108,13 +108,17 @@ class AdaptiveGroupHeader extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: GlassTokens.groupHeaderTitleGap),
-                DefaultTextStyle.merge(
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    color: scheme.onSurfaceVariant,
+                // Flexible: emoji spans (Twemoji) are a bit taller than the
+                // measured line; the fixed-height header must not overflow.
+                Flexible(
+                  child: DefaultTextStyle.merge(
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
+                    child: subtitle ?? const SizedBox.shrink(),
                   ),
-                  child: subtitle ?? const SizedBox.shrink(),
                 ),
               ],
             ),

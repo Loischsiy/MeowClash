@@ -44,6 +44,7 @@
 - [x] 8. AdaptiveFloatingButton (кнопка теста), AdaptiveEmptyState, AdaptiveActivityIndicator
 - [x] 9. Тесты стекла: число слоёв блюра на 100+ прокси, фолбэки (Reduce Transparency/Motion, kill switch), переключение платформ
 - [x] 10. Голдены Material совпадают; analyze без новых замечаний; flutter test зелёный; proxy_list_performance_test проходит
+- [x] 10a. Фикс переполнения заголовка группы (эмодзи в подзаголовке): тест, analyze, коммит
 - [ ] 11. iOS-симулятор: скриншоты светлая/тёмная (если доступен из среды)
 - [x] 12. Обновить .agents/adaptive-ui.md (новые примитивы, правила экрана)
 - [ ] 13. Текст PR: скриншоты, «Android/Linux/Windows без изменений», замеры; удалить этот трекер
@@ -60,6 +61,8 @@
 - 2026-10-24 (сессия 2): первая iOS-сборка упала — фаза Xcode «Flutter Build» разворачивала симлинк shadow `bin/flutter` до реального SDK и писала в его `bin/cache`. Исправлено в `.agent/flutter-shadow`: `bin/flutter`, `bin/dart` — копии, `bin/internal` — папка симлинков, `engine.stamp`/`engine.realm` — копии.
 - 2026-10-24 (сессия 2): `flutter build ios --simulator --debug` собирается, но `simctl boot` из среды агента падает (runtime iOS 27.0 недоступен) — скриншоты с симулятора делает пользователь.
 - 2026-10-24 (сессия 2): баг — `cupertino_icons` нет в pubspec, `CupertinoIcons.*` рисовались бы пустыми квадратами. Заменены на `Icons.*_rounded` во всех примитивах и экране; правило добавлено в `.agents/adaptive-ui.md`.
+- 2026-10-24 (сессия 3): найдено незакоммиченное — фикс переполнения AdaptiveGroupHeader (подзаголовок с эмодзи выше замера → `Flexible`) + тест `group header absorbs a subtitle taller than measured`. Проверяю и коммичу (шаг 10a).
+- 2026-10-24 (сессия 3): тест падал с LateInitializationError (`globalState.measure` читался до `host()`), перенесён в `Builder`. Без фикса красный (RenderFlex overflowed by 6 px), с фиксом зелёный. `flutter test` 276 passed / 1 skipped; analyze `lib test` — 0 ошибок, 0 новых замечаний. Коммит `fix(ui): group header absorbs emoji-tall subtitles`.
 
 ## Заметки / ограничения среды
 

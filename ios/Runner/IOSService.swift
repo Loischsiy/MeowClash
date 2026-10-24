@@ -54,7 +54,7 @@ final class IOSService {
 
     private static func loadManagers() async throws -> [NETunnelProviderManager] {
         #if targetEnvironment(simulator)
-        // UI-preview builds only (.agents/liquid-glass-plan.md, step 9): the
+        // UI-preview builds only (.agents/build.md, iOS Simulator): the
         // simulator has no nehelper, so NetworkExtension preferences always fail
         // with "IPC failed" and Dart main() would never reach runApp. Report "no
         // VPN profile"; starting the VPN still fails with a clear error.

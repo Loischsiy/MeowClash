@@ -74,6 +74,13 @@ name is historical: **the shim is not ARM64-only.**
 - **The released IPA is unsigned by design.** Resigning only the outer app is not enough: the embedded
   `.appex` needs its own provisioning profile with NetworkExtension (Packet Tunnel) and App Groups
   entitlements. No App Store/TestFlight credentials are configured.
+- **iOS 27 requires UIScene.** Without `UIApplicationSceneManifest` (`FlutterSceneDelegate`) in
+  `ios/Runner/Info.plist` the app dies at launch in
+  `_UIApplicationEvaluateRuntimeIssueForNoSceneLifecycleAdoption`. `AppDelegate` is a
+  `FlutterImplicitEngineDelegate`: plugins, `IOSService` and the glass channel are registered in
+  `didInitializeImplicitFlutterEngine`, not in `didFinishLaunching`.
+- The iOS Simulator has no NetworkExtension daemon: `IOSService.loadManagers()` returns `[]` under
+  `targetEnvironment(simulator)` so Dart `main()` still reaches `runApp` (UI preview only).
 - A green unsigned compile proves nothing about VPN routing, signing, extension memory or provider
   scripts on a real device. Physical-device acceptance for iOS/ARM64 releases belongs in the PR
   checklist, not in a tracked `.md`.

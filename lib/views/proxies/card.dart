@@ -4,7 +4,9 @@ import 'package:meowclash/models/models.dart';
 import 'package:meowclash/providers/providers.dart';
 import 'package:meowclash/state.dart';
 import 'package:meowclash/views/proxies/common.dart';
+import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:meowclash/widgets/widgets.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -35,6 +37,25 @@ class ProxyCard extends StatelessWidget {
 
   bool _canDrillDown(Group? group) => group != null && group.name != groupName;
 
+  /// Darwin check badge: the user's own choice — the pinned proxy of an
+  /// auto group (the Material check mark), or the selection of a selector.
+  bool _isChecked(WidgetRef ref) => groupType.isComputedSelected
+      ? ref.watch(getProxyNameProvider(groupName)) == proxy.name
+      : ref.watch(getSelectedProxyNameProvider(groupName)) == proxy.name;
+
+  /// Keeps the name clear of the Darwin check badge.
+  Widget _reserveCheckSpace(Widget child) => Consumer(
+        builder: (context, ref, child) => Padding(
+          padding: _isChecked(ref)
+              ? const EdgeInsetsDirectional.only(
+                  end: GlassTokens.cardCheckReserve,
+                )
+              : EdgeInsets.zero,
+          child: child,
+        ),
+        child: child,
+      );
+
   void _openProxyGroup(BuildContext context, Group group) {
     showExtend(
       context,
@@ -55,33 +76,12 @@ class ProxyCard extends StatelessWidget {
             proxyName: proxy.name,
             testUrl: testUrl,
           ));
-          return delay == 0 || delay == null
-              ? SizedBox(
-                  height: measure.labelSmallHeight,
-                  width: measure.labelSmallHeight,
-                  child: delay == 0
-                      ? const CircularProgressIndicator(
-                          strokeWidth: 2,
-                        )
-                      : IconButton(
-                          icon: const Icon(Icons.bolt),
-                          iconSize: globalState.measure.labelSmallHeight,
-                          padding: EdgeInsets.zero,
-                          onPressed: _handleTestCurrentDelay,
-                        ),
-                )
-              : GestureDetector(
-                  onTap: _handleTestCurrentDelay,
-                  child: Text(
-                    delay > 0 ? '$delay ms' : "Timeout",
-                    style: context.textTheme.labelSmall?.copyWith(
-                      overflow: TextOverflow.ellipsis,
-                      color: utils.getDelayColor(
-                        delay,
-                      ),
-                    ),
-                  ),
-                );
+          return AdaptiveDelayBadge(
+            delay: delay,
+            color: utils.getDelayColor(delay),
+            height: measure.labelSmallHeight,
+            onTest: _handleTestCurrentDelay,
+          );
         },
       ),
     );
@@ -90,6 +90,16 @@ class ProxyCard extends StatelessWidget {
     if (type == ProxyCardType.oneline) {
       return Consumer(
         builder: (context, ref, child) {
+          if (AdaptivePlatform.useGlass) {
+            return Padding(
+              padding: _isChecked(ref)
+                  ? const EdgeInsetsDirectional.only(
+                      end: GlassTokens.cardCheckReserve,
+                    )
+                  : EdgeInsets.zero,
+              child: child,
+            );
+          }
           final isSelected = groupType.isComputedSelected &&
               ref.watch(getProxyNameProvider(groupName)) == proxy.name;
 
@@ -119,8 +129,10 @@ class ProxyCard extends StatelessWidget {
           ),
         ),
       );
-    } else if (type == ProxyCardType.min) {
-      return SizedBox(
+    }
+    final Widget text;
+    if (type == ProxyCardType.min) {
+      text = SizedBox(
         height: measure.bodyMediumHeight * 1,
         child: EmojiText(
           proxy.name,
@@ -130,7 +142,7 @@ class ProxyCard extends StatelessWidget {
         ),
       );
     } else {
-      return SizedBox(
+      text = SizedBox(
         height: measure.bodyMediumHeight * 2,
         child: EmojiText(
           proxy.name,
@@ -140,6 +152,7 @@ class ProxyCard extends StatelessWidget {
         ),
       );
     }
+    return AdaptivePlatform.useGlass ? _reserveCheckSpace(text) : text;
   }
 
   Future<void> _changeProxy(WidgetRef ref) async {
@@ -181,7 +194,7 @@ class ProxyCard extends StatelessWidget {
                 return _canDrillDown(group) ? group : null;
               }),
             );
-            return CommonCard(
+            return AdaptiveCard(
               key: key,
               onPressed: () {
                 _changeProxy(ref);
@@ -190,6 +203,10 @@ class ProxyCard extends StatelessWidget {
                   ? () => _openProxyGroup(context, drillDownGroup)
                   : null,
               isSelected: selectedProxyName == proxy.name,
+              checked: AdaptivePlatform.useGlass && _isChecked(ref),
+              checkAlignment: type == ProxyCardType.oneline
+                  ? AlignmentDirectional.centerEnd
+                  : AlignmentDirectional.topEnd,
               child: child!,
             );
           },
@@ -236,7 +253,8 @@ class ProxyCard extends StatelessWidget {
             ),
           ),
         ),
-        if (groupType.isComputedSelected)
+        // Darwin shows the pinned proxy with the AdaptiveCard check badge.
+        if (groupType.isComputedSelected && !AdaptivePlatform.useGlass)
           Positioned(
             top: 0,
             right: 0,
@@ -277,8 +295,9 @@ class _ProxyGroupDrillDownViewState
       groupsProvider.select((state) => state.getGroup(widget.groupName)),
     );
     if (group == null) {
-      return NullStatus(
+      return AdaptiveEmptyState(
         label: appLocalizations.nullTip(appLocalizations.proxies),
+        icon: CupertinoIcons.globe,
       );
     }
 
@@ -289,8 +308,9 @@ class _ProxyGroupDrillDownViewState
       group.testUrl,
     );
     if (sortedProxies.isEmpty) {
-      return NullStatus(
+      return AdaptiveEmptyState(
         label: appLocalizations.nullTip(appLocalizations.proxies),
+        icon: CupertinoIcons.globe,
       );
     }
 

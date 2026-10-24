@@ -66,6 +66,11 @@
 - 2026-10-24 (сессия 3): найдено незакоммиченное — фикс переполнения AdaptiveGroupHeader (подзаголовок с эмодзи выше замера → `Flexible`) + тест `group header absorbs a subtitle taller than measured`. Проверяю и коммичу (шаг 10a).
 - 2026-10-24 (сессия 3): тест падал с LateInitializationError (`globalState.measure` читался до `host()`), перенесён в `Builder`. Без фикса красный (RenderFlex overflowed by 6 px), с фиксом зелёный. `flutter test` 276 passed / 1 skipped; analyze `lib test` — 0 ошибок, 0 новых замечаний. Коммит `fix(ui): group header absorbs emoji-tall subtitles`.
 - 2026-10-24 (сессия 3): черновик PR в `.agent/pr-liquid-glass-proxies.md`. Код экрана готов; остались только шаги 11/13b/13c со стороны пользователя.
+- 2026-10-24 (сессия 3): ПОБОЧНЫЙ БАГ фазы 1 (не этот PR): на iOS «Edit/Add profile» серые. `showExtend` на mobile пушит `SheetType.page` непрозрачным маршрутом, а `AdaptiveSheetScaffold` рисует его стеклом (прозрачный фон + GlassSurface) — тонировка поверх пустоты. Тест `adaptive_sheet_test.dart` покрывал только sideSheet/bottomSheet. Фикс в отдельной ветке `fix/glass-sheet-pages` от main (см. «Побочные задачи»).
+
+## Побочные задачи (отдельные ветки)
+
+- [ ] `fix/glass-sheet-pages` от main: для `SheetType.page` без стекла, непрозрачный фон темы + тест, analyze, flutter test, коммит. Затем вернуться на `feat/liquid-glass-proxies`.
 
 ## Заметки / ограничения среды
 

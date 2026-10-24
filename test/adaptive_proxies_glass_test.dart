@@ -79,11 +79,11 @@ void main() {
     globalState.config = globalState.config.copyWith(
       currentProfileId: 'test',
       profiles: [
-        Profile(
+        const Profile(
           id: 'test',
-          autoUpdateDuration: const Duration(days: 1),
-          unfoldSet: const {'Select', 'Auto'},
-          selectedMap: const {'Select': 'HK 002'},
+          autoUpdateDuration: Duration(days: 1),
+          unfoldSet: {'Select', 'Auto'},
+          selectedMap: {'Select': 'HK 002'},
           currentGroupName: 'Select',
         ),
       ],

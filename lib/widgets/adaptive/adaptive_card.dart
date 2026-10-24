@@ -135,7 +135,7 @@ class _GlassCardState extends State<_GlassCard> {
             width: GlassTokens.hairlineWidth,
           );
 
-    Widget content = widget.child;
+    var content = widget.child;
     if (widget.checked) {
       content = Stack(
         children: [

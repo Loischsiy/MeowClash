@@ -27,7 +27,7 @@ class AdaptiveFloatingButton extends StatefulWidget {
   /// Material icon.
   final Widget icon;
 
-  /// Darwin symbol (usually a `CupertinoIcons` icon).
+  /// Darwin symbol (a rounded Material icon; `cupertino_icons` is not bundled).
   final Widget glassIcon;
 
   /// Darwin only: replaces the symbol with a spinner and ignores taps.

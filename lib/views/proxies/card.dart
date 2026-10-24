@@ -6,7 +6,6 @@ import 'package:meowclash/state.dart';
 import 'package:meowclash/views/proxies/common.dart';
 import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:meowclash/widgets/widgets.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -297,7 +296,7 @@ class _ProxyGroupDrillDownViewState
     if (group == null) {
       return AdaptiveEmptyState(
         label: appLocalizations.nullTip(appLocalizations.proxies),
-        icon: CupertinoIcons.globe,
+        icon: Icons.public_rounded,
       );
     }
 
@@ -310,7 +309,7 @@ class _ProxyGroupDrillDownViewState
     if (sortedProxies.isEmpty) {
       return AdaptiveEmptyState(
         label: appLocalizations.nullTip(appLocalizations.proxies),
-        icon: CupertinoIcons.globe,
+        icon: Icons.public_rounded,
       );
     }
 

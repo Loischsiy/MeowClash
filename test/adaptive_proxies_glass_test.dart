@@ -254,7 +254,7 @@ void main() {
       expect(find.byType(CircularProgressIndicator), findsNothing);
       expect(find.text('48 ms'), findsOneWidget);
       expect(find.text('Timeout'), findsOneWidget);
-      expect(find.byIcon(CupertinoIcons.bolt_fill), findsWidgets);
+      expect(find.byIcon(Icons.bolt_rounded), findsWidgets);
       await tester.pumpWidget(const SizedBox.shrink());
     }, variant: darwin);
 
@@ -262,7 +262,7 @@ void main() {
       await setUp(tester, type: ProxiesType.list, groupsOverride: const []);
       await pumpScreen(tester, host(const ProxiesListView()));
       expect(find.byType(AdaptiveEmptyState), findsOneWidget);
-      expect(find.byIcon(CupertinoIcons.globe), findsOneWidget);
+      expect(find.byIcon(Icons.public_rounded), findsOneWidget);
     }, variant: darwin);
 
     testWidgets('delay test button is one glass circle', (tester) async {
@@ -320,7 +320,7 @@ void main() {
             child: AdaptiveFloatingButton(
               onPressed: () {},
               icon: const Icon(Icons.network_ping),
-              glassIcon: const Icon(CupertinoIcons.speedometer),
+              glassIcon: const Icon(Icons.speed_rounded),
             ),
           ),
           accessibility: const GlassAccessibility(reduceMotion: true),

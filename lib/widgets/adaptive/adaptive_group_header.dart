@@ -1,6 +1,5 @@
 import 'dart:math' as math;
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'adaptive_platform.dart';
@@ -122,7 +121,7 @@ class AdaptiveGroupHeader extends StatelessWidget {
           ),
           const SizedBox(width: GlassTokens.groupHeaderButtonGap),
           GlassIconButton(
-            icon: const Icon(CupertinoIcons.speedometer),
+            icon: const Icon(Icons.speed_rounded),
             onPressed: onTest,
             busy: testing,
           ),
@@ -135,7 +134,7 @@ class AdaptiveGroupHeader extends StatelessWidget {
                 reduceMotion: accessibility.reduceMotion,
               ),
               curve: GlassTokens.morphCurve,
-              child: const Icon(CupertinoIcons.chevron_down),
+              child: const Icon(Icons.expand_more_rounded),
             ),
             onPressed: onToggle,
           ),

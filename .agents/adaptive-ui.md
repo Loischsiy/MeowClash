@@ -46,6 +46,8 @@ pixel-for-pixel. Code: `lib/widgets/adaptive/` (import `adaptive.dart`).
   sheets (settings, providers, group picker, icons) are still Material-in-glass-sheet — next PR.
 - `proxy_list_performance_test.dart` looks for `IconButton` inside `ProxyGroupCard` and for
   `FloatingActionButton`: keep them in the Material branches.
+- Do not use `CupertinoIcons`: `cupertino_icons` is not a dependency, so its font is not bundled and
+  the glyphs render as empty boxes. Use rounded Material symbols (`Icons.*_rounded`) on Darwin too.
 
 ## Accessibility and fallbacks
 

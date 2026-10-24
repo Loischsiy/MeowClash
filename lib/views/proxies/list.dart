@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meowclash/common/common.dart';
@@ -35,7 +34,7 @@ class _ProxiesListViewState extends ConsumerState<ProxiesListView> {
     if (state.groupNames.isEmpty) {
       return AdaptiveEmptyState(
         label: appLocalizations.nullTip(appLocalizations.proxies),
-        icon: CupertinoIcons.globe,
+        icon: Icons.public_rounded,
       );
     }
     return CommonScrollBar(

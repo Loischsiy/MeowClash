@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:meowclash/widgets/card.dart';
 
@@ -211,7 +210,7 @@ class _CheckBadge extends StatelessWidget {
         child: DecoratedBox(
           decoration: BoxDecoration(color: color, shape: BoxShape.circle),
           child: Icon(
-            CupertinoIcons.checkmark_alt,
+            Icons.check_rounded,
             size: GlassTokens.cardCheckIconSize,
             color: onColor,
           ),

@@ -19,7 +19,7 @@ class GlassIconButton extends StatefulWidget {
     this.tooltip,
   });
 
-  /// Usually an `Icon` with a `CupertinoIcons` symbol; its size and color come
+  /// Usually an `Icon` with a rounded Material symbol; its size and color come
   /// from this button.
   final Widget icon;
 

@@ -57,7 +57,9 @@
 - 2026-10-24 (сессия 2): Material-голдены прокси/хрома совпадают, perf-тест проходит, analyze — 0 ошибок, новое замечание только omit_local_variable_types в adaptive_card.dart (исправлено). Material-кнопка теста больше не делает лишний setState.
 - 2026-10-24 (сессия 2): `test/adaptive_proxies_glass_test.dart` — 14 тестов (150 прокси на группу: список 0 блюров в покое / 1 после прокрутки, вкладки ровно 1; Reduce Transparency, kill switch, Reduce Motion, Material-ветки) — зелёные. Коммиты шагов 4–9: см. git log.
 - 2026-10-24 (сессия 2): шаг 10 — `flutter test` 275 passed / 1 skipped; analyze `lib test` — 0 ошибок, 0 новых замечаний относительно базы. Шаг 12 — раздел «Inner screens (phase 2)» в `.agents/adaptive-ui.md`.
-- Дальше: шаг 11 (iOS-симулятор: `flutter build ios --simulator --debug` → simctl install/launch/screenshot; не запускать при открытом Xcode).
+- 2026-10-24 (сессия 2): первая iOS-сборка упала — фаза Xcode «Flutter Build» разворачивала симлинк shadow `bin/flutter` до реального SDK и писала в его `bin/cache`. Исправлено в `.agent/flutter-shadow`: `bin/flutter`, `bin/dart` — копии, `bin/internal` — папка симлинков, `engine.stamp`/`engine.realm` — копии.
+- 2026-10-24 (сессия 2): `flutter build ios --simulator --debug` собирается, но `simctl boot` из среды агента падает (runtime iOS 27.0 недоступен) — скриншоты с симулятора делает пользователь.
+- 2026-10-24 (сессия 2): баг — `cupertino_icons` нет в pubspec, `CupertinoIcons.*` рисовались бы пустыми квадратами. Заменены на `Icons.*_rounded` во всех примитивах и экране; правило добавлено в `.agents/adaptive-ui.md`.
 
 ## Заметки / ограничения среды
 

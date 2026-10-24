@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:meowclash/common/color.dart';
 
@@ -182,7 +181,7 @@ class _AdaptiveGroupSelectorState extends State<AdaptiveGroupSelector> {
               Padding(
                 padding: const EdgeInsetsDirectional.only(end: inner),
                 child: GlassIconButton(
-                  icon: const Icon(CupertinoIcons.square_grid_2x2),
+                  icon: const Icon(Icons.grid_view_rounded),
                   onPressed: widget.onMore,
                   size: GlassTokens.groupBarButtonSize,
                   iconSize: GlassTokens.groupBarIconSize,

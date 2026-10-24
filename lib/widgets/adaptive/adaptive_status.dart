@@ -40,7 +40,7 @@ class AdaptiveEmptyState extends StatelessWidget {
   const AdaptiveEmptyState({
     super.key,
     required this.label,
-    this.icon = CupertinoIcons.tray,
+    this.icon = Icons.inbox_outlined,
   });
 
   final String label;

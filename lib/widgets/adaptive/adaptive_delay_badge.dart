@@ -83,7 +83,7 @@ class AdaptiveDelayBadge extends StatelessWidget {
           child: SizedBox.square(
             dimension: height,
             child: Icon(
-              CupertinoIcons.bolt_fill,
+              Icons.bolt_rounded,
               size: height * GlassTokens.delayBoltSizeFactor,
               color: theme.colorScheme.onSurfaceVariant,
             ),

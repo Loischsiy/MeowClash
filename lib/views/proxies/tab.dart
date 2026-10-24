@@ -5,7 +5,6 @@ import 'package:meowclash/providers/providers.dart';
 import 'package:meowclash/state.dart';
 import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:meowclash/widgets/widgets.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -186,7 +185,7 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
     if (groupNames.isEmpty) {
       return AdaptiveEmptyState(
         label: appLocalizations.nullTip(appLocalizations.proxies),
-        icon: CupertinoIcons.globe,
+        icon: Icons.public_rounded,
       );
     }
     final GroupNameKeyMap keyMap = {};
@@ -404,7 +403,7 @@ class _DelayTestButtonState extends State<DelayTestButton>
         onPressed: _healthcheck,
         busy: _running,
         icon: const Icon(Icons.network_ping),
-        glassIcon: const Icon(CupertinoIcons.speedometer),
+        glassIcon: const Icon(Icons.speed_rounded),
       );
     }
     return AnimatedBuilder(
@@ -420,7 +419,7 @@ class _DelayTestButtonState extends State<DelayTestButton>
       child: AdaptiveFloatingButton(
         onPressed: _healthcheck,
         icon: const Icon(Icons.network_ping),
-        glassIcon: const Icon(CupertinoIcons.speedometer),
+        glassIcon: const Icon(Icons.speed_rounded),
       ),
     );
   }

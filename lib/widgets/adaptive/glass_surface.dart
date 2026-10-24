@@ -39,6 +39,7 @@ class GlassSurface extends StatelessWidget {
     this.opaqueColor,
     this.rim = true,
     this.shadow = false,
+    this.shadows,
     this.refraction,
   });
 
@@ -64,6 +65,10 @@ class GlassSurface extends StatelessWidget {
 
   /// Cast [GlassTokens.floatingShadow] around the shape (floating chrome).
   final bool shadow;
+
+  /// Replaces [GlassTokens.floatingShadow] when [shadow] is set (lighter
+  /// shadows of small chrome such as toolbar capsules).
+  final List<BoxShadow>? shadows;
 
   /// Edge refraction on top of the blur, in the same single backdrop layer.
   /// Applies to [GlassBackdrop.blur] only, and only where
@@ -142,7 +147,7 @@ class GlassSurface extends StatelessWidget {
       surface = CustomPaint(
         painter: _OuterShadowPainter(
           borderRadius: borderRadius,
-          shadows: GlassTokens.floatingShadow(brightness),
+          shadows: shadows ?? GlassTokens.floatingShadow(brightness),
         ),
         child: surface,
       );

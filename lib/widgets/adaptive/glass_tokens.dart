@@ -183,6 +183,67 @@ abstract final class GlassTokens {
   static const double groupBarButtonSize = 36;
   static const double groupBarIconSize = 18;
 
+  // Page toolbar: the macOS window toolbar and the iOS navigation bar, after
+  // macOS 26 / iOS 26. The bar itself is see-through (no blur of its own);
+  // its buttons sit in glass capsules and the content under it fades out
+  // (scroll edge). Heights exclude the top inset (title bar / status bar).
+  static const double toolbarHeightMac = 52;
+  static const double toolbarHeightIos = 44;
+  // Title: macOS 15 semibold at the leading edge, iOS headline 17 semibold
+  // in the middle.
+  static const double toolbarTitleSizeMac = 15;
+  static const double toolbarTitleLineMac = 20;
+  static const double toolbarTitleSizeIos = 17;
+  static const double toolbarTitleLineIos = 22;
+  // Distance of the outermost capsules from the bar edges, between capsules
+  // and between the leading capsule and the title.
+  static const double toolbarInsetMac = 12;
+  static const double toolbarInsetIos = 16;
+  static const double toolbarItemGap = 8;
+  static const double toolbarTitleGap = 12;
+  // Capsule height, which is also the width of each button in it.
+  static const double toolbarItemSizeMac = 32;
+  static const double toolbarItemSizeIos = 36;
+  static const double toolbarIconSizeMac = 17;
+  static const double toolbarIconSizeIos = 20;
+  static const double toolbarItemSigma = 16;
+  // Search field capsule (search mode): magnifier, text, clear button.
+  static const double toolbarSearchSizeMac = 13;
+  static const double toolbarSearchLineMac = 16;
+  static const double toolbarSearchSizeIos = 17;
+  static const double toolbarSearchLineIos = 22;
+  static const double toolbarSearchIconSizeMac = 14;
+  static const double toolbarSearchIconSizeIos = 17;
+  static const double toolbarSearchPadding = 10;
+  static const double toolbarSearchIconGap = 6;
+  // Scroll edge: the window color behind the bar, solid down to
+  // [toolbarFadeSolidStop] of the painted height, then fading out to nothing
+  // [toolbarFadeExtent] below the bar's bottom edge. No blur, no hairline.
+  static const double toolbarFadeExtent = 16;
+  static const double toolbarFadeSolidStop = 0.6;
+  static const double _toolbarFadeOpacityLight = 0.92;
+  static const double _toolbarFadeOpacityDark = 0.88;
+  // Capsules float a little above the bar: a soft drop and, in light mode,
+  // a crisp contour (the white rim alone vanishes on a light window).
+  static const List<BoxShadow> _toolbarItemShadowLight = [
+    BoxShadow(
+      color: Color(0x14000000),
+      blurRadius: 8,
+      offset: Offset(0, 2),
+    ),
+    BoxShadow(
+      color: Color(0x12000000),
+      blurRadius: 1,
+    ),
+  ];
+  static const List<BoxShadow> _toolbarItemShadowDark = [
+    BoxShadow(
+      color: Color(0x40000000),
+      blurRadius: 8,
+      offset: Offset(0, 2),
+    ),
+  ];
+
   // Round floating action (delay test of the current group).
   static const double floatingButtonSize = 56;
   static const double floatingButtonIconSize = 24;
@@ -264,6 +325,12 @@ abstract final class GlassTokens {
 
   static List<BoxShadow> floatingShadow(Brightness brightness) =>
       _isDark(brightness) ? _floatingShadowDark : _floatingShadowLight;
+
+  static double toolbarFadeOpacity(Brightness brightness) =>
+      _isDark(brightness) ? _toolbarFadeOpacityDark : _toolbarFadeOpacityLight;
+
+  static List<BoxShadow> toolbarItemShadow(Brightness brightness) =>
+      _isDark(brightness) ? _toolbarItemShadowDark : _toolbarItemShadowLight;
 
   static Duration motion(Duration duration, {required bool reduceMotion}) =>
       reduceMotion ? Duration.zero : duration;

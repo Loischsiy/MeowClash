@@ -61,6 +61,30 @@ abstract final class GlassTextStyles {
         weight: FontWeight.w600,
       );
 
+  /// Page title in the toolbar.
+  static TextStyle toolbarTitle(TextTheme textTheme) => _style(
+        textTheme.titleLarge,
+        size: _mac
+            ? GlassTokens.toolbarTitleSizeMac
+            : GlassTokens.toolbarTitleSizeIos,
+        line: _mac
+            ? GlassTokens.toolbarTitleLineMac
+            : GlassTokens.toolbarTitleLineIos,
+        weight: FontWeight.w600,
+      );
+
+  /// Text of the toolbar search field.
+  static TextStyle toolbarSearch(TextTheme textTheme) => _style(
+        textTheme.bodyLarge,
+        size: _mac
+            ? GlassTokens.toolbarSearchSizeMac
+            : GlassTokens.toolbarSearchSizeIos,
+        line: _mac
+            ? GlassTokens.toolbarSearchLineMac
+            : GlassTokens.toolbarSearchLineIos,
+        weight: FontWeight.w400,
+      );
+
   /// Selected proxy under the group name.
   static TextStyle groupSubtitle(TextTheme textTheme) => _style(
         textTheme.labelMedium,

@@ -12,6 +12,10 @@ pixel-for-pixel. Code: `lib/widgets/adaptive/` (import `adaptive.dart`).
   Windows must stay identical: `test/adaptive_chrome_golden_test.dart` and
   `test/material_chrome_golden_test.dart` (baselines generated before the glass work). Regenerate them only
   for an intended Material change (`--update-goldens`), never to make a glass change pass.
+- Font: Darwin uses the system San Francisco — `GlassTheme.fontFamily` / `fontFamilyFallback` return
+  `null` there, so `ThemeData` keeps the Cupertino typography and the system fallback cascade (PingFang,
+  Apple Color Emoji). Other platforms keep the bundled NotoSans + JetBrainsMono fallback
+  (`test/adaptive_font_test.dart`). Never hardcode `fontFamily: 'NotoSans'` in a theme or widget.
 
 ## Where glass is allowed
 

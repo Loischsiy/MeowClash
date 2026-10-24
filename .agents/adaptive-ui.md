@@ -32,6 +32,31 @@ pixel-for-pixel. Code: `lib/widgets/adaptive/` (import `adaptive.dart`).
   Glass there would only tint an empty backdrop flat grey.
 - All numbers (sigmas, radii, opacities, sizes, durations) live in `glass_tokens.dart`.
 
+## Toolbar (app bar)
+
+- Every page's bar comes from `CommonScaffold`: on Darwin (and without a custom `appBar`) it builds
+  `AdaptiveAppBar(child: GlassToolbar(...))` instead of the Material `AppBar`; the Material branch is the
+  old code verbatim. Pages keep passing plain `IconButton`s as `actions` — never restyle them per page.
+- macOS 26 / iOS 26 model: the bar itself has **no fill and no blur**; only its capsules are glass
+  (`GlassToolbarGroup`, one `GlassSurface` each). Page actions share one capsule, search is its own
+  round capsule, the leading button (back / close / edit-exit) another. While searching,
+  `GlassToolbarSearchField` replaces the title and the actions hide. Budget: 1–3 blurs per bar.
+- Sizes (`GlassTokens.toolbar*`): macOS 52 pt bar, compact 15 pt title at the leading edge; iOS 44 pt
+  bar under the status bar, centered 17 pt title. macOS keeps window drag on the bar (`onWindowDrag`).
+- A capsule inside an already blurring surface (e.g. `CommonScaffold` in a glass sheet) switches to
+  `GlassBackdrop.native` via `GlassSurface.isOverBlur` — never blur over blur.
+- Scrolling under the bar is **opt-in per page**: `CommonScaffold(scrollUnderToolbar: true)` →
+  `extendBodyBehindAppBar`, `SafeArea(top: false)` and the bar's scroll-edge fade (a gradient in the
+  window color, `toolbarFade*`, no blur, `IgnorePointer`). The page must pad its scroll view with
+  `AdaptiveAppBar.topInset(context)` (0 on Material and on pages that do not opt in). Keyword chips stay
+  below the bar and remove the top padding for the page under them. Home opts in per tab via
+  `_scrollUnderToolbarPages` in `lib/pages/home.dart` (currently Tools only); other pages keep their own
+  top padding, which would hide content under the bar if enabled globally.
+- Fallbacks: `opaque` → solid window-colored bar + hairline, no fade, opaque capsules. Nothing in the bar
+  animates (no `Opacity` above the capsules), and with Reduce Motion the search hint does not fade.
+- Tests: `test/adaptive_toolbar_test.dart` (layout, blur count, search, back, drag, scroll-under,
+  fallbacks); Material: `test/material_chrome_golden_test.dart`.
+
 ## Inner screens (phase 2)
 
 - One screen per PR. Each screen gets Material goldens taken **before** the glass work

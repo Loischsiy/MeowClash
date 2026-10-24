@@ -45,9 +45,11 @@
 - [x] 9. Тесты стекла: число слоёв блюра на 100+ прокси, фолбэки (Reduce Transparency/Motion, kill switch), переключение платформ
 - [x] 10. Голдены Material совпадают; analyze без новых замечаний; flutter test зелёный; proxy_list_performance_test проходит
 - [x] 10a. Фикс переполнения заголовка группы (эмодзи в подзаголовке): тест, analyze, коммит
-- [ ] 11. iOS-симулятор: скриншоты светлая/тёмная (если доступен из среды)
+- [ ] 11. iOS-симулятор: скриншоты светлая/тёмная — ЗАБЛОКИРОВАНО для агента (`simctl boot` падает), делает пользователь
 - [x] 12. Обновить .agents/adaptive-ui.md (новые примитивы, правила экрана)
-- [ ] 13. Текст PR: скриншоты, «Android/Linux/Windows без изменений», замеры; удалить этот трекер
+- [x] 13a. Черновик текста PR — `.agent/pr-liquid-glass-proxies.md` (в .gitignore), TODO на скриншоты/замеры/фолбэки на устройстве
+- [ ] 13b. ЖДЁМ ПОЛЬЗОВАТЕЛЯ: скриншоты macOS + iOS (светлая/тёмная), замер прокрутки 100+ прокси в DevTools (main vs ветка), проверка Reduce Transparency/Motion на устройствах → вписать в черновик
+- [ ] 13c. Удалить этот трекер последним коммитом (`chore(agents): drop the phase 2 proxies tracker`), пуш ветки и PR — пользователь (git push из среды заблокирован)
 
 ## Журнал
 
@@ -63,6 +65,7 @@
 - 2026-10-24 (сессия 2): баг — `cupertino_icons` нет в pubspec, `CupertinoIcons.*` рисовались бы пустыми квадратами. Заменены на `Icons.*_rounded` во всех примитивах и экране; правило добавлено в `.agents/adaptive-ui.md`.
 - 2026-10-24 (сессия 3): найдено незакоммиченное — фикс переполнения AdaptiveGroupHeader (подзаголовок с эмодзи выше замера → `Flexible`) + тест `group header absorbs a subtitle taller than measured`. Проверяю и коммичу (шаг 10a).
 - 2026-10-24 (сессия 3): тест падал с LateInitializationError (`globalState.measure` читался до `host()`), перенесён в `Builder`. Без фикса красный (RenderFlex overflowed by 6 px), с фиксом зелёный. `flutter test` 276 passed / 1 skipped; analyze `lib test` — 0 ошибок, 0 новых замечаний. Коммит `fix(ui): group header absorbs emoji-tall subtitles`.
+- 2026-10-24 (сессия 3): черновик PR в `.agent/pr-liquid-glass-proxies.md`. Код экрана готов; остались только шаги 11/13b/13c со стороны пользователя.
 
 ## Заметки / ограничения среды
 

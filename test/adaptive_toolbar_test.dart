@@ -44,6 +44,8 @@ Future<GlobalKey<CommonScaffoldState>> _pumpScaffold(
   WidgetTester tester, {
   double top = _macTop,
   bool highContrast = false,
+  Widget body = const SizedBox.expand(),
+  bool scrollUnderToolbar = false,
 }) async {
   await AppLocalizations.load(const Locale('en'));
   final key = GlobalKey<CommonScaffoldState>();
@@ -67,7 +69,8 @@ Future<GlobalKey<CommonScaffoldState>> _pumpScaffold(
           key: key,
           title: 'Profiles',
           actions: _pageActions(),
-          body: const SizedBox.expand(),
+          scrollUnderToolbar: scrollUnderToolbar,
+          body: body,
         );
       }),
     ),
@@ -80,6 +83,28 @@ void _enableSearch(GlobalKey<CommonScaffoldState> key, List<String> queries) {
     (_) => AppBarSearchState(onSearch: queries.add),
   );
 }
+
+/// A page that opts into scrolling under the toolbar the way `ToolsView`
+/// does: its own top padding is [AdaptiveAppBar.topInset].
+Widget _insetList() => Builder(
+      builder: (context) => ListView(
+        padding: EdgeInsets.only(top: AdaptiveAppBar.topInset(context)),
+        children: [
+          for (var i = 0; i < 30; i++)
+            SizedBox(height: 50, child: Text('Row $i')),
+        ],
+      ),
+    );
+
+Finder _fade() => find.descendant(
+      of: find.byType(AdaptiveAppBar),
+      matching: find.byWidgetPredicate(
+        (w) =>
+            w is DecoratedBox &&
+            w.decoration is BoxDecoration &&
+            (w.decoration as BoxDecoration).gradient != null,
+      ),
+    );
 
 double? _fontSize(WidgetTester tester, String text) =>
     tester.renderObject<RenderParagraph>(find.text(text)).text.style?.fontSize;
@@ -324,6 +349,90 @@ void main() {
     }, variant: TargetPlatformVariant.only(TargetPlatform.android));
   });
 
+  group('CommonScaffold scrollUnderToolbar', () {
+    const macBar = _macTop + GlassTokens.toolbarHeightMac;
+    setUp(() => _syncTaps = 0);
+
+    testWidgets('macOS: body starts at the window top, content scrolls under',
+        (tester) async {
+      await _pumpScaffold(tester, body: _insetList(), scrollUnderToolbar: true);
+
+      expect(tester.getRect(find.byType(ListView)).top, 0);
+      // The first row starts right below the bar, not under it.
+      expect(tester.getTopLeft(find.text('Row 0')).dy, macBar);
+      expect(_fade(), findsOneWidget);
+      // Still no blur for the bar itself: three actions in one capsule.
+      expect(_backdropLayers(tester), 1);
+
+      final row2 = tester.getTopLeft(find.text('Row 2')).dy;
+      expect(row2, macBar + 100);
+      await tester.drag(find.text('Row 5'), const Offset(0, -150));
+      await tester.pump();
+      // Row 2 now sits under the bar instead of being clipped at its edge.
+      final scrolled = tester.getTopLeft(find.text('Row 2')).dy;
+      expect(scrolled, lessThan(row2 - 100));
+      expect(scrolled, lessThan(macBar));
+      expect(scrolled, greaterThan(0));
+      // Buttons above the scrolled content still take the taps.
+      await tester.tap(find.byIcon(Icons.sync));
+      expect(_syncTaps, 1);
+    }, variant: _darwin);
+
+    testWidgets('iOS: same under the status bar', (tester) async {
+      await _pumpScaffold(
+        tester,
+        top: _iosTop,
+        body: _insetList(),
+        scrollUnderToolbar: true,
+      );
+      expect(tester.getRect(find.byType(ListView)).top, 0);
+      expect(
+        tester.getTopLeft(find.text('Row 0')).dy,
+        _iosTop + GlassTokens.toolbarHeightIos,
+      );
+      expect(_fade(), findsOneWidget);
+    }, variant: _ios);
+
+    testWidgets('without the flag the page stays below the bar',
+        (tester) async {
+      await _pumpScaffold(tester, body: _insetList());
+      expect(tester.getRect(find.byType(ListView)).top, macBar);
+      expect(tester.getTopLeft(find.text('Row 0')).dy, macBar);
+      expect(_fade(), findsNothing);
+    }, variant: _darwin);
+
+    testWidgets('keyword chips sit below the bar, the page adds no inset',
+        (tester) async {
+      final key = await _pumpScaffold(
+        tester,
+        body: _insetList(),
+        scrollUnderToolbar: true,
+      );
+      key.currentState!.addKeyword('hk');
+      await tester.pump();
+
+      final chips = tester.getRect(find.byType(Wrap));
+      expect(chips.top, macBar + 16);
+      expect(
+        tester.getTopLeft(find.text('Row 0')).dy,
+        tester.getRect(find.byType(ListView)).top,
+      );
+      expect(tester.getRect(find.byType(ListView)).top, chips.bottom + 16);
+    }, variant: _darwin);
+
+    testWidgets('Material ignores the flag', (tester) async {
+      await _pumpScaffold(
+        tester,
+        top: 0,
+        body: _insetList(),
+        scrollUnderToolbar: true,
+      );
+      expect(find.byType(AppBar), findsOneWidget);
+      expect(tester.getRect(find.byType(ListView)).top, kToolbarHeight);
+      expect(tester.getTopLeft(find.text('Row 0')).dy, kToolbarHeight);
+    }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+  });
+
   group('AdaptiveAppBar', () {
     Widget bar({
       VoidCallback? onWindowDrag,
@@ -352,15 +461,7 @@ void main() {
           ),
         );
 
-    Finder gradient() => find.descendant(
-          of: find.byType(AdaptiveAppBar),
-          matching: find.byWidgetPredicate(
-            (w) =>
-                w is DecoratedBox &&
-                w.decoration is BoxDecoration &&
-                (w.decoration as BoxDecoration).gradient != null,
-          ),
-        );
+    Finder gradient() => _fade();
 
     testWidgets('macOS: drag moves the window, taps reach the buttons',
         (tester) async {

@@ -10,6 +10,7 @@ import 'package:meowclash/views/access.dart';
 import 'package:meowclash/views/application_setting.dart';
 import 'package:meowclash/views/config/config.dart';
 import 'package:meowclash/views/hotkey.dart';
+import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:meowclash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -105,7 +106,12 @@ class _ToolboxViewState extends ConsumerState<ToolsView> {
     return ListView.builder(
       itemCount: items.length,
       itemBuilder: (_, index) => items[index],
-      padding: const EdgeInsets.only(bottom: 20),
+      // Scrolls under the Darwin glass toolbar (`scrollUnderToolbar` in
+      // home.dart); topInset is 0 on Material.
+      padding: EdgeInsets.only(
+        top: AdaptiveAppBar.topInset(context),
+        bottom: 20,
+      ),
     );
   }
 }

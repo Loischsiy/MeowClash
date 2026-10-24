@@ -35,6 +35,7 @@ class CommonScaffold extends ConsumerStatefulWidget {
     this.appBarEditState,
     this.floatingActionButton,
     this.disableBackground = false,
+    this.scrollUnderToolbar = false,
   });
 
   CommonScaffold.open({
@@ -72,6 +73,12 @@ class CommonScaffold extends ConsumerStatefulWidget {
   final FloatingActionButton? floatingActionButton;
   final bool disableBackground;
 
+  /// Darwin glass toolbar only: the body starts at the top of the window and
+  /// scrolls under the see-through bar, which then paints its scroll-edge
+  /// fade. The page's scroll view must add [AdaptiveAppBar.topInset] to its
+  /// top padding itself, so this is opt-in per page. No effect on Material.
+  final bool scrollUnderToolbar;
+
   @override
   ConsumerState<CommonScaffold> createState() => CommonScaffoldState();
 }
@@ -95,6 +102,11 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
   bool get _isSearch => _appBarState.value.searchState?.isSearch == true;
 
   bool get _isEdit => _appBarState.value.editState?.isEdit == true;
+
+  bool get _scrollUnderToolbar =>
+      widget.scrollUnderToolbar &&
+      AdaptivePlatform.useGlass &&
+      widget.appBar == null;
 
   set onKeywordsUpdate(Function(List<String>)? onKeywordsUpdate) {
     _onKeywordsUpdate = onKeywordsUpdate;
@@ -399,6 +411,7 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
       value: Theme.of(context).appBarTheme.systemOverlayStyle!,
       child: AdaptiveAppBar(
         transparent: isTransparent,
+        scrollEdge: _scrollUnderToolbar,
         onWindowDrag: Platform.isMacOS ? windowManager.startDragging : null,
         child: _buildPopScope(
           GlassToolbar(
@@ -545,13 +558,18 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
     // bottom padding, so this SafeArea keeps every page above the capsule.
     // Screens opt into scrolling underneath it in stage 2 (inner screens),
     // once their scroll views add [AdaptiveTabBar.bottomInset] themselves.
+    // Likewise at the top: with [CommonScaffold.scrollUnderToolbar] the
+    // Scaffold reports the glass toolbar as top padding and the page adds
+    // [AdaptiveAppBar.topInset] to its own scroll view.
+    final scrollUnder = _scrollUnderToolbar;
     final body = SafeArea(
+      top: !scrollUnder,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ValueListenableBuilder(
             valueListenable: _keywordsNotifier,
-            builder: (_, keywords, __) {
+            builder: (context, keywords, __) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 if (_onKeywordsUpdate != null) {
                   _onKeywordsUpdate!(keywords);
@@ -561,9 +579,11 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
                 return const SizedBox();
               }
               return Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 16,
+                padding: EdgeInsets.fromLTRB(
+                  16,
+                  16 + AdaptiveAppBar.topInset(context),
+                  16,
+                  16,
                 ),
                 child: Wrap(
                   runSpacing: 8,
@@ -583,7 +603,17 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
             },
           ),
           Expanded(
-            child: widget.body,
+            // Keyword chips already sit below the toolbar: the page under
+            // them must not add [AdaptiveAppBar.topInset] again.
+            child: ValueListenableBuilder(
+              valueListenable: _keywordsNotifier,
+              builder: (context, keywords, child) => MediaQuery.removePadding(
+                context: context,
+                removeTop: keywords.isNotEmpty,
+                child: child!,
+              ),
+              child: widget.body,
+            ),
           ),
         ],
       ),
@@ -593,6 +623,7 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
       appBar: _buildAppBar(),
       body: body,
       extendBody: extendBody,
+      extendBodyBehindAppBar: scrollUnder,
       resizeToAvoidBottomInset: true,
       backgroundColor: backgroundUrl != null ? Colors.transparent : widget.backgroundColor,
       floatingActionButton: widget.floatingActionButton ??

@@ -96,6 +96,7 @@ class _ScriptsViewState extends ConsumerState<ScriptsView> {
                       PopupMenuItemData(
                         icon: Icons.delete,
                         label: appLocalizations.delete,
+                        type: PopupMenuItemType.danger,
                         onPressed: () {
                           _handleDelScript(
                             script.label,

@@ -10,6 +10,7 @@ ios/                Xcode project: Runner (app) + PacketTunnel (NetworkExtension
 native/quickjs/     Rebuilt flutter_js QuickJS C bridge (CMake) + MSVC math shim + smoke.cpp;
                     has its own README.md with the pinned upstream commit
 scripts/            Python release tooling (rename_release_assets.py)
+shaders/            Flutter fragment shaders (glass_refraction.frag, iOS tab bar) — .agents/adaptive-ui.md
 tool/               One-off Node generators (generate_ip_country_names.cjs)
 test/               All Dart, Python and NixOS-VM tests (.agents/testing.md)
 LICENSES/           Third-party license notices (Unicode CLDR data for lib/common/ip_country_names.dart)
@@ -41,6 +42,8 @@ lib/                Flutter app code
     proxies/        Proxy list, cards, settings, providers
   widgets/          Reusable UI components (dialogs, cards, grids, charts, inputs, sheets,
                     suspendable_ui, visibility_polling, navigation_page_view, ip_details dialog)
+    adaptive/       Darwin glass chrome vs Material switch (tab bar, sidebar, app bar, context menu,
+                    GlassSurface, glass tokens/theme/accessibility) — see .agents/adaptive-ui.md
 plugins/
   proxy/            Windows plugin for system proxy toggle
   window_ext/       macOS/Windows window management plugin

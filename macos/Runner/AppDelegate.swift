@@ -4,45 +4,32 @@ import window_ext
 import LaunchAtLogin
 
 @main
-class AppDelegate: FlutterAppDelegate, NSPopoverDelegate {
+class AppDelegate: FlutterAppDelegate {
     var statusBarController: StatusBarController?
     private var statusBarChannel: FlutterMethodChannel?
     private var glassAccessibilityChannel: FlutterMethodChannel?
+    private var contextMenuChannel: FlutterMethodChannel?
+    private let contextMenuPresenter = ContextMenuPresenter()
     
-    var flutterUIPopover = NSPopover.init()
-    
-    override init() {
-        super.init()
-        flutterUIPopover.behavior = NSPopover.Behavior.transient
-        flutterUIPopover.delegate = self
-    }
-    
+    // MeowClash is a regular window app (Dock icon + app menu) with an extra
+    // menu bar icon. The window starts hidden (`hiddenWindowAtLaunch`) and Dart
+    // shows it unless silent launch is enabled (lib/controller.dart).
     override func applicationDidFinishLaunching(_ aNotification: Notification) {
         NSLog("AppDelegate: applicationDidFinishLaunching called")
         
         setupCoreInApplicationSupport()
         
-        
-        guard let mainController = mainFlutterWindow?.contentViewController as? FlutterViewController else {
+        guard let mainController = (mainFlutterWindow as? MainFlutterWindow)?.flutterViewController else {
             NSLog("ERROR: Could not get FlutterViewController from mainFlutterWindow")
             return
         }
         
-        
-        let popoverContainer = PopoverContainerViewController(flutterViewController: mainController)
-        
-        flutterUIPopover.contentSize = NSSize(width: 375, height: 600)
-        
-        flutterUIPopover.contentViewController = popoverContainer
-        
-        statusBarController = StatusBarController.init(flutterUIPopover)
-        
         setupStatusBarChannel(flutterViewController: mainController)
         setupGlassAccessibilityChannel(flutterViewController: mainController)
+        setupContextMenuChannel(flutterViewController: mainController)
+        setupAppVisibilityObservers()
         
         super.applicationDidFinishLaunching(aNotification)
-        
-        mainFlutterWindow?.close()
     }
     
     func setupStatusBarChannel(flutterViewController: FlutterViewController) {
@@ -52,10 +39,11 @@ class AppDelegate: FlutterAppDelegate, NSPopoverDelegate {
         )
         
         statusBarChannel = channel
+        statusBarController = StatusBarController(window: mainFlutterWindow, channel: channel)
         channel.setMethodCallHandler { [weak self] (call: FlutterMethodCall, result: @escaping FlutterResult) in
             switch call.method {
             case "isVisible":
-                result(self?.flutterUIPopover.isShown ?? false)
+                result(self?.statusBarController?.isWindowVisible ?? false)
             case "updateIcon":
                 if let args = call.arguments as? [String: Any],
                    let isConnected = args["isConnected"] as? Bool {
@@ -109,6 +97,37 @@ class AppDelegate: FlutterAppDelegate, NSPopoverDelegate {
         )
     }
 
+    // Native context menus for the Flutter chrome
+    // (lib/widgets/adaptive/adaptive_context_menu.dart). `show` pops an NSMenu
+    // up at a point in Flutter logical coordinates (points, origin top-left)
+    // and replies with the chosen item index, or -1 when it was dismissed.
+    func setupContextMenuChannel(flutterViewController: FlutterViewController) {
+        let channel = FlutterMethodChannel(
+            name: "meowclash/context_menu",
+            binaryMessenger: flutterViewController.engine.binaryMessenger
+        )
+        contextMenuChannel = channel
+        channel.setMethodCallHandler { [weak self, weak flutterViewController] (call: FlutterMethodCall, result: @escaping FlutterResult) in
+            guard call.method == "show" else {
+                result(FlutterMethodNotImplemented)
+                return
+            }
+            guard let self = self,
+                  let view = flutterViewController?.view,
+                  view.window != nil,
+                  let args = call.arguments as? [String: Any],
+                  let items = args["items"] as? [[String: Any]],
+                  let x = (args["x"] as? NSNumber)?.doubleValue,
+                  let y = (args["y"] as? NSNumber)?.doubleValue else {
+                result(FlutterError(code: "INVALID_ARGS", message: "Invalid arguments", details: nil))
+                return
+            }
+            self.contextMenuPresenter.present(items: items, at: NSPoint(x: x, y: y), in: view) { index in
+                result(index)
+            }
+        }
+    }
+
     @objc func glassAccessibilityDidChange(_ notification: Notification) {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
@@ -144,15 +163,28 @@ class AppDelegate: FlutterAppDelegate, NSPopoverDelegate {
         return (a << 24) | (r << 16) | (g << 8) | b
     }
 
-    // NSPopover closes automatically on outside clicks/Escape as well as via
-    // the status item. Its delegate covers all paths; the original Flutter
-    // window is closed and cannot be used as a visibility signal.
-    func popoverWillShow(_ notification: Notification) {
-        statusBarChannel?.invokeMethod("visibilityChanged", arguments: true)
+    // Cmd+H hides the whole app without any window event reaching
+    // window_manager, so report it to the UI lifecycle directly. The window
+    // delegate belongs to window_manager; never replace it here.
+    func setupAppVisibilityObservers() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(applicationVisibilityDidChange),
+            name: NSApplication.didHideNotification,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(applicationVisibilityDidChange),
+            name: NSApplication.didUnhideNotification,
+            object: nil
+        )
     }
 
-    func popoverDidClose(_ notification: Notification) {
-        statusBarChannel?.invokeMethod("visibilityChanged", arguments: false)
+    @objc func applicationVisibilityDidChange(_ notification: Notification) {
+        let visible = notification.name == NSApplication.didUnhideNotification
+            && (statusBarController?.isWindowVisible ?? false)
+        statusBarChannel?.invokeMethod("visibilityChanged", arguments: visible)
     }
 
     func setupCoreInApplicationSupport() {
@@ -255,12 +287,93 @@ class AppDelegate: FlutterAppDelegate, NSPopoverDelegate {
       return true
     }
     
+    // Dock click or a second launch from Finder while the window is hidden or
+    // minimized: show it the same way the menu bar icon does.
     override func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
         if !flag, let controller = statusBarController {
-            if !flutterUIPopover.isShown {
-                controller.showPopover(self)
-            }
+            controller.showWindow()
+            return false
         }
         return true
+    }
+}
+
+/// Builds and shows the NSMenu behind `meowclash/context_menu`. Lives here, not
+/// in its own file, so the Xcode project needs no new source entry.
+final class ContextMenuPresenter: NSObject, NSMenuDelegate {
+    private struct DestructiveItem {
+        let title: String
+        let image: NSImage?
+    }
+
+    private var selectedIndex = -1
+    private var destructiveItems: [NSMenuItem: DestructiveItem] = [:]
+
+    /// `popUp` runs its own tracking loop and returns once the menu closes.
+    /// The reply is sent on the next run-loop turn, after AppKit has delivered
+    /// the item action.
+    func present(items: [[String: Any]], at point: NSPoint, in view: NSView, completion: @escaping (Int) -> Void) {
+        selectedIndex = -1
+        destructiveItems.removeAll()
+        let menu = NSMenu()
+        menu.autoenablesItems = false
+        menu.delegate = self
+        for (index, item) in items.enumerated() {
+            let title = item["title"] as? String ?? ""
+            let enabled = item["enabled"] as? Bool ?? true
+            let destructive = item["destructive"] as? Bool ?? false
+            // HIG: destructive actions form their own group at the end.
+            if destructive, let last = menu.items.last, !last.isSeparatorItem {
+                menu.addItem(.separator())
+            }
+            let menuItem = NSMenuItem(title: title, action: #selector(itemSelected(_:)), keyEquivalent: "")
+            menuItem.target = self
+            menuItem.tag = index
+            menuItem.isEnabled = enabled
+            var image: NSImage?
+            if let symbol = item["symbol"] as? String {
+                image = NSImage(systemSymbolName: symbol, accessibilityDescription: nil)
+            }
+            menuItem.image = image
+            if destructive && enabled {
+                let info = DestructiveItem(title: title, image: image)
+                destructiveItems[menuItem] = info
+                style(menuItem, info, highlighted: false)
+            }
+            menu.addItem(menuItem)
+        }
+        let location = NSPoint(x: point.x, y: view.isFlipped ? point.y : view.bounds.height - point.y)
+        menu.popUp(positioning: nil, at: location, in: view)
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else {
+                completion(-1)
+                return
+            }
+            self.destructiveItems.removeAll()
+            completion(self.selectedIndex)
+        }
+    }
+
+    @objc private func itemSelected(_ sender: NSMenuItem) {
+        selectedIndex = sender.tag
+    }
+
+    // Red text would be unreadable on the accent-colored highlight, so the
+    // highlighted destructive item switches to the standard selected color.
+    func menu(_ menu: NSMenu, willHighlight item: NSMenuItem?) {
+        for (menuItem, info) in destructiveItems {
+            style(menuItem, info, highlighted: menuItem === item)
+        }
+    }
+
+    private func style(_ item: NSMenuItem, _ info: DestructiveItem, highlighted: Bool) {
+        let color: NSColor = highlighted ? .selectedMenuItemTextColor : .systemRed
+        item.attributedTitle = NSAttributedString(
+            string: info.title,
+            attributes: [.foregroundColor: color, .font: NSFont.menuFont(ofSize: 0)]
+        )
+        if let image = info.image {
+            item.image = image.withSymbolConfiguration(NSImage.SymbolConfiguration(paletteColors: [color])) ?? image
+        }
     }
 }

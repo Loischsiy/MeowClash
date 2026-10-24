@@ -483,6 +483,7 @@ class _ProfileItemState extends State<ProfileItem> {
                             PopupMenuItemData(
                               icon: Icons.delete_outlined,
                               label: appLocalizations.delete,
+                              type: PopupMenuItemType.danger,
                               onPressed: () {
                                 _handleDeleteProfile(context);
                               },

@@ -109,6 +109,8 @@ flutter:
     - assets/images/
     - assets/images/avatars/
     - assets/images/platforms/
+  shaders:
+    - shaders/glass_refraction.frag
   fonts:
     - family: NotoSans
       fonts:

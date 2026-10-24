@@ -36,6 +36,11 @@ abstract final class GlassTokens {
   // Selection capsule (tab bar item, sidebar row), as alpha of the accent.
   static const double _selectionOpacityLight = 0.16;
   static const double _selectionOpacityDark = 0.24;
+  // With Reduce Transparency the capsule must read on an opaque fill.
+  static const double selectionOpacityOpaque = 0.30;
+  // Hover wash on sidebar rows (macOS pointer).
+  static const double _hoverOpacityLight = 0.06;
+  static const double _hoverOpacityDark = 0.08;
 
   // Corner radii.
   static const double tabBarRadius = 30;
@@ -48,12 +53,54 @@ abstract final class GlassTokens {
   static const double tabBarHeight = 62;
   static const double tabBarHorizontalMargin = 16;
   static const double tabBarBottomGap = 8;
+  static const double tabBarInnerPadding = 4;
+  static const double tabBarIconSize = 24;
+  static const double tabBarLabelGap = 2;
+
+  // Edge refraction of the iOS tab bar (shaders/glass_refraction.frag), in
+  // logical px: how far in from the rim the bevel reaches, how far its
+  // outermost band reads from, and how far red and blue part there. The
+  // selected tab gets a shallower lens of its own.
+  static const double tabBarRefractionBevel = 14;
+  static const double tabBarRefractionDepth = 10;
+  static const double tabBarRefractionDispersion = 0.75;
+  static const double tabBarLensBevel = 8;
+  static const double tabBarLensDepth = 4;
+  static const double tabBarLensDispersion = 0.5;
 
   // Geometry of the macOS chrome.
   static const double sidebarWidth = 84;
   static const double sidebarExtendedWidth = 200;
+  static const double sidebarPadding = 10;
+  static const double sidebarRowHeight = 32;
+  static const double sidebarCompactRowHeight = 44;
+  static const double sidebarRowGap = 2;
+  static const double sidebarIconSize = 20;
+  static const double sidebarCompactIconSize = 22;
+  static const double sidebarLogoSize = 28;
   static const double titleBarHeight = 28;
   static const double trafficLightsInset = 78;
+
+  // Geometry of the Flutter glass context menu (iOS, and macOS when the
+  // native NSMenu channel is unavailable).
+  static const double menuMinWidth = 200;
+  static const double menuMaxWidth = 280;
+  static const double menuVerticalPadding = 6;
+  static const double menuRowHeight = 44;
+  static const double menuRowInset = 6;
+  static const double menuRowPadding = 12;
+  static const double menuRowRadius = 8;
+  static const double menuIconSize = 20;
+  static const double menuIconGap = 16;
+  static const double menuGroupGap = 6;
+  // Distance between the menu and the control that opened it.
+  static const double menuAnchorGap = 4;
+  // The menu grows from this scale to 1 while opening.
+  static const double menuOpenScale = 0.85;
+  static const double _menuPressedOpacityLight = 0.10;
+  static const double _menuPressedOpacityDark = 0.14;
+  // Text and icons of disabled menu rows, as alpha of the foreground.
+  static const double disabledOpacity = 0.30;
 
   // Shadows cast by floating glass (tab bar, menus, sheets).
   static const List<BoxShadow> _floatingShadowLight = [
@@ -79,6 +126,7 @@ abstract final class GlassTokens {
   // Motion. Zeroed by [GlassAccessibility.reduceMotion].
   static const Duration morphDuration = Duration(milliseconds: 240);
   static const Curve morphCurve = Curves.easeOutCubic;
+  static const Duration hoverDuration = Duration(milliseconds: 120);
 
   static bool _isDark(Brightness brightness) => brightness == Brightness.dark;
 
@@ -99,6 +147,12 @@ abstract final class GlassTokens {
 
   static double selectionOpacity(Brightness brightness) =>
       _isDark(brightness) ? _selectionOpacityDark : _selectionOpacityLight;
+
+  static double hoverOpacity(Brightness brightness) =>
+      _isDark(brightness) ? _hoverOpacityDark : _hoverOpacityLight;
+
+  static double menuPressedOpacity(Brightness brightness) =>
+      _isDark(brightness) ? _menuPressedOpacityDark : _menuPressedOpacityLight;
 
   static List<BoxShadow> floatingShadow(Brightness brightness) =>
       _isDark(brightness) ? _floatingShadowDark : _floatingShadowLight;

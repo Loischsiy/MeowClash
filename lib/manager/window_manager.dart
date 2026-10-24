@@ -7,13 +7,13 @@ import 'package:meowclash/providers/config.dart';
 import 'package:meowclash/providers/app.dart';
 import 'package:meowclash/services/ui_lifecycle.dart';
 import 'package:meowclash/state.dart';
+import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:window_ext/window_ext.dart';
 import 'package:window_manager/window_manager.dart';
 
 class WindowManager extends ConsumerStatefulWidget {
-
   const WindowManager({
     super.key,
     required this.child,
@@ -45,12 +45,9 @@ class _WindowContainerState extends ConsumerState<WindowManager>
         }
       },
     );
-    // On macOS, we still need windowExtManager for quit handling, but not windowManager
     windowExtManager.addListener(this);
-    if (!Platform.isMacOS) {
-      windowManager.addListener(this);
-      unawaited(_syncInitialVisibility());
-    }
+    windowManager.addListener(this);
+    unawaited(_syncInitialVisibility());
   }
 
   Future<void> _syncInitialVisibility() async {
@@ -129,29 +126,57 @@ class _WindowContainerState extends ConsumerState<WindowManager>
   @override
   Future<void> dispose() async {
     windowExtManager.removeListener(this);
-    if (!Platform.isMacOS) {
-      windowManager.removeListener(this);
-    }
+    windowManager.removeListener(this);
     super.dispose();
   }
 }
 
 class WindowHeaderContainer extends StatelessWidget {
-
   const WindowHeaderContainer({
     super.key,
     required this.child,
   });
   final Widget child;
 
+  // On macOS the strip is the transparent title bar: it holds the native
+  // traffic lights and is a drag area (see WindowHeader).
+  //
+  // macOS glass: full-size content view. The app is laid out under the title
+  // bar, which becomes a top `MediaQuery` inset: the sidebar runs up behind
+  // the traffic lights and each page's AppBar grows into a unified toolbar
+  // (AdaptiveSidebar / AdaptiveAppBar). The strip stays on top only as an
+  // invisible drag area.
   @override
   Widget build(BuildContext context) {
-    if (Platform.isMacOS) {
-      return child;
+    if (AdaptivePlatform.isMacOSGlass) {
+      final mediaQuery = MediaQuery.of(context);
+      return Stack(
+        children: [
+          MediaQuery(
+            data: mediaQuery.copyWith(
+              padding: mediaQuery.padding.copyWith(
+                top: mediaQuery.padding.top + kHeaderHeight,
+              ),
+              viewPadding: mediaQuery.viewPadding.copyWith(
+                top: mediaQuery.viewPadding.top + kHeaderHeight,
+              ),
+            ),
+            child: child,
+          ),
+          const Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: WindowHeader(),
+          ),
+        ],
+      );
     }
+    return _buildMaterial();
+  }
 
-    return Consumer(
-      builder: (_, ref, child) => Stack(
+  Widget _buildMaterial() => Consumer(
+        builder: (_, ref, child) => Stack(
           children: [
             Column(
               children: [
@@ -167,9 +192,8 @@ class WindowHeaderContainer extends StatelessWidget {
             const WindowHeader(),
           ],
         ),
-      child: child,
-    );
-  }
+        child: child,
+      );
 }
 
 class WindowHeader extends StatefulWidget {
@@ -186,9 +210,7 @@ class _WindowHeaderState extends State<WindowHeader> {
   @override
   void initState() {
     super.initState();
-    if (!Platform.isMacOS) {
-      _initNotifier();
-    }
+    _initNotifier();
   }
 
   Future<void> _initNotifier() async {
@@ -293,7 +315,20 @@ class _WindowHeaderState extends State<WindowHeader> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
-    
+
+    if (AdaptivePlatform.isMacOSGlass) {
+      // Invisible: the native title bar is transparent and the content below
+      // paints the chrome. Only window drag and zoom live here.
+      return SizedBox(
+        height: kHeaderHeight,
+        child: GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onPanStart: (_) => windowManager.startDragging(),
+          onDoubleTap: _updateMaximized,
+        ),
+      );
+    }
+
     return Material(
       color: Colors.transparent,
       child: Container(
@@ -363,7 +398,7 @@ class _WindowControlButtonState extends State<_WindowControlButton> {
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
     final defaultHoverColor = colorScheme.onSurface.withValues(alpha: 0.08);
-    
+
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
@@ -374,7 +409,7 @@ class _WindowControlButtonState extends State<_WindowControlButton> {
           width: 46,
           height: kHeaderHeight,
           decoration: BoxDecoration(
-            color: _isHovered 
+            color: _isHovered
                 ? (widget.hoverColor ?? defaultHoverColor)
                 : Colors.transparent,
           ),
@@ -399,18 +434,18 @@ class _ConnectionStatusIndicator extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = context.colorScheme;
-    
+
     // Watch VPN/TUN status via runTimeProvider
     final isStart = ref.watch(runTimeProvider.select((state) => state != null));
-    
-    final statusColor = isStart 
+
+    final statusColor = isStart
         ? const Color(0xFF4CAF50) // Green when connected
-        : colorScheme.onSurface.withValues(alpha: 0.3); // Gray when disconnected
-    
-    final statusText = isStart 
-        ? appLocalizations.running 
-        : appLocalizations.stopped;
-    
+        : colorScheme.onSurface
+            .withValues(alpha: 0.3); // Gray when disconnected
+
+    final statusText =
+        isStart ? appLocalizations.running : appLocalizations.stopped;
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -449,24 +484,24 @@ class AppIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-      margin: const EdgeInsets.only(left: 8),
-      child: const Row(
-        children: [
-          SizedBox(
-            width: 24,
-            height: 24,
-            child: CircleAvatar(
-              foregroundImage: AssetImage("assets/images/icon.png"),
-              backgroundColor: Colors.transparent,
+        margin: const EdgeInsets.only(left: 8),
+        child: const Row(
+          children: [
+            SizedBox(
+              width: 24,
+              height: 24,
+              child: CircleAvatar(
+                foregroundImage: AssetImage("assets/images/icon.png"),
+                backgroundColor: Colors.transparent,
+              ),
             ),
-          ),
-          SizedBox(
-            width: 8,
-          ),
-          Text(
-            appName,
-          ),
-        ],
-      ),
-    );
+            SizedBox(
+              width: 8,
+            ),
+            Text(
+              appName,
+            ),
+          ],
+        ),
+      );
 }

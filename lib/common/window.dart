@@ -20,10 +20,14 @@ class Window {
       protocol.register("meowclash");
     }
 
-    // On macOS, the app runs in status bar with popover - no window manager needed
+    // macOS is a regular window like the other desktops; the menu bar icon
+    // only asks to show/hide it (macos/Runner/StatusBarController.swift).
     if (Platform.isMacOS) {
-      await StatusBarManager.initVisibility(uiLifecycle);
-      return;
+      StatusBarManager.listen(
+        uiLifecycle,
+        onShowWindow: show,
+        onHideWindow: hide,
+      );
     }
 
     await windowManager.ensureInitialized();
@@ -32,35 +36,33 @@ class Window {
       minimumSize: const Size(380, 400),
     );
     await windowManager.setTitleBarStyle(TitleBarStyle.hidden);
-    if (!Platform.isMacOS) {
-      final left = props.left ?? 0;
-      final top = props.top ?? 0;
-      final right = left + props.width;
-      final bottom = top + props.height;
-      if (left == 0 && top == 0) {
-        await windowManager.setAlignment(Alignment.center);
-      } else {
-        final displays = await screenRetriever.getAllDisplays();
-        final isPositionValid = displays.any(
-          (display) {
-            final displayBounds = Rect.fromLTWH(
-              display.visiblePosition!.dx,
-              display.visiblePosition!.dy,
-              display.size.width,
-              display.size.height,
-            );
-            return displayBounds.contains(Offset(left, top)) ||
-                displayBounds.contains(Offset(right, bottom));
-          },
-        );
-        if (isPositionValid) {
-          await windowManager.setPosition(
-            Offset(
-              left,
-              top,
-            ),
+    final left = props.left ?? 0;
+    final top = props.top ?? 0;
+    final right = left + props.width;
+    final bottom = top + props.height;
+    if (left == 0 && top == 0) {
+      await windowManager.setAlignment(Alignment.center);
+    } else {
+      final displays = await screenRetriever.getAllDisplays();
+      final isPositionValid = displays.any(
+        (display) {
+          final displayBounds = Rect.fromLTWH(
+            display.visiblePosition!.dx,
+            display.visiblePosition!.dy,
+            display.size.width,
+            display.size.height,
           );
-        }
+          return displayBounds.contains(Offset(left, top)) ||
+              displayBounds.contains(Offset(right, bottom));
+        },
+      );
+      if (isPositionValid) {
+        await windowManager.setPosition(
+          Offset(
+            left,
+            top,
+          ),
+        );
       }
     }
     await windowManager.waitUntilReadyToShow(windowOptions, () async {
@@ -69,8 +71,11 @@ class Window {
   }
 
   Future<void> show() async {
-    if (Platform.isMacOS) return;
-
+    // macOS: return to the Dock before ordering the window front, otherwise
+    // an accessory app can show the window without becoming active.
+    if (Platform.isMacOS) {
+      await windowManager.setSkipTaskbar(false);
+    }
     render?.resume();
     if (await windowManager.isMinimized()) {
       await windowManager.restore();
@@ -82,8 +87,6 @@ class Window {
   }
 
   Future<bool> get isVisible async {
-    if (Platform.isMacOS) return false;
-
     final value = await windowManager.isVisible();
     commonPrint.log("window visible check: $value");
     return value;
@@ -94,8 +97,6 @@ class Window {
   }
 
   Future<void> hide() async {
-    if (Platform.isMacOS) return;
-
     await windowManager.hide();
     uiLifecycle.updateWindowVisibility(visible: false);
     render?.pause();

@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
 import 'glass_accessibility.dart';
+import 'glass_refraction.dart';
 import 'glass_tokens.dart';
 
 /// How a [GlassSurface] obtains its translucency.
@@ -38,6 +39,7 @@ class GlassSurface extends StatelessWidget {
     this.opaqueColor,
     this.rim = true,
     this.shadow = false,
+    this.refraction,
   });
 
   final Widget child;
@@ -62,6 +64,12 @@ class GlassSurface extends StatelessWidget {
 
   /// Cast [GlassTokens.floatingShadow] around the shape (floating chrome).
   final bool shadow;
+
+  /// Edge refraction on top of the blur, in the same single backdrop layer.
+  /// Applies to [GlassBackdrop.blur] only, and only where
+  /// [GlassRefractionShader.supported]; otherwise the surface keeps the plain
+  /// blur. The iOS tab bar is the only user.
+  final GlassRefraction? refraction;
 
   @override
   Widget build(BuildContext context) {
@@ -93,7 +101,26 @@ class GlassSurface extends StatelessWidget {
       child: child,
     );
 
-    if (!opaque && backdrop == GlassBackdrop.blur) {
+    final refraction = this.refraction;
+    if (!opaque &&
+        backdrop == GlassBackdrop.blur &&
+        refraction != null &&
+        GlassRefractionShader.supported) {
+      // Until the program has loaded, [GlassRefractionBackdrop] is the same
+      // plain blur, so the widget tree does not change when it arrives.
+      surface = ValueListenableBuilder<ui.FragmentProgram?>(
+        valueListenable: GlassRefractionShader.program,
+        builder: (context, program, child) => GlassRefractionBackdrop(
+          program: program,
+          sigma: sigma,
+          radius: borderRadius.topLeft.x,
+          refraction: refraction,
+          devicePixelRatio: MediaQuery.devicePixelRatioOf(context),
+          child: child,
+        ),
+        child: surface,
+      );
+    } else if (!opaque && backdrop == GlassBackdrop.blur) {
       // `grouped` shares one backdrop read with sibling surfaces when an
       // ancestor [BackdropGroup] exists, and behaves like the plain
       // constructor otherwise.

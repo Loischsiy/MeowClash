@@ -483,11 +483,16 @@ class PopupMenuItemData {
     this.icon,
     required this.label,
     required this.onPressed,
+    this.type = PopupMenuItemType.primary,
   });
 
   final String label;
   final VoidCallback? onPressed;
   final IconData? icon;
+
+  /// [PopupMenuItemType.danger] marks destructive actions (delete). Only the
+  /// Darwin menus draw it differently (system red); Material is unchanged.
+  final PopupMenuItemType type;
 }
 
 @freezed

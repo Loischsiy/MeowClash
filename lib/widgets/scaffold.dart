@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:meowclash/common/common.dart';
 import 'package:meowclash/enum/enum.dart';
@@ -5,12 +7,14 @@ import 'package:meowclash/models/models.dart';
 import 'package:meowclash/providers/providers.dart';
 import 'package:meowclash/services/ui_lifecycle.dart';
 import 'package:meowclash/state.dart';
+import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:meowclash/widgets/fade_box.dart';
 import 'package:meowclash/widgets/pop_scope.dart';
 import 'package:meowclash/widgets/search_order_marker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:window_manager/window_manager.dart';
 
 import 'chip.dart';
 
@@ -384,7 +388,11 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
             widget.appBar ??
                 ValueListenableBuilder<AppBarState>(
                   valueListenable: _appBarState,
-                  builder: (_, state, __) => _buildAppBarWrap(
+                  builder: (_, state, __) => AdaptiveAppBar(
+                    transparent: isTransparent,
+                    onWindowDrag:
+                        Platform.isMacOS ? windowManager.startDragging : null,
+                    child: _buildAppBarWrap(
                       AppBar(
                         backgroundColor: isTransparent ? Colors.transparent : null,
                         elevation: isTransparent ? 0 : null,
@@ -401,6 +409,7 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
                         ),
                       ),
                     ),
+                  ),
                 ),
             ValueListenableBuilder(
               valueListenable: _loading,
@@ -451,6 +460,12 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
     assert(widget.appBar != null || widget.title != null);
     final backgroundUrl = widget.disableBackground ? null : ref.watch(backgroundUrlProvider);
     
+    final extendBody =
+        AdaptiveTabBar.extendsBody && widget.bottomNavigationBar != null;
+    // With [extendBody] the Scaffold reports the floating glass tab bar as
+    // bottom padding, so this SafeArea keeps every page above the capsule.
+    // Screens opt into scrolling underneath it in stage 2 (inner screens),
+    // once their scroll views add [AdaptiveTabBar.bottomInset] themselves.
     final body = SafeArea(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -498,6 +513,7 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
     final scaffold = Scaffold(
       appBar: _buildAppBar(),
       body: body,
+      extendBody: extendBody,
       resizeToAvoidBottomInset: true,
       backgroundColor: backgroundUrl != null ? Colors.transparent : widget.backgroundColor,
       floatingActionButton: widget.floatingActionButton ??

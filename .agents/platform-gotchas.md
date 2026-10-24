@@ -1,4 +1,4 @@
-# Platform gotchas (Windows / MSVC / QuickJS / iOS)
+# Platform gotchas (Windows / MSVC / QuickJS / iOS / macOS)
 
 Router: `AGENTS.md`. Why the build code looks the way it does — do not "simplify" any of these.
 
@@ -74,6 +74,28 @@ name is historical: **the shim is not ARM64-only.**
 - **The released IPA is unsigned by design.** Resigning only the outer app is not enough: the embedded
   `.appex` needs its own provisioning profile with NetworkExtension (Packet Tunnel) and App Groups
   entitlements. No App Store/TestFlight credentials are configured.
+- **iOS 27 requires UIScene.** Without `UIApplicationSceneManifest` (`FlutterSceneDelegate`) in
+  `ios/Runner/Info.plist` the app dies at launch in
+  `_UIApplicationEvaluateRuntimeIssueForNoSceneLifecycleAdoption`. `AppDelegate` is a
+  `FlutterImplicitEngineDelegate`: plugins, `IOSService` and the glass channel are registered in
+  `didInitializeImplicitFlutterEngine`, not in `didFinishLaunching`.
+- The iOS Simulator has no NetworkExtension daemon: `IOSService.loadManagers()` returns `[]` under
+  `targetEnvironment(simulator)` so Dart `main()` still reaches `runApp` (UI preview only).
 - A green unsigned compile proves nothing about VPN routing, signing, extension memory or provider
   scripts on a real device. Physical-device acceptance for iOS/ARM64 releases belongs in the PR
   checklist, not in a tracked `.md`.
+
+## macOS window and menu bar icon
+
+- MeowClash runs as a **regular window with a Dock icon** (no `LSUIElement`, no `NSPopover`).
+  `window_manager` owns size, position, `setPreventClose` and show/hide exactly as on Windows/Linux.
+- The menu bar icon (`macos/Runner/StatusBarController.swift`) does not own the window: a left click
+  asks Dart (`status_bar_icon` channel, methods `showWindow` / `hideWindow`) so the tray/close
+  logic stays in one place. If Dart has not registered the handler yet, the native side shows the
+  window itself. Right click opens a native menu (Show / Quit).
+- Native → Dart `visibilityChanged(bool)` is sent on Cmd+H / unhide and on the native fallback;
+  Dock reopen (`applicationShouldHandleReopen`) goes through the same `showWindow` path.
+- `window.show()` on macOS calls `setSkipTaskbar(false)` first: `hide()` with `setSkipTaskbar(true)`
+  switches the activation policy to accessory (no Dock icon), and showing must undo it.
+- The title bar is transparent with a full-size content view; the Flutter strip of `kHeaderHeight`
+  (`WindowHeaderContainer`) sits under the traffic lights and is the drag area.

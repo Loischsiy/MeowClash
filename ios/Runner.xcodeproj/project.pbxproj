@@ -1,88 +1,883 @@
 // !$*UTF8*$!
 {
-archiveVersion = 1;
-classes = {};
-objectVersion = 56;
-objects = {
-7EB492CA521F7206E680AF12 = {isa = PBXFileReference; lastKnownFileType = "sourcecode.swift"; path = "Shared/CoreEngine.swift"; sourceTree = SOURCE_ROOT;};
-180CFF50256E8750EA6041B4 = {isa = PBXFileReference; lastKnownFileType = "sourcecode.swift"; path = "Shared/SharedStore.swift"; sourceTree = SOURCE_ROOT;};
-8D8ED5FA2851C9C861E46DD0 = {isa = PBXFileReference; lastKnownFileType = "sourcecode.swift"; path = "Runner/AppDelegate.swift"; sourceTree = SOURCE_ROOT;};
-519C0612BB79235C3E586077 = {isa = PBXFileReference; lastKnownFileType = "sourcecode.swift"; path = "Runner/IOSService.swift"; sourceTree = SOURCE_ROOT;};
-43F4D714A5F782D4D65C824D = {isa = PBXFileReference; lastKnownFileType = "sourcecode.c.objc"; path = "Runner/GeneratedPluginRegistrant.m"; sourceTree = SOURCE_ROOT;};
-C627DF14BE04AFC70E846D78 = {isa = PBXFileReference; lastKnownFileType = "sourcecode.swift"; path = "PacketTunnel/PacketTunnelProvider.swift"; sourceTree = SOURCE_ROOT;};
-EEBA11446DC84CB5F5C0B04D = {isa = PBXFileReference; lastKnownFileType = "sourcecode.swift"; path = "PacketTunnel/TunnelNetwork.swift"; sourceTree = SOURCE_ROOT;};
-277B9358609E0D3008378E87 = {isa = PBXFileReference; lastKnownFileType = "sourcecode.c.c"; path = "PacketTunnel/TunnelDescriptor.c"; sourceTree = SOURCE_ROOT;};
-93102FDA041F08116DAB3045 = {isa = PBXFileReference; lastKnownFileType = "file.storyboard"; path = "Runner/Base.lproj/Main.storyboard"; sourceTree = SOURCE_ROOT;};
-0F93B9B797E06C5137DA2FD6 = {isa = PBXFileReference; lastKnownFileType = "file.storyboard"; path = "Runner/Base.lproj/LaunchScreen.storyboard"; sourceTree = SOURCE_ROOT;};
-3E5D1206360B0A3752DEF4D9 = {isa = PBXFileReference; lastKnownFileType = "folder.assetcatalog"; path = "Runner/Assets.xcassets"; sourceTree = SOURCE_ROOT;};
-ADB806B03330F589C88EB1DC = {isa = PBXFileReference; lastKnownFileType = "sourcecode.c.h"; path = "Shared/MeowCore.h"; sourceTree = SOURCE_ROOT;};
-73482BEEB318AB7D0C54031C = {isa = PBXFileReference; lastKnownFileType = "sourcecode.c.h"; path = "Runner/Runner-Bridging-Header.h"; sourceTree = SOURCE_ROOT;};
-30E9315EFE8CC7424097C1FD = {isa = PBXFileReference; lastKnownFileType = "sourcecode.c.h"; path = "Runner/GeneratedPluginRegistrant.h"; sourceTree = SOURCE_ROOT;};
-5A1A5ABB0239FD615742A54F = {isa = PBXFileReference; lastKnownFileType = "sourcecode.c.h"; path = "PacketTunnel/PacketTunnel-Bridging-Header.h"; sourceTree = SOURCE_ROOT;};
-5B5C11E234714AC5C2909689 = {isa = PBXFileReference; lastKnownFileType = "text.plist.xml"; path = "Runner/Info.plist"; sourceTree = SOURCE_ROOT;};
-EC8E6730DA9039BD42A1F508 = {isa = PBXFileReference; lastKnownFileType = "text.plist.xml"; path = "PacketTunnel/Info.plist"; sourceTree = SOURCE_ROOT;};
-DB05A456C01C31C44B7C2204 = {isa = PBXFileReference; lastKnownFileType = "text.plist.entitlements"; path = "Runner/Runner.entitlements"; sourceTree = SOURCE_ROOT;};
-8BBCE8199A18D868385867C2 = {isa = PBXFileReference; lastKnownFileType = "text.plist.entitlements"; path = "PacketTunnel/PacketTunnel.entitlements"; sourceTree = SOURCE_ROOT;};
-33D6016D654C59424AD9F78C = {isa = PBXFileReference; lastKnownFileType = "text.xcconfig"; path = "Flutter/Debug.xcconfig"; sourceTree = SOURCE_ROOT;};
-10DF966175FDB4190FD04B03 = {isa = PBXFileReference; lastKnownFileType = "text.xcconfig"; path = "Flutter/Release.xcconfig"; sourceTree = SOURCE_ROOT;};
-5D81A7158FDB1CA949463BB9 = {isa = PBXFileReference; lastKnownFileType = "text.xcconfig"; path = "Flutter/Profile.xcconfig"; sourceTree = SOURCE_ROOT;};
-9D34501E45F1140DA03ADE3D = {isa = PBXFileReference; lastKnownFileType = "text.xcconfig"; path = "Config/Identifiers.xcconfig"; sourceTree = SOURCE_ROOT;};
-02A7A45DE75AB9523C719AB4 = {isa = PBXFileReference; lastKnownFileType = "text.xcconfig"; path = "Config/PacketTunnel.xcconfig"; sourceTree = SOURCE_ROOT;};
-A1BCD60CB254EA979642C0C7 = {isa = PBXFileReference; lastKnownFileType = "text.script.sh"; path = "build_core.sh"; sourceTree = SOURCE_ROOT;};
-EC182A4DAB0DC039DB9FC25E = {isa = PBXFileReference; lastKnownFileType = "text.script.sh"; path = "generate_icons.sh"; sourceTree = SOURCE_ROOT;};
-52F62DAEB6A87DD8AC72DD72 = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Runner.app; sourceTree = BUILT_PRODUCTS_DIR;};
-A2EA633EB532F8F45409F4B7 = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PacketTunnel.appex; sourceTree = BUILT_PRODUCTS_DIR;};
-346BD5CC39C27EB4EB0B052A = {isa = PBXGroup; children = (52F62DAEB6A87DD8AC72DD72,A2EA633EB532F8F45409F4B7,); name = Products; sourceTree = "<group>";};
-92FF466FAA05DE12ECDB004B = {isa = PBXGroup; children = (7EB492CA521F7206E680AF12,180CFF50256E8750EA6041B4,8D8ED5FA2851C9C861E46DD0,519C0612BB79235C3E586077,43F4D714A5F782D4D65C824D,C627DF14BE04AFC70E846D78,EEBA11446DC84CB5F5C0B04D,277B9358609E0D3008378E87,93102FDA041F08116DAB3045,0F93B9B797E06C5137DA2FD6,3E5D1206360B0A3752DEF4D9,ADB806B03330F589C88EB1DC,73482BEEB318AB7D0C54031C,30E9315EFE8CC7424097C1FD,5A1A5ABB0239FD615742A54F,5B5C11E234714AC5C2909689,EC8E6730DA9039BD42A1F508,DB05A456C01C31C44B7C2204,8BBCE8199A18D868385867C2,33D6016D654C59424AD9F78C,10DF966175FDB4190FD04B03,5D81A7158FDB1CA949463BB9,9D34501E45F1140DA03ADE3D,02A7A45DE75AB9523C719AB4,A1BCD60CB254EA979642C0C7,EC182A4DAB0DC039DB9FC25E,346BD5CC39C27EB4EB0B052A,); sourceTree = "<group>";};
-BE244E6B6AA777099BA91BF1 = {isa = PBXBuildFile; fileRef = 8D8ED5FA2851C9C861E46DD0;};
-8AE073BB710BC30573F61ED5 = {isa = PBXBuildFile; fileRef = 519C0612BB79235C3E586077;};
-F8B9E27578FD874962DEF7E0 = {isa = PBXBuildFile; fileRef = 43F4D714A5F782D4D65C824D;};
-236FBA7686B55F2AB7B562EC = {isa = PBXBuildFile; fileRef = 7EB492CA521F7206E680AF12;};
-449E91C2DE346D620941B7A0 = {isa = PBXBuildFile; fileRef = 180CFF50256E8750EA6041B4;};
-8F97D0D0D85C18E1AB2199FD = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (BE244E6B6AA777099BA91BF1,8AE073BB710BC30573F61ED5,F8B9E27578FD874962DEF7E0,236FBA7686B55F2AB7B562EC,449E91C2DE346D620941B7A0,); runOnlyForDeploymentPostprocessing = 0; };
-4D612E584533F0E34772E35A = {isa = PBXBuildFile; fileRef = C627DF14BE04AFC70E846D78;};
-4E4A60F3856E12BD57ADC161 = {isa = PBXBuildFile; fileRef = EEBA11446DC84CB5F5C0B04D;};
-60359301EE1A40530252CDD1 = {isa = PBXBuildFile; fileRef = 277B9358609E0D3008378E87;};
-9C2CE5CC22F5E1B8C34608BE = {isa = PBXBuildFile; fileRef = 7EB492CA521F7206E680AF12;};
-D918201B7E64D3931BA8AEDA = {isa = PBXBuildFile; fileRef = 180CFF50256E8750EA6041B4;};
-765C03D0E08C97D4E6DCD6ED = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (4D612E584533F0E34772E35A,4E4A60F3856E12BD57ADC161,60359301EE1A40530252CDD1,9C2CE5CC22F5E1B8C34608BE,D918201B7E64D3931BA8AEDA,); runOnlyForDeploymentPostprocessing = 0; };
-8ABE9D9C75E97AA3A546AF4C = {isa = PBXBuildFile; fileRef = 93102FDA041F08116DAB3045;};
-74E5A4840C1BED2D85C84338 = {isa = PBXBuildFile; fileRef = 0F93B9B797E06C5137DA2FD6;};
-D0AF5C53C3FA90E23942B4A0 = {isa = PBXBuildFile; fileRef = 3E5D1206360B0A3752DEF4D9;};
-EAECA608681C174871B6A18A = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (8ABE9D9C75E97AA3A546AF4C,74E5A4840C1BED2D85C84338,D0AF5C53C3FA90E23942B4A0,); runOnlyForDeploymentPostprocessing = 0; };
-52B0FE1B3DD38B21954D93D8 = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
-C13C3EED9F70EF11CE995662 = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
-9D9FD728400214A3EF55358D = {isa = PBXBuildFile; fileRef = A2EA633EB532F8F45409F4B7; settings = {ATTRIBUTES = (RemoveHeadersOnCopy,);};};
-41A895ABD88FAB6AD478B0C7 = {isa = PBXCopyFilesBuildPhase; buildActionMask = 2147483647; files = (9D9FD728400214A3EF55358D,); runOnlyForDeploymentPostprocessing = 0; dstPath = ""; dstSubfolderSpec = 13; name = "Embed App Extensions";};
-8DDE35E87B69AEC928230ADC = {isa = PBXShellScriptBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; name = "Flutter Build"; alwaysOutOfDate = 1; shellPath = /bin/sh; shellScript = "\"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" build";};
-28380FFBCB8EC5D4D50E4CFA = {isa = PBXShellScriptBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; name = "Embed Flutter Frameworks"; alwaysOutOfDate = 1; shellPath = /bin/sh; shellScript = "\"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" embed_and_thin";};
-C5386CBF05D7FC8EEDA52787 = {isa = PBXShellScriptBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; name = "Build Go core and MeowClash icons"; alwaysOutOfDate = 1; shellPath = /bin/bash; shellScript = "bash \"$SRCROOT/build_core.sh\"";};
-9C4A32203984E6AA54F3CA5D = {isa = XCBuildConfiguration;  buildSettings = {"IPHONEOS_DEPLOYMENT_TARGET" = "15.0"; "SDKROOT" = "iphoneos"; "ENABLE_USER_SCRIPT_SANDBOXING" = "NO"; "SWIFT_VERSION" = "5.0"; "CLANG_ENABLE_MODULES" = "YES"; "CLANG_ENABLE_OBJC_ARC" = "YES"; "GCC_C_LANGUAGE_STANDARD" = "gnu11"; "CLANG_CXX_LANGUAGE_STANDARD" = "gnu++17"; "DEBUG_INFORMATION_FORMAT" = "dwarf"; "GCC_OPTIMIZATION_LEVEL" = "0"; "SWIFT_OPTIMIZATION_LEVEL" = "-Onone"; "SWIFT_COMPILATION_MODE" = "singlefile"; "ONLY_ACTIVE_ARCH" = "YES"; "GCC_PREPROCESSOR_DEFINITIONS" = ("DEBUG=1","$(inherited)",); "SWIFT_ACTIVE_COMPILATION_CONDITIONS" = ("DEBUG",);}; name = Debug;};
-09912808D422D63E4FEDD04D = {isa = XCBuildConfiguration;  buildSettings = {"IPHONEOS_DEPLOYMENT_TARGET" = "15.0"; "SDKROOT" = "iphoneos"; "ENABLE_USER_SCRIPT_SANDBOXING" = "NO"; "SWIFT_VERSION" = "5.0"; "CLANG_ENABLE_MODULES" = "YES"; "CLANG_ENABLE_OBJC_ARC" = "YES"; "GCC_C_LANGUAGE_STANDARD" = "gnu11"; "CLANG_CXX_LANGUAGE_STANDARD" = "gnu++17"; "DEBUG_INFORMATION_FORMAT" = "dwarf-with-dsym"; "GCC_OPTIMIZATION_LEVEL" = "s"; "SWIFT_OPTIMIZATION_LEVEL" = "-O"; "SWIFT_COMPILATION_MODE" = "wholemodule"; "ONLY_ACTIVE_ARCH" = "NO";}; name = Release;};
-AB9691A9F14FA7324F5F42D4 = {isa = XCBuildConfiguration;  buildSettings = {"IPHONEOS_DEPLOYMENT_TARGET" = "15.0"; "SDKROOT" = "iphoneos"; "ENABLE_USER_SCRIPT_SANDBOXING" = "NO"; "SWIFT_VERSION" = "5.0"; "CLANG_ENABLE_MODULES" = "YES"; "CLANG_ENABLE_OBJC_ARC" = "YES"; "GCC_C_LANGUAGE_STANDARD" = "gnu11"; "CLANG_CXX_LANGUAGE_STANDARD" = "gnu++17"; "DEBUG_INFORMATION_FORMAT" = "dwarf-with-dsym"; "GCC_OPTIMIZATION_LEVEL" = "s"; "SWIFT_OPTIMIZATION_LEVEL" = "-O"; "SWIFT_COMPILATION_MODE" = "wholemodule"; "ONLY_ACTIVE_ARCH" = "NO";}; name = Profile;};
-F972733F5179D5DF526225E0 = {isa = XCConfigurationList; buildConfigurations = (9C4A32203984E6AA54F3CA5D,09912808D422D63E4FEDD04D,AB9691A9F14FA7324F5F42D4,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release;};
-3175A2C6E413F3F61B7038EC = {isa = XCBuildConfiguration; baseConfigurationReference = 33D6016D654C59424AD9F78C; buildSettings = {"IPHONEOS_DEPLOYMENT_TARGET" = "15.0"; "SDKROOT" = "iphoneos"; "SUPPORTED_PLATFORMS" = "iphoneos"; "ARCHS" = "arm64"; "TARGETED_DEVICE_FAMILY" = "1,2"; "SWIFT_VERSION" = "5.0"; "ENABLE_BITCODE" = "NO"; "CLANG_ENABLE_MODULES" = "YES"; "ENABLE_USER_SCRIPT_SANDBOXING" = "NO"; "CODE_SIGN_STYLE" = "Automatic"; "CLANG_ENABLE_OBJC_ARC" = "YES"; "GCC_C_LANGUAGE_STANDARD" = "gnu11"; "CLANG_CXX_LANGUAGE_STANDARD" = "gnu++17"; "SWIFT_OBJC_BRIDGING_HEADER" = "$(SRCROOT)/Runner/Runner-Bridging-Header.h"; "HEADER_SEARCH_PATHS" = ("$(inherited)","$(SRCROOT)/Shared",); "LIBRARY_SEARCH_PATHS" = ("$(inherited)","$(SRCROOT)/../libclash/ios",); "OTHER_LDFLAGS" = ("$(inherited)","-lclash","-lresolv","-framework","NetworkExtension","-framework","SystemConfiguration","-framework","Security",); "LD_RUNPATH_SEARCH_PATHS" = ("$(inherited)","@executable_path/Frameworks",); "PRODUCT_NAME" = "$(TARGET_NAME)"; "PRODUCT_BUNDLE_IDENTIFIER" = "$(APP_BUNDLE_ID)"; "INFOPLIST_FILE" = "Runner/Info.plist"; "CODE_SIGN_ENTITLEMENTS" = "Runner/Runner.entitlements"; "SWIFT_INSTALL_OBJC_HEADER" = "NO"; "ASSETCATALOG_COMPILER_APPICON_NAME" = "AppIcon";}; name = Debug;};
-CC345FAA8FDFB4FFAC004C82 = {isa = XCBuildConfiguration; baseConfigurationReference = 10DF966175FDB4190FD04B03; buildSettings = {"IPHONEOS_DEPLOYMENT_TARGET" = "15.0"; "SDKROOT" = "iphoneos"; "SUPPORTED_PLATFORMS" = "iphoneos"; "ARCHS" = "arm64"; "TARGETED_DEVICE_FAMILY" = "1,2"; "SWIFT_VERSION" = "5.0"; "ENABLE_BITCODE" = "NO"; "CLANG_ENABLE_MODULES" = "YES"; "ENABLE_USER_SCRIPT_SANDBOXING" = "NO"; "CODE_SIGN_STYLE" = "Automatic"; "CLANG_ENABLE_OBJC_ARC" = "YES"; "GCC_C_LANGUAGE_STANDARD" = "gnu11"; "CLANG_CXX_LANGUAGE_STANDARD" = "gnu++17"; "SWIFT_OBJC_BRIDGING_HEADER" = "$(SRCROOT)/Runner/Runner-Bridging-Header.h"; "HEADER_SEARCH_PATHS" = ("$(inherited)","$(SRCROOT)/Shared",); "LIBRARY_SEARCH_PATHS" = ("$(inherited)","$(SRCROOT)/../libclash/ios",); "OTHER_LDFLAGS" = ("$(inherited)","-lclash","-lresolv","-framework","NetworkExtension","-framework","SystemConfiguration","-framework","Security",); "LD_RUNPATH_SEARCH_PATHS" = ("$(inherited)","@executable_path/Frameworks",); "PRODUCT_NAME" = "$(TARGET_NAME)"; "PRODUCT_BUNDLE_IDENTIFIER" = "$(APP_BUNDLE_ID)"; "INFOPLIST_FILE" = "Runner/Info.plist"; "CODE_SIGN_ENTITLEMENTS" = "Runner/Runner.entitlements"; "SWIFT_INSTALL_OBJC_HEADER" = "NO"; "ASSETCATALOG_COMPILER_APPICON_NAME" = "AppIcon";}; name = Release;};
-0B7033442967714929751B0F = {isa = XCBuildConfiguration; baseConfigurationReference = 5D81A7158FDB1CA949463BB9; buildSettings = {"IPHONEOS_DEPLOYMENT_TARGET" = "15.0"; "SDKROOT" = "iphoneos"; "SUPPORTED_PLATFORMS" = "iphoneos"; "ARCHS" = "arm64"; "TARGETED_DEVICE_FAMILY" = "1,2"; "SWIFT_VERSION" = "5.0"; "ENABLE_BITCODE" = "NO"; "CLANG_ENABLE_MODULES" = "YES"; "ENABLE_USER_SCRIPT_SANDBOXING" = "NO"; "CODE_SIGN_STYLE" = "Automatic"; "CLANG_ENABLE_OBJC_ARC" = "YES"; "GCC_C_LANGUAGE_STANDARD" = "gnu11"; "CLANG_CXX_LANGUAGE_STANDARD" = "gnu++17"; "SWIFT_OBJC_BRIDGING_HEADER" = "$(SRCROOT)/Runner/Runner-Bridging-Header.h"; "HEADER_SEARCH_PATHS" = ("$(inherited)","$(SRCROOT)/Shared",); "LIBRARY_SEARCH_PATHS" = ("$(inherited)","$(SRCROOT)/../libclash/ios",); "OTHER_LDFLAGS" = ("$(inherited)","-lclash","-lresolv","-framework","NetworkExtension","-framework","SystemConfiguration","-framework","Security",); "LD_RUNPATH_SEARCH_PATHS" = ("$(inherited)","@executable_path/Frameworks",); "PRODUCT_NAME" = "$(TARGET_NAME)"; "PRODUCT_BUNDLE_IDENTIFIER" = "$(APP_BUNDLE_ID)"; "INFOPLIST_FILE" = "Runner/Info.plist"; "CODE_SIGN_ENTITLEMENTS" = "Runner/Runner.entitlements"; "SWIFT_INSTALL_OBJC_HEADER" = "NO"; "ASSETCATALOG_COMPILER_APPICON_NAME" = "AppIcon";}; name = Profile;};
-FB2DCD6E78616EB74253C17A = {isa = XCConfigurationList; buildConfigurations = (3175A2C6E413F3F61B7038EC,CC345FAA8FDFB4FFAC004C82,0B7033442967714929751B0F,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release;};
-E5B15A5E475E60CD32AB7811 = {isa = XCBuildConfiguration; baseConfigurationReference = 02A7A45DE75AB9523C719AB4; buildSettings = {"IPHONEOS_DEPLOYMENT_TARGET" = "15.0"; "SDKROOT" = "iphoneos"; "SUPPORTED_PLATFORMS" = "iphoneos"; "ARCHS" = "arm64"; "TARGETED_DEVICE_FAMILY" = "1,2"; "SWIFT_VERSION" = "5.0"; "ENABLE_BITCODE" = "NO"; "CLANG_ENABLE_MODULES" = "YES"; "ENABLE_USER_SCRIPT_SANDBOXING" = "NO"; "CODE_SIGN_STYLE" = "Automatic"; "CLANG_ENABLE_OBJC_ARC" = "YES"; "GCC_C_LANGUAGE_STANDARD" = "gnu11"; "CLANG_CXX_LANGUAGE_STANDARD" = "gnu++17"; "SWIFT_OBJC_BRIDGING_HEADER" = "$(SRCROOT)/PacketTunnel/PacketTunnel-Bridging-Header.h"; "HEADER_SEARCH_PATHS" = ("$(inherited)","$(SRCROOT)/Shared",); "LIBRARY_SEARCH_PATHS" = ("$(inherited)","$(SRCROOT)/../libclash/ios",); "OTHER_LDFLAGS" = ("$(inherited)","-lclash","-lresolv","-framework","NetworkExtension","-framework","SystemConfiguration","-framework","Security",); "LD_RUNPATH_SEARCH_PATHS" = ("$(inherited)","@executable_path/Frameworks","@executable_path/../../Frameworks",); "PRODUCT_NAME" = "$(TARGET_NAME)"; "PRODUCT_BUNDLE_IDENTIFIER" = "$(APP_BUNDLE_ID).PacketTunnel"; "INFOPLIST_FILE" = "PacketTunnel/Info.plist"; "CODE_SIGN_ENTITLEMENTS" = "PacketTunnel/PacketTunnel.entitlements"; "SWIFT_INSTALL_OBJC_HEADER" = "NO"; "APPLICATION_EXTENSION_API_ONLY" = "YES"; "SKIP_INSTALL" = "YES";}; name = Debug;};
-49226BF80D798A764DB75F1E = {isa = XCBuildConfiguration; baseConfigurationReference = 02A7A45DE75AB9523C719AB4; buildSettings = {"IPHONEOS_DEPLOYMENT_TARGET" = "15.0"; "SDKROOT" = "iphoneos"; "SUPPORTED_PLATFORMS" = "iphoneos"; "ARCHS" = "arm64"; "TARGETED_DEVICE_FAMILY" = "1,2"; "SWIFT_VERSION" = "5.0"; "ENABLE_BITCODE" = "NO"; "CLANG_ENABLE_MODULES" = "YES"; "ENABLE_USER_SCRIPT_SANDBOXING" = "NO"; "CODE_SIGN_STYLE" = "Automatic"; "CLANG_ENABLE_OBJC_ARC" = "YES"; "GCC_C_LANGUAGE_STANDARD" = "gnu11"; "CLANG_CXX_LANGUAGE_STANDARD" = "gnu++17"; "SWIFT_OBJC_BRIDGING_HEADER" = "$(SRCROOT)/PacketTunnel/PacketTunnel-Bridging-Header.h"; "HEADER_SEARCH_PATHS" = ("$(inherited)","$(SRCROOT)/Shared",); "LIBRARY_SEARCH_PATHS" = ("$(inherited)","$(SRCROOT)/../libclash/ios",); "OTHER_LDFLAGS" = ("$(inherited)","-lclash","-lresolv","-framework","NetworkExtension","-framework","SystemConfiguration","-framework","Security",); "LD_RUNPATH_SEARCH_PATHS" = ("$(inherited)","@executable_path/Frameworks","@executable_path/../../Frameworks",); "PRODUCT_NAME" = "$(TARGET_NAME)"; "PRODUCT_BUNDLE_IDENTIFIER" = "$(APP_BUNDLE_ID).PacketTunnel"; "INFOPLIST_FILE" = "PacketTunnel/Info.plist"; "CODE_SIGN_ENTITLEMENTS" = "PacketTunnel/PacketTunnel.entitlements"; "SWIFT_INSTALL_OBJC_HEADER" = "NO"; "APPLICATION_EXTENSION_API_ONLY" = "YES"; "SKIP_INSTALL" = "YES";}; name = Release;};
-CF7825CC846D4C890A5A17D7 = {isa = XCBuildConfiguration; baseConfigurationReference = 02A7A45DE75AB9523C719AB4; buildSettings = {"IPHONEOS_DEPLOYMENT_TARGET" = "15.0"; "SDKROOT" = "iphoneos"; "SUPPORTED_PLATFORMS" = "iphoneos"; "ARCHS" = "arm64"; "TARGETED_DEVICE_FAMILY" = "1,2"; "SWIFT_VERSION" = "5.0"; "ENABLE_BITCODE" = "NO"; "CLANG_ENABLE_MODULES" = "YES"; "ENABLE_USER_SCRIPT_SANDBOXING" = "NO"; "CODE_SIGN_STYLE" = "Automatic"; "CLANG_ENABLE_OBJC_ARC" = "YES"; "GCC_C_LANGUAGE_STANDARD" = "gnu11"; "CLANG_CXX_LANGUAGE_STANDARD" = "gnu++17"; "SWIFT_OBJC_BRIDGING_HEADER" = "$(SRCROOT)/PacketTunnel/PacketTunnel-Bridging-Header.h"; "HEADER_SEARCH_PATHS" = ("$(inherited)","$(SRCROOT)/Shared",); "LIBRARY_SEARCH_PATHS" = ("$(inherited)","$(SRCROOT)/../libclash/ios",); "OTHER_LDFLAGS" = ("$(inherited)","-lclash","-lresolv","-framework","NetworkExtension","-framework","SystemConfiguration","-framework","Security",); "LD_RUNPATH_SEARCH_PATHS" = ("$(inherited)","@executable_path/Frameworks","@executable_path/../../Frameworks",); "PRODUCT_NAME" = "$(TARGET_NAME)"; "PRODUCT_BUNDLE_IDENTIFIER" = "$(APP_BUNDLE_ID).PacketTunnel"; "INFOPLIST_FILE" = "PacketTunnel/Info.plist"; "CODE_SIGN_ENTITLEMENTS" = "PacketTunnel/PacketTunnel.entitlements"; "SWIFT_INSTALL_OBJC_HEADER" = "NO"; "APPLICATION_EXTENSION_API_ONLY" = "YES"; "SKIP_INSTALL" = "YES";}; name = Profile;};
-E4BB3E94C51E631B27CEE2B9 = {isa = XCConfigurationList; buildConfigurations = (E5B15A5E475E60CD32AB7811,49226BF80D798A764DB75F1E,CF7825CC846D4C890A5A17D7,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release;};
-414EBE56078DEA8B7F39B9B8 = {isa = XCBuildConfiguration; baseConfigurationReference = 02A7A45DE75AB9523C719AB4; buildSettings = {"SDKROOT" = "iphoneos"; "SUPPORTED_PLATFORMS" = "iphoneos"; "ARCHS" = "arm64"; "CODE_SIGNING_ALLOWED" = "NO";}; name = Debug;};
-AD9C391D713985ECFE7270CD = {isa = XCBuildConfiguration; baseConfigurationReference = 02A7A45DE75AB9523C719AB4; buildSettings = {"SDKROOT" = "iphoneos"; "SUPPORTED_PLATFORMS" = "iphoneos"; "ARCHS" = "arm64"; "CODE_SIGNING_ALLOWED" = "NO";}; name = Release;};
-11B10EF63629B2104FBDC6A0 = {isa = XCBuildConfiguration; baseConfigurationReference = 02A7A45DE75AB9523C719AB4; buildSettings = {"SDKROOT" = "iphoneos"; "SUPPORTED_PLATFORMS" = "iphoneos"; "ARCHS" = "arm64"; "CODE_SIGNING_ALLOWED" = "NO";}; name = Profile;};
-23BF71024EED065A016C3592 = {isa = XCConfigurationList; buildConfigurations = (414EBE56078DEA8B7F39B9B8,AD9C391D713985ECFE7270CD,11B10EF63629B2104FBDC6A0,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release;};
-F900C39E3B6C78BC60FE1EB2 = {isa = PBXAggregateTarget; buildConfigurationList = 23BF71024EED065A016C3592; buildPhases = (C5386CBF05D7FC8EEDA52787,); dependencies = (); name = MeowCore; productName = MeowCore;};
-0E2B88561A77AD6E097397DF = {isa = PBXContainerItemProxy; containerPortal = 56CC3C9E08382E9258B2443E; proxyType = 1; remoteGlobalIDString = F900C39E3B6C78BC60FE1EB2; remoteInfo = "MeowCore";};
-0AE050096AA3FD31F1928196 = {isa = PBXTargetDependency; target = F900C39E3B6C78BC60FE1EB2; targetProxy = 0E2B88561A77AD6E097397DF;};
-F5E01CDEBCB3756AC3250553 = {isa = PBXNativeTarget; buildConfigurationList = E4BB3E94C51E631B27CEE2B9; buildPhases = (765C03D0E08C97D4E6DCD6ED,C13C3EED9F70EF11CE995662,); buildRules = (); dependencies = (0AE050096AA3FD31F1928196,); name = PacketTunnel; productName = PacketTunnel; productReference = A2EA633EB532F8F45409F4B7; productType = "com.apple.product-type.app-extension";};
-14FED7CC1B089EF276E8BD13 = {isa = PBXContainerItemProxy; containerPortal = 56CC3C9E08382E9258B2443E; proxyType = 1; remoteGlobalIDString = F5E01CDEBCB3756AC3250553; remoteInfo = "PacketTunnel";};
-65AA2893F3A001598EAFD7C7 = {isa = PBXTargetDependency; target = F5E01CDEBCB3756AC3250553; targetProxy = 14FED7CC1B089EF276E8BD13;};
-04CE06A1C292A5AB8C1A3FC5 = {isa = PBXContainerItemProxy; containerPortal = 56CC3C9E08382E9258B2443E; proxyType = 1; remoteGlobalIDString = F900C39E3B6C78BC60FE1EB2; remoteInfo = "MeowCore";};
-522291D115160FF09A5175FE = {isa = PBXTargetDependency; target = F900C39E3B6C78BC60FE1EB2; targetProxy = 04CE06A1C292A5AB8C1A3FC5;};
-779F4B57923F091D2087B767 = {isa = PBXNativeTarget; buildConfigurationList = FB2DCD6E78616EB74253C17A; buildPhases = (8DDE35E87B69AEC928230ADC,8F97D0D0D85C18E1AB2199FD,52B0FE1B3DD38B21954D93D8,EAECA608681C174871B6A18A,41A895ABD88FAB6AD478B0C7,28380FFBCB8EC5D4D50E4CFA,); buildRules = (); dependencies = (65AA2893F3A001598EAFD7C7,522291D115160FF09A5175FE,); name = Runner; productName = Runner; productReference = 52F62DAEB6A87DD8AC72DD72; productType = "com.apple.product-type.application";};
-56CC3C9E08382E9258B2443E = {isa = PBXProject; attributes = {BuildIndependentTargetsInParallel = YES; LastUpgradeCheck = 1600; TargetAttributes = {779F4B57923F091D2087B767 = {CreatedOnToolsVersion = 16.0; LastSwiftMigration = 1600; SystemCapabilities = {com.apple.ApplicationGroups.iOS = {enabled = 1;}; com.apple.NetworkExtensions.iOS = {enabled = 1;};};}; F5E01CDEBCB3756AC3250553 = {CreatedOnToolsVersion = 16.0; SystemCapabilities = {com.apple.ApplicationGroups.iOS = {enabled = 1;}; com.apple.NetworkExtensions.iOS = {enabled = 1;};};};};}; buildConfigurationList = F972733F5179D5DF526225E0; compatibilityVersion = "Xcode 14.0"; developmentRegion = en; hasScannedForEncodings = 0; knownRegions = (en,Base,); mainGroup = 92FF466FAA05DE12ECDB004B; productRefGroup = 346BD5CC39C27EB4EB0B052A; projectDirPath = ""; projectRoot = ""; targets = (779F4B57923F091D2087B767,F5E01CDEBCB3756AC3250553,F900C39E3B6C78BC60FE1EB2,);};
-};
-rootObject = 56CC3C9E08382E9258B2443E;
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 54;
+	objects = {
+
+/* Begin PBXAggregateTarget section */
+		F900C39E3B6C78BC60FE1EB2 /* MeowCore */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 23BF71024EED065A016C3592 /* Build configuration list for PBXAggregateTarget "MeowCore" */;
+			buildPhases = (
+				C5386CBF05D7FC8EEDA52787 /* Build Go core and MeowClash icons */,
+			);
+			dependencies = (
+			);
+			name = MeowCore;
+			productName = MeowCore;
+		};
+/* End PBXAggregateTarget section */
+
+/* Begin PBXBuildFile section */
+		236FBA7686B55F2AB7B562EC /* CoreEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EB492CA521F7206E680AF12 /* CoreEngine.swift */; };
+		449E91C2DE346D620941B7A0 /* SharedStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 180CFF50256E8750EA6041B4 /* SharedStore.swift */; };
+		4D612E584533F0E34772E35A /* PacketTunnelProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = C627DF14BE04AFC70E846D78 /* PacketTunnelProvider.swift */; };
+		4E4A60F3856E12BD57ADC161 /* TunnelNetwork.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEBA11446DC84CB5F5C0B04D /* TunnelNetwork.swift */; };
+		60359301EE1A40530252CDD1 /* TunnelDescriptor.c in Sources */ = {isa = PBXBuildFile; fileRef = 277B9358609E0D3008378E87 /* TunnelDescriptor.c */; };
+		6FD84FB24D6595BEE0BE35F6 /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EB2A0F0AB4961EB5785A9FA9 /* Pods_Runner.framework */; };
+		74E5A4840C1BED2D85C84338 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0F93B9B797E06C5137DA2FD6 /* LaunchScreen.storyboard */; };
+		8ABE9D9C75E97AA3A546AF4C /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 93102FDA041F08116DAB3045 /* Main.storyboard */; };
+		8AE073BB710BC30573F61ED5 /* IOSService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519C0612BB79235C3E586077 /* IOSService.swift */; };
+		9C2CE5CC22F5E1B8C34608BE /* CoreEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EB492CA521F7206E680AF12 /* CoreEngine.swift */; };
+		9D9FD728400214A3EF55358D /* PacketTunnel.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = A2EA633EB532F8F45409F4B7 /* PacketTunnel.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		BE244E6B6AA777099BA91BF1 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D8ED5FA2851C9C861E46DD0 /* AppDelegate.swift */; };
+		D0AF5C53C3FA90E23942B4A0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3E5D1206360B0A3752DEF4D9 /* Assets.xcassets */; };
+		D918201B7E64D3931BA8AEDA /* SharedStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 180CFF50256E8750EA6041B4 /* SharedStore.swift */; };
+		F8B9E27578FD874962DEF7E0 /* GeneratedPluginRegistrant.m in Sources */ = {isa = PBXBuildFile; fileRef = 43F4D714A5F782D4D65C824D /* GeneratedPluginRegistrant.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		04CE06A1C292A5AB8C1A3FC5 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 56CC3C9E08382E9258B2443E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F900C39E3B6C78BC60FE1EB2;
+			remoteInfo = MeowCore;
+		};
+		0E2B88561A77AD6E097397DF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 56CC3C9E08382E9258B2443E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F900C39E3B6C78BC60FE1EB2;
+			remoteInfo = MeowCore;
+		};
+		14FED7CC1B089EF276E8BD13 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 56CC3C9E08382E9258B2443E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F5E01CDEBCB3756AC3250553;
+			remoteInfo = PacketTunnel;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		41A895ABD88FAB6AD478B0C7 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				9D9FD728400214A3EF55358D /* PacketTunnel.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		02A7A45DE75AB9523C719AB4 /* PacketTunnel.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config/PacketTunnel.xcconfig; sourceTree = SOURCE_ROOT; };
+		0F93B9B797E06C5137DA2FD6 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Runner/Base.lproj/LaunchScreen.storyboard; sourceTree = SOURCE_ROOT; };
+		10DF966175FDB4190FD04B03 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Flutter/Release.xcconfig; sourceTree = SOURCE_ROOT; };
+		180CFF50256E8750EA6041B4 /* SharedStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shared/SharedStore.swift; sourceTree = SOURCE_ROOT; };
+		1FA649B4E01580D675261595 /* Pods-Runner.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"; sourceTree = "<group>"; };
+		277B9358609E0D3008378E87 /* TunnelDescriptor.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = PacketTunnel/TunnelDescriptor.c; sourceTree = SOURCE_ROOT; };
+		30E9315EFE8CC7424097C1FD /* GeneratedPluginRegistrant.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Runner/GeneratedPluginRegistrant.h; sourceTree = SOURCE_ROOT; };
+		33D6016D654C59424AD9F78C /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Flutter/Debug.xcconfig; sourceTree = SOURCE_ROOT; };
+		3D26F8254D18CDC4A235DB57 /* Pods-Runner.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.debug.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"; sourceTree = "<group>"; };
+		3E5D1206360B0A3752DEF4D9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Runner/Assets.xcassets; sourceTree = SOURCE_ROOT; };
+		43F4D714A5F782D4D65C824D /* GeneratedPluginRegistrant.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Runner/GeneratedPluginRegistrant.m; sourceTree = SOURCE_ROOT; };
+		519C0612BB79235C3E586077 /* IOSService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Runner/IOSService.swift; sourceTree = SOURCE_ROOT; };
+		52F62DAEB6A87DD8AC72DD72 /* Runner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Runner.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		5A1A5ABB0239FD615742A54F /* PacketTunnel-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "PacketTunnel/PacketTunnel-Bridging-Header.h"; sourceTree = SOURCE_ROOT; };
+		5B5C11E234714AC5C2909689 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Runner/Info.plist; sourceTree = SOURCE_ROOT; };
+		5D81A7158FDB1CA949463BB9 /* Profile.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Flutter/Profile.xcconfig; sourceTree = SOURCE_ROOT; };
+		73482BEEB318AB7D0C54031C /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner/Runner-Bridging-Header.h"; sourceTree = SOURCE_ROOT; };
+		7EB492CA521F7206E680AF12 /* CoreEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shared/CoreEngine.swift; sourceTree = SOURCE_ROOT; };
+		8BBCE8199A18D868385867C2 /* PacketTunnel.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PacketTunnel/PacketTunnel.entitlements; sourceTree = SOURCE_ROOT; };
+		8D8ED5FA2851C9C861E46DD0 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Runner/AppDelegate.swift; sourceTree = SOURCE_ROOT; };
+		93102FDA041F08116DAB3045 /* Main.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Runner/Base.lproj/Main.storyboard; sourceTree = SOURCE_ROOT; };
+		96B5F378F1F2D51B75BF57E7 /* Pods-Runner.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.profile.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig"; sourceTree = "<group>"; };
+		9D34501E45F1140DA03ADE3D /* Identifiers.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config/Identifiers.xcconfig; sourceTree = SOURCE_ROOT; };
+		A1BCD60CB254EA979642C0C7 /* build_core.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = build_core.sh; sourceTree = SOURCE_ROOT; };
+		A2EA633EB532F8F45409F4B7 /* PacketTunnel.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PacketTunnel.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		ADB806B03330F589C88EB1DC /* MeowCore.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Shared/MeowCore.h; sourceTree = SOURCE_ROOT; };
+		C627DF14BE04AFC70E846D78 /* PacketTunnelProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PacketTunnel/PacketTunnelProvider.swift; sourceTree = SOURCE_ROOT; };
+		DB05A456C01C31C44B7C2204 /* Runner.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Runner/Runner.entitlements; sourceTree = SOURCE_ROOT; };
+		EB2A0F0AB4961EB5785A9FA9 /* Pods_Runner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Runner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		EC182A4DAB0DC039DB9FC25E /* generate_icons.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = generate_icons.sh; sourceTree = SOURCE_ROOT; };
+		EC8E6730DA9039BD42A1F508 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = PacketTunnel/Info.plist; sourceTree = SOURCE_ROOT; };
+		EEBA11446DC84CB5F5C0B04D /* TunnelNetwork.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PacketTunnel/TunnelNetwork.swift; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		52B0FE1B3DD38B21954D93D8 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6FD84FB24D6595BEE0BE35F6 /* Pods_Runner.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C13C3EED9F70EF11CE995662 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		30028B12060E2D278F61123A /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				EB2A0F0AB4961EB5785A9FA9 /* Pods_Runner.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		346BD5CC39C27EB4EB0B052A /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				52F62DAEB6A87DD8AC72DD72 /* Runner.app */,
+				A2EA633EB532F8F45409F4B7 /* PacketTunnel.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		92FF466FAA05DE12ECDB004B = {
+			isa = PBXGroup;
+			children = (
+				7EB492CA521F7206E680AF12 /* CoreEngine.swift */,
+				180CFF50256E8750EA6041B4 /* SharedStore.swift */,
+				8D8ED5FA2851C9C861E46DD0 /* AppDelegate.swift */,
+				519C0612BB79235C3E586077 /* IOSService.swift */,
+				43F4D714A5F782D4D65C824D /* GeneratedPluginRegistrant.m */,
+				C627DF14BE04AFC70E846D78 /* PacketTunnelProvider.swift */,
+				EEBA11446DC84CB5F5C0B04D /* TunnelNetwork.swift */,
+				277B9358609E0D3008378E87 /* TunnelDescriptor.c */,
+				93102FDA041F08116DAB3045 /* Main.storyboard */,
+				0F93B9B797E06C5137DA2FD6 /* LaunchScreen.storyboard */,
+				3E5D1206360B0A3752DEF4D9 /* Assets.xcassets */,
+				ADB806B03330F589C88EB1DC /* MeowCore.h */,
+				73482BEEB318AB7D0C54031C /* Runner-Bridging-Header.h */,
+				30E9315EFE8CC7424097C1FD /* GeneratedPluginRegistrant.h */,
+				5A1A5ABB0239FD615742A54F /* PacketTunnel-Bridging-Header.h */,
+				5B5C11E234714AC5C2909689 /* Info.plist */,
+				EC8E6730DA9039BD42A1F508 /* Info.plist */,
+				DB05A456C01C31C44B7C2204 /* Runner.entitlements */,
+				8BBCE8199A18D868385867C2 /* PacketTunnel.entitlements */,
+				33D6016D654C59424AD9F78C /* Debug.xcconfig */,
+				10DF966175FDB4190FD04B03 /* Release.xcconfig */,
+				5D81A7158FDB1CA949463BB9 /* Profile.xcconfig */,
+				9D34501E45F1140DA03ADE3D /* Identifiers.xcconfig */,
+				02A7A45DE75AB9523C719AB4 /* PacketTunnel.xcconfig */,
+				A1BCD60CB254EA979642C0C7 /* build_core.sh */,
+				EC182A4DAB0DC039DB9FC25E /* generate_icons.sh */,
+				346BD5CC39C27EB4EB0B052A /* Products */,
+				E554DBA0909F42AFD3DECD07 /* Pods */,
+				30028B12060E2D278F61123A /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		E554DBA0909F42AFD3DECD07 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				3D26F8254D18CDC4A235DB57 /* Pods-Runner.debug.xcconfig */,
+				1FA649B4E01580D675261595 /* Pods-Runner.release.xcconfig */,
+				96B5F378F1F2D51B75BF57E7 /* Pods-Runner.profile.xcconfig */,
+			);
+			name = Pods;
+			path = Pods;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		779F4B57923F091D2087B767 /* Runner */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FB2DCD6E78616EB74253C17A /* Build configuration list for PBXNativeTarget "Runner" */;
+			buildPhases = (
+				11C53C3CDFB3CC5ACDE837E0 /* [CP] Check Pods Manifest.lock */,
+				8DDE35E87B69AEC928230ADC /* Flutter Build */,
+				8F97D0D0D85C18E1AB2199FD /* Sources */,
+				52B0FE1B3DD38B21954D93D8 /* Frameworks */,
+				EAECA608681C174871B6A18A /* Resources */,
+				41A895ABD88FAB6AD478B0C7 /* Embed App Extensions */,
+				28380FFBCB8EC5D4D50E4CFA /* Embed Flutter Frameworks */,
+				601588358866D463C18B6FAE /* [CP] Embed Pods Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				65AA2893F3A001598EAFD7C7 /* PBXTargetDependency */,
+				522291D115160FF09A5175FE /* PBXTargetDependency */,
+			);
+			name = Runner;
+			productName = Runner;
+			productReference = 52F62DAEB6A87DD8AC72DD72 /* Runner.app */;
+			productType = "com.apple.product-type.application";
+		};
+		F5E01CDEBCB3756AC3250553 /* PacketTunnel */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E4BB3E94C51E631B27CEE2B9 /* Build configuration list for PBXNativeTarget "PacketTunnel" */;
+			buildPhases = (
+				765C03D0E08C97D4E6DCD6ED /* Sources */,
+				C13C3EED9F70EF11CE995662 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				0AE050096AA3FD31F1928196 /* PBXTargetDependency */,
+			);
+			name = PacketTunnel;
+			productName = PacketTunnel;
+			productReference = A2EA633EB532F8F45409F4B7 /* PacketTunnel.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		56CC3C9E08382E9258B2443E /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1510;
+				TargetAttributes = {
+					779F4B57923F091D2087B767 = {
+						CreatedOnToolsVersion = 16.0;
+						LastSwiftMigration = 1600;
+						SystemCapabilities = {
+							com.apple.ApplicationGroups.iOS = {
+								enabled = 1;
+							};
+							com.apple.NetworkExtensions.iOS = {
+								enabled = 1;
+							};
+						};
+					};
+					F5E01CDEBCB3756AC3250553 = {
+						CreatedOnToolsVersion = 16.0;
+						SystemCapabilities = {
+							com.apple.ApplicationGroups.iOS = {
+								enabled = 1;
+							};
+							com.apple.NetworkExtensions.iOS = {
+								enabled = 1;
+							};
+						};
+					};
+				};
+			};
+			buildConfigurationList = F972733F5179D5DF526225E0 /* Build configuration list for PBXProject "Runner" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 92FF466FAA05DE12ECDB004B;
+			productRefGroup = 346BD5CC39C27EB4EB0B052A /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				779F4B57923F091D2087B767 /* Runner */,
+				F5E01CDEBCB3756AC3250553 /* PacketTunnel */,
+				F900C39E3B6C78BC60FE1EB2 /* MeowCore */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		EAECA608681C174871B6A18A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8ABE9D9C75E97AA3A546AF4C /* Main.storyboard in Resources */,
+				74E5A4840C1BED2D85C84338 /* LaunchScreen.storyboard in Resources */,
+				D0AF5C53C3FA90E23942B4A0 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		11C53C3CDFB3CC5ACDE837E0 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-Runner-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		28380FFBCB8EC5D4D50E4CFA /* Embed Flutter Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			name = "Embed Flutter Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" embed_and_thin";
+		};
+		601588358866D463C18B6FAE /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		8DDE35E87B69AEC928230ADC /* Flutter Build */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			name = "Flutter Build";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" build";
+		};
+		C5386CBF05D7FC8EEDA52787 /* Build Go core and MeowClash icons */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			name = "Build Go core and MeowClash icons";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/bash;
+			shellScript = "bash \"$SRCROOT/build_core.sh\"";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		765C03D0E08C97D4E6DCD6ED /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4D612E584533F0E34772E35A /* PacketTunnelProvider.swift in Sources */,
+				4E4A60F3856E12BD57ADC161 /* TunnelNetwork.swift in Sources */,
+				60359301EE1A40530252CDD1 /* TunnelDescriptor.c in Sources */,
+				9C2CE5CC22F5E1B8C34608BE /* CoreEngine.swift in Sources */,
+				D918201B7E64D3931BA8AEDA /* SharedStore.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8F97D0D0D85C18E1AB2199FD /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BE244E6B6AA777099BA91BF1 /* AppDelegate.swift in Sources */,
+				8AE073BB710BC30573F61ED5 /* IOSService.swift in Sources */,
+				F8B9E27578FD874962DEF7E0 /* GeneratedPluginRegistrant.m in Sources */,
+				236FBA7686B55F2AB7B562EC /* CoreEngine.swift in Sources */,
+				449E91C2DE346D620941B7A0 /* SharedStore.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		0AE050096AA3FD31F1928196 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F900C39E3B6C78BC60FE1EB2 /* MeowCore */;
+			targetProxy = 0E2B88561A77AD6E097397DF /* PBXContainerItemProxy */;
+		};
+		522291D115160FF09A5175FE /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F900C39E3B6C78BC60FE1EB2 /* MeowCore */;
+			targetProxy = 04CE06A1C292A5AB8C1A3FC5 /* PBXContainerItemProxy */;
+		};
+		65AA2893F3A001598EAFD7C7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F5E01CDEBCB3756AC3250553 /* PacketTunnel */;
+			targetProxy = 14FED7CC1B089EF276E8BD13 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		09912808D422D63E4FEDD04D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_OPTIMIZATION_LEVEL = s;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				ONLY_ACTIVE_ARCH = NO;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		0B7033442967714929751B0F /* Profile */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 5D81A7158FDB1CA949463BB9 /* Profile.xcconfig */;
+			buildSettings = {
+				ARCHS = arm64;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				ENABLE_BITCODE = NO;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/Shared",
+				);
+				INFOPLIST_FILE = Runner/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/../libclash/ios",
+				);
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-lclash",
+					"-lresolv",
+					"-framework",
+					NetworkExtension,
+					"-framework",
+					SystemConfiguration,
+					"-framework",
+					Security,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "$(APP_BUNDLE_ID)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = iphoneos;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_OBJC_BRIDGING_HEADER = "$(SRCROOT)/Runner/Runner-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Profile;
+		};
+		11B10EF63629B2104FBDC6A0 /* Profile */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 02A7A45DE75AB9523C719AB4 /* PacketTunnel.xcconfig */;
+			buildSettings = {
+				ARCHS = arm64;
+				CODE_SIGNING_ALLOWED = NO;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = iphoneos;
+			};
+			name = Profile;
+		};
+		3175A2C6E413F3F61B7038EC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 33D6016D654C59424AD9F78C /* Debug.xcconfig */;
+			buildSettings = {
+				ARCHS = arm64;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				ENABLE_BITCODE = NO;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/Shared",
+				);
+				INFOPLIST_FILE = Runner/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/../libclash/ios",
+				);
+				"LIBRARY_SEARCH_PATHS[sdk=iphonesimulator*]" = (
+					"$(inherited)",
+					"$(SRCROOT)/../libclash/ios-simulator",
+				);
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-lclash",
+					"-lresolv",
+					"-framework",
+					NetworkExtension,
+					"-framework",
+					SystemConfiguration,
+					"-framework",
+					Security,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "$(APP_BUNDLE_ID)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_OBJC_BRIDGING_HEADER = "$(SRCROOT)/Runner/Runner-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		414EBE56078DEA8B7F39B9B8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 02A7A45DE75AB9523C719AB4 /* PacketTunnel.xcconfig */;
+			buildSettings = {
+				ARCHS = arm64;
+				CODE_SIGNING_ALLOWED = NO;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+			};
+			name = Debug;
+		};
+		49226BF80D798A764DB75F1E /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 02A7A45DE75AB9523C719AB4 /* PacketTunnel.xcconfig */;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				ARCHS = arm64;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CODE_SIGN_ENTITLEMENTS = PacketTunnel/PacketTunnel.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				ENABLE_BITCODE = NO;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/Shared",
+				);
+				INFOPLIST_FILE = PacketTunnel/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/../libclash/ios",
+				);
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-lclash",
+					"-lresolv",
+					"-framework",
+					NetworkExtension,
+					"-framework",
+					SystemConfiguration,
+					"-framework",
+					Security,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "$(APP_BUNDLE_ID).PacketTunnel";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = iphoneos;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_OBJC_BRIDGING_HEADER = "$(SRCROOT)/PacketTunnel/PacketTunnel-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		9C4A32203984E6AA54F3CA5D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_COMPILATION_MODE = singlefile;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		AB9691A9F14FA7324F5F42D4 /* Profile */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_OPTIMIZATION_LEVEL = s;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				ONLY_ACTIVE_ARCH = NO;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Profile;
+		};
+		AD9C391D713985ECFE7270CD /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 02A7A45DE75AB9523C719AB4 /* PacketTunnel.xcconfig */;
+			buildSettings = {
+				ARCHS = arm64;
+				CODE_SIGNING_ALLOWED = NO;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = iphoneos;
+			};
+			name = Release;
+		};
+		CC345FAA8FDFB4FFAC004C82 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 10DF966175FDB4190FD04B03 /* Release.xcconfig */;
+			buildSettings = {
+				ARCHS = arm64;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				ENABLE_BITCODE = NO;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/Shared",
+				);
+				INFOPLIST_FILE = Runner/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/../libclash/ios",
+				);
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-lclash",
+					"-lresolv",
+					"-framework",
+					NetworkExtension,
+					"-framework",
+					SystemConfiguration,
+					"-framework",
+					Security,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "$(APP_BUNDLE_ID)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = iphoneos;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_OBJC_BRIDGING_HEADER = "$(SRCROOT)/Runner/Runner-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		CF7825CC846D4C890A5A17D7 /* Profile */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 02A7A45DE75AB9523C719AB4 /* PacketTunnel.xcconfig */;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				ARCHS = arm64;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CODE_SIGN_ENTITLEMENTS = PacketTunnel/PacketTunnel.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				ENABLE_BITCODE = NO;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/Shared",
+				);
+				INFOPLIST_FILE = PacketTunnel/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/../libclash/ios",
+				);
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-lclash",
+					"-lresolv",
+					"-framework",
+					NetworkExtension,
+					"-framework",
+					SystemConfiguration,
+					"-framework",
+					Security,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "$(APP_BUNDLE_ID).PacketTunnel";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = iphoneos;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_OBJC_BRIDGING_HEADER = "$(SRCROOT)/PacketTunnel/PacketTunnel-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Profile;
+		};
+		E5B15A5E475E60CD32AB7811 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 02A7A45DE75AB9523C719AB4 /* PacketTunnel.xcconfig */;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				ARCHS = arm64;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CODE_SIGN_ENTITLEMENTS = PacketTunnel/PacketTunnel.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				ENABLE_BITCODE = NO;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/Shared",
+				);
+				INFOPLIST_FILE = PacketTunnel/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/../libclash/ios",
+				);
+				"LIBRARY_SEARCH_PATHS[sdk=iphonesimulator*]" = (
+					"$(inherited)",
+					"$(SRCROOT)/../libclash/ios-simulator",
+				);
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-lclash",
+					"-lresolv",
+					"-framework",
+					NetworkExtension,
+					"-framework",
+					SystemConfiguration,
+					"-framework",
+					Security,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "$(APP_BUNDLE_ID).PacketTunnel";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_OBJC_BRIDGING_HEADER = "$(SRCROOT)/PacketTunnel/PacketTunnel-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		23BF71024EED065A016C3592 /* Build configuration list for PBXAggregateTarget "MeowCore" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				414EBE56078DEA8B7F39B9B8 /* Debug */,
+				AD9C391D713985ECFE7270CD /* Release */,
+				11B10EF63629B2104FBDC6A0 /* Profile */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E4BB3E94C51E631B27CEE2B9 /* Build configuration list for PBXNativeTarget "PacketTunnel" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E5B15A5E475E60CD32AB7811 /* Debug */,
+				49226BF80D798A764DB75F1E /* Release */,
+				CF7825CC846D4C890A5A17D7 /* Profile */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F972733F5179D5DF526225E0 /* Build configuration list for PBXProject "Runner" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9C4A32203984E6AA54F3CA5D /* Debug */,
+				09912808D422D63E4FEDD04D /* Release */,
+				AB9691A9F14FA7324F5F42D4 /* Profile */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		FB2DCD6E78616EB74253C17A /* Build configuration list for PBXNativeTarget "Runner" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3175A2C6E413F3F61B7038EC /* Debug */,
+				CC345FAA8FDFB4FFAC004C82 /* Release */,
+				0B7033442967714929751B0F /* Profile */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 56CC3C9E08382E9258B2443E /* Project object */;
 }

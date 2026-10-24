@@ -40,4 +40,13 @@ abstract final class GlassFlags {
   /// flipped at runtime before the first frame.
   static bool backdropBlurEnabled =
       const bool.fromEnvironment('MEOWCLASH_GLASS_BLUR', defaultValue: true);
+
+  /// Edge refraction shader of the iOS tab bar. When false (or when the
+  /// renderer cannot run shader filters) the bar keeps the plain blur.
+  ///
+  /// Defaults from `--dart-define=MEOWCLASH_GLASS_REFRACTION=false`.
+  static bool refractionEnabled = const bool.fromEnvironment(
+    'MEOWCLASH_GLASS_REFRACTION',
+    defaultValue: true,
+  );
 }

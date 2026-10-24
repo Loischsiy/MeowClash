@@ -1,6 +1,7 @@
+import 'package:flutter/material.dart';
 import 'package:meowclash/common/common.dart';
 import 'package:meowclash/models/common.dart';
-import 'package:flutter/material.dart';
+import 'package:meowclash/widgets/adaptive/adaptive.dart';
 
 class CommonPopupRoute<T> extends PopupRoute<T> {
 
@@ -53,7 +54,14 @@ class CommonPopupRoute<T> extends PopupRoute<T> {
               child: child,
             ),
           ),
-        child: AnimatedBuilder(
+        // Darwin: scale-only growth (no `Opacity` over the menu's blur).
+        child: AdaptivePlatform.useGlass
+            ? GlassMenuTransition(
+                animation: animation,
+                alignment: align,
+                child: builder(context),
+              )
+            : AnimatedBuilder(
           animation: animation,
           builder: (_, child) => Opacity(
               opacity: 0.1 + 0.9 * animationValue,
@@ -114,6 +122,26 @@ class _CommonPopupBoxState extends State<CommonPopupBox> {
   Offset _offset = Offset.zero;
 
   void _open({Offset offset = Offset.zero}) {
+    final popup = widget.popup;
+    final box = context.findRenderObject() as RenderBox?;
+    if (popup is CommonPopupMenu &&
+        AdaptiveContextMenu.prefersNative &&
+        box != null &&
+        box.hasSize) {
+      // macOS: a real NSMenu under the control; Flutter menu as fallback.
+      final anchor = box.localToGlobal(Offset.zero) & box.size;
+      AdaptiveContextMenu.showNative(
+        anchor: anchor,
+        entries: popup.adaptiveEntries,
+      ).then((shown) {
+        if (!shown && mounted) _openRoute(offset);
+      });
+      return;
+    }
+    _openRoute(offset);
+  }
+
+  void _openRoute(Offset offset) {
     _offset = offset;
     _updateOffset();
     _isOpen = true;
@@ -257,8 +285,24 @@ class CommonPopupMenu extends StatelessWidget {
     );
   }
 
+  List<AdaptiveMenuEntry> get adaptiveEntries => [
+        for (final item in items)
+          AdaptiveMenuEntry(
+            label: item.label,
+            icon: item.icon,
+            onPressed: item.onPressed,
+            destructive: item.type == PopupMenuItemType.danger,
+          ),
+      ];
+
   @override
-  Widget build(BuildContext context) => IntrinsicHeight(
+  Widget build(BuildContext context) => AdaptiveContextMenu(
+        entries: adaptiveEntries,
+        minWidth: minWidth,
+        materialBuilder: _buildMaterial,
+      );
+
+  Widget _buildMaterial(BuildContext context) => IntrinsicHeight(
       child: IntrinsicWidth(
         child: Card(
           elevation: 12,

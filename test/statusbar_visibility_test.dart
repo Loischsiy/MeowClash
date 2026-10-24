@@ -1,6 +1,3 @@
-// Native messages intentionally arrive between asynchronous snapshot steps.
-// ignore_for_file: cascade_invocations
-
 import 'dart:async';
 
 import 'package:flutter/services.dart';
@@ -8,6 +5,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:meowclash/common/statusbar.dart';
 import 'package:meowclash/services/ui_lifecycle.dart';
 
+/// macOS runs as a regular window; the menu bar icon
+/// (macos/Runner/StatusBarController.swift) asks Dart to show or hide it and
+/// reports Cmd+H. A null reply makes the native side toggle the window itself.
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   const channel = MethodChannel('status_bar_icon');
@@ -15,60 +15,67 @@ void main() {
   final messenger =
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
 
-  Future<void> nativeVisibility({required bool visible}) {
-    final done = Completer<void>();
-    // Simulate a native macOS NSPopover delegate callback, not a Dart invoke.
+  /// Simulates a call from the native runner, not a Dart invoke. Returns the
+  /// decoded reply, or null when Dart did not handle the method.
+  Future<Object?> nativeCall(String method, [Object? arguments]) {
+    final done = Completer<Object?>();
     // ignore: deprecated_member_use
     messenger.handlePlatformMessage(
       channel.name,
-      codec.encodeMethodCall(MethodCall('visibilityChanged', visible)),
-      (_) => done.complete(),
+      codec.encodeMethodCall(MethodCall(method, arguments)),
+      (reply) => done.complete(
+        reply == null ? null : codec.decodeEnvelope(reply),
+      ),
     );
     return done.future;
   }
 
   tearDown(() {
     channel.setMethodCallHandler(null);
-    messenger.setMockMethodCallHandler(channel, null);
   });
 
-  test('initially hidden popover and native reopen/auto-close are forwarded',
+  test('menu bar show/hide requests run the Dart window actions', () async {
+    final controller = UiLifecycleController();
+    addTearDown(controller.dispose);
+    final calls = <String>[];
+    StatusBarManager.listen(
+      controller,
+      onShowWindow: () async => calls.add('show'),
+      onHideWindow: () async => calls.add('hide'),
+    );
+
+    expect(await nativeCall('showWindow'), isTrue);
+    expect(await nativeCall('hideWindow'), isTrue);
+    expect(calls, ['show', 'hide']);
+  });
+
+  test('native visibility changes (Cmd+H, native fallback) are forwarded',
       () async {
     final controller = UiLifecycleController();
     addTearDown(controller.dispose);
-    messenger.setMockMethodCallHandler(channel, (call) async {
-      expect(call.method, 'isVisible');
-      return false;
-    });
-    await StatusBarManager.initVisibility(controller);
+    StatusBarManager.listen(
+      controller,
+      onShowWindow: () async {},
+      onHideWindow: () async {},
+    );
+
+    await nativeCall('visibilityChanged', false);
     expect(controller.hasWindowVisibility, isTrue);
-    expect(controller.isVisible, isFalse);
-    await nativeVisibility(visible: true);
-    expect(controller.isForeground, isTrue);
-    await nativeVisibility(visible: false);
     expect(controller.isForeground, isFalse);
+    await nativeCall('visibilityChanged', true);
+    expect(controller.isForeground, isTrue);
   });
 
-  test('a late native snapshot cannot re-hide an opened popover', () async {
+  test('unknown methods are left to the native fallback', () async {
     final controller = UiLifecycleController();
     addTearDown(controller.dispose);
-    final snapshot = Completer<bool>();
-    messenger.setMockMethodCallHandler(channel, (_) => snapshot.future);
-    final init = StatusBarManager.initVisibility(controller);
-    await nativeVisibility(visible: true);
-    snapshot.complete(false);
-    await init;
-    expect(controller.isVisible, isTrue);
-  });
+    StatusBarManager.listen(
+      controller,
+      onShowWindow: () async {},
+      onHideWindow: () async {},
+    );
 
-  test('older native runners fall back to Flutter lifecycle', () async {
-    final controller = UiLifecycleController();
-    addTearDown(controller.dispose);
-    messenger.setMockMethodCallHandler(channel, (_) async {
-      throw MissingPluginException();
-    });
-    await StatusBarManager.initVisibility(controller);
+    expect(await nativeCall('togglePopover'), isNull);
     expect(controller.hasWindowVisibility, isFalse);
-    expect(controller.isVisible, isTrue);
   });
 }

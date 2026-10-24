@@ -76,6 +76,14 @@ class GlassSurface extends StatelessWidget {
   /// blur. The iOS tab bar is the only user.
   final GlassRefraction? refraction;
 
+  /// Whether [context] is painted inside a [GlassSurface] that blurs.
+  ///
+  /// Small glass inside it (e.g. toolbar capsules of a page shown in a glass
+  /// sheet) must not blur again: no blur inside a blurred surface.
+  static bool isOverBlur(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<_GlassBlurScope>()?.blurs ??
+      false;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -103,7 +111,11 @@ class GlassSurface extends StatelessWidget {
               opaque: opaque,
             )
           : null,
-      child: child,
+      // Always present, so toggling [opaque] keeps the child's state.
+      child: _GlassBlurScope(
+        blurs: !opaque && backdrop == GlassBackdrop.blur,
+        child: child,
+      ),
     );
 
     final refraction = this.refraction;
@@ -154,6 +166,16 @@ class GlassSurface extends StatelessWidget {
     }
     return surface;
   }
+}
+
+class _GlassBlurScope extends InheritedWidget {
+  const _GlassBlurScope({required this.blurs, required super.child});
+
+  final bool blurs;
+
+  @override
+  bool updateShouldNotify(_GlassBlurScope oldWidget) =>
+      oldWidget.blurs != blurs;
 }
 
 ui.RSuperellipse _shape(Rect rect, BorderRadius radius) =>

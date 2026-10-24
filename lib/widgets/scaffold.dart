@@ -211,6 +211,14 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
     );
   }
 
+  void _handleStartSearching() {
+    updateSearchState(
+      (state) => state?.copyWith(
+        isSearch: true,
+      ),
+    );
+  }
+
   @override
   void dispose() {
     _appBarState.dispose();
@@ -265,6 +273,14 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
         : widget.leading;
   }
 
+  Widget _buildTitleText() => Text(
+        !_isEdit
+            ? widget.title!
+            : appLocalizations.selectedCountTitle(
+                "${_appBarState.value.editState?.editCount ?? 0}",
+              ),
+      );
+
   Widget _buildTitle(AppBarSearchState? startState) => _isSearch
         ? TextField(
             autofocus: true,
@@ -279,13 +295,7 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
               hintText: appLocalizations.search,
             ),
           )
-        : Text(
-            !_isEdit
-                ? widget.title!
-                : appLocalizations.selectedCountTitle(
-                    "${_appBarState.value.editState?.editCount ?? 0}",
-                  ),
-          );
+        : _buildTitleText();
 
   List<Widget> _buildActions(
     AppBarSearchState? searchState,
@@ -302,13 +312,7 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
 
     final hasSearch = searchState != null;
     final searchButton = IconButton(
-      onPressed: () {
-        updateSearchState(
-          (state) => state?.copyWith(
-            isSearch: true,
-          ),
-        );
-      },
+      onPressed: _handleStartSearching,
       icon: const Icon(Icons.search),
     );
 
@@ -336,8 +340,10 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
   
   }
 
-  Widget _buildAppBarWrap(Widget child) {
-    final appBar = _isSearch ? _buildSearchingAppBarTheme(child) : child;
+  Widget _buildAppBarWrap(Widget child) =>
+      _buildPopScope(_isSearch ? _buildSearchingAppBarTheme(child) : child);
+
+  Widget _buildPopScope(Widget appBar) {
     if (_isEdit || _isSearch) {
       return SystemBackBlock(
         child: CommonPopScope(
@@ -356,12 +362,79 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
     return appBar;
   }
 
+  /// Darwin leading button: what the Material `AppBar` shows or implies.
+  Widget? _buildGlassLeading() {
+    if (_isEdit) {
+      return IconButton(
+        onPressed: _appBarState.value.editState?.onExit,
+        icon: const Icon(Icons.close_rounded),
+      );
+    }
+    if (_isSearch) {
+      return IconButton(
+        onPressed: _handleExitSearching,
+        icon: const BackButtonIcon(),
+      );
+    }
+    if (widget.leading != null) return widget.leading;
+    if (!widget.automaticallyImplyLeading) return null;
+    final route = ModalRoute.of(context);
+    if (route?.impliesAppBarDismissal != true) return null;
+    return route is PageRoute && route.fullscreenDialog
+        ? const CloseButton()
+        : const BackButton();
+  }
+
+  /// Darwin toolbar (macOS 26 / iOS 26): see-through bar, actions in one
+  /// glass capsule, search in its own round capsule or a glass field.
+  Widget _buildGlassAppBar(
+    BuildContext context,
+    AppBarState state, {
+    required bool isTransparent,
+  }) {
+    final searchState = state.searchState;
+    final actions =
+        state.actions.isNotEmpty ? state.actions : widget.actions ?? [];
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: Theme.of(context).appBarTheme.systemOverlayStyle!,
+      child: AdaptiveAppBar(
+        transparent: isTransparent,
+        onWindowDrag: Platform.isMacOS ? windowManager.startDragging : null,
+        child: _buildPopScope(
+          GlassToolbar(
+            leading: _buildGlassLeading(),
+            title: _buildTitleText(),
+            actions: actions,
+            search: searchState == null
+                ? null
+                : IconButton(
+                    tooltip: appLocalizations.search,
+                    onPressed: _handleStartSearching,
+                    icon: const Icon(Icons.search_rounded),
+                  ),
+            searchField: _isSearch
+                ? GlassToolbarSearchField(
+                    controller: _textController,
+                    hintText: appLocalizations.search,
+                    onChanged: (value) => searchState?.onSearch(value),
+                    onClear: _handleClear,
+                  )
+                : null,
+          ),
+        ),
+      ),
+    );
+  }
+
   PreferredSizeWidget _buildAppBar() {
     final backgroundUrl = widget.disableBackground ? null : ref.watch(backgroundUrlProvider);
     final isTransparent = backgroundUrl != null;
+    final glass = AdaptivePlatform.useGlass && widget.appBar == null;
     
     return PreferredSize(
-      preferredSize: const Size.fromHeight(kToolbarHeight),
+      preferredSize: Size.fromHeight(
+        glass ? AdaptiveAppBar.toolbarHeight : kToolbarHeight,
+      ),
       child: Theme(
         data: Theme.of(context).copyWith(
           appBarTheme: AppBarTheme(
@@ -388,7 +461,13 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
             widget.appBar ??
                 ValueListenableBuilder<AppBarState>(
                   valueListenable: _appBarState,
-                  builder: (_, state, __) => AdaptiveAppBar(
+                  builder: (context, state, __) => glass
+                      ? _buildGlassAppBar(
+                          context,
+                          state,
+                          isTransparent: isTransparent,
+                        )
+                      : AdaptiveAppBar(
                     transparent: isTransparent,
                     onWindowDrag:
                         Platform.isMacOS ? windowManager.startDragging : null,

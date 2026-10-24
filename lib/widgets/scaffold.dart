@@ -397,12 +397,22 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
         : const BackButton();
   }
 
+  /// A page with no back / close button of its own (a tab root): on iOS its
+  /// title goes to the large title row. Search and edit mode do not count,
+  /// so the bar keeps its height while they come and go.
+  bool get _isRootPage {
+    if (widget.leading != null) return false;
+    if (!widget.automaticallyImplyLeading) return true;
+    return ModalRoute.of(context)?.impliesAppBarDismissal != true;
+  }
+
   /// Darwin toolbar (macOS 26 / iOS 26): see-through bar, actions in one
   /// glass capsule, search in its own round capsule or a glass field.
   Widget _buildGlassAppBar(
     BuildContext context,
     AppBarState state, {
     required bool isTransparent,
+    required bool largeTitle,
   }) {
     final searchState = state.searchState;
     final actions =
@@ -412,9 +422,11 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
       child: AdaptiveAppBar(
         transparent: isTransparent,
         scrollEdge: _scrollUnderToolbar,
+        largeTitle: largeTitle,
         onWindowDrag: Platform.isMacOS ? windowManager.startDragging : null,
         child: _buildPopScope(
           GlassToolbar(
+            largeTitle: largeTitle,
             leading: _buildGlassLeading(),
             title: _buildTitleText(),
             actions: actions,
@@ -443,10 +455,13 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
     final backgroundUrl = widget.disableBackground ? null : ref.watch(backgroundUrlProvider);
     final isTransparent = backgroundUrl != null;
     final glass = AdaptivePlatform.useGlass && widget.appBar == null;
+    final largeTitle = glass && AdaptiveAppBar.largeTitles && _isRootPage;
     
     return PreferredSize(
       preferredSize: Size.fromHeight(
-        glass ? AdaptiveAppBar.toolbarHeight : kToolbarHeight,
+        glass
+            ? AdaptiveAppBar.preferredHeight(context, largeTitle: largeTitle)
+            : kToolbarHeight,
       ),
       child: Theme(
         data: Theme.of(context).copyWith(
@@ -479,6 +494,7 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
                           context,
                           state,
                           isTransparent: isTransparent,
+                          largeTitle: largeTitle,
                         )
                       : AdaptiveAppBar(
                     transparent: isTransparent,

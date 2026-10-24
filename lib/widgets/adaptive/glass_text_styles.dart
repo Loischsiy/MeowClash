@@ -73,6 +73,14 @@ abstract final class GlassTextStyles {
         weight: FontWeight.w600,
       );
 
+  /// Large title of an iOS root page, in its own row below the toolbar.
+  static TextStyle toolbarLargeTitle(TextTheme textTheme) => _style(
+        textTheme.headlineLarge,
+        size: GlassTokens.toolbarLargeTitleSizeIos,
+        line: GlassTokens.toolbarLargeTitleLineIos,
+        weight: FontWeight.w700,
+      );
+
   /// Text of the toolbar search field.
   static TextStyle toolbarSearch(TextTheme textTheme) => _style(
         textTheme.bodyLarge,

@@ -318,17 +318,98 @@ void main() {
       expect(find.byType(GlassToolbarSearchField), findsNothing);
     }, variant: _darwin);
 
-    testWidgets('iOS: 44 pt bar under the status bar, centred 17 pt title',
+    testWidgets('iOS root page: button row, then a large title row',
         (tester) async {
-      await _pumpScaffold(tester, top: _iosTop);
+      final key = await _pumpScaffold(tester, top: _iosTop);
+      _enableSearch(key, []);
+      await tester.pump();
+      const row = _iosTop + GlassTokens.toolbarHeightIos;
       expect(
         tester.getSize(find.byType(AdaptiveAppBar)).height,
+        row + GlassTokens.toolbarLargeTitleHeightIos,
+      );
+      // The capsules keep the 44 pt row to themselves.
+      final capsules = find.byType(GlassToolbarGroup);
+      expect(capsules, findsNWidgets(2));
+      expect(
+        tester.getRect(capsules.last).center.dy,
+        _iosTop + GlassTokens.toolbarHeightIos / 2,
+      );
+      expect(
+        tester.getRect(capsules.last).right,
+        800 - GlassTokens.toolbarInsetIos,
+      );
+      // Large 34 pt title below them, at the leading edge.
+      final title = tester.getRect(find.text('Profiles'));
+      expect(_fontSize(tester, 'Profiles'), GlassTokens.toolbarLargeTitleSizeIos);
+      expect(title.left, GlassTokens.toolbarInsetIos);
+      expect(title.top, greaterThanOrEqualTo(row));
+      expect(
+        title.bottom,
+        row +
+            GlassTokens.toolbarLargeTitleHeightIos -
+            GlassTokens.toolbarLargeTitleBottomIos,
+      );
+      expect(_backdropLayers(tester), 2);
+
+      // Search keeps the bar height and the large title.
+      await tester.tap(find.byIcon(Icons.search_rounded));
+      await tester.pump();
+      expect(find.byType(GlassToolbarSearchField), findsOneWidget);
+      expect(find.text('Profiles'), findsOneWidget);
+      expect(
+        tester.getSize(find.byType(AdaptiveAppBar)).height,
+        row + GlassTokens.toolbarLargeTitleHeightIos,
+      );
+      // Leave search mode so its system back block is released.
+      await tester.tap(find.byType(BackButtonIcon));
+      await tester.pump();
+      expect(find.byType(GlassToolbarSearchField), findsNothing);
+    }, variant: _ios);
+
+    testWidgets('iOS pushed page: 44 pt bar, centred 17 pt title',
+        (tester) async {
+      await _pumpScaffold(tester, top: _iosTop);
+      final navigator = tester.state<NavigatorState>(find.byType(Navigator));
+      unawaited(navigator.push(MaterialPageRoute<void>(
+        builder: (_) => const CommonScaffold(
+          title: 'Providers',
+          body: SizedBox.expand(),
+        ),
+      )));
+      await tester.pumpAndSettle();
+      expect(
+        tester.getSize(find.byType(AdaptiveAppBar).last).height,
         _iosTop + GlassTokens.toolbarHeightIos,
       );
-      expect(_fontSize(tester, 'Profiles'), GlassTokens.toolbarTitleSizeIos);
-      expect(tester.getCenter(find.text('Profiles')).dx, 400);
-      expect(_backdropLayers(tester), 1);
+      expect(_fontSize(tester, 'Providers'), GlassTokens.toolbarTitleSizeIos);
+      expect(tester.getCenter(find.text('Providers')).dx, 400);
     }, variant: _ios);
+
+    testWidgets('iOS without a status bar: capsules keep off the top edge',
+        (tester) async {
+      await _pumpScaffold(tester, top: 0);
+      expect(
+        tester.getSize(find.byType(AdaptiveAppBar)).height,
+        GlassTokens.toolbarMinTopInsetIos +
+            GlassTokens.toolbarHeightIos +
+            GlassTokens.toolbarLargeTitleHeightIos,
+      );
+      expect(
+        tester.getRect(find.byType(GlassToolbarGroup).first).top,
+        greaterThanOrEqualTo(GlassTokens.toolbarMinTopInsetIos),
+      );
+    }, variant: _ios);
+
+    testWidgets('macOS root page keeps the compact one-row bar',
+        (tester) async {
+      await _pumpScaffold(tester);
+      expect(
+        tester.getSize(find.byType(AdaptiveAppBar)).height,
+        _macTop + GlassTokens.toolbarHeightMac,
+      );
+      expect(_fontSize(tester, 'Profiles'), GlassTokens.toolbarTitleSizeMac);
+    }, variant: _darwin);
 
     testWidgets('Reduce Transparency / Increase Contrast: no blur at all',
         (tester) async {
@@ -409,9 +490,12 @@ void main() {
         scrollUnderToolbar: true,
       );
       expect(tester.getRect(find.byType(ListView)).top, 0);
+      // Root page: the content starts below the large title row.
       expect(
         tester.getTopLeft(find.text('Row 0')).dy,
-        _iosTop + GlassTokens.toolbarHeightIos,
+        _iosTop +
+            GlassTokens.toolbarHeightIos +
+            GlassTokens.toolbarLargeTitleHeightIos,
       );
       expect(_fade(), findsOneWidget);
     }, variant: _ios);

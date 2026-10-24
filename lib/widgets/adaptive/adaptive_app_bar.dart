@@ -24,6 +24,7 @@ class AdaptiveAppBar extends StatelessWidget {
     this.onWindowDrag,
     this.transparent = false,
     this.scrollEdge = false,
+    this.largeTitle = false,
   });
 
   final Widget child;
@@ -37,6 +38,12 @@ class AdaptiveAppBar extends StatelessWidget {
   /// The page scrolls under the bar: paint the scroll-edge fade.
   final bool scrollEdge;
 
+  /// [child] is a [GlassToolbar] with its large title row (iOS root page):
+  /// the bar is taller by [GlassTokens.toolbarLargeTitleHeightIos].
+  final bool largeTitle;
+
+  static bool get _ios => defaultTargetPlatform == TargetPlatform.iOS;
+
   /// Height of the toolbar row without the top inset: the Darwin toolbar
   /// height, [kToolbarHeight] for Material.
   static double get toolbarHeight {
@@ -44,6 +51,30 @@ class AdaptiveAppBar extends StatelessWidget {
     return defaultTargetPlatform == TargetPlatform.macOS
         ? GlassTokens.toolbarHeightMac
         : GlassTokens.toolbarHeightIos;
+  }
+
+  /// Whether root pages (no back button) put their title in a large title
+  /// row below the buttons: the iOS glass toolbar only.
+  static bool get largeTitles => AdaptivePlatform.useGlass && _ios;
+
+  static double _barHeight({required bool largeTitle}) =>
+      toolbarHeight +
+      (largeTitle && largeTitles ? GlassTokens.toolbarLargeTitleHeightIos : 0);
+
+  /// The `PreferredSize` height of a page's bar, without the top inset the
+  /// `Scaffold` adds on its own: the toolbar row, the large title row when
+  /// [largeTitle], and on iOS whatever [GlassTokens.toolbarMinTopInsetIos]
+  /// adds where there is no status bar.
+  static double preferredHeight(
+    BuildContext context, {
+    bool largeTitle = false,
+  }) {
+    if (!AdaptivePlatform.useGlass) return kToolbarHeight;
+    final shortfall = _ios
+        ? GlassTokens.toolbarMinTopInsetIos - MediaQuery.paddingOf(context).top
+        : 0.0;
+    return _barHeight(largeTitle: largeTitle) +
+        (shortfall > 0 ? shortfall : 0);
   }
 
   /// Top space the bar covers (title bar / status bar + toolbar) inside a
@@ -65,7 +96,13 @@ class AdaptiveAppBar extends StatelessWidget {
 
     Widget bar = SafeArea(
       bottom: false,
-      child: SizedBox(height: toolbarHeight, child: child),
+      minimum: _ios
+          ? const EdgeInsets.only(top: GlassTokens.toolbarMinTopInsetIos)
+          : EdgeInsets.zero,
+      child: SizedBox(
+        height: _barHeight(largeTitle: largeTitle),
+        child: child,
+      ),
     );
     if (transparent) {
       // Over a page background image: no fill, no edge.
@@ -141,6 +178,12 @@ class AdaptiveAppBar extends StatelessWidget {
 /// capsule at the trailing edge. While searching, [searchField] (usually a
 /// [GlassToolbarSearchField]) takes the title's place and the actions hide.
 ///
+/// With [largeTitle] (iOS root pages) the row keeps only the capsules (and
+/// the search field) and the title moves to a second row below, large and
+/// at the leading edge, like the iOS 26 large title. It stays put while the
+/// page scrolls and while searching, so the bar never changes height. Wrap
+/// it in an [AdaptiveAppBar] with the same `largeTitle`.
+///
 /// Pages keep passing plain Material `IconButton`s; the capsules restyle
 /// them. Nothing here animates, so Reduce Motion needs no extra branch (and
 /// no `Opacity` ever sits above the capsules' blur).
@@ -154,6 +197,7 @@ class GlassToolbar extends StatelessWidget {
     this.actions = const [],
     this.search,
     this.searchField,
+    this.largeTitle = false,
   });
 
   final Widget title;
@@ -161,12 +205,23 @@ class GlassToolbar extends StatelessWidget {
   final List<Widget> actions;
   final Widget? search;
   final Widget? searchField;
+  final bool largeTitle;
 
   static bool get _mac => defaultTargetPlatform == TargetPlatform.macOS;
+
+  Widget _title(TextStyle style, Color color) => DefaultTextStyle(
+        style: style.copyWith(color: color),
+        maxLines: 1,
+        softWrap: false,
+        overflow: TextOverflow.ellipsis,
+        child: title,
+      );
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final color = theme.colorScheme.onSurface;
+    final large = largeTitle && !_mac;
     final inset =
         _mac ? GlassTokens.toolbarInsetMac : GlassTokens.toolbarInsetIos;
     final searching = searchField != null;
@@ -181,7 +236,7 @@ class GlassToolbar extends StatelessWidget {
         GlassToolbarGroup(children: [search]),
       ],
     ];
-    return NavigationToolbar(
+    final row = NavigationToolbar(
       leading: leading == null
           ? null
           : Padding(
@@ -192,15 +247,9 @@ class GlassToolbar extends StatelessWidget {
               ),
             ),
       middle: searchField ??
-          DefaultTextStyle(
-            style: GlassTextStyles.toolbarTitle(theme.textTheme).copyWith(
-              color: theme.colorScheme.onSurface,
-            ),
-            maxLines: 1,
-            softWrap: false,
-            overflow: TextOverflow.ellipsis,
-            child: title,
-          ),
+          (large
+              ? null
+              : _title(GlassTextStyles.toolbarTitle(theme.textTheme), color)),
       trailing: trailing.isEmpty
           ? null
           : Padding(
@@ -211,6 +260,33 @@ class GlassToolbar extends StatelessWidget {
       middleSpacing: leading == null && !_mac
           ? inset
           : GlassTokens.toolbarTitleGap,
+    );
+    if (!large) return row;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SizedBox(height: GlassTokens.toolbarHeightIos, child: row),
+        SizedBox(
+          height: GlassTokens.toolbarLargeTitleHeightIos,
+          child: Padding(
+            padding: EdgeInsetsDirectional.only(
+              start: inset,
+              end: inset,
+              bottom: GlassTokens.toolbarLargeTitleBottomIos,
+            ),
+            child: Align(
+              alignment: AlignmentDirectional.bottomStart,
+              child: Semantics(
+                header: true,
+                child: _title(
+                  GlassTextStyles.toolbarLargeTitle(theme.textTheme),
+                  color,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

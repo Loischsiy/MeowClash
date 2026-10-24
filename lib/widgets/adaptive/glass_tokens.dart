@@ -195,6 +195,17 @@ abstract final class GlassTokens {
   static const double toolbarTitleLineMac = 20;
   static const double toolbarTitleSizeIos = 17;
   static const double toolbarTitleLineIos = 22;
+  // iOS root pages (no back button): the buttons keep the 44 pt row and the
+  // title gets a row of its own below it, large and at the leading edge, as
+  // the iOS 26 large title (34 bold) of Mail / Settings. Its line sits
+  // [toolbarLargeTitleBottomIos] above the row's bottom edge.
+  static const double toolbarLargeTitleSizeIos = 34;
+  static const double toolbarLargeTitleLineIos = 41;
+  static const double toolbarLargeTitleHeightIos = 52;
+  static const double toolbarLargeTitleBottomIos = 8;
+  // Least space above the iOS bar where there is no status bar (iPhone in
+  // landscape), so the capsules never touch the screen edge.
+  static const double toolbarMinTopInsetIos = 8;
   // Distance of the outermost capsules from the bar edges, between capsules
   // and between the leading capsule and the title.
   static const double toolbarInsetMac = 12;

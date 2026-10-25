@@ -446,6 +446,18 @@ abstract final class GlassTokens {
   static const double listSectionFooterLineMac = 14;
   static const double listSectionFooterSizeIos = 13;
   static const double listSectionFooterLineIos = 18;
+  // Rules of a profile override: a long reorderable list, so one small
+  // content card per rule instead of a grouped section; monospaced value and
+  // a selection circle at the end, as in Mail's edit mode.
+  static const double ruleRowGap = 6;
+  static const double ruleRowVerticalPaddingMac = 8;
+  static const double ruleRowVerticalPaddingIos = 12;
+  static const double ruleCheckSizeMac = 18;
+  static const double ruleCheckSizeIos = 22;
+  static const double ruleTextSizeMac = 12;
+  static const double ruleTextLineMac = 16;
+  static const double ruleTextSizeIos = 15;
+  static const double ruleTextLineIos = 20;
 
   // Switch: the Cupertino switch in the accent. Its track is 31 pt tall in a
   // 39 pt box (focus margin); macOS scales it down to the 22 pt track of the

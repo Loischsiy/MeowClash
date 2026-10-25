@@ -4,6 +4,7 @@ import 'package:meowclash/enum/enum.dart';
 import 'package:meowclash/models/models.dart';
 import 'package:meowclash/providers/providers.dart';
 import 'package:meowclash/state.dart';
+import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:meowclash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -99,18 +100,18 @@ class _OverrideProfileViewState extends State<OverrideProfileView> {
         );
         if (!isInit) {
           return const Center(
-            child: CircularProgressIndicator(),
+            child: AdaptiveActivityIndicator(),
           );
         }
         return FadeBox(
           child: !isInit
               ? const Center(
-                  child: CircularProgressIndicator(),
+                  child: AdaptiveActivityIndicator(),
                 )
               : child!,
         );
       },
-      child: LayoutBuilder(
+      child: AdaptivePlatform.useGlass ? _buildGlassList() : LayoutBuilder(
         builder: (_, constraints) {
           _currentMaxWidth = constraints.maxWidth - 104;
           return CommonAutoHiddenScrollBar(
@@ -208,6 +209,68 @@ class _OverrideProfileViewState extends State<OverrideProfileView> {
         },
       ),
     );
+
+  /// Darwin: grouped sections on the plain background. Everything here
+  /// scrolls, so nothing blurs (the rule list can hold hundreds of rows).
+  Widget _buildGlassList() => LayoutBuilder(
+        builder: (_, constraints) {
+          final padding = GlassListSection.listPadding;
+          final gap = GlassListSection.gap;
+          final horizontal = EdgeInsets.symmetric(horizontal: padding.left);
+          return CommonAutoHiddenScrollBar(
+            controller: _controller,
+            child: CustomScrollView(
+              controller: _controller,
+              slivers: [
+                SliverToBoxAdapter(child: SizedBox(height: padding.top)),
+                SliverPadding(
+                  padding: horizontal,
+                  sliver: SliverToBoxAdapter(
+                    child: Consumer(
+                      builder: (_, ref, child) {
+                        final scriptMode = ref.watch(scriptStateProvider
+                            .select((state) => state.realId != null));
+                        if (!scriptMode) {
+                          return const SizedBox();
+                        }
+                        return child!;
+                      },
+                      child: Padding(
+                        padding: EdgeInsets.only(bottom: gap),
+                        child: _GlassFootnote(
+                          icon: Icons.info_outline_rounded,
+                          text: appLocalizations.overrideInvalidTip,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                SliverPadding(
+                  padding: horizontal,
+                  sliver: SliverList.list(
+                    children: [
+                      const OverrideSwitch(),
+                      SizedBox(height: gap),
+                      ChainTitle(profileId: widget.profileId),
+                      ChainContent(profileId: widget.profileId),
+                      SizedBox(height: gap),
+                      RuleTitle(profileId: widget.profileId),
+                    ],
+                  ),
+                ),
+                SliverPadding(
+                  padding: horizontal.copyWith(bottom: padding.bottom),
+                  sliver: RuleContent(
+                    maxWidth: constraints.maxWidth -
+                        padding.horizontal -
+                        RuleContent.glassTextReserve,
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      );
 
   @override
   Widget build(BuildContext context) => ProviderScope(
@@ -343,6 +406,28 @@ class OverrideSwitch extends ConsumerWidget {
         (state) => state.overrideData?.enable,
       ),
     );
+    void setEnable({required bool value}) {
+      ref.read(profileOverrideStateProvider.notifier).updateState(
+            (state) => state.copyWith.overrideData!(
+              enable: value,
+            ),
+          );
+    }
+
+    if (AdaptivePlatform.useGlass) {
+      return GlassListSection(
+        children: [
+          GlassListRow(
+            title: Text(appLocalizations.enableOverride),
+            trailing: AdaptiveSwitch(
+              value: enable ?? false,
+              onChanged: (value) => setEnable(value: value),
+            ),
+            onTap: () => setEnable(value: !(enable ?? false)),
+          ),
+        ],
+      );
+    }
     return CommonCard(
       onPressed: () {},
       type: CommonCardType.filled,
@@ -355,13 +440,7 @@ class OverrideSwitch extends ConsumerWidget {
         title: Text(appLocalizations.enableOverride),
         delegate: SwitchDelegate(
           value: enable ?? false,
-          onChanged: (value) {
-            ref.read(profileOverrideStateProvider.notifier).updateState(
-                  (state) => state.copyWith.overrideData!(
-                    enable: value,
-                  ),
-                );
-          },
+          onChanged: (value) => setEnable(value: value),
         ),
       ),
     );
@@ -386,6 +465,19 @@ class RuleTitle extends ConsumerWidget {
         );
   }
 
+  void _handleSelectAll(WidgetRef ref, {required bool isSelectAll}) {
+    ref.read(profileOverrideStateProvider.notifier).updateState(
+          (state) => state.copyWith(
+            selectedRules: isSelectAll
+                ? <String>{}
+                : state.overrideData?.rule.rules
+                        .map((item) => item.id)
+                        .toSet() ??
+                    <String>{},
+          ),
+        );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final vm3 = ref.watch(
@@ -405,6 +497,43 @@ class RuleTitle extends ConsumerWidget {
     final isEdit = vm3.a;
     final isSelectAll = vm3.b;
     final isOverrideRule = vm3.c;
+    if (AdaptivePlatform.useGlass) {
+      return GlassSectionHeader(
+        title: appLocalizations.rule,
+        subtitle: isOverrideRule
+            ? appLocalizations.overrideOriginRules
+            : appLocalizations.addedOriginRules,
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          spacing: GlassTokens.listRowTrailingGap,
+          children: [
+            if (!isEdit)
+              GlassIconButton(
+                icon: Icon(
+                  isOverrideRule ? Icons.edit_document : Icons.note_add_rounded,
+                ),
+                onPressed: () => _handleChangeType(ref, isOverrideRule),
+              ),
+            if (!isEdit)
+              GlassButton(
+                label: appLocalizations.add,
+                icon: Icons.add_rounded,
+                onPressed: () =>
+                    globalState.appController.handleAddOrUpdate(ref),
+              )
+            else
+              GlassButton(
+                label: appLocalizations.selectAll,
+                kind: isSelectAll
+                    ? GlassButtonKind.filled
+                    : GlassButtonKind.tinted,
+                onPressed: () =>
+                    _handleSelectAll(ref, isSelectAll: isSelectAll),
+              ),
+          ],
+        ),
+      );
+    }
     return FilledButtonTheme(
       data: const FilledButtonThemeData(
         style: ButtonStyle(
@@ -451,28 +580,13 @@ class RuleTitle extends ConsumerWidget {
                 : isSelectAll
                     ? FilledButton(
                         onPressed: () {
-                          ref
-                              .read(profileOverrideStateProvider.notifier)
-                              .updateState(
-                                (state) => state.copyWith(
-                                  selectedRules: {},
-                                ),
-                              );
+                          _handleSelectAll(ref, isSelectAll: isSelectAll);
                         },
                         child: Text(appLocalizations.selectAll),
                       )
                     : FilledButton.tonal(
                         onPressed: () {
-                          ref
-                              .read(profileOverrideStateProvider.notifier)
-                              .updateState(
-                                (state) => state.copyWith(
-                                  selectedRules: state.overrideData?.rule.rules
-                                          .map((item) => item.id)
-                                          .toSet() ??
-                                      {},
-                                ),
-                              );
+                          _handleSelectAll(ref, isSelectAll: isSelectAll);
                         },
                         child: Text(appLocalizations.selectAll),
                       ),
@@ -557,6 +671,131 @@ class RuleContent extends ConsumerWidget {
     );
   }
 
+  void _handleGetOriginRules(WidgetRef ref) {
+    final rules = ref.read(
+      profileOverrideStateProvider.select(
+        (state) => state.snippet?.rule ?? [],
+      ),
+    );
+    ref.read(profileOverrideStateProvider.notifier).updateState(
+          (state) => state.copyWith.overrideData!.rule(
+            overrideRules: rules,
+          ),
+        );
+  }
+
+  static bool get _mac => AdaptivePlatform.isMacOSGlass;
+
+  static double get _glassVerticalPadding => _mac
+      ? GlassTokens.ruleRowVerticalPaddingMac
+      : GlassTokens.ruleRowVerticalPaddingIos;
+
+  static double get _glassCheckSize =>
+      _mac ? GlassTokens.ruleCheckSizeMac : GlassTokens.ruleCheckSizeIos;
+
+  /// Darwin: width a rule card takes besides its text.
+  static double get glassTextReserve =>
+      2 * GlassListSection.rowPadding +
+      GlassTokens.listRowTrailingGap +
+      _glassCheckSize;
+
+  static TextStyle _glassTextStyle(BuildContext context) =>
+      GlassTextStyles.codeLine(context.textTheme).toJetBrainsMono;
+
+  double _glassItemExtent(BuildContext context, Rule rule) {
+    final textHeight = globalState.measure
+        .computeTextSize(
+          Text(rule.value, style: _glassTextStyle(context)),
+          maxWidth: maxWidth,
+        )
+        .height;
+    final content =
+        textHeight > _glassCheckSize ? textHeight : _glassCheckSize;
+    return GlassTokens.ruleRowGap + 2 * _glassVerticalPadding + content;
+  }
+
+  /// Darwin: a flat card per rule (the list is long and scrolls, so no
+  /// blur) with the selection circle at the end; lifted with a shadow while
+  /// dragged.
+  Widget _buildGlassItem({
+    required Rule rule,
+    required bool isSelected,
+    required VoidCallback onTap,
+    required BuildContext context,
+    bool lifted = false,
+  }) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    Widget card = AdaptiveCard(
+      isSelected: isSelected,
+      checked: false,
+      onPressed: onTap,
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: GlassListSection.rowPadding,
+          vertical: _glassVerticalPadding,
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(rule.value, style: _glassTextStyle(context)),
+            ),
+            const SizedBox(width: GlassTokens.listRowTrailingGap),
+            Icon(
+              isSelected ? Icons.check_circle_rounded : Icons.circle_outlined,
+              size: _glassCheckSize,
+              color: isSelected
+                  ? scheme.primary
+                  : scheme.onSurfaceVariant
+                      .withValues(alpha: GlassTokens.listRowChevronOpacity),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (lifted) {
+      card = DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(GlassTokens.cardRadius),
+          boxShadow: GlassTokens.floatingShadow(theme.brightness),
+        ),
+        child: card,
+      );
+    }
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        vertical: GlassTokens.ruleRowGap / 2,
+      ),
+      child: card,
+    );
+  }
+
+  /// Darwin: the dragged rule grows a little (not with Reduce Motion).
+  Widget _buildGlassProxy({
+    required BuildContext context,
+    required Rule rule,
+    required bool isSelected,
+    required Animation<double> animation,
+  }) {
+    final reduceMotion = GlassAccessibility.of(context).reduceMotion;
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (_, child) {
+        final value = Curves.easeInOut.transform(animation.value);
+        final scale =
+            reduceMotion ? 1.0 : 1 + (GlassTokens.listRowDragScale - 1) * value;
+        return Transform.scale(scale: scale, child: child);
+      },
+      child: _buildGlassItem(
+        rule: rule,
+        isSelected: isSelected,
+        onTap: () {},
+        context: context,
+        lifted: true,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final vm3 = ref.watch(
@@ -574,6 +813,27 @@ class RuleContent extends ConsumerWidget {
     final rules = vm3.a;
     final type = vm3.b;
     final selectedRules = vm3.c;
+    final glass = AdaptivePlatform.useGlass;
+    if (rules.isEmpty && glass) {
+      return SliverToBoxAdapter(
+        child: SizedBox(
+          height: 300,
+          child: type == OverrideRuleType.added
+              ? AdaptiveEmptyState(
+                  label: appLocalizations.noData,
+                  icon: Icons.rule_rounded,
+                )
+              : Center(
+                  child: GlassButton(
+                    label: appLocalizations.getOriginRules,
+                    icon: Icons.download_rounded,
+                    kind: GlassButtonKind.filled,
+                    onPressed: () => _handleGetOriginRules(ref),
+                  ),
+                ),
+        ),
+      );
+    }
     if (rules.isEmpty) {
       return SliverToBoxAdapter(
         child: SizedBox(
@@ -585,18 +845,7 @@ class RuleContent extends ConsumerWidget {
                   )
                 : FilledButton(
                     onPressed: () {
-                      final rules = ref.read(
-                        profileOverrideStateProvider.select(
-                          (state) => state.snippet?.rule ?? [],
-                        ),
-                      );
-                      ref
-                          .read(profileOverrideStateProvider.notifier)
-                          .updateState(
-                        (state) => state.copyWith.overrideData!.rule(
-                            overrideRules: rules,
-                          ),
-                      );
+                      _handleGetOriginRules(ref);
                     },
                     child: Text(appLocalizations.getOriginRules),
                   ),
@@ -611,17 +860,31 @@ class RuleContent extends ConsumerWidget {
         return ReorderableDelayedDragStartListener(
           key: ObjectKey(rule),
           index: index,
-          child: _buildItem(
-            rule: rule,
-            isSelected: selectedRules.contains(rule.id),
-            onTab: () {
-              _handleSelect(ref, rule.id);
-            },
-            context: context,
-          ),
+          child: glass
+              ? _buildGlassItem(
+                  rule: rule,
+                  isSelected: selectedRules.contains(rule.id),
+                  onTap: () => _handleSelect(ref, rule.id),
+                  context: context,
+                )
+              : _buildItem(
+                  rule: rule,
+                  isSelected: selectedRules.contains(rule.id),
+                  onTab: () {
+                    _handleSelect(ref, rule.id);
+                  },
+                  context: context,
+                ),
         );
       },
-      proxyDecorator: proxyDecorator,
+      proxyDecorator: glass
+          ? (_, index, animation) => _buildGlassProxy(
+                context: context,
+                rule: rules[index],
+                isSelected: selectedRules.contains(rules[index].id),
+                animation: animation,
+              )
+          : proxyDecorator,
       itemCount: rules.length,
       onReorder: (oldIndex, newIndex) {
         if (oldIndex < newIndex) {
@@ -636,9 +899,14 @@ class RuleContent extends ConsumerWidget {
               ),
             );
       },
-      keyBuilder: (index) => rules[index].value,
+      keyBuilder: (index) => glass
+          ? '${_mac ? 'mac' : 'ios'}:${rules[index].value}'
+          : rules[index].value,
       itemExtentBuilder: (index) {
         final rule = rules[index];
+        if (glass) {
+          return _glassItemExtent(context, rule);
+        }
         return 40 +
             globalState.measure
                 .computeTextSize(
@@ -1000,6 +1268,17 @@ class ChainTitle extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    if (AdaptivePlatform.useGlass) {
+      return GlassSectionHeader(
+        title: appLocalizations.proxyChains,
+        subtitle: appLocalizations.proxyChainsDesc,
+        trailing: GlassButton(
+          label: appLocalizations.add,
+          icon: Icons.add_rounded,
+          onPressed: () => _handleAdd(ref),
+        ),
+      );
+    }
     return FilledButtonTheme(
       data: const FilledButtonThemeData(
         style: ButtonStyle(
@@ -1115,6 +1394,36 @@ class ChainContent extends ConsumerWidget {
     );
   }
 
+  /// Darwin: one row per chain in a grouped section; a tap edits it.
+  Widget _buildGlassItem(WidgetRef ref, ProxyChain chain) => GlassListRow(
+        title: Text(
+          chain.name.isEmpty ? appLocalizations.unnamed : chain.name,
+        ),
+        subtitle: Text(
+          chain.hops.length < 2
+              ? appLocalizations.chainHopsRequired
+              : chain.hops.join('  \u2192  '),
+        ),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          spacing: GlassTokens.listRowTrailingGap,
+          children: [
+            if (chain.enable && chain.hops.length >= 2)
+              _ChainTestButton(chainName: chain.name),
+            AdaptiveSwitch(
+              value: chain.enable,
+              onChanged: (value) => _handleToggle(ref, chain, value),
+            ),
+            GlassIconButton(
+              icon: const Icon(Icons.delete_outline_rounded),
+              tooltip: appLocalizations.delete,
+              onPressed: () => _handleDelete(ref, chain),
+            ),
+          ],
+        ),
+        onTap: () => _handleEdit(ref, chain),
+      );
+
   Widget _buildItem(WidgetRef ref, ProxyChain chain) => Container(
         margin: const EdgeInsets.symmetric(
           vertical: 4,
@@ -1168,6 +1477,22 @@ class ChainContent extends ConsumerWidget {
         (state) => state.overrideData?.chains ?? const <ProxyChain>[],
       ),
     );
+    if (AdaptivePlatform.useGlass) {
+      if (chains.isEmpty) {
+        return Padding(
+          padding: EdgeInsets.symmetric(vertical: GlassListSection.gap / 2),
+          child: _GlassFootnote(
+            text: appLocalizations.nullTip(appLocalizations.proxyChains),
+            center: true,
+          ),
+        );
+      }
+      return GlassListSection(
+        children: [
+          for (final chain in chains) _buildGlassItem(ref, chain),
+        ],
+      );
+    }
     if (chains.isEmpty) {
       return Padding(
         padding: const EdgeInsets.symmetric(
@@ -1449,7 +1774,13 @@ class _ChainTestButtonState extends State<_ChainTestButton> {
   }
 
   @override
-  Widget build(BuildContext context) => IconButton(
+  Widget build(BuildContext context) => AdaptivePlatform.useGlass
+      ? GlassIconButton(
+          icon: const Icon(Icons.speed_rounded),
+          busy: _testing,
+          onPressed: _handleTest,
+        )
+      : IconButton(
         onPressed: _testing ? null : _handleTest,
         icon: _testing
             ? const SizedBox(
@@ -1459,4 +1790,49 @@ class _ChainTestButtonState extends State<_ChainTestButton> {
               )
             : const Icon(Icons.speed),
       );
+}
+
+/// Explanation in the section footer style, lined up with the row text;
+/// optionally led by a symbol or centered (empty lists). Darwin only.
+class _GlassFootnote extends StatelessWidget {
+  const _GlassFootnote({
+    required this.text,
+    this.icon,
+    this.center = false,
+  });
+
+  final String text;
+  final IconData? icon;
+  final bool center;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final color = theme.colorScheme.onSurfaceVariant;
+    final style = GlassTextStyles.listSectionFooter(theme.textTheme)
+        .copyWith(color: color);
+    final icon = this.icon;
+    Widget content = Text(
+      text,
+      style: style,
+      textAlign: center ? TextAlign.center : null,
+    );
+    if (icon != null) {
+      content = Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: GlassTokens.listRowTrailingGap,
+        children: [
+          Icon(icon, size: style.fontSize! * style.height!, color: color),
+          Expanded(child: content),
+        ],
+      );
+    }
+    if (center) {
+      content = Center(child: content);
+    }
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: GlassListSection.rowPadding),
+      child: content,
+    );
+  }
 }

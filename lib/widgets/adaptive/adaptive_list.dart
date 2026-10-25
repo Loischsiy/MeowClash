@@ -66,13 +66,20 @@ class AdaptiveSwitch extends StatelessWidget {
 }
 
 /// Header line above a [GlassListSection], lined up with the row text; an
-/// optional [trailing] control (e.g. a [GlassButton]) sits at its end.
+/// optional [subtitle] in the footer style below the title and an optional
+/// [trailing] control (e.g. a [GlassButton]) at its end.
 ///
 /// Darwin only.
 class GlassSectionHeader extends StatelessWidget {
-  const GlassSectionHeader({super.key, required this.title, this.trailing});
+  const GlassSectionHeader({
+    super.key,
+    required this.title,
+    this.subtitle,
+    this.trailing,
+  });
 
   final String title;
+  final String? subtitle;
   final Widget? trailing;
 
   @override
@@ -83,6 +90,11 @@ class GlassSectionHeader extends StatelessWidget {
       color: _mac ? scheme.onSurface : scheme.onSurfaceVariant,
     );
     final trailing = this.trailing;
+    final subtitle = this.subtitle;
+    final Widget heading = Semantics(
+      header: true,
+      child: Text(title, style: style),
+    );
     return Padding(
       padding: EdgeInsetsDirectional.only(
         start: _rowPadding,
@@ -92,10 +104,22 @@ class GlassSectionHeader extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: Semantics(
-              header: true,
-              child: Text(title, style: style),
-            ),
+            child: subtitle == null
+                ? heading
+                : Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      heading,
+                      const SizedBox(height: GlassTokens.listRowSubtitleGap),
+                      Text(
+                        subtitle,
+                        style: GlassTextStyles.listSectionFooter(
+                          theme.textTheme,
+                        ).copyWith(color: scheme.onSurfaceVariant),
+                      ),
+                    ],
+                  ),
           ),
           if (trailing != null) ...[
             const SizedBox(width: GlassTokens.listRowTrailingGap),

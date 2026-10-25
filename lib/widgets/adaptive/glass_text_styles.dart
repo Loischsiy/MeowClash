@@ -183,6 +183,14 @@ abstract final class GlassTextStyles {
         weight: FontWeight.w400,
       );
 
+  /// A line of code (override rules); callers apply the monospaced family.
+  static TextStyle codeLine(TextTheme textTheme) => _style(
+        textTheme.bodyMedium,
+        size: _mac ? GlassTokens.ruleTextSizeMac : GlassTokens.ruleTextSizeIos,
+        line: _mac ? GlassTokens.ruleTextLineMac : GlassTokens.ruleTextLineIos,
+        weight: FontWeight.w400,
+      );
+
   /// Label of a content push button.
   static TextStyle button(TextTheme textTheme) => _style(
         textTheme.labelLarge,

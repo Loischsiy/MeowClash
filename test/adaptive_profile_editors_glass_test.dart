@@ -8,12 +8,14 @@ import 'package:meowclash/common/app_localizations.dart';
 import 'package:meowclash/common/measure.dart';
 import 'package:meowclash/common/theme.dart';
 import 'package:meowclash/controller.dart';
+import 'package:meowclash/enum/enum.dart';
 import 'package:meowclash/l10n/l10n.dart';
 import 'package:meowclash/models/models.dart';
 import 'package:meowclash/providers/providers.dart';
 import 'package:meowclash/state.dart';
 import 'package:meowclash/views/profiles/add_profile.dart';
 import 'package:meowclash/views/profiles/edit_profile.dart';
+import 'package:meowclash/views/profiles/override_profile.dart';
 import 'package:meowclash/views/profiles/scripts.dart';
 import 'package:meowclash/widgets/adaptive/adaptive.dart';
 
@@ -272,4 +274,188 @@ void main() {
       expect(find.byType(GlassListSection), findsNothing);
     }, variant: darwin);
   });
+
+  group('OverrideProfileView', () {
+    Future<void> pumpOverride(
+      WidgetTester tester, {
+      OverrideData? data,
+      Set<String> selected = const {},
+    }) async {
+      await setUp(tester);
+      await tester.pumpWidget(
+        host(
+          (_) => const _GlassOverrideSections(),
+          overrides: [fixedOverrideState(data: data, selected: selected)],
+        ),
+      );
+      await settle(tester);
+    }
+
+    testWidgets('sections, Apple switches, no blur in 150 rules',
+        (tester) async {
+      await pumpOverride(tester, data: editorOverrideData(rules: 150));
+      // Override switch + chains; rules are flat cards.
+      expect(find.byType(GlassListSection), findsNWidgets(2));
+      expect(find.byType(GlassSectionHeader), findsNWidgets(2));
+      // Override + two chains.
+      expect(find.byType(CupertinoSwitch), findsNWidgets(3));
+      expect(find.byType(Switch), findsNothing);
+      expect(find.byType(ListTile), findsNothing);
+      expect(find.byType(AdaptiveCard), findsWidgets);
+      expect(find.byType(BackdropFilter), findsNothing);
+      await tester.drag(
+        find.byType(CustomScrollView),
+        const Offset(0, -3000),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byType(BackdropFilter), findsNothing);
+      expect(tester.takeException(), isNull);
+    }, variant: darwin);
+
+    testWidgets('rule extent matches the rendered card', (tester) async {
+      final long = List.filled(6, 'very-long-domain-name').join('.');
+      await pumpOverride(
+        tester,
+        data: editorOverrideData().copyWith(
+          rule: OverrideRule(
+            addedRules: [
+              const Rule(id: 's', value: 'MATCH,DIRECT'),
+              Rule(id: 'l', value: 'DOMAIN-SUFFIX,$long,Proxy'),
+            ],
+          ),
+        ),
+      );
+      final pad = AdaptivePlatform.isMacOSGlass
+          ? GlassTokens.ruleRowVerticalPaddingMac
+          : GlassTokens.ruleRowVerticalPaddingIos;
+      final check = AdaptivePlatform.isMacOSGlass
+          ? GlassTokens.ruleCheckSizeMac
+          : GlassTokens.ruleCheckSizeIos;
+      final heights = <double>[];
+      for (final value in ['MATCH,DIRECT', 'DOMAIN-SUFFIX,$long,Proxy']) {
+        final text = tester.getSize(find.text(value)).height;
+        final item = tester.getSize(
+          find
+              .ancestor(
+                of: find.text(value),
+                matching: find.byType(ReorderableDelayedDragStartListener),
+              )
+              .first,
+        );
+        heights.add(text);
+        // The test font renders a wrapped paragraph up to 1 px shorter than
+        // TextPainter measures it; the card never overflows.
+        expect(
+          item.height,
+          moreOrLessEquals(
+            GlassTokens.ruleRowGap + 2 * pad + (text > check ? text : check),
+            epsilon: 1,
+          ),
+        );
+      }
+      // The long rule wraps, so the extent really follows the text.
+      expect(heights.last, greaterThan(heights.first));
+    }, variant: darwin);
+
+    testWidgets('tapping a rule selects it with the circle', (tester) async {
+      await pumpOverride(tester);
+      expect(find.byIcon(Icons.check_circle_rounded), findsNothing);
+      expect(find.byIcon(Icons.circle_outlined), findsNWidgets(3));
+      await tester.tap(find.text('DOMAIN-SUFFIX,example1.com,Proxy'));
+      await tester.pumpAndSettle();
+      expect(find.byIcon(Icons.check_circle_rounded), findsOneWidget);
+      // Edit mode: "Select all" replaces "Add" in the rules header.
+      expect(
+        find.widgetWithText(GlassButton, appLocalizations.selectAll),
+        findsOneWidget,
+      );
+    }, variant: darwin);
+
+    testWidgets('override and chain switches toggle', (tester) async {
+      await pumpOverride(tester);
+      bool value(int index) => tester
+          .widget<CupertinoSwitch>(find.byType(CupertinoSwitch).at(index))
+          .value;
+      expect([value(0), value(1), value(2)], [true, true, false]);
+      await tester.tap(find.text(appLocalizations.enableOverride));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(CupertinoSwitch).at(2));
+      await tester.pumpAndSettle();
+      expect([value(0), value(1), value(2)], [false, true, true]);
+    }, variant: darwin);
+
+    testWidgets('empty added rules and chains: Apple empty states',
+        (tester) async {
+      await pumpOverride(
+        tester,
+        data: editorOverrideData().copyWith(
+          chains: const [],
+          rule: const OverrideRule(),
+        ),
+      );
+      expect(find.byType(AdaptiveEmptyState), findsOneWidget);
+      expect(
+        find.text(appLocalizations.nullTip(appLocalizations.proxyChains)),
+        findsOneWidget,
+      );
+      expect(find.byType(AdaptiveCard), findsNothing);
+    }, variant: darwin);
+
+    testWidgets('empty override rules: "Get origin rules" glass button',
+        (tester) async {
+      await pumpOverride(
+        tester,
+        data: editorOverrideData().copyWith(
+          rule: const OverrideRule(type: OverrideRuleType.override),
+        ),
+      );
+      expect(
+        find.widgetWithText(GlassButton, appLocalizations.getOriginRules),
+        findsOneWidget,
+      );
+      expect(find.byType(FilledButton), findsNothing);
+      expect(find.text(appLocalizations.overrideOriginRules), findsOneWidget);
+    }, variant: darwin);
+  });
+}
+
+/// The Darwin sections of `OverrideProfileView` (`_buildGlassList`) without
+/// the disk loading: same paddings and the same rule text width.
+class _GlassOverrideSections extends StatelessWidget {
+  const _GlassOverrideSections();
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+        builder: (_, constraints) {
+          final padding = GlassListSection.listPadding;
+          final gap = GlassListSection.gap;
+          final horizontal = EdgeInsets.symmetric(horizontal: padding.left);
+          return CustomScrollView(
+            slivers: [
+              SliverToBoxAdapter(child: SizedBox(height: padding.top)),
+              SliverPadding(
+                padding: horizontal,
+                sliver: SliverList.list(
+                  children: [
+                    const OverrideSwitch(),
+                    SizedBox(height: gap),
+                    const ChainTitle(profileId: editorProfileId),
+                    const ChainContent(profileId: editorProfileId),
+                    SizedBox(height: gap),
+                    const RuleTitle(profileId: editorProfileId),
+                  ],
+                ),
+              ),
+              SliverPadding(
+                padding: horizontal.copyWith(bottom: padding.bottom),
+                sliver: RuleContent(
+                  maxWidth: constraints.maxWidth -
+                      padding.horizontal -
+                      RuleContent.glassTextReserve,
+                ),
+              ),
+            ],
+          );
+        },
+      );
 }

@@ -19,7 +19,8 @@ pixel-for-pixel. Code: `lib/widgets/adaptive/` (import `adaptive.dart`).
 
 ## Where glass is allowed
 
-- Only chrome: macOS sidebar + title bar, iOS tab bar, app bar, sheets / side sheets, context menus.
+- Only chrome: macOS sidebar + title bar, iOS tab bar, app bar, sheets / side sheets, dialogs, context
+  menus.
 - Never on scrolling content or list items, never nested (one `BackdropFilter` per surface, no blur
   inside a blurred surface), never an `Opacity` above a blur (animate scale / color instead).
 - `GlassSurface` is the single primitive. `GlassBackdrop.blur` = one `BackdropFilter` (iOS bars, sheets,
@@ -102,7 +103,24 @@ pixel-for-pixel. Code: `lib/widgets/adaptive/` (import `adaptive.dart`).
   opens the same `CommonPopupBox` menu and turns into the spinner while the profile updates. The sort
   sheet rows are flat `AdaptiveCard`s `listRowHeight` tall (the card hairline counts in), the dragged
   row lifts with `floatingShadow` and `listRowDragScale` (no scale with Reduce Motion). Profile
-  editors and `CommonDialog` are still Material-in-glass — separate PRs.
+  editors are still Material-in-glass — next PR.
+- Dialogs (`lib/widgets/adaptive/adaptive_dialog.dart`): on Darwin `showCommonDialog` goes through
+  `showGlassDialog` / `GlassDialogRoute` and `CommonDialog` / `CommonModal` render `GlassDialog` /
+  `GlassModalPanel` — one `GlassSurface` each, no blur behind. `dialogBarrierColor`: macOS does not dim
+  the window at all (as AppKit alerts; a dark barrier kills the glass), iOS dims lightly. In dark mode
+  the panel tint is `dialogTint` (surface lifted by a white wash), so it stands above the equally dark
+  window instead of sinking into it; keep `dialogTintOpacity` low enough for the app to show through. Appearing
+  is animated by the dialog itself via `GlassDialogRoute.presenceOf` → `GlassSurface.presence` (sigma,
+  fill, rim and shadow scale with it) + scale 1.05→1 (no scale with Reduce Motion or on close); never an
+  `Opacity` / `FadeTransition` above the blur. A raw `AlertDialog` pushed through the route falls back
+  to a plain fade (it has no blur). `GlassDialogActions` drops `SizedBox` / `Spacer` between actions:
+  macOS — 28 pt capsules at the trailing edge, the last one filled with the accent; iOS — full-width
+  44 pt buttons over a hairline, two side by side, three or more stacked. Content inherits
+  `GlassTheme.form` (fields get `GlassFieldBorder`: filled, no outline, accent ring on focus), so call
+  sites keep their `TextField`s. Pickers (`OptionsDialog`) use `GlassOptionRow` with a checkmark.
+  Material keeps `showModal` + `FadeScaleTransition` + `AlertDialog` verbatim
+  (`test/material_dialogs_golden_test.dart`); glass checks live in
+  `test/adaptive_dialogs_glass_test.dart`.
 - `proxy_list_performance_test.dart` looks for `IconButton` inside `ProxyGroupCard` and for
   `FloatingActionButton`: keep them in the Material branches.
 - Proxies goldens (`test/material_proxies_golden_test.dart`) need groups with `hidden: false`, otherwise

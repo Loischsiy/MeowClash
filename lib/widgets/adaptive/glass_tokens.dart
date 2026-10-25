@@ -297,6 +297,93 @@ abstract final class GlassTokens {
   // The dragged row grows to this scale (none with Reduce Motion).
   static const double listRowDragScale = 1.02;
 
+  // Dialogs (alerts, prompts, pickers) and the large desktop modal: one glass
+  // panel over an unblurred app (dimmed on iOS only). The panel is a bit
+  // denser than the chrome so forms stay legible, yet the app still shows
+  // through it.
+  static const double dialogSigma = 30;
+  static const double _dialogTintOpacityLight = 0.66;
+  static const double _dialogTintOpacityDark = 0.55;
+  // Dark mode: the panel is lifted above the window by a white wash over the
+  // surface color, like the macOS / iOS alerts, instead of sinking into the
+  // equally dark background.
+  static const double _dialogLiftDark = 0.12;
+  static const double dialogRadiusIos = 28;
+  static const double dialogRadiusMac = 18;
+  // Panel width (content is 300 wide inside the paddings, as before) and its
+  // least distance to the window edges.
+  static const double dialogWidth = 340;
+  static const double dialogInset = 20;
+  static const double dialogContentMaxHeight = 500;
+  static const double dialogPadding = 20;
+  static const double dialogTitleGap = 8;
+  // macOS: push buttons in a row at the trailing edge below the content.
+  static const double dialogActionsGapMac = 16;
+  static const double dialogButtonHeightMac = 28;
+  static const double dialogButtonMinWidthMac = 72;
+  static const double dialogButtonPaddingMac = 14;
+  static const double dialogButtonGapMac = 8;
+  static const double _dialogButtonFillOpacityLight = 0.07;
+  static const double _dialogButtonFillOpacityDark = 0.14;
+  // iOS: full-width buttons under a hairline; two side by side, three or
+  // more stacked.
+  static const double dialogContentBottomIos = 18;
+  static const double dialogButtonHeightIos = 44;
+  static const double dialogButtonPaddingIos = 8;
+  static const int dialogSideBySideMaxIos = 2;
+  static const double _dialogPressedOpacityLight = 0.08;
+  static const double _dialogPressedOpacityDark = 0.12;
+  // Type scale (Apple HIG): macOS title3 15 / body 13 / push button 13,
+  // iOS headline 17 / subheadline 15 / alert button 17.
+  static const double dialogTitleSizeMac = 15;
+  static const double dialogTitleLineMac = 20;
+  static const double dialogTitleSizeIos = 17;
+  static const double dialogTitleLineIos = 22;
+  static const double dialogMessageSizeMac = 13;
+  static const double dialogMessageLineMac = 17;
+  static const double dialogMessageSizeIos = 15;
+  static const double dialogMessageLineIos = 20;
+  static const double dialogButtonSizeMac = 13;
+  static const double dialogButtonLineMac = 16;
+  static const double dialogButtonSizeIos = 17;
+  static const double dialogButtonLineIos = 22;
+  // Dimming behind a dialog, as alpha of black. No blur behind it. macOS
+  // does not dim the window under an alert: the shadow sets it apart and the
+  // app keeps showing through the glass.
+  static const double _dialogBarrierOpacityIosLight = 0.20;
+  static const double _dialogBarrierOpacityIosDark = 0.30;
+  // Appearance, as the system alerts: the panel fades in while shrinking
+  // from [dialogEnterScale] to 1 (no scale with Reduce Motion) and only
+  // fades out.
+  static const double dialogEnterScale = 1.05;
+  static const Duration dialogEnterDuration = Duration(milliseconds: 250);
+  static const Duration dialogExitDuration = Duration(milliseconds: 160);
+  static const Curve dialogCurve = Curves.easeOutCubic;
+
+  // Text fields (dialogs, editors): a rounded filled field without an
+  // outline. macOS draws the accent focus ring, iOS shows only the caret.
+  static const double inputRadius = 10;
+  static const double inputHorizontalPadding = 12;
+  static const double inputVerticalPaddingMac = 8;
+  static const double inputVerticalPaddingIos = 11;
+  static const double inputFocusWidthMac = 2;
+  static const double inputFocusOpacityMac = 0.55;
+  static const double inputErrorWidth = 1;
+  static const double _inputFillOpacityLight = 0.06;
+  static const double _inputFillOpacityDark = 0.10;
+  static const double inputTextSizeMac = 13;
+  static const double inputTextLineMac = 17;
+  static const double inputTextSizeIos = 17;
+  static const double inputTextLineIos = 22;
+
+  // Single-choice rows (pickers in dialogs): the checkmark marks the choice
+  // instead of a radio button.
+  static const double optionRowHeightMac = 32;
+  static const double optionRowHeightIos = 44;
+  static const double optionRowRadius = 8;
+  static const double optionRowPadding = 12;
+  static const double optionCheckSize = 18;
+
   // Shadows cast by floating glass (tab bar, menus, sheets).
   static const List<BoxShadow> _floatingShadowLight = [
     BoxShadow(
@@ -381,6 +468,40 @@ abstract final class GlassTokens {
     }
     return dark ? _systemGreenDark : _systemGreenLight;
   }
+
+  static double dialogTintOpacity(Brightness brightness) =>
+      _isDark(brightness) ? _dialogTintOpacityDark : _dialogTintOpacityLight;
+
+  static double dialogButtonFillOpacity(Brightness brightness) =>
+      _isDark(brightness)
+          ? _dialogButtonFillOpacityDark
+          : _dialogButtonFillOpacityLight;
+
+  static double dialogPressedOpacity(Brightness brightness) =>
+      _isDark(brightness)
+          ? _dialogPressedOpacityDark
+          : _dialogPressedOpacityLight;
+
+  static Color dialogBarrierColor(Brightness brightness, {required bool mac}) =>
+      const Color(0xFF000000).withValues(
+        alpha: mac
+            ? 0
+            : _isDark(brightness)
+                ? _dialogBarrierOpacityIosDark
+                : _dialogBarrierOpacityIosLight,
+      );
+
+  /// Tint color of a dialog panel made from the theme [surface].
+  static Color dialogTint(Color surface, Brightness brightness) =>
+      _isDark(brightness)
+          ? Color.alphaBlend(
+              const Color(0xFFFFFFFF).withValues(alpha: _dialogLiftDark),
+              surface,
+            )
+          : surface;
+
+  static double inputFillOpacity(Brightness brightness) =>
+      _isDark(brightness) ? _inputFillOpacityDark : _inputFillOpacityLight;
 
   static List<BoxShadow> floatingShadow(Brightness brightness) =>
       _isDark(brightness) ? _floatingShadowDark : _floatingShadowLight;

@@ -2,6 +2,7 @@ import 'package:meowclash/common/app_localizations.dart';
 import 'package:meowclash/common/common.dart';
 import 'package:meowclash/models/common.dart';
 import 'package:meowclash/state.dart';
+import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:meowclash/widgets/dialog.dart';
 import 'package:meowclash/widgets/null_status.dart';
 import 'package:flutter/material.dart';
@@ -41,6 +42,16 @@ class OptionsDialog<T> extends StatelessWidget {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     Scrollable.ensureVisible(context);
                   });
+                }
+                if (AdaptivePlatform.useGlass) {
+                  // Apple pickers mark the choice with a checkmark.
+                  return GlassOptionRow(
+                    label: Text(textBuilder(option)),
+                    selected: value == option,
+                    onTap: () {
+                      Navigator.of(context).pop(option);
+                    },
+                  );
                 }
                 return ListItem.radio(
                   delegate: RadioDelegate(

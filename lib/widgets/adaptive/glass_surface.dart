@@ -41,7 +41,9 @@ class GlassSurface extends StatelessWidget {
     this.shadow = false,
     this.shadows,
     this.refraction,
-  });
+    this.tintOpacity,
+    this.presence = 1,
+  }) : assert(presence >= 0 && presence <= 1, 'presence is 0..1');
 
   final Widget child;
 
@@ -76,6 +78,17 @@ class GlassSurface extends StatelessWidget {
   /// blur. The iOS tab bar is the only user.
   final GlassRefraction? refraction;
 
+  /// Alpha of the tint over the blur; defaults to
+  /// [GlassTokens.tintOpacity]. Denser panels (dialogs) pass their own.
+  final double? tintOpacity;
+
+  /// How far the surface has appeared, 0..1. Below 1 the blur strength, the
+  /// fill, the rim and the shadow scale down together, so a surface can fade
+  /// in without an `Opacity` above its `BackdropFilter` (which would hide the
+  /// blur until the fade ends). Fade the child separately, inside the
+  /// surface.
+  final double presence;
+
   /// Whether [context] is painted inside a [GlassSurface] that blurs.
   ///
   /// Small glass inside it (e.g. toolbar capsules of a page shown in a glass
@@ -93,14 +106,16 @@ class GlassSurface extends StatelessWidget {
     final base = color ?? theme.colorScheme.surface;
     final Color fill;
     if (opaque) {
-      fill = opaqueColor ?? theme.colorScheme.surface;
+      final solid = opaqueColor ?? theme.colorScheme.surface;
+      fill = presence == 1 ? solid : solid.withValues(alpha: solid.a * presence);
     } else {
       final alpha = switch (backdrop) {
-        GlassBackdrop.blur => GlassTokens.tintOpacity(brightness),
+        GlassBackdrop.blur => tintOpacity ?? GlassTokens.tintOpacity(brightness),
         GlassBackdrop.native => GlassTokens.nativeBackdropTint(brightness),
       };
-      fill = base.withValues(alpha: alpha);
+      fill = base.withValues(alpha: alpha * presence);
     }
+    final sigma = this.sigma * presence;
 
     Widget surface = CustomPaint(
       painter: _GlassFillPainter(color: fill, borderRadius: borderRadius),
@@ -109,6 +124,7 @@ class GlassSurface extends StatelessWidget {
               borderRadius: borderRadius,
               brightness: brightness,
               opaque: opaque,
+              presence: presence,
             )
           : null,
       // Always present, so toggling [opaque] keeps the child's state.
@@ -159,13 +175,24 @@ class GlassSurface extends StatelessWidget {
       surface = CustomPaint(
         painter: _OuterShadowPainter(
           borderRadius: borderRadius,
-          shadows: shadows ?? GlassTokens.floatingShadow(brightness),
+          shadows: _scaled(
+            shadows ?? GlassTokens.floatingShadow(brightness),
+            presence,
+          ),
         ),
         child: surface,
       );
     }
     return surface;
   }
+}
+
+List<BoxShadow> _scaled(List<BoxShadow> shadows, double presence) {
+  if (presence == 1) return shadows;
+  return [
+    for (final shadow in shadows)
+      shadow.copyWith(color: shadow.color.withValues(alpha: shadow.color.a * presence)),
+  ];
 }
 
 class _GlassBlurScope extends InheritedWidget {
@@ -209,18 +236,21 @@ class _GlassRimPainter extends CustomPainter {
     required this.borderRadius,
     required this.brightness,
     required this.opaque,
+    this.presence = 1,
   });
 
   final BorderRadius borderRadius;
   final Brightness brightness;
   final bool opaque;
+  final double presence;
 
   @override
   void paint(Canvas canvas, Size size) {
+    if (presence == 0) return;
     const width = GlassTokens.rimWidth;
     final rect = (Offset.zero & size).deflate(width / 2);
-    final Color top;
-    final Color bottom;
+    Color top;
+    Color bottom;
     if (opaque) {
       // Opaque fallback keeps a plain hairline so the shape stays readable.
       top = bottom = (brightness == Brightness.dark
@@ -232,6 +262,10 @@ class _GlassRimPainter extends CustomPainter {
           .withValues(alpha: GlassTokens.rimTopOpacity(brightness));
       bottom = Colors.white
           .withValues(alpha: GlassTokens.rimBottomOpacity(brightness));
+    }
+    if (presence < 1) {
+      top = top.withValues(alpha: top.a * presence);
+      bottom = bottom.withValues(alpha: bottom.a * presence);
     }
     final paint = Paint()
       ..style = PaintingStyle.stroke
@@ -252,7 +286,8 @@ class _GlassRimPainter extends CustomPainter {
   bool shouldRepaint(_GlassRimPainter oldDelegate) =>
       oldDelegate.borderRadius != borderRadius ||
       oldDelegate.brightness != brightness ||
-      oldDelegate.opaque != opaque;
+      oldDelegate.opaque != opaque ||
+      oldDelegate.presence != presence;
 }
 
 /// Paints shadows outside the shape only, so they never darken the glass.

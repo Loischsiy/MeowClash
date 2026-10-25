@@ -9,6 +9,7 @@ import 'package:meowclash/state.dart';
 import 'package:meowclash/views/profiles/edit_profile.dart';
 import 'package:meowclash/views/profiles/override_profile.dart';
 import 'package:meowclash/views/profiles/scripts.dart';
+import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:meowclash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -116,12 +117,12 @@ class _ProfilesViewState extends State<ProfilesView> with PageMixin {
       ];
 
   @override
-  Widget? get floatingActionButton => FloatingActionButton(
-        heroTag: null,
+  Widget? get floatingActionButton => AdaptiveFloatingButton(
         onPressed: _handleShowAddExtendPage,
-        child: const Icon(
+        icon: const Icon(
           Icons.add,
         ),
+        glassIcon: const Icon(Icons.add_rounded),
       );
 
   @override
@@ -137,18 +138,25 @@ class _ProfilesViewState extends State<ProfilesView> with PageMixin {
           fireImmediately: true,
         );
         final profilesSelectorState = ref.watch(profilesSelectorStateProvider);
+        // Darwin: the page scrolls under the glass toolbar (home.dart), so
+        // its content starts below the bar. 0 on Material.
+        final topInset = AdaptiveAppBar.topInset(context);
         if (profilesSelectorState.profiles.isEmpty) {
-          return NullStatus(
+          final empty = AdaptiveEmptyState(
             label: appLocalizations.nullProfileDesc,
+            icon: Icons.folder_outlined,
           );
+          return topInset > 0
+              ? Padding(padding: EdgeInsets.only(top: topInset), child: empty)
+              : empty;
         }
         return Align(
           alignment: Alignment.topCenter,
           child: SingleChildScrollView(
-            padding: const EdgeInsets.only(
+            padding: EdgeInsets.only(
               left: 16,
               right: 16,
-              top: 16,
+              top: 16 + topInset,
               bottom: 88,
             ),
             child: Grid(
@@ -382,8 +390,191 @@ class _ProfileItemState extends State<ProfileItem> {
     );
   }
 
+  /// Darwin: secondary lines of the card on the Apple type scale, with the
+  /// traffic as a thin capsule in the system colors.
+  List<Widget> _buildGlassProfileInfo(BuildContext context) {
+    final textTheme = context.textTheme;
+    final secondary = GlassTextStyles.cardSubtitle(textTheme).copyWith(
+      color: context.colorScheme.onSurfaceVariant,
+    );
+    const gap = SizedBox(height: GlassTokens.profileCardLineGap);
+    Widget line(String text) => Text(
+          text,
+          style: secondary,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        );
+    final updated = widget.profile.lastUpdateDate?.lastUpdateTimeDesc ?? "";
+    final subscriptionInfo = widget.profile.subscriptionInfo;
+    if (subscriptionInfo == null) return [gap, line(updated)];
+
+    final isUnlimited = subscriptionInfo.total == 0;
+    final expireDate = subscriptionInfo.expire > 0
+        ? DateFormat('dd.MM.yyyy').format(
+            DateTime.fromMillisecondsSinceEpoch(subscriptionInfo.expire * 1000))
+        : null;
+    final children = <Widget>[];
+    if (!isUnlimited) {
+      final usedValue = subscriptionInfo.upload + subscriptionInfo.download;
+      final used = TrafficValue(value: usedValue);
+      final total = TrafficValue(value: subscriptionInfo.total);
+      final progress = (usedValue / subscriptionInfo.total).clamp(0.0, 1.0);
+      children.addAll([
+        gap,
+        line(
+          '${appLocalizations.traffic} ${used.showValue} ${used.showUnit} / ${total.showValue} ${total.showUnit}',
+        ),
+        gap,
+        AdaptiveProgressBar(
+          value: progress,
+          color: context.colorScheme.primary,
+          glassColor: GlassTokens.trafficColor(
+            progress,
+            Theme.of(context).brightness,
+          ),
+        ),
+      ]);
+    }
+    children.addAll([
+      gap,
+      line(
+        expireDate != null
+            ? '${appLocalizations.expiresOn} $expireDate'
+            : appLocalizations.subscriptionUnlimited,
+      ),
+      line('${appLocalizations.updated} $updated'),
+    ]);
+    return children;
+  }
+
+  CommonPopupMenu _buildPopupMenu(BuildContext context) => CommonPopupMenu(
+        items: [
+          if (_isTV)
+            PopupMenuItemData(
+              icon: Icons.check_circle_outline,
+              label: appLocalizations.selectProfile,
+              onPressed: () {
+                widget.onChanged(widget.profile.id);
+              },
+            ),
+          PopupMenuItemData(
+            icon: Icons.edit_outlined,
+            label: appLocalizations.edit,
+            onPressed: () {
+              _handleShowEditExtendPage(context);
+            },
+          ),
+          if (widget.profile.type == ProfileType.url) ...[
+            PopupMenuItemData(
+              icon: Icons.sync_alt_sharp,
+              label: appLocalizations.sync,
+              onPressed: updateProfile,
+            ),
+          ],
+          if (system.isMobile && !_isTV)
+            PopupMenuItemData(
+              icon: Icons.tv_outlined,
+              label: appLocalizations.sendToTv,
+              onPressed: () {
+                BaseNavigator.push(
+                    context, SendToTvPage(profileUrl: widget.profile.url));
+              },
+            ),
+          if (widget.profile.providerHeaders['support-url'] != null &&
+              widget.profile.providerHeaders['support-url']!.isNotEmpty &&
+              !_isTV)
+            PopupMenuItemData(
+              icon: widget.profile.providerHeaders['support-url']!
+                      .toLowerCase()
+                      .contains('t.me')
+                  ? Icons.telegram
+                  : Icons.insert_link,
+              label: appLocalizations.support,
+              onPressed: () {
+                globalState
+                    .openUrl(widget.profile.providerHeaders['support-url']!);
+              },
+            ),
+          PopupMenuItemData(
+            icon: Icons.extension_outlined,
+            label: appLocalizations.override,
+            onPressed: () {
+              _handlePushGenProfilePage(context, widget.profile.id);
+            },
+          ),
+          PopupMenuItemData(
+            icon: Icons.file_copy_outlined,
+            label: appLocalizations.exportFile,
+            onPressed: () {
+              _handleExportFile(context);
+            },
+          ),
+          PopupMenuItemData(
+            icon: Icons.delete_outlined,
+            label: appLocalizations.delete,
+            type: PopupMenuItemType.danger,
+            onPressed: () {
+              _handleDeleteProfile(context);
+            },
+          ),
+        ],
+      );
+
+  /// Darwin: a translucent card (no blur, it scrolls), the choice shown by
+  /// the card's accent tint and hairline only — no check badge, the "⋯"
+  /// button owns the trailing edge. The button turns into a spinner while
+  /// the profile updates (no cross-fade, so Reduce Motion needs no case).
+  Widget _buildGlass(BuildContext context) {
+    const more = Icon(Icons.more_horiz_rounded);
+    return AdaptiveCard(
+      isSelected: widget.profile.id == widget.groupValue,
+      checked: false,
+      onPressed: () {
+        widget.onChanged(widget.profile.id);
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: GlassTokens.profileCardHorizontalPadding,
+          vertical: GlassTokens.profileCardVerticalPadding,
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    widget.profile.label ?? widget.profile.id,
+                    style: GlassTextStyles.groupTitle(context.textTheme),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  ..._buildGlassProfileInfo(context),
+                ],
+              ),
+            ),
+            const SizedBox(width: GlassTokens.profileCardTrailingGap),
+            if (widget.profile.isUpdating)
+              const GlassIconButton(icon: more, onPressed: null, busy: true)
+            else
+              CommonPopupBox(
+                popup: _buildPopupMenu(context),
+                targetBuilder: (open) =>
+                    GlassIconButton(icon: more, onPressed: open),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
-  Widget build(BuildContext context) => CommonCard(
+  Widget build(BuildContext context) => AdaptivePlatform.useGlass
+      ? _buildGlass(context)
+      : _buildMaterial(context);
+
+  Widget _buildMaterial(BuildContext context) => CommonCard(
       isSelected: widget.profile.id == widget.groupValue,
       onPressed: _isTV
           ? null
@@ -422,74 +613,7 @@ class _ProfileItemState extends State<ProfileItem> {
                         child: CircularProgressIndicator(),
                       )
                     : CommonPopupBox(
-                        popup: CommonPopupMenu(
-                          items: [
-                            if (_isTV)
-                              PopupMenuItemData(
-                                icon: Icons.check_circle_outline,
-                                label: appLocalizations.selectProfile,
-                                onPressed: () {
-                                  widget.onChanged(widget.profile.id);
-                                },
-                              ),
-                            PopupMenuItemData(
-                              icon: Icons.edit_outlined,
-                              label: appLocalizations.edit,
-                              onPressed: () {
-                                _handleShowEditExtendPage(context);
-                              },
-                            ),
-                            if (widget.profile.type == ProfileType.url) ...[
-                              PopupMenuItemData(
-                                icon: Icons.sync_alt_sharp,
-                                label: appLocalizations.sync,
-                                onPressed: updateProfile,
-                              ),
-                            ],
-                            if (system.isMobile && !_isTV)
-                              PopupMenuItemData(
-                                icon: Icons.tv_outlined,
-                                label: appLocalizations.sendToTv,
-                                onPressed: () {
-                                  BaseNavigator.push(context,
-                                      SendToTvPage(profileUrl: widget.profile.url));
-                                },
-                              ),
-                              if (widget.profile.providerHeaders['support-url'] != null && widget.profile.providerHeaders['support-url']!.isNotEmpty && !_isTV )
-                            PopupMenuItemData(
-                              icon: widget.profile.providerHeaders['support-url']!.toLowerCase().contains('t.me')
-                              ? Icons.telegram
-                              : Icons.insert_link,
-                              label: appLocalizations.support,
-                              onPressed: () {
-                                globalState.openUrl(widget.profile.providerHeaders['support-url']!);
-                              },
-                            ),
-                            PopupMenuItemData(
-                              icon: Icons.extension_outlined,
-                              label: appLocalizations.override,
-                              onPressed: () {
-                                _handlePushGenProfilePage(
-                                    context, widget.profile.id);
-                              },
-                            ),
-                            PopupMenuItemData(
-                              icon: Icons.file_copy_outlined,
-                              label: appLocalizations.exportFile,
-                              onPressed: () {
-                                _handleExportFile(context);
-                              },
-                            ),
-                            PopupMenuItemData(
-                              icon: Icons.delete_outlined,
-                              label: appLocalizations.delete,
-                              type: PopupMenuItemType.danger,
-                              onPressed: () {
-                                _handleDeleteProfile(context);
-                              },
-                            ),
-                          ],
-                        ),
+                        popup: _buildPopupMenu(context),
                         targetBuilder: (open) => Focus(
                             focusNode: _menuFocusNode,
                             canRequestFocus: true,
@@ -543,6 +667,9 @@ class _ReorderableProfilesSheetState extends State<ReorderableProfilesSheet> {
     Animation<double> animation,
   ) {
     final profile = profiles[index];
+    if (AdaptivePlatform.useGlass) {
+      return _buildGlassProxy(profile, animation);
+    }
     return AnimatedBuilder(
       animation: animation,
       builder: (_, child) {
@@ -570,6 +697,37 @@ class _ReorderableProfilesSheetState extends State<ReorderableProfilesSheet> {
     );
   }
 
+  /// Darwin: the dragged row lifts with a soft shadow and grows a little
+  /// (no growth with Reduce Motion).
+  Widget _buildGlassProxy(Profile profile, Animation<double> animation) {
+    final reduceMotion = GlassAccessibility.of(context).reduceMotion;
+    final shadow = GlassTokens.floatingShadow(Theme.of(context).brightness);
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (_, child) {
+        final animValue = Curves.easeInOut.transform(animation.value);
+        final scale = reduceMotion
+            ? 1.0
+            : lerpDouble(1, GlassTokens.listRowDragScale, animValue)!;
+        return Transform.scale(scale: scale, child: child);
+      },
+      child: Container(
+        key: Key(profile.id),
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(GlassTokens.cardRadius),
+            boxShadow: shadow,
+          ),
+          child: _GlassSortRow(
+            label: profile.label ?? profile.id,
+            trailing: const Icon(Icons.drag_handle_rounded),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) => AdaptiveSheetScaffold(
       type: widget.type,
@@ -579,8 +737,8 @@ class _ReorderableProfilesSheetState extends State<ReorderableProfilesSheet> {
             Navigator.of(context).pop();
             globalState.appController.setProfiles(profiles);
           },
-          icon: const Icon(
-            Icons.save,
+          icon: Icon(
+            AdaptivePlatform.useGlass ? Icons.check_rounded : Icons.save,
           ),
         )
       ],
@@ -606,6 +764,19 @@ class _ReorderableProfilesSheetState extends State<ReorderableProfilesSheet> {
           },
           itemBuilder: (_, index) {
             final profile = profiles[index];
+            if (AdaptivePlatform.useGlass) {
+              return Container(
+                key: Key(profile.id),
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: _GlassSortRow(
+                  label: profile.label ?? profile.id,
+                  trailing: ReorderableDragStartListener(
+                    index: index,
+                    child: const Icon(Icons.drag_handle_rounded),
+                  ),
+                ),
+              );
+            }
             return Container(
               key: Key(profile.id),
               padding: const EdgeInsets.symmetric(vertical: 4),
@@ -630,4 +801,45 @@ class _ReorderableProfilesSheetState extends State<ReorderableProfilesSheet> {
       ),
       title: appLocalizations.profilesSort,
     );
+}
+
+/// Darwin row of the profiles sort sheet: a flat translucent card (the sheet
+/// is the only blurred surface) with the name and a trailing drag symbol.
+class _GlassSortRow extends StatelessWidget {
+  const _GlassSortRow({required this.label, required this.trailing});
+
+  final String label;
+  final Widget trailing;
+
+  @override
+  Widget build(BuildContext context) => AdaptiveCard(
+        // The card's hairline insets its child on both sides.
+        child: SizedBox(
+          height: GlassTokens.listRowHeight - 2 * GlassTokens.hairlineWidth,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: GlassTokens.listRowHorizontalPadding,
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    label,
+                    style: GlassTextStyles.cardTitle(context.textTheme),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                IconTheme.merge(
+                  data: IconThemeData(
+                    size: GlassTokens.listRowIconSize,
+                    color: context.colorScheme.onSurfaceVariant,
+                  ),
+                  child: trailing,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
 }

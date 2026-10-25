@@ -56,7 +56,7 @@ pixel-for-pixel. Code: `lib/widgets/adaptive/` (import `adaptive.dart`).
   window color, `toolbarFade*`, no blur, `IgnorePointer`). The page must pad its scroll view with
   `AdaptiveAppBar.topInset(context)` (0 on Material and on pages that do not opt in). Keyword chips stay
   below the bar and remove the top padding for the page under them. Home opts in per tab via
-  `_scrollUnderToolbarPages` in `lib/pages/home.dart` (currently Tools and Proxies); other pages keep their own
+  `_scrollUnderToolbarPages` in `lib/pages/home.dart` (currently Tools, Proxies and Profiles); other pages keep their own
   top padding, which would hide content under the bar if enabled globally.
 - Fallbacks: `opaque` → solid window-colored bar + hairline, no fade, opaque capsules. Nothing in the bar
   animates (no `Opacity` above the capsules), and with Reduce Motion the search hint does not fade.
@@ -74,7 +74,9 @@ pixel-for-pixel. Code: `lib/widgets/adaptive/` (import `adaptive.dart`).
   `AdaptiveGroupHeader` (collapsible group row; blurred only while `pinned`),
   `AdaptiveGroupSelector` (floating glass group bar over a `TabController`),
   `AdaptiveFloatingButton` (glass circle, `busy` spinner), `AdaptiveEmptyState`,
-  `AdaptiveActivityIndicator`, `GlassIconButton` (Darwin-only symbol button).
+  `AdaptiveActivityIndicator`, `AdaptiveProgressBar` (static capsule, no animation; the Material
+  branch is the old `LinearProgressIndicator`), `GlassIconButton` (Darwin-only symbol button,
+  `busy` spinner).
 - Blur budget of a scrolling screen is constant: only a pinned header / floating bar / floating
   button may be a `GlassSurface`. A pinned list header is a `SliverPersistentHeader` that swaps to its
   glass variant only when `shrinkOffset > 0`, so at rest the list has zero blur.
@@ -93,6 +95,14 @@ pixel-for-pixel. Code: `lib/widgets/adaptive/` (import `adaptive.dart`).
 - Proxies screen: in the list mode the expanded group header pins; in the tab mode the grid scrolls
   under `AdaptiveGroupSelector`. The Darwin check badge replaces `_ProxyComputedMark`. Proxy-screen
   sheets (settings, providers, group picker, icons) are still Material-in-glass-sheet — next PR.
+- Profiles screen: cards are `AdaptiveCard(checked: false)` — selection is the tint + hairline only, no
+  check badge; the name uses `GlassTextStyles.groupTitle`, the details `cardSubtitle`. The traffic bar
+  is an `AdaptiveProgressBar` colored by `GlassTokens.trafficColor` (Apple green, orange above
+  `trafficWarningThreshold`, red above `trafficCriticalThreshold`). The trailing `GlassIconButton`
+  opens the same `CommonPopupBox` menu and turns into the spinner while the profile updates. The sort
+  sheet rows are flat `AdaptiveCard`s `listRowHeight` tall (the card hairline counts in), the dragged
+  row lifts with `floatingShadow` and `listRowDragScale` (no scale with Reduce Motion). Profile
+  editors and `CommonDialog` are still Material-in-glass — separate PRs.
 - `proxy_list_performance_test.dart` looks for `IconButton` inside `ProxyGroupCard` and for
   `FloatingActionButton`: keep them in the Material branches.
 - Proxies goldens (`test/material_proxies_golden_test.dart`) need groups with `hidden: false`, otherwise

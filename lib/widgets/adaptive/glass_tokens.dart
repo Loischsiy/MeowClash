@@ -266,6 +266,37 @@ abstract final class GlassTokens {
   static const double emptyStatePadding = 32;
   static const double activityIndicatorRadius = 10;
 
+  // Profile cards: padding of the content and the gaps between its lines.
+  static const double profileCardHorizontalPadding = 14;
+  static const double profileCardVerticalPadding = 10;
+  static const double profileCardLineGap = 4;
+  static const double profileCardTrailingGap = 8;
+
+  // Progress bar (subscription traffic): a thin capsule on a faint track,
+  // no animation. The fill turns orange past [trafficWarningThreshold] and
+  // red past [trafficCriticalThreshold] of the quota, in the Apple system
+  // colors of the current appearance.
+  static const double progressBarHeight = 4;
+  static const double progressBarRadius = progressBarHeight / 2;
+  static const double _progressTrackOpacityLight = 0.08;
+  static const double _progressTrackOpacityDark = 0.14;
+  static const double trafficWarningThreshold = 0.7;
+  static const double trafficCriticalThreshold = 0.9;
+  static const Color _systemGreenLight = Color(0xFF34C759);
+  static const Color _systemGreenDark = Color(0xFF30D158);
+  static const Color _systemOrangeLight = Color(0xFFFF9500);
+  static const Color _systemOrangeDark = Color(0xFFFF9F0A);
+  static const Color _systemRedLight = Color(0xFFFF3B30);
+  static const Color _systemRedDark = Color(0xFFFF453A);
+
+  // Rows of a plain list inside a glass sheet (profiles sort): flat
+  // translucent cards, no blur, a trailing symbol.
+  static const double listRowHeight = 44;
+  static const double listRowHorizontalPadding = 12;
+  static const double listRowIconSize = 20;
+  // The dragged row grows to this scale (none with Reduce Motion).
+  static const double listRowDragScale = 1.02;
+
   // Shadows cast by floating glass (tab bar, menus, sheets).
   static const List<BoxShadow> _floatingShadowLight = [
     BoxShadow(
@@ -333,6 +364,23 @@ abstract final class GlassTokens {
 
   static double delayPillOpacity(Brightness brightness) =>
       _isDark(brightness) ? _delayPillOpacityDark : _delayPillOpacityLight;
+
+  static double progressTrackOpacity(Brightness brightness) =>
+      _isDark(brightness)
+          ? _progressTrackOpacityDark
+          : _progressTrackOpacityLight;
+
+  /// Fill of a traffic bar at [progress] (0..1 of the quota).
+  static Color trafficColor(double progress, Brightness brightness) {
+    final dark = _isDark(brightness);
+    if (progress > trafficCriticalThreshold) {
+      return dark ? _systemRedDark : _systemRedLight;
+    }
+    if (progress > trafficWarningThreshold) {
+      return dark ? _systemOrangeDark : _systemOrangeLight;
+    }
+    return dark ? _systemGreenDark : _systemGreenLight;
+  }
 
   static List<BoxShadow> floatingShadow(Brightness brightness) =>
       _isDark(brightness) ? _floatingShadowDark : _floatingShadowLight;

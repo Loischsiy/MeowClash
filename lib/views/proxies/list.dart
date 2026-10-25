@@ -31,11 +31,17 @@ class _ProxiesListViewState extends ConsumerState<ProxiesListView> {
   Widget build(BuildContext context) {
     final state = ref.watch(proxiesListSelectorStateProvider);
     ref.watch(themeSettingProvider.select((state) => state.textScale));
+    // Scrolling under the Darwin glass toolbar (`scrollUnderToolbar` in
+    // home.dart); 0 on Material and without the flag.
+    final topInset = AdaptiveAppBar.topInset(context);
     if (state.groupNames.isEmpty) {
-      return AdaptiveEmptyState(
+      final empty = AdaptiveEmptyState(
         label: appLocalizations.nullTip(appLocalizations.proxies),
         icon: Icons.public_rounded,
       );
+      return topInset > 0
+          ? Padding(padding: EdgeInsets.only(top: topInset), child: empty)
+          : empty;
     }
     return CommonScrollBar(
       controller: _controller,
@@ -47,6 +53,8 @@ class _ProxiesListViewState extends ConsumerState<ProxiesListView> {
             key: const PageStorageKey('proxies-list'),
             controller: _controller,
             slivers: [
+              // Stuck group headers pin below the toolbar, cards go under it.
+              if (topInset > 0) const SliverToolbarInset(),
               SliverPadding(
                 padding: const EdgeInsets.all(16),
                 sliver: SliverMainAxisGroup(

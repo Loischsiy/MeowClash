@@ -172,6 +172,43 @@ class AdaptiveAppBar extends StatelessWidget {
   }
 }
 
+/// First sliver of a scroll view that scrolls under the glass toolbar and
+/// has pinned headers of its own: an empty pinned spacer as tall as
+/// [AdaptiveAppBar.topInset]. It paints nothing and takes no taps, so the
+/// content still scrolls visibly under the bar, but later pinned headers
+/// stick right below the bar instead of under it (never glass under glass).
+/// Add it only when the inset is above 0, so Material keeps its old slivers.
+class SliverToolbarInset extends StatelessWidget {
+  const SliverToolbarInset({super.key});
+
+  @override
+  Widget build(BuildContext context) => SliverPersistentHeader(
+        pinned: true,
+        delegate: _ToolbarInsetDelegate(AdaptiveAppBar.topInset(context)),
+      );
+}
+
+class _ToolbarInsetDelegate extends SliverPersistentHeaderDelegate {
+  const _ToolbarInsetDelegate(this.extent);
+
+  final double extent;
+
+  @override
+  double get minExtent => extent;
+
+  @override
+  double get maxExtent => extent;
+
+  // Full height, so the following pinned slivers see it as overlap.
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) =>
+      const SizedBox.expand();
+
+  @override
+  bool shouldRebuild(_ToolbarInsetDelegate oldDelegate) =>
+      oldDelegate.extent != extent;
+}
+
 /// The Darwin toolbar row: an optional round [leading] capsule, the title
 /// (macOS: compact at the leading edge; iOS: centered), the page [actions]
 /// in one [GlassToolbarGroup] and the [search] button in its own round

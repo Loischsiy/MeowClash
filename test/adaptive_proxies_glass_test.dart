@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -104,9 +106,12 @@ void main() {
     addTearDown(tester.view.reset);
   }
 
+  // [topInset] stands in for `CommonScaffold(scrollUnderToolbar: true)`:
+  // the Scaffold then reports the glass toolbar as top padding.
   Widget host(
     Widget child, {
     GlassAccessibility accessibility = GlassAccessibility.fallback,
+    double topInset = 0,
   }) =>
       ProviderScope(
         overrides: [backgroundUrlProvider.overrideWith((ref) => null)],
@@ -119,7 +124,13 @@ void main() {
                 globalState.appController = AppController(context, ref);
                 globalState.measure = Measure.of(context, 1);
                 globalState.theme = CommonTheme.of(context, 1);
-                return child;
+                if (topInset == 0) return child;
+                return MediaQuery(
+                  data: MediaQuery.of(context).copyWith(
+                    padding: EdgeInsets.only(top: topInset),
+                  ),
+                  child: child,
+                );
               }),
             ),
           ),
@@ -357,6 +368,80 @@ void main() {
       expect(find.byType(TabBar), findsOneWidget);
       expect(find.byType(GlassSurface), findsNothing);
       expect(blur, findsNothing);
+      await tester.pumpWidget(const SizedBox.shrink());
+    }, variant: android);
+  });
+
+  group('under the glass toolbar', () {
+    const bar = 100.0;
+    Iterable<Rect> cardRects(WidgetTester tester) => tester
+        .widgetList(find.byType(AdaptiveCard))
+        .map((card) => tester.getRect(find.byWidget(card)));
+
+    testWidgets('list: starts below the bar, header sticks right under it',
+        (tester) async {
+      await setUp(tester, type: ProxiesType.list);
+      await pumpScreen(
+        tester,
+        host(const ProxiesListView(), topInset: bar),
+      );
+      expect(tester.getRect(find.byType(CustomScrollView)).top, 0);
+      expect(cardRects(tester).map((r) => r.top).reduce(min),
+          greaterThanOrEqualTo(bar));
+      expect(blur, findsNothing);
+
+      await scrollList(tester, 600);
+      // The stuck header pins below the toolbar, not under its glass...
+      final header = tester.getRect(find.byType(GlassSurface).first);
+      expect(header.top, greaterThanOrEqualTo(bar));
+      expect(header.top, lessThanOrEqualTo(bar + GlassTokens.groupHeaderMargin));
+      // ...while the cards scroll on under the toolbar.
+      expect(cardRects(tester).where((r) => r.top < bar), isNotEmpty);
+      expect(blur, findsOneWidget);
+      expect(blurInCards(), findsNothing);
+      await tester.pumpWidget(const SizedBox.shrink());
+    }, variant: apple);
+
+    testWidgets('tabs: group bar below the toolbar, grid scrolls under both',
+        (tester) async {
+      await setUp(tester, type: ProxiesType.tab);
+      await pumpScreen(tester, host(const ProxiesTabView(), topInset: bar));
+      final groupBar = tester.getRect(find.byType(GlassSurface).first);
+      expect(groupBar.top, greaterThanOrEqualTo(bar));
+      expect(
+        groupBar.top,
+        lessThanOrEqualTo(bar + GlassTokens.groupBarTopMargin),
+      );
+      expect(tester.getRect(find.byType(AdaptiveCard).first).top,
+          greaterThanOrEqualTo(groupBar.bottom));
+
+      await tester.drag(find.byType(GridView), const Offset(0, -500));
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(cardRects(tester).where((r) => r.top < bar), isNotEmpty);
+      expect(tester.getRect(find.byType(GlassSurface).first), groupBar);
+      expect(blur, findsOneWidget);
+      await tester.pumpWidget(const SizedBox.shrink());
+    }, variant: apple);
+
+    testWidgets('empty state stays centred below the bar', (tester) async {
+      await setUp(tester, type: ProxiesType.list, groupsOverride: const []);
+      await pumpScreen(
+        tester,
+        host(const ProxiesListView(), topInset: bar),
+      );
+      expect(tester.getRect(find.byType(AdaptiveEmptyState)).top, bar);
+    }, variant: darwin);
+
+    testWidgets('Material ignores the inset: no spacer, TabBar on top',
+        (tester) async {
+      await setUp(tester, type: ProxiesType.list);
+      await pumpScreen(tester, host(const ProxiesListView(), topInset: bar));
+      expect(find.byType(SliverToolbarInset), findsNothing);
+      await tester.pumpWidget(const SizedBox.shrink());
+
+      await setUp(tester, type: ProxiesType.tab);
+      await pumpScreen(tester, host(const ProxiesTabView(), topInset: bar));
+      expect(tester.getTopLeft(find.byType(TabBar)).dy, 0);
       await tester.pumpWidget(const SizedBox.shrink());
     }, variant: android);
   });

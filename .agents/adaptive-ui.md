@@ -56,7 +56,7 @@ pixel-for-pixel. Code: `lib/widgets/adaptive/` (import `adaptive.dart`).
   window color, `toolbarFade*`, no blur, `IgnorePointer`). The page must pad its scroll view with
   `AdaptiveAppBar.topInset(context)` (0 on Material and on pages that do not opt in). Keyword chips stay
   below the bar and remove the top padding for the page under them. Home opts in per tab via
-  `_scrollUnderToolbarPages` in `lib/pages/home.dart` (currently Tools only); other pages keep their own
+  `_scrollUnderToolbarPages` in `lib/pages/home.dart` (currently Tools and Proxies); other pages keep their own
   top padding, which would hide content under the bar if enabled globally.
 - Fallbacks: `opaque` → solid window-colored bar + hairline, no fade, opaque capsules. Nothing in the bar
   animates (no `Opacity` above the capsules), and with Reduce Motion the search hint does not fade.
@@ -85,6 +85,11 @@ pixel-for-pixel. Code: `lib/widgets/adaptive/` (import `adaptive.dart`).
   `measure.bodyMediumHeight` & co. so its goldens do not move.
 - A floating bar over content: the host stacks it over the pages and pads the scroll view by the
   primitive's `contentInset` (0 off Darwin, so the Material padding is unchanged).
+- A scroll view with its own pinned headers that scrolls under the toolbar starts with
+  `SliverToolbarInset` (only when `topInset > 0`): an empty pinned spacer as tall as the bar, so the
+  headers stick right below the bar via `constraints.overlap` while the content keeps going under it.
+  Plain top padding would pin them under the bar — glass under glass. Floating overlays (the proxies
+  group bar) are positioned at `top: topInset` and the content below them adds the inset too.
 - Proxies screen: in the list mode the expanded group header pins; in the tab mode the grid scrolls
   under `AdaptiveGroupSelector`. The Darwin check badge replaces `_ProxyComputedMark`. Proxy-screen
   sheets (settings, providers, group picker, icons) are still Material-in-glass-sheet — next PR.

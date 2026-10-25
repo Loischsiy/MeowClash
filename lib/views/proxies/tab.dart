@@ -182,11 +182,17 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
     ref.watch(themeSettingProvider.select((state) => state.textScale));
     final state = ref.watch(groupNamesStateProvider);
     final groupNames = state.groupNames;
+    // Scrolling under the Darwin glass toolbar (`scrollUnderToolbar` in
+    // home.dart); 0 on Material and without the flag.
+    final topInset = AdaptiveAppBar.topInset(context);
     if (groupNames.isEmpty) {
-      return AdaptiveEmptyState(
+      final empty = AdaptiveEmptyState(
         label: appLocalizations.nullTip(appLocalizations.proxies),
         icon: Icons.public_rounded,
       );
+      return topInset > 0
+          ? Padding(padding: EdgeInsets.only(top: topInset), child: empty)
+          : empty;
     }
     final GroupNameKeyMap keyMap = {};
     final children = groupNames.map((groupName) {
@@ -211,12 +217,14 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
       children: children,
     );
     if (AdaptiveGroupSelector.floats) {
-      // The grids scroll under the floating glass bar; each pads its top by
-      // AdaptiveGroupSelector.contentInset.
+      // The grids scroll under the floating glass bar (and on under the
+      // toolbar above it); each pads its top by
+      // AdaptiveGroupSelector.contentInset + AdaptiveAppBar.topInset. The
+      // bar itself stays below the toolbar: never glass under glass.
       return Stack(
         children: [
           Positioned.fill(child: pages),
-          Positioned(top: 0, left: 0, right: 0, child: selector),
+          Positioned(top: topInset, left: 0, right: 0, child: selector),
         ],
       );
     }
@@ -297,7 +305,9 @@ class ProxyGroupViewState extends ConsumerState<ProxyGroupView> {
         child: GridView.builder(
           controller: _controller,
           padding: EdgeInsets.only(
-            top: 16 + AdaptiveGroupSelector.contentInset,
+            top: 16 +
+                AdaptiveGroupSelector.contentInset +
+                AdaptiveAppBar.topInset(context),
             left: 16,
             right: 16,
             bottom: 96,

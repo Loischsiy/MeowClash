@@ -4,14 +4,17 @@ import 'package:flutter/material.dart';
 import 'adaptive_platform.dart';
 import 'glass_accessibility.dart';
 import 'glass_surface.dart';
+import 'glass_text_styles.dart';
 import 'glass_tokens.dart';
 
 /// The floating action of a page.
 ///
 /// * Darwin: a round Liquid Glass button (one blurred surface) that shrinks
-///   slightly while pressed and shows a spinner while [busy]. Reduce Motion
-///   drops the press animation; Reduce Transparency makes it opaque.
-/// * Everything else: `FloatingActionButton`, unchanged.
+///   slightly while pressed and shows a spinner while [busy]; a capsule with
+///   the symbol and [label] when there is one. Reduce Motion drops the press
+///   animation; Reduce Transparency makes it opaque.
+/// * Everything else: `FloatingActionButton` (`.extended` with a [label]),
+///   unchanged.
 class AdaptiveFloatingButton extends StatefulWidget {
   const AdaptiveFloatingButton({
     super.key,
@@ -20,7 +23,11 @@ class AdaptiveFloatingButton extends StatefulWidget {
     required this.glassIcon,
     this.busy = false,
     this.tooltip,
+    this.label,
   });
+
+  /// Text next to the icon (extended button / capsule).
+  final String? label;
 
   final VoidCallback? onPressed;
 
@@ -51,7 +58,17 @@ class _AdaptiveFloatingButtonState extends State<AdaptiveFloatingButton> {
 
   @override
   Widget build(BuildContext context) {
+    final label = widget.label;
     if (!AdaptivePlatform.useGlass) {
+      if (label != null) {
+        return FloatingActionButton.extended(
+          heroTag: null,
+          tooltip: widget.tooltip,
+          onPressed: widget.onPressed,
+          label: Text(label),
+          icon: widget.icon,
+        );
+      }
       return FloatingActionButton(
         heroTag: null,
         tooltip: widget.tooltip,
@@ -63,26 +80,48 @@ class _AdaptiveFloatingButtonState extends State<AdaptiveFloatingButton> {
     final accessibility = GlassAccessibility.of(context);
     final radius =
         BorderRadius.circular(GlassTokens.floatingButtonSize / 2);
+    final symbol = widget.busy
+        ? const CupertinoActivityIndicator(
+            radius: GlassTokens.activityIndicatorRadius,
+          )
+        : IconTheme.merge(
+            data: IconThemeData(
+              size: GlassTokens.floatingButtonIconSize,
+              color: theme.colorScheme.primary,
+            ),
+            child: widget.glassIcon,
+          );
     Widget button = GlassSurface(
       sigma: GlassTokens.barSigma,
       borderRadius: radius,
       shadow: true,
-      child: SizedBox.square(
-        dimension: GlassTokens.floatingButtonSize,
-        child: Center(
-          child: widget.busy
-              ? const CupertinoActivityIndicator(
-                  radius: GlassTokens.activityIndicatorRadius,
-                )
-              : IconTheme.merge(
-                  data: IconThemeData(
-                    size: GlassTokens.floatingButtonIconSize,
-                    color: theme.colorScheme.primary,
-                  ),
-                  child: widget.glassIcon,
+      child: label == null
+          ? SizedBox.square(
+              dimension: GlassTokens.floatingButtonSize,
+              child: Center(child: symbol),
+            )
+          : SizedBox(
+              height: GlassTokens.floatingButtonSize,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: GlassTokens.floatingButtonLabelPadding,
                 ),
-        ),
-      ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    symbol,
+                    const SizedBox(width: GlassTokens.floatingButtonLabelGap),
+                    Text(
+                      label,
+                      maxLines: 1,
+                      style: GlassTextStyles.floatingButtonLabel(
+                        theme.textTheme,
+                      ).copyWith(color: theme.colorScheme.primary),
+                    ),
+                  ],
+                ),
+              ),
+            ),
     );
     button = AnimatedScale(
       scale: _pressed ? GlassTokens.floatingButtonPressedScale : 1,
@@ -96,7 +135,7 @@ class _AdaptiveFloatingButtonState extends State<AdaptiveFloatingButton> {
     button = Semantics(
       button: true,
       enabled: _enabled,
-      label: widget.tooltip,
+      label: widget.tooltip ?? label,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: _enabled ? widget.onPressed : null,

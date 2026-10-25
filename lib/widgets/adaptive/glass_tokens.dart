@@ -263,6 +263,11 @@ abstract final class GlassTokens {
   static const double floatingButtonSize = 56;
   static const double floatingButtonIconSize = 24;
   static const double floatingButtonPressedScale = 0.92;
+  // With a label the button becomes a capsule of the same height.
+  static const double floatingButtonLabelPadding = 20;
+  static const double floatingButtonLabelGap = 8;
+  static const double floatingButtonLabelSize = 17;
+  static const double floatingButtonLabelLine = 22;
 
   // Empty and loading states.
   static const double emptyStateIconSize = 44;
@@ -400,6 +405,11 @@ abstract final class GlassTokens {
   static const double listSectionGapMac = 20;
   static const double listSectionGapIos = 28;
   static const double listSectionHeaderGap = 6;
+  // Margin between the sections and the edges of the scroll view.
+  static const double listInsetMac = 20;
+  static const double listInsetIos = 16;
+  static const double listInsetVerticalMac = 16;
+  static const double listInsetVerticalIos = 20;
   static const double listSectionFooterGap = 6;
   // Rows: least height (one line), paddings, leading symbol.
   static const double listRowMinHeightMac = 36;

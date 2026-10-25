@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'adaptive_platform.dart';
 import 'glass_accessibility.dart';
 import 'glass_text_styles.dart';
+import 'glass_theme.dart';
 import 'glass_tokens.dart';
 
 // Content-level primitives of Darwin forms and grouped lists (profile
@@ -140,6 +141,17 @@ class GlassListSection extends StatelessWidget {
 
   /// Horizontal inset of row content (for content laid out like a row).
   static double get rowPadding => _rowPadding;
+
+  /// Padding of a scroll view that lays out sections.
+  static EdgeInsets get listPadding => _mac
+      ? const EdgeInsets.symmetric(
+          horizontal: GlassTokens.listInsetMac,
+          vertical: GlassTokens.listInsetVerticalMac,
+        )
+      : const EdgeInsets.symmetric(
+          horizontal: GlassTokens.listInsetIos,
+          vertical: GlassTokens.listInsetVerticalIos,
+        );
 
   double get _dividerInset {
     final inset = dividerInset;
@@ -442,6 +454,30 @@ class _GlassListRowState extends State<GlassListRow> {
       child: content,
     );
   }
+}
+
+/// A row of a [GlassListSection] that holds a form control (a text field, a
+/// [GlassButton]) instead of a title: padded like a [GlassListRow], with the
+/// [GlassTheme.form] overlay so Material `TextFormField`s become Apple fields
+/// without a Darwin branch of their own. Darwin only.
+class GlassListField extends StatelessWidget {
+  const GlassListField({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Theme(
+        data: GlassTheme.form(Theme.of(context)),
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: _rowPadding,
+            vertical: _mac
+                ? GlassTokens.listRowVerticalPaddingMac
+                : GlassTokens.listRowVerticalPaddingIos,
+          ),
+          child: child,
+        ),
+      );
 }
 
 /// How strongly a [GlassButton] is drawn.

@@ -191,6 +191,14 @@ abstract final class GlassTextStyles {
         weight: _mac ? FontWeight.w500 : FontWeight.w600,
       );
 
+  /// Label of a capsule floating button ("Save").
+  static TextStyle floatingButtonLabel(TextTheme textTheme) => _style(
+        textTheme.labelLarge,
+        size: GlassTokens.floatingButtonLabelSize,
+        line: GlassTokens.floatingButtonLabelLine,
+        weight: FontWeight.w600,
+      );
+
   /// Selected proxy under the group name.
   static TextStyle groupSubtitle(TextTheme textTheme) => _style(
         textTheme.labelMedium,

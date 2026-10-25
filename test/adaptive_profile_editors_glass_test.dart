@@ -9,10 +9,12 @@ import 'package:meowclash/common/measure.dart';
 import 'package:meowclash/common/theme.dart';
 import 'package:meowclash/controller.dart';
 import 'package:meowclash/l10n/l10n.dart';
+import 'package:meowclash/models/models.dart';
 import 'package:meowclash/providers/providers.dart';
 import 'package:meowclash/state.dart';
 import 'package:meowclash/views/profiles/add_profile.dart';
 import 'package:meowclash/views/profiles/edit_profile.dart';
+import 'package:meowclash/views/profiles/scripts.dart';
 import 'package:meowclash/widgets/adaptive/adaptive.dart';
 
 import 'performance_test_support.dart';
@@ -106,8 +108,8 @@ void main() {
     await waitForProfileFileRow(tester);
   }
 
-  final darwin = TargetPlatformVariant(
-    const {TargetPlatform.iOS, TargetPlatform.macOS},
+  const darwin = TargetPlatformVariant(
+    {TargetPlatform.iOS, TargetPlatform.macOS},
   );
 
   group('AddProfileView', () {
@@ -217,6 +219,57 @@ void main() {
       GlassFlags.backdropBlurEnabled = false;
       await pumpEdit(tester);
       expect(find.byType(BackdropFilter), findsNothing);
+    }, variant: darwin);
+  });
+
+  group('ScriptsView', () {
+    Finder checkIn(String label) => find.descendant(
+          of: find.widgetWithText(GlassListRow, label),
+          matching: find.byIcon(Icons.check_rounded),
+        );
+
+    testWidgets('one section, checkmark instead of radio, ⋯ menus',
+        (tester) async {
+      await setUp(tester);
+      await tester.pumpWidget(host((_) => const ScriptsView()));
+      await settle(tester);
+      expect(find.byType(GlassListSection), findsOneWidget);
+      expect(find.byType(GlassListRow), findsNWidgets(2));
+      expect(find.byType(GlassIconButton), findsNWidgets(2));
+      expect(find.byType(Radio<String>), findsNothing);
+      expect(find.byType(ListTile), findsNothing);
+      expect(checkIn('Add DNS'), findsOneWidget);
+      expect(checkIn('Rename nodes'), findsNothing);
+      expect(
+        find.descendant(
+          of: find.byType(ListView),
+          matching: find.byType(BackdropFilter),
+        ),
+        findsNothing,
+      );
+      expect(find.byType(AdaptiveFloatingButton), findsOneWidget);
+      expect(find.byType(FloatingActionButton), findsNothing);
+    }, variant: darwin);
+
+    testWidgets('tapping a row makes it the current script', (tester) async {
+      await setUp(tester);
+      await tester.pumpWidget(host((_) => const ScriptsView()));
+      await settle(tester);
+      await tester.tap(find.text('Rename nodes'));
+      await tester.pumpAndSettle();
+      expect(checkIn('Rename nodes'), findsOneWidget);
+      expect(checkIn('Add DNS'), findsNothing);
+    }, variant: darwin);
+
+    testWidgets('empty: Apple empty state', (tester) async {
+      await setUp(tester);
+      globalState.config =
+          globalState.config.copyWith(scriptProps: const ScriptProps());
+      await tester.pumpWidget(host((_) => const ScriptsView()));
+      await settle(tester);
+      expect(find.byType(AdaptiveEmptyState), findsOneWidget);
+      expect(find.text(appLocalizations.nullScriptTip), findsOneWidget);
+      expect(find.byType(GlassListSection), findsNothing);
     }, variant: darwin);
   });
 }

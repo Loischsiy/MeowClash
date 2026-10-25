@@ -70,7 +70,9 @@ class CommonScaffold extends ConsumerStatefulWidget {
   final bool automaticallyImplyLeading;
   final bool? centerTitle;
   final AppBarEditState? appBarEditState;
-  final FloatingActionButton? floatingActionButton;
+  /// Usually a `FloatingActionButton`; an `AdaptiveFloatingButton` on pages
+  /// with a Darwin glass variant.
+  final Widget? floatingActionButton;
   final bool disableBackground;
 
   /// Darwin glass toolbar only: the body starts at the top of the window and

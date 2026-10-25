@@ -4,6 +4,7 @@ import 'package:meowclash/models/models.dart';
 import 'package:meowclash/pages/editor.dart';
 import 'package:meowclash/providers/config.dart';
 import 'package:meowclash/state.dart';
+import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:meowclash/widgets/card.dart';
 import 'package:meowclash/widgets/input.dart';
 import 'package:meowclash/widgets/list.dart';
@@ -38,6 +39,9 @@ class _ScriptsViewState extends ConsumerState<ScriptsView> {
       ));
       final currentId = vm2.a;
       final scripts = vm2.b;
+      if (AdaptivePlatform.useGlass) {
+        return _buildGlassContent(currentId, scripts);
+      }
       if (scripts.isEmpty) {
         return NullStatus(
           label: appLocalizations.nullScriptTip,
@@ -82,29 +86,7 @@ class _ScriptsViewState extends ConsumerState<ScriptsView> {
                         Icons.more_vert,
                       ),
                     ),
-                  popup: CommonPopupMenu(
-                    items: [
-                      PopupMenuItemData(
-                        icon: Icons.edit,
-                        label: appLocalizations.edit,
-                        onPressed: () {
-                          _handleToEditor(
-                            script: script,
-                          );
-                        },
-                      ),
-                      PopupMenuItemData(
-                        icon: Icons.delete,
-                        label: appLocalizations.delete,
-                        type: PopupMenuItemType.danger,
-                        onPressed: () {
-                          _handleDelScript(
-                            script.label,
-                          );
-                        },
-                      ),
-                    ],
-                  ),
+                  popup: _buildScriptMenu(script),
                 ),
               ),
             ),
@@ -112,6 +94,79 @@ class _ScriptsViewState extends ConsumerState<ScriptsView> {
         },
       );
     });
+
+  CommonPopupMenu _buildScriptMenu(Script script) => CommonPopupMenu(
+        items: [
+          PopupMenuItemData(
+            icon: Icons.edit,
+            label: appLocalizations.edit,
+            onPressed: () {
+              _handleToEditor(
+                script: script,
+              );
+            },
+          ),
+          PopupMenuItemData(
+            icon: Icons.delete,
+            label: appLocalizations.delete,
+            type: PopupMenuItemType.danger,
+            onPressed: () {
+              _handleDelScript(
+                script.label,
+              );
+            },
+          ),
+        ],
+      );
+
+  /// Apple: one grouped section, the current script marked by a leading
+  /// checkmark (single choice, no radio), a "⋯" menu per row. Flat rows, no
+  /// blur; the floating add button is the only glass layer.
+  Widget _buildGlassContent(String? currentId, List<Script> scripts) {
+    if (scripts.isEmpty) {
+      return AdaptiveEmptyState(
+        label: appLocalizations.nullScriptTip,
+        icon: Icons.code_rounded,
+      );
+    }
+    final padding = GlassListSection.listPadding;
+    return ListView(
+      padding: padding.copyWith(
+        bottom: padding.bottom +
+            GlassTokens.floatingButtonSize +
+            kFloatingActionButtonMargin * 2,
+      ),
+      children: [
+        GlassListSection(
+          children: [
+            for (final script in scripts)
+              GlassListRow(
+                key: ValueKey(script.id),
+                leading: script.id == currentId
+                    ? const Icon(Icons.check_rounded)
+                    : const SizedBox.shrink(),
+                title: Text(
+                  script.label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                selected: script.id == currentId,
+                onTap: () {
+                  ref.read(scriptStateProvider.notifier).setId(script.id);
+                },
+                trailing: CommonPopupBox(
+                  targetBuilder: (open) => GlassIconButton(
+                    icon: const Icon(Icons.more_horiz_rounded),
+                    onPressed: open,
+                  ),
+                  popup: _buildScriptMenu(script),
+                ),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
 
   Future<void> _handleEditorSave(_, String title, String content, {Script? script}) async {
     var newScript = script?.copyWith(
@@ -231,10 +286,16 @@ class _ScriptsViewState extends ConsumerState<ScriptsView> {
   @override
   Widget build(BuildContext context) => CommonScaffold(
       disableBackground: true,
-      floatingActionButton: FloatingActionButton(
-        onPressed: _handleToEditor,
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButton: AdaptivePlatform.useGlass
+          ? AdaptiveFloatingButton(
+              onPressed: _handleToEditor,
+              icon: const Icon(Icons.add),
+              glassIcon: const Icon(Icons.add_rounded),
+            )
+          : FloatingActionButton(
+              onPressed: _handleToEditor,
+              child: const Icon(Icons.add),
+            ),
       body: _buildContent(),
       title: appLocalizations.script,
     );

@@ -298,11 +298,16 @@ abstract final class GlassTokens {
   static const double listRowDragScale = 1.02;
 
   // Dialogs (alerts, prompts, pickers) and the large desktop modal: one glass
-  // panel over a dimmed, unblurred app. The panel is denser than the chrome
-  // so forms stay legible over any content.
+  // panel over an unblurred app (dimmed on iOS only). The panel is a bit
+  // denser than the chrome so forms stay legible, yet the app still shows
+  // through it.
   static const double dialogSigma = 30;
-  static const double _dialogTintOpacityLight = 0.80;
-  static const double _dialogTintOpacityDark = 0.68;
+  static const double _dialogTintOpacityLight = 0.66;
+  static const double _dialogTintOpacityDark = 0.55;
+  // Dark mode: the panel is lifted above the window by a white wash over the
+  // surface color, like the macOS / iOS alerts, instead of sinking into the
+  // equally dark background.
+  static const double _dialogLiftDark = 0.12;
   static const double dialogRadiusIos = 28;
   static const double dialogRadiusMac = 18;
   // Panel width (content is 300 wide inside the paddings, as before) and its
@@ -342,9 +347,11 @@ abstract final class GlassTokens {
   static const double dialogButtonLineMac = 16;
   static const double dialogButtonSizeIos = 17;
   static const double dialogButtonLineIos = 22;
-  // Dimming behind a dialog, as alpha of black. No blur behind it.
-  static const double _dialogBarrierOpacityLight = 0.20;
-  static const double _dialogBarrierOpacityDark = 0.45;
+  // Dimming behind a dialog, as alpha of black. No blur behind it. macOS
+  // does not dim the window under an alert: the shadow sets it apart and the
+  // app keeps showing through the glass.
+  static const double _dialogBarrierOpacityIosLight = 0.20;
+  static const double _dialogBarrierOpacityIosDark = 0.30;
   // Appearance, as the system alerts: the panel fades in while shrinking
   // from [dialogEnterScale] to 1 (no scale with Reduce Motion) and only
   // fades out.
@@ -475,12 +482,23 @@ abstract final class GlassTokens {
           ? _dialogPressedOpacityDark
           : _dialogPressedOpacityLight;
 
-  static Color dialogBarrierColor(Brightness brightness) =>
+  static Color dialogBarrierColor(Brightness brightness, {required bool mac}) =>
       const Color(0xFF000000).withValues(
-        alpha: _isDark(brightness)
-            ? _dialogBarrierOpacityDark
-            : _dialogBarrierOpacityLight,
+        alpha: mac
+            ? 0
+            : _isDark(brightness)
+                ? _dialogBarrierOpacityIosDark
+                : _dialogBarrierOpacityIosLight,
       );
+
+  /// Tint color of a dialog panel made from the theme [surface].
+  static Color dialogTint(Color surface, Brightness brightness) =>
+      _isDark(brightness)
+          ? Color.alphaBlend(
+              const Color(0xFFFFFFFF).withValues(alpha: _dialogLiftDark),
+              surface,
+            )
+          : surface;
 
   static double inputFillOpacity(Brightness brightness) =>
       _isDark(brightness) ? _inputFillOpacityDark : _inputFillOpacityLight;

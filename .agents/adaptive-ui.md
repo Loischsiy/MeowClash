@@ -106,7 +106,10 @@ pixel-for-pixel. Code: `lib/widgets/adaptive/` (import `adaptive.dart`).
   editors are still Material-in-glass — next PR.
 - Dialogs (`lib/widgets/adaptive/adaptive_dialog.dart`): on Darwin `showCommonDialog` goes through
   `showGlassDialog` / `GlassDialogRoute` and `CommonDialog` / `CommonModal` render `GlassDialog` /
-  `GlassModalPanel` — one `GlassSurface` each, barrier `dialogBarrierColor`, no blur behind. Appearing
+  `GlassModalPanel` — one `GlassSurface` each, no blur behind. `dialogBarrierColor`: macOS does not dim
+  the window at all (as AppKit alerts; a dark barrier kills the glass), iOS dims lightly. In dark mode
+  the panel tint is `dialogTint` (surface lifted by a white wash), so it stands above the equally dark
+  window instead of sinking into it; keep `dialogTintOpacity` low enough for the app to show through. Appearing
   is animated by the dialog itself via `GlassDialogRoute.presenceOf` → `GlassSurface.presence` (sigma,
   fill, rim and shadow scale with it) + scale 1.05→1 (no scale with Reduce Motion or on close); never an
   `Opacity` / `FadeTransition` above the blur. A raw `AlertDialog` pushed through the route falls back

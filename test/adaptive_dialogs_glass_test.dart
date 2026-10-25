@@ -56,7 +56,7 @@ void main() {
     addTearDown(accessibility.dispose);
   }
 
-  Widget host() => ProviderScope(
+  Widget host({Brightness brightness = Brightness.light}) => ProviderScope(
         overrides: [backgroundUrlProvider.overrideWith((ref) => null)],
         child: GlassAccessibilityScope(
           controller: accessibility,
@@ -67,6 +67,7 @@ void main() {
               useMaterial3: true,
               colorScheme: ColorScheme.fromSeed(
                 seedColor: const Color(0xFF6750A4),
+                brightness: brightness,
               ),
             ),
             home: Scaffold(
@@ -91,9 +92,10 @@ void main() {
     void Function() show, {
     Size viewSize = size,
     bool settle = true,
+    Brightness brightness = Brightness.light,
   }) async {
     await setUp(tester, viewSize: viewSize);
-    await tester.pumpWidget(host());
+    await tester.pumpWidget(host(brightness: brightness));
     show();
     if (settle) {
       await tester.pumpAndSettle();
@@ -158,6 +160,53 @@ void main() {
         findsOneWidget,
       );
       expectNoFadeAboveBlur(tester);
+    }, variant: apple);
+
+    Iterable<Color> barrierColors(WidgetTester tester) => tester
+        .widgetList<ModalBarrier>(find.byType(ModalBarrier))
+        .map((barrier) => barrier.color)
+        .whereType<Color>()
+        .where((color) => color.a > 0);
+
+    testWidgets('macOS: the window is not dimmed behind the dialog',
+        (tester) async {
+      for (final brightness in Brightness.values) {
+        await open(tester, showTwoButtons, brightness: brightness);
+        expect(barrierColors(tester), isEmpty, reason: '$brightness');
+        await tester.pumpWidget(const SizedBox.shrink());
+      }
+    }, variant: mac);
+
+    testWidgets('iOS: a light dim behind the dialog', (tester) async {
+      await open(tester, showTwoButtons, brightness: Brightness.dark);
+      final colors = barrierColors(tester);
+      expect(colors, hasLength(1));
+      expect(
+        colors.single.a,
+        closeTo(
+          GlassTokens.dialogBarrierColor(Brightness.dark, mac: false).a,
+          0.01,
+        ),
+      );
+      expect(colors.single.a, lessThanOrEqualTo(0.3));
+    }, variant: ios);
+
+    testWidgets('dark: the panel is lifted above the dark window',
+        (tester) async {
+      await open(tester, showTwoButtons, brightness: Brightness.dark);
+      final surface = Theme.of(tester.element(find.byType(GlassDialog)))
+          .colorScheme
+          .surface;
+      final panel = tester.widget<GlassSurface>(find.byType(GlassSurface));
+      expect(
+        panel.color!.computeLuminance(),
+        greaterThan(surface.computeLuminance()),
+      );
+      expect(
+        panel.tintOpacity,
+        lessThan(0.6),
+        reason: 'the app must still show through the glass',
+      );
     }, variant: apple);
 
     testWidgets('appears like a system alert, blur kept while fading',

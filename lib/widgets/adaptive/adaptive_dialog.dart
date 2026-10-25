@@ -24,7 +24,7 @@ Future<T?> showGlassDialog<T>({
       builder: builder,
       barrierDismissible: dismissible,
       barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
-      barrierColor: GlassTokens.dialogBarrierColor(brightness),
+      barrierColor: GlassTokens.dialogBarrierColor(brightness, mac: _mac),
     ),
   );
 }
@@ -238,7 +238,11 @@ class GlassDialog extends StatelessWidget {
               sigma: GlassTokens.dialogSigma,
               tintOpacity: GlassTokens.dialogTintOpacity(theme.brightness),
               borderRadius: BorderRadius.circular(radius()),
-              color: color,
+              color: color ??
+                  GlassTokens.dialogTint(
+                    theme.colorScheme.surface,
+                    theme.brightness,
+                  ),
               shadow: true,
               presence: presence,
               // The fade lives below the blur, never above it.
@@ -574,6 +578,10 @@ class GlassModalPanel extends StatelessWidget {
               sigma: GlassTokens.dialogSigma,
               tintOpacity: GlassTokens.dialogTintOpacity(theme.brightness),
               borderRadius: BorderRadius.circular(GlassDialog.radius()),
+              color: GlassTokens.dialogTint(
+                theme.colorScheme.surface,
+                theme.brightness,
+              ),
               shadow: true,
               presence: presence,
               child: Opacity(opacity: presence, child: content),

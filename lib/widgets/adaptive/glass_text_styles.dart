@@ -93,6 +93,47 @@ abstract final class GlassTextStyles {
         weight: FontWeight.w400,
       );
 
+  /// Dialog title.
+  static TextStyle dialogTitle(TextTheme textTheme) => _style(
+        textTheme.titleLarge,
+        size: _mac ? GlassTokens.dialogTitleSizeMac : GlassTokens.dialogTitleSizeIos,
+        line: _mac ? GlassTokens.dialogTitleLineMac : GlassTokens.dialogTitleLineIos,
+        weight: FontWeight.w600,
+      );
+
+  /// Dialog text (messages, default text of the dialog content).
+  static TextStyle dialogMessage(TextTheme textTheme) => _style(
+        textTheme.bodyMedium,
+        size: _mac
+            ? GlassTokens.dialogMessageSizeMac
+            : GlassTokens.dialogMessageSizeIos,
+        line: _mac
+            ? GlassTokens.dialogMessageLineMac
+            : GlassTokens.dialogMessageLineIos,
+        weight: FontWeight.w400,
+      );
+
+  /// Dialog button label; [preferred] is the confirming (last) action.
+  static TextStyle dialogButton(TextTheme textTheme, {bool preferred = false}) =>
+      _style(
+        textTheme.labelLarge,
+        size: _mac
+            ? GlassTokens.dialogButtonSizeMac
+            : GlassTokens.dialogButtonSizeIos,
+        line: _mac
+            ? GlassTokens.dialogButtonLineMac
+            : GlassTokens.dialogButtonLineIos,
+        weight: preferred && !_mac ? FontWeight.w600 : FontWeight.w400,
+      );
+
+  /// Text typed into a field.
+  static TextStyle inputText(TextTheme textTheme) => _style(
+        textTheme.bodyLarge,
+        size: _mac ? GlassTokens.inputTextSizeMac : GlassTokens.inputTextSizeIos,
+        line: _mac ? GlassTokens.inputTextLineMac : GlassTokens.inputTextLineIos,
+        weight: FontWeight.w400,
+      );
+
   /// Selected proxy under the group name.
   static TextStyle groupSubtitle(TextTheme textTheme) => _style(
         textTheme.labelMedium,

@@ -14,6 +14,7 @@ import 'package:meowclash/plugins/service.dart';
 import 'package:meowclash/plugins/ios.dart';
 import 'package:meowclash/services/async_polling_loop.dart';
 import 'package:meowclash/services/profile_script_evaluator.dart';
+import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:meowclash/widgets/dialog.dart';
 import 'package:meowclash/widgets/scaffold.dart';
 import 'package:meowclash/widgets/visibility_polling.dart';
@@ -305,9 +306,16 @@ class GlobalState {
               child: SingleChildScrollView(
                 child: SelectableText.rich(
                   TextSpan(
-                    style: Theme.of(context).textTheme.labelLarge,
+                    style: AdaptivePlatform.useGlass
+                        ? GlassTextStyles.dialogMessage(
+                            Theme.of(context).textTheme,
+                          )
+                        : Theme.of(context).textTheme.labelLarge,
                     children: [message],
                   ),
+                  // iOS alerts center their message.
+                  textAlign:
+                      AdaptivePlatform.isIOSGlass ? TextAlign.center : null,
                   style: const TextStyle(
                     overflow: TextOverflow.visible,
                   ),
@@ -343,15 +351,23 @@ class GlobalState {
     required Widget child,
     bool dismissible = true,
   }) async =>
-      showModal<T>(
-        context: navigatorKey.currentState!.context,
-        configuration: FadeScaleTransitionConfiguration(
-          barrierColor: Colors.black38,
-          barrierDismissible: dismissible,
-        ),
-        builder: (_) => child,
-        filter: commonFilter,
-      );
+      AdaptivePlatform.useGlass
+          // Darwin: dimmed, unblurred backdrop; the dialog panel is the only
+          // glass layer and animates itself like a system alert.
+          ? showGlassDialog<T>(
+              context: navigatorKey.currentState!.context,
+              dismissible: dismissible,
+              builder: (_) => child,
+            )
+          : showModal<T>(
+              context: navigatorKey.currentState!.context,
+              configuration: FadeScaleTransitionConfiguration(
+                barrierColor: Colors.black38,
+                barrierDismissible: dismissible,
+              ),
+              builder: (_) => child,
+              filter: commonFilter,
+            );
 
   Future<T?> safeRun<T>(
     FutureOr<T> Function() futureFunction, {

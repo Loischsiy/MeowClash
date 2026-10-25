@@ -1,7 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'adaptive_platform.dart';
 import 'glass_accessibility.dart';
+import 'glass_field.dart';
+import 'glass_text_styles.dart';
+import 'glass_tokens.dart';
 
 /// Darwin-only overlay for the app [ThemeData].
 ///
@@ -48,4 +52,61 @@ abstract final class GlassTheme {
           modalElevation: 0,
         ),
       );
+
+  /// Darwin overlay for forms (dialog content, later the profile editors):
+  /// Apple-sized field text and rounded filled fields without an outline.
+  /// macOS rings the focused field in the accent, iOS shows only the caret;
+  /// errors get a hairline in the error color.
+  ///
+  /// The state borders are set on purpose: they win over the
+  /// `border: OutlineInputBorder()` that call sites pass for Material, so the
+  /// fields need no Darwin branch of their own.
+  static ThemeData form(ThemeData base) {
+    final scheme = base.colorScheme;
+    final brightness = base.brightness;
+    final mac = defaultTargetPlatform == TargetPlatform.macOS;
+    final text = GlassTextStyles.inputText(base.textTheme);
+    const rest = GlassFieldBorder();
+    final error = GlassFieldBorder(
+      borderSide: BorderSide(
+        color: scheme.error,
+        width: GlassTokens.inputErrorWidth,
+      ),
+    );
+    final focused = mac
+        ? GlassFieldBorder(
+            borderSide: BorderSide(
+              color: scheme.primary.withValues(
+                alpha: GlassTokens.inputFocusOpacityMac,
+              ),
+              width: GlassTokens.inputFocusWidthMac,
+            ),
+          )
+        : rest;
+    return base.copyWith(
+      textTheme: base.textTheme.copyWith(bodyLarge: text),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: scheme.onSurface.withValues(
+          alpha: GlassTokens.inputFillOpacity(brightness),
+        ),
+        hoverColor: Colors.transparent,
+        isDense: true,
+        contentPadding: EdgeInsets.symmetric(
+          horizontal: GlassTokens.inputHorizontalPadding,
+          vertical: mac
+              ? GlassTokens.inputVerticalPaddingMac
+              : GlassTokens.inputVerticalPaddingIos,
+        ),
+        labelStyle: text.copyWith(color: scheme.onSurfaceVariant),
+        hintStyle: text.copyWith(color: scheme.onSurfaceVariant),
+        border: rest,
+        enabledBorder: rest,
+        disabledBorder: rest,
+        focusedBorder: focused,
+        errorBorder: error,
+        focusedErrorBorder: error,
+      ),
+    );
+  }
 }

@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:meowclash/providers/app.dart';
+import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -26,6 +27,28 @@ class CommonDialog extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final size = ref.watch(viewSizeProvider);
     final colorScheme = Theme.of(context).colorScheme;
+
+    if (AdaptivePlatform.useGlass) {
+      return GlassDialog(
+        title: title,
+        actions: actions ?? const [],
+        contentPadding: padding,
+        color: backgroundColor,
+        content: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: min(
+              size.height - 40,
+              GlassTokens.dialogContentMaxHeight,
+            ),
+          ),
+          child: !overrideScroll
+              ? SingleChildScrollView(
+                  child: child,
+                )
+              : child ?? const SizedBox.shrink(),
+        ),
+      );
+    }
     
     return AlertDialog(
       title: Text(title),
@@ -63,6 +86,13 @@ class CommonModal extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final size = ref.watch(viewSizeProvider);
     final colorScheme = Theme.of(context).colorScheme;
+    if (AdaptivePlatform.useGlass) {
+      return GlassModalPanel(
+        width: size.width * 0.85,
+        height: size.height * 0.85,
+        child: child,
+      );
+    }
     return Center(
       child: Container(
         width: size.width * 0.85,

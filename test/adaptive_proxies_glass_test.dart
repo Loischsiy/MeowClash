@@ -402,6 +402,26 @@ void main() {
       await tester.pumpWidget(const SizedBox.shrink());
     }, variant: apple);
 
+    testWidgets('list: header is glass from the first pixel under the bar',
+        (tester) async {
+      // Less than the toolbar height: the header sticks through the toolbar
+      // overlap while its own shrinkOffset is still 0.
+      await setUp(tester, type: ProxiesType.list);
+      await pumpScreen(
+        tester,
+        host(const ProxiesListView(), topInset: bar),
+      );
+      expect(blur, findsNothing);
+
+      await scrollList(tester, bar / 2);
+      final header = tester.getRect(find.byType(GlassSurface).first);
+      expect(header.top, greaterThanOrEqualTo(bar));
+      expect(cardRects(tester).where((r) => r.top < header.bottom), isNotEmpty);
+      expect(blur, findsOneWidget);
+      expect(blurInCards(), findsNothing);
+      await tester.pumpWidget(const SizedBox.shrink());
+    }, variant: apple);
+
     testWidgets('tabs: group bar below the toolbar, grid scrolls under both',
         (tester) async {
       await setUp(tester, type: ProxiesType.tab);

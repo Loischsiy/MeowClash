@@ -222,9 +222,12 @@ class _GlassGroupHeaderDelegate extends SliverPersistentHeaderDelegate {
   @override
   double get maxExtent => extent;
 
+  // Under [SliverToolbarInset] the header sticks through the toolbar's
+  // overlap while its own shrinkOffset is still 0 (the first toolbar-height
+  // pixels of scroll): it already covers the cards then, so it needs glass.
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) =>
-      shrinkOffset > 0 ? _pinned : _resting;
+      shrinkOffset > 0 || overlapsContent ? _pinned : _resting;
 
   @override
   bool shouldRebuild(_GlassGroupHeaderDelegate oldDelegate) =>

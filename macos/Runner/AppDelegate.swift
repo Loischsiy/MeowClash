@@ -122,7 +122,15 @@ class AppDelegate: FlutterAppDelegate {
                 result(FlutterError(code: "INVALID_ARGS", message: "Invalid arguments", details: nil))
                 return
             }
-            self.contextMenuPresenter.present(items: items, at: NSPoint(x: x, y: y), in: view) { index in
+            // A pop-up button passes the index of its current value: that
+            // item is placed over the button, as NSPopUpButton does.
+            let positioning = (args["positioning"] as? NSNumber)?.intValue
+            self.contextMenuPresenter.present(
+                items: items,
+                at: NSPoint(x: x, y: y),
+                positioning: positioning,
+                in: view
+            ) { index in
                 result(index)
             }
         }
@@ -312,9 +320,16 @@ final class ContextMenuPresenter: NSObject, NSMenuDelegate {
     /// `popUp` runs its own tracking loop and returns once the menu closes.
     /// The reply is sent on the next run-loop turn, after AppKit has delivered
     /// the item action.
-    func present(items: [[String: Any]], at point: NSPoint, in view: NSView, completion: @escaping (Int) -> Void) {
+    func present(
+        items: [[String: Any]],
+        at point: NSPoint,
+        positioning: Int? = nil,
+        in view: NSView,
+        completion: @escaping (Int) -> Void
+    ) {
         selectedIndex = -1
         destructiveItems.removeAll()
+        var positioningItem: NSMenuItem?
         let menu = NSMenu()
         menu.autoenablesItems = false
         menu.delegate = self
@@ -330,6 +345,13 @@ final class ContextMenuPresenter: NSObject, NSMenuDelegate {
             menuItem.target = self
             menuItem.tag = index
             menuItem.isEnabled = enabled
+            // Current value of a pop-up button / choice in a list.
+            if item["checked"] as? Bool == true {
+                menuItem.state = .on
+            }
+            if index == positioning {
+                positioningItem = menuItem
+            }
             var image: NSImage?
             if let symbol = item["symbol"] as? String {
                 image = NSImage(systemSymbolName: symbol, accessibilityDescription: nil)
@@ -343,7 +365,7 @@ final class ContextMenuPresenter: NSObject, NSMenuDelegate {
             menu.addItem(menuItem)
         }
         let location = NSPoint(x: point.x, y: view.isFlipped ? point.y : view.bounds.height - point.y)
-        menu.popUp(positioning: nil, at: location, in: view)
+        menu.popUp(positioning: positioningItem, at: location, in: view)
         DispatchQueue.main.async { [weak self] in
             guard let self = self else {
                 completion(-1)

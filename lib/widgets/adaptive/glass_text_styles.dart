@@ -134,6 +134,63 @@ abstract final class GlassTextStyles {
         weight: FontWeight.w400,
       );
 
+  /// Title of a grouped list row.
+  static TextStyle listRowTitle(TextTheme textTheme) => _style(
+        textTheme.bodyLarge,
+        size: _mac
+            ? GlassTokens.listRowTitleSizeMac
+            : GlassTokens.listRowTitleSizeIos,
+        line: _mac
+            ? GlassTokens.listRowTitleLineMac
+            : GlassTokens.listRowTitleLineIos,
+        weight: FontWeight.w400,
+      );
+
+  /// Second line of a grouped list row.
+  static TextStyle listRowSubtitle(TextTheme textTheme) => _style(
+        textTheme.bodyMedium,
+        size: _mac
+            ? GlassTokens.listRowSubtitleSizeMac
+            : GlassTokens.listRowSubtitleSizeIos,
+        line: _mac
+            ? GlassTokens.listRowSubtitleLineMac
+            : GlassTokens.listRowSubtitleLineIos,
+        weight: FontWeight.w400,
+      );
+
+  /// Header above a grouped list section: bold on macOS (System Settings),
+  /// secondary footnote on iOS.
+  static TextStyle listSectionHeader(TextTheme textTheme) => _style(
+        textTheme.titleSmall,
+        size: _mac
+            ? GlassTokens.listSectionHeaderSizeMac
+            : GlassTokens.listSectionHeaderSizeIos,
+        line: _mac
+            ? GlassTokens.listSectionHeaderLineMac
+            : GlassTokens.listSectionHeaderLineIos,
+        weight: _mac ? FontWeight.w600 : FontWeight.w400,
+      );
+
+  /// Explanation below a grouped list section.
+  static TextStyle listSectionFooter(TextTheme textTheme) => _style(
+        textTheme.bodySmall,
+        size: _mac
+            ? GlassTokens.listSectionFooterSizeMac
+            : GlassTokens.listSectionFooterSizeIos,
+        line: _mac
+            ? GlassTokens.listSectionFooterLineMac
+            : GlassTokens.listSectionFooterLineIos,
+        weight: FontWeight.w400,
+      );
+
+  /// Label of a content push button.
+  static TextStyle button(TextTheme textTheme) => _style(
+        textTheme.labelLarge,
+        size: _mac ? GlassTokens.buttonTextSizeMac : GlassTokens.buttonTextSizeIos,
+        line: _mac ? GlassTokens.buttonTextLineMac : GlassTokens.buttonTextLineIos,
+        weight: _mac ? FontWeight.w500 : FontWeight.w600,
+      );
+
   /// Selected proxy under the group name.
   static TextStyle groupSubtitle(TextTheme textTheme) => _style(
         textTheme.labelMedium,

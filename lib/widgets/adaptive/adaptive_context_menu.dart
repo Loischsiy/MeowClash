@@ -16,6 +16,7 @@ class AdaptiveMenuEntry {
     this.icon,
     this.onPressed,
     this.destructive = false,
+    this.checked = false,
   });
 
   final String label;
@@ -27,6 +28,10 @@ class AdaptiveMenuEntry {
   /// Destroys data (delete). Drawn in the system red on Darwin and kept in its
   /// own group at the end of the menu, as the Apple HIG asks.
   final bool destructive;
+
+  /// The current choice (pop-up buttons, single-choice menus): a checkmark
+  /// on Darwin.
+  final bool checked;
 
   bool get enabled => onPressed != null;
 }
@@ -59,6 +64,9 @@ class AdaptiveContextMenu extends StatelessWidget {
   /// Pops up a native menu just below [anchor] (global logical coordinates,
   /// which are points on macOS) and runs the chosen entry.
   ///
+  /// With [popUp] (the menu of a pop-up button) the checked entry is laid
+  /// over [anchor] instead, as `NSPopUpButton` does.
+  ///
   /// Completes with `false` when no native menu could be shown (wrong
   /// platform, channel missing or failing) so the caller can fall back to the
   /// Flutter menu; `true` once the menu was shown, whether or not an entry
@@ -66,13 +74,19 @@ class AdaptiveContextMenu extends StatelessWidget {
   static Future<bool> showNative({
     required Rect anchor,
     required List<AdaptiveMenuEntry> entries,
+    bool popUp = false,
   }) async {
     if (!prefersNative || entries.isEmpty) return false;
+    final checkedIndex = entries.indexWhere((entry) => entry.checked);
+    final positioned = popUp && checkedIndex >= 0;
     final Object? index;
     try {
       index = await channel.invokeMethod<Object?>('show', {
         'x': anchor.left,
-        'y': anchor.bottom + GlassTokens.menuAnchorGap,
+        'y': positioned
+            ? anchor.top
+            : anchor.bottom + GlassTokens.menuAnchorGap,
+        if (positioned) 'positioning': checkedIndex,
         'items': [
           for (final entry in entries)
             {
@@ -80,6 +94,7 @@ class AdaptiveContextMenu extends StatelessWidget {
               'symbol': sfSymbolFor(entry.icon),
               'enabled': entry.enabled,
               'destructive': entry.destructive,
+              'checked': entry.checked,
             },
         ],
       });
@@ -123,11 +138,123 @@ class AdaptiveContextMenu extends StatelessWidget {
     Icons.redo: 'arrow.uturn.forward',
   };
 
+  /// Opens the Flutter glass menu next to [anchor] (global coordinates):
+  /// below it, or above when there is more room there; it scrolls when the
+  /// entries do not fit and starts at the checked entry. For pop-up buttons
+  /// on iOS, and on macOS when [showNative] is unavailable.
+  static Future<void> showGlass({
+    required BuildContext context,
+    required Rect anchor,
+    required List<AdaptiveMenuEntry> entries,
+    double minWidth = GlassTokens.menuMinWidth,
+  }) =>
+      Navigator.of(context).push(
+        _GlassMenuRoute(
+          anchor: anchor,
+          entries: entries,
+          minWidth: minWidth,
+          barrierLabel:
+              MaterialLocalizations.of(context).modalBarrierDismissLabel,
+        ),
+      );
+
   @override
   Widget build(BuildContext context) {
     if (!AdaptivePlatform.useGlass) return materialBuilder(context);
     return _GlassMenu(entries: entries, minWidth: minWidth);
   }
+}
+
+class _GlassMenuRoute extends PopupRoute<void> {
+  _GlassMenuRoute({
+    required this.anchor,
+    required this.entries,
+    required this.minWidth,
+    required this.barrierLabel,
+  });
+
+  final Rect anchor;
+  final List<AdaptiveMenuEntry> entries;
+  final double minWidth;
+
+  @override
+  final String barrierLabel;
+
+  @override
+  Color? get barrierColor => null;
+
+  @override
+  bool get barrierDismissible => true;
+
+  @override
+  Duration get transitionDuration => GlassTokens.morphDuration;
+
+  @override
+  Widget buildPage(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+  ) =>
+      CustomSingleChildLayout(
+        delegate: _GlassMenuLayout(
+          anchor: anchor,
+          padding: MediaQuery.paddingOf(context),
+        ),
+        child: GlassMenuTransition(
+          animation: animation,
+          alignment: Alignment.topCenter,
+          child: _GlassMenu(
+            entries: entries,
+            minWidth: minWidth < anchor.width ? anchor.width : minWidth,
+          ),
+        ),
+      );
+}
+
+/// Places a glass menu below its anchor, or above when there is more room,
+/// inside the safe area.
+class _GlassMenuLayout extends SingleChildLayoutDelegate {
+  const _GlassMenuLayout({required this.anchor, required this.padding});
+
+  final Rect anchor;
+  final EdgeInsets padding;
+
+  static const _gap = GlassTokens.menuAnchorGap;
+  static const _margin = GlassTokens.menuScreenMargin;
+
+  double _below(Size size) =>
+      size.height - padding.bottom - _margin - (anchor.bottom + _gap);
+
+  double _above() => anchor.top - _gap - padding.top - _margin;
+
+  @override
+  BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
+    final size = constraints.biggest;
+    final below = _below(size);
+    final above = _above();
+    final height = below > above ? below : above;
+    final width = size.width - padding.horizontal - 2 * _margin;
+    return BoxConstraints(
+      maxWidth: width < 0 ? 0 : width,
+      maxHeight: height < 0 ? 0 : height,
+    );
+  }
+
+  @override
+  Offset getPositionForChild(Size size, Size childSize) {
+    final fitsBelow = childSize.height <= _below(size) || _below(size) >= _above();
+    final y = fitsBelow
+        ? anchor.bottom + _gap
+        : anchor.top - _gap - childSize.height;
+    final minX = padding.left + _margin;
+    final maxX = size.width - padding.right - _margin - childSize.width;
+    final x = maxX < minX ? minX : anchor.left.clamp(minX, maxX);
+    return Offset(x, y);
+  }
+
+  @override
+  bool shouldRelayout(_GlassMenuLayout oldDelegate) =>
+      oldDelegate.anchor != anchor || oldDelegate.padding != padding;
 }
 
 /// Opening animation of a glass popup: it grows out of the corner nearest to
@@ -172,14 +299,36 @@ class GlassMenuTransition extends StatelessWidget {
   }
 }
 
-class _GlassMenu extends StatelessWidget {
+class _GlassMenu extends StatefulWidget {
   const _GlassMenu({required this.entries, required this.minWidth});
 
   final List<AdaptiveMenuEntry> entries;
   final double minWidth;
 
   @override
+  State<_GlassMenu> createState() => _GlassMenuState();
+}
+
+class _GlassMenuState extends State<_GlassMenu> {
+  final _checkedKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    // A long choice list (hundreds of nodes) opens at the current value.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final checked = _checkedKey.currentContext;
+      if (checked != null && checked.mounted) {
+        Scrollable.ensureVisible(checked, alignment: 0.5);
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final entries = widget.entries;
+    final minWidth = widget.minWidth;
+    final hasChecks = entries.any((entry) => entry.checked);
     final theme = Theme.of(context);
     final brightness = theme.brightness;
     final separatorColor = theme.colorScheme.onSurface
@@ -188,7 +337,10 @@ class _GlassMenu extends StatelessWidget {
       child: ConstrainedBox(
         constraints: BoxConstraints(
           minWidth: minWidth,
-          maxWidth: GlassTokens.menuMaxWidth,
+          // A pop-up button's menu is at least as wide as the button.
+          maxWidth: minWidth > GlassTokens.menuMaxWidth
+              ? minWidth
+              : GlassTokens.menuMaxWidth,
         ),
         child: GlassSurface(
           sigma: GlassTokens.menuSigma,
@@ -201,7 +353,8 @@ class _GlassMenu extends StatelessWidget {
               padding: const EdgeInsets.symmetric(
                 vertical: GlassTokens.menuVerticalPadding,
               ),
-              child: Column(
+              child: SingleChildScrollView(
+                child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -221,9 +374,14 @@ class _GlassMenu extends StatelessWidget {
                           child: ColoredBox(color: separatorColor),
                         ),
                       ),
-                    _GlassMenuRow(entry: entries[i]),
+                    _GlassMenuRow(
+                      key: entries[i].checked ? _checkedKey : null,
+                      entry: entries[i],
+                      reserveCheck: hasChecks,
+                    ),
                   ],
                 ],
+              ),
               ),
             ),
           ),
@@ -234,9 +392,17 @@ class _GlassMenu extends StatelessWidget {
 }
 
 class _GlassMenuRow extends StatefulWidget {
-  const _GlassMenuRow({required this.entry});
+  const _GlassMenuRow({
+    super.key,
+    required this.entry,
+    required this.reserveCheck,
+  });
 
   final AdaptiveMenuEntry entry;
+
+  /// Leaves the leading checkmark column of a choice menu (iOS puts the
+  /// checkmark before the label).
+  final bool reserveCheck;
 
   @override
   State<_GlassMenuRow> createState() => _GlassMenuRowState();
@@ -319,6 +485,19 @@ class _GlassMenuRowState extends State<_GlassMenuRow> {
                   ),
                   child: Row(
                     children: [
+                      if (widget.reserveCheck) ...[
+                        SizedBox.square(
+                          dimension: GlassTokens.optionCheckSize,
+                          child: entry.checked
+                              ? Icon(
+                                  Icons.check_rounded,
+                                  size: GlassTokens.optionCheckSize,
+                                  color: foreground,
+                                )
+                              : null,
+                        ),
+                        const SizedBox(width: GlassTokens.menuCheckGap),
+                      ],
                       Expanded(
                         child: Text(
                           entry.label,

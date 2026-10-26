@@ -8,6 +8,7 @@ import 'package:meowclash/l10n/l10n.dart';
 import 'package:meowclash/models/models.dart';
 import 'package:meowclash/state.dart';
 import 'package:meowclash/views/dashboard/widgets/ip_details_dialog.dart';
+import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:meowclash/widgets/widgets.dart';
 
 class NetworkDetection extends ConsumerStatefulWidget {
@@ -59,8 +60,20 @@ class _NetworkDetectionState extends ConsumerState<NetworkDetection> {
     return String.fromCharCode(firstLetter) + String.fromCharCode(secondLetter);
   }
 
+  void _showDetectionTip() {
+    globalState.showMessage(
+      title: appLocalizations.tip,
+      message: TextSpan(
+        text: appLocalizations.detectionTip,
+      ),
+      cancelable: false,
+    );
+  }
+
   @override
-  Widget build(BuildContext context) => SizedBox(
+  Widget build(BuildContext context) => AdaptivePlatform.useGlass
+      ? _buildGlass(context)
+      : SizedBox(
         height: getWidgetHeight(1),
         child: ValueListenableBuilder<NetworkDetectionState>(
           valueListenable: detectionState.state,
@@ -192,4 +205,85 @@ class _NetworkDetectionState extends ConsumerState<NetworkDetection> {
           },
         ),
       );
+
+  Widget _buildGlass(BuildContext context) {
+    final theme = Theme.of(context);
+    final mac = AdaptivePlatform.isMacOSGlass;
+    final reduceMotion = GlassAccessibility.of(context).reduceMotion;
+    return SizedBox(
+      height: getWidgetHeight(1),
+      child: ValueListenableBuilder<NetworkDetectionState>(
+        valueListenable: detectionState.state,
+        builder: (_, state, __) {
+          final ipInfo = state.ipInfo;
+          final Widget content;
+          if (ipInfo != null) {
+            content = GlassWidgetValue(
+              key: const ValueKey('ip'),
+              value: ipInfo.ip,
+            );
+          } else if (!state.isLoading) {
+            content = Text(
+              AppLocalizations.of(context).ipDetailsUnavailable,
+              key: const ValueKey('unavailable'),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: GlassTextStyles.widgetCaption(theme.textTheme).copyWith(
+                color: GlassTokens.systemRed(theme.brightness),
+              ),
+            );
+          } else {
+            content = const AdaptiveActivityIndicator(
+              key: ValueKey('loading'),
+              radius: GlassTokens.widgetSpinnerRadius,
+            );
+          }
+          return AdaptiveWidgetTile(
+            info: Info(
+              label: appLocalizations.networkDetection,
+              iconData: Icons.network_check,
+            ),
+            leading: ipInfo == null
+                ? null
+                : Text(
+                    _countryCodeToEmoji(ipInfo.countryCode),
+                    style: TextStyle(
+                      fontFamily: FontFamily.twEmoji.value,
+                      fontSize: mac
+                          ? GlassTokens.widgetTileSymbolSizeMac
+                          : GlassTokens.widgetTileSymbolSizeIos,
+                      height: 1,
+                    ),
+                  ),
+            trailing: GlassIconButton(
+              tooltip: appLocalizations.tip,
+              size: mac
+                  ? GlassTokens.widgetHeaderButtonSizeMac
+                  : GlassTokens.widgetHeaderButtonSizeIos,
+              iconSize: mac
+                  ? GlassTokens.widgetHeaderButtonIconSizeMac
+                  : GlassTokens.widgetHeaderButtonIconSizeIos,
+              icon: const Icon(Icons.info_outline_rounded),
+              onPressed: _showDetectionTip,
+            ),
+            onPressed: _showDetails,
+            onLongPress: _refresh,
+            child: GlassWidgetTileBody(
+              child: AnimatedSwitcher(
+                duration: GlassTokens.motion(
+                  GlassTokens.widgetContentFadeDuration,
+                  reduceMotion: reduceMotion,
+                ),
+                layoutBuilder: (current, previous) => Stack(
+                  alignment: AlignmentDirectional.bottomStart,
+                  children: [...previous, if (current != null) current],
+                ),
+                child: content,
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
 }

@@ -1,6 +1,7 @@
 import 'package:meowclash/common/common.dart';
 import 'package:meowclash/providers/app.dart';
 import 'package:meowclash/state.dart';
+import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:meowclash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,7 +10,9 @@ class IntranetIP extends StatelessWidget {
   const IntranetIP({super.key});
 
   @override
-  Widget build(BuildContext context) => SizedBox(
+  Widget build(BuildContext context) => AdaptivePlatform.useGlass
+      ? _buildGlass(context)
+      : SizedBox(
       height: getWidgetHeight(1),
       child: CommonCard(
         info: Info(
@@ -61,4 +64,35 @@ class IntranetIP extends StatelessWidget {
         ),
       ),
     );
+
+  Widget _buildGlass(BuildContext context) => SizedBox(
+        height: getWidgetHeight(1),
+        child: AdaptiveWidgetTile(
+          info: Info(
+            label: appLocalizations.intranetIP,
+            iconData: Icons.devices,
+          ),
+          child: GlassWidgetTileBody(
+            child: Consumer(
+              builder: (_, ref, __) {
+                final localIp = ref.watch(localIpProvider);
+                if (localIp == null) {
+                  return const AdaptiveActivityIndicator(
+                    radius: GlassTokens.widgetSpinnerRadius,
+                  );
+                }
+                return TooltipText(
+                  text: Text(
+                    localIp.isNotEmpty ? localIp : appLocalizations.noNetwork,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GlassTextStyles.widgetValue(context.textTheme)
+                        .copyWith(color: context.colorScheme.onSurface),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      );
 }

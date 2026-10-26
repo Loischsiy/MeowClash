@@ -6,7 +6,10 @@ import 'package:meowclash/common/common.dart';
 import 'package:meowclash/models/models.dart';
 import 'package:meowclash/providers/providers.dart';
 import 'package:meowclash/views/media_unlock/media_unlock_page.dart';
+import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:meowclash/widgets/widgets.dart';
+
+import 'media_unlock.dart';
 
 class MediaUnlockSmall extends ConsumerStatefulWidget {
   const MediaUnlockSmall({super.key});
@@ -70,7 +73,9 @@ class _MediaUnlockSmallState extends ConsumerState<MediaUnlockSmall> {
             (isLoading
                 ? MediaUnlockStatus.testing
                 : MediaUnlockStatus.unknown));
-    final color = status.statusColor(context.colorScheme);
+    final color = AdaptivePlatform.useGlass
+        ? glassMediaStatusColor(context, status)
+        : status.statusColor(context.colorScheme);
 
     final iconSize = platform.iconSize;
     final Widget icon;
@@ -135,7 +140,9 @@ class _MediaUnlockSmallState extends ConsumerState<MediaUnlockSmall> {
               style: context.textTheme.labelSmall?.copyWith(
                 fontWeight: FontWeight.w600,
                 fontSize: 11.ap,
-                color: context.colorScheme.error,
+                color: AdaptivePlatform.useGlass
+                    ? color
+                    : context.colorScheme.error,
               ),
               maxLines: 1,
             ),
@@ -145,7 +152,12 @@ class _MediaUnlockSmallState extends ConsumerState<MediaUnlockSmall> {
             width: 12.ap,
             height: 12.ap,
             child: Center(
-              child: status == MediaUnlockStatus.testing
+              child: status == MediaUnlockStatus.testing &&
+                      AdaptivePlatform.useGlass
+                  ? const AdaptiveActivityIndicator(
+                      radius: GlassTokens.widgetInlineSpinnerRadius,
+                    )
+                  : status == MediaUnlockStatus.testing
                   ? RepaintBoundary(
                       child: SizedBox(
                         width: 10.ap,
@@ -209,7 +221,27 @@ class _MediaUnlockSmallState extends ConsumerState<MediaUnlockSmall> {
 
           final isWidgetLoading =
               displayedPlatforms.any(state.testingPlatforms.contains);
-          final card = CommonCard(
+          final card = AdaptivePlatform.useGlass
+              ? buildGlassMediaUnlockTile(
+                  context,
+                  isWidgetLoading: isWidgetLoading,
+                  onRefresh: () => mediaUnlockState.checkPlatforms(
+                    displayedPlatforms,
+                    force: true,
+                  ),
+                  rows: [
+                    for (final p in displayedPlatforms)
+                      _buildPlatformRow(
+                        p,
+                        state.results[p],
+                        state.isLoading,
+                        context,
+                        isItemTesting: state.testingPlatforms.contains(p),
+                        colorfulIcons: colorfulIcons,
+                      ),
+                  ],
+                )
+              : CommonCard(
             onPressed: () {
               showExtend(
                 context,

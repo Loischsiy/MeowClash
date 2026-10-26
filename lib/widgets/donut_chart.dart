@@ -36,9 +36,19 @@ class DonutChart extends StatefulWidget {
     super.key,
     required this.data,
     this.duration = commonDuration,
+    this.strokeFraction,
+    this.trackColor,
   });
   final List<DonutChartData> data;
   final Duration duration;
+
+  /// Ring width as a fraction of the chart's shorter side. Null keeps the
+  /// Material 10 logical px (scaled by `.ap`).
+  final double? strokeFraction;
+
+  /// Full ring painted under the segments (also visible while there is no
+  /// traffic yet). Null paints no track, as in Material.
+  final Color? trackColor;
 
   @override
   State<DonutChart> createState() => _DonutChartState();
@@ -82,6 +92,8 @@ class _DonutChartState extends State<DonutChart>
             _oldData,
             widget.data,
             _animationController.value,
+            strokeFraction: widget.strokeFraction,
+            trackColor: widget.trackColor,
           ),
         ),
     );
@@ -89,10 +101,18 @@ class _DonutChartState extends State<DonutChart>
 
 class DonutChartPainter extends CustomPainter {
 
-  DonutChartPainter(this.oldData, this.newData, this.progress);
+  DonutChartPainter(
+    this.oldData,
+    this.newData,
+    this.progress, {
+    this.strokeFraction,
+    this.trackColor,
+  });
   final List<DonutChartData> oldData;
   final List<DonutChartData> newData;
   final double progress;
+  final double? strokeFraction;
+  final Color? trackColor;
 
   double _logTransform(double value) {
     const base = 10.0;
@@ -131,8 +151,23 @@ class DonutChartPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
-    final strokeWidth = 10.0.ap;
+    final fraction = strokeFraction;
+    final strokeWidth = fraction == null
+        ? 10.0.ap
+        : min(size.width, size.height) * fraction;
     final radius = min(size.width / 2, size.height / 2) - strokeWidth / 2;
+
+    final track = trackColor;
+    if (track != null) {
+      canvas.drawCircle(
+        center,
+        radius,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = strokeWidth
+          ..color = track,
+      );
+    }
 
     final gapAngle = 2 * asin(strokeWidth * 1 / (2 * radius)) * 1.2;
 
@@ -173,5 +208,7 @@ class DonutChartPainter extends CustomPainter {
   @override
   bool shouldRepaint(DonutChartPainter oldDelegate) => oldDelegate.progress != progress ||
         oldDelegate.oldData != oldData ||
-        oldDelegate.newData != newData;
+        oldDelegate.newData != newData ||
+        oldDelegate.strokeFraction != strokeFraction ||
+        oldDelegate.trackColor != trackColor;
 }

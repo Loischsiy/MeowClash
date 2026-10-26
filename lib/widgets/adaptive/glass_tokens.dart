@@ -772,6 +772,21 @@ abstract final class GlassTokens {
   // Gap between stacked lines inside a tile (value over caption, legend).
   static const double widgetLineGap = 2;
   static const double widgetRowGap = 8;
+  // Spinner of a tile still loading its value.
+  static const double widgetSpinnerRadius = 8;
+
+  /// Spinner inside a widget row (media-unlock status slot).
+  static const double widgetInlineSpinnerRadius = 5;
+  // Small borderless button at the trailing edge of a tile header (ⓘ).
+  static const double widgetHeaderButtonSizeMac = 22;
+  static const double widgetHeaderButtonSizeIos = 28;
+  static const double widgetHeaderButtonIconSizeMac = 14;
+  static const double widgetHeaderButtonIconSizeIos = 16;
+
+  /// Between two header buttons of a widget tile.
+  static const double widgetHeaderButtonGap = 4;
+  // Cross-fade when a tile swaps its content (loading → value → error).
+  static const Duration widgetContentFadeDuration = Duration(milliseconds: 200);
 
   // Segmented control (dashboard mode picker), as in System Settings: a
   // recessed capsule track and a neutral raised thumb — never the accent.

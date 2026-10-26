@@ -8,6 +8,7 @@ import 'package:meowclash/services/async_polling_loop.dart';
 import 'package:meowclash/state.dart';
 import 'package:meowclash/views/dashboard/widgets/core_status_dialog.dart';
 import 'package:meowclash/widgets/visibility_polling.dart';
+import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:meowclash/widgets/widgets.dart';
 
 final _memoryInfoStateNotifier = ValueNotifier<TrafficValue>(
@@ -43,7 +44,9 @@ class _MemoryInfoState extends State<MemoryInfo>
   }
 
   @override
-  Widget build(BuildContext context) => SizedBox(
+  Widget build(BuildContext context) => AdaptivePlatform.useGlass
+      ? _buildGlass(context)
+      : SizedBox(
         height: getWidgetHeight(1),
         child: CommonCard(
           info: Info(
@@ -86,6 +89,27 @@ class _MemoryInfoState extends State<MemoryInfo>
                   ),
                 )
               ],
+            ),
+          ),
+        ),
+      );
+
+  Widget _buildGlass(BuildContext context) => SizedBox(
+        height: getWidgetHeight(1),
+        child: AdaptiveWidgetTile(
+          info: Info(
+            iconData: Icons.memory,
+            label: appLocalizations.memoryInfo,
+          ),
+          // Opens core status; manual GC lives in the dialog.
+          onPressed: showCoreStatusDialog,
+          child: GlassWidgetTileBody(
+            child: ValueListenableBuilder(
+              valueListenable: _memoryInfoStateNotifier,
+              builder: (_, trafficValue, __) => GlassWidgetValue(
+                value: trafficValue.showValue,
+                unit: trafficValue.showUnit,
+              ),
             ),
           ),
         ),

@@ -95,22 +95,33 @@ class OutboundMode extends StatelessWidget {
               final mode = ref.watch(
                 patchClashConfigProvider.select((state) => state.mode),
               );
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  for (final item in Mode.values)
-                    GlassListRow(
-                      title: Text(Intl.message(item.name)),
-                      selected: item == mode,
-                      accessory: item == mode
-                          ? GlassRowAccessory.checkmark
-                          : GlassRowAccessory.none,
-                      onTap: item == mode
-                          ? null
-                          : () => globalState.appController.changeMode(item),
+              // The tile height is fixed by the grid: with large text the
+              // three rows scale down to fit instead of overflowing.
+              return LayoutBuilder(
+                builder: (_, constraints) => FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: SizedBox(
+                    width: constraints.maxWidth,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        for (final item in Mode.values)
+                          GlassListRow(
+                            title: Text(Intl.message(item.name)),
+                            selected: item == mode,
+                            accessory: item == mode
+                                ? GlassRowAccessory.checkmark
+                                : GlassRowAccessory.none,
+                            onTap: item == mode
+                                ? null
+                                : () =>
+                                    globalState.appController.changeMode(item),
+                          ),
+                      ],
                     ),
-                ],
+                  ),
+                ),
               );
             },
           ),
@@ -122,10 +133,10 @@ class OutboundModeV2 extends StatelessWidget {
   const OutboundModeV2({super.key});
 
   Color _getTextColor(BuildContext context, Mode mode) => switch (mode) {
-      Mode.rule => context.colorScheme.onSecondaryContainer,
-      Mode.global => context.colorScheme.onPrimaryContainer,
-      Mode.direct => context.colorScheme.onTertiaryContainer,
-    };
+        Mode.rule => context.colorScheme.onSecondaryContainer,
+        Mode.global => context.colorScheme.onPrimaryContainer,
+        Mode.direct => context.colorScheme.onTertiaryContainer,
+      };
 
   @override
   Widget build(BuildContext context) {

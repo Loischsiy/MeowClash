@@ -1,7 +1,5 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:meowclash/widgets/list.dart';
@@ -248,16 +246,16 @@ void main() {
           generateListView([
             ...generateSection(
               items: [
-                ListItem.open(
-                  title: const Text('Open'),
-                  delegate: const OpenDelegate(
+                const ListItem.open(
+                  title: Text('Open'),
+                  delegate: OpenDelegate(
                     title: 'Open',
                     widget: SizedBox(),
                   ),
                 ),
-                ListItem.next(
-                  title: const Text('Next'),
-                  delegate: const NextDelegate(
+                const ListItem.next(
+                  title: Text('Next'),
+                  delegate: NextDelegate(
                     title: 'Next',
                     widget: SizedBox(),
                   ),
@@ -425,6 +423,77 @@ void main() {
       expect(fills, isNotEmpty);
       expect(fills.every((color) => color.a == 1), isTrue);
     }, variant: TargetPlatformVariant.only(TargetPlatform.macOS));
+
+    Iterable<Color> sectionFills(WidgetTester tester) => tester
+        .widgetList<DecoratedBox>(
+          find.descendant(
+            of: find.byType(GlassListSection),
+            matching: find.byType(DecoratedBox),
+          ),
+        )
+        .map((box) => box.decoration)
+        .whereType<ShapeDecoration>()
+        .map((decoration) => decoration.color)
+        .whereType<Color>();
+
+    testWidgets('Reduce Transparency: opaque section fill, back to glass after',
+        (tester) async {
+      useGlass();
+      final accessibility = GlassAccessibilityController();
+      addTearDown(accessibility.dispose);
+      accessibility.value = const GlassAccessibility(reduceTransparency: true);
+      await tester.pumpWidget(
+        GlassAccessibilityScope(
+          controller: accessibility,
+          child: app(
+            generateListView([
+              const ListHeader(title: 'Group'),
+              for (var i = 0; i < 3; i++)
+                ListItem(title: Text('Row $i'), onTap: () {}),
+            ]),
+          ),
+        ),
+      );
+      expect(find.byType(BackdropFilter), findsNothing);
+      expect(sectionFills(tester), isNotEmpty);
+      expect(sectionFills(tester).every((color) => color.a == 1), isTrue);
+
+      accessibility.value = GlassAccessibility.fallback;
+      await tester.pump();
+      expect(sectionFills(tester).any((color) => color.a < 1), isTrue);
+      expect(find.byType(BackdropFilter), findsNothing);
+    }, variant: const TargetPlatformVariant({
+      TargetPlatform.iOS,
+      TargetPlatform.macOS,
+    }));
+
+    testWidgets('a 120-row list scrolls to the end with no blur anywhere',
+        (tester) async {
+      useGlass();
+      await tester.pumpWidget(
+        app(
+          generateListView([
+            for (var i = 0; i < 120; i++)
+              ListItem(
+                leading: const Icon(Icons.info_outline),
+                title: Text('Row $i'),
+                onTap: () {},
+              ),
+          ]),
+        ),
+      );
+      expect(find.byType(BackdropFilter), findsNothing);
+      await tester.scrollUntilVisible(
+        find.text('Row 119'),
+        500,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(find.text('Row 119'), findsOneWidget);
+      expect(find.byType(BackdropFilter), findsNothing);
+    }, variant: const TargetPlatformVariant({
+      TargetPlatform.iOS,
+      TargetPlatform.macOS,
+    }));
   });
 }
 

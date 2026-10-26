@@ -82,6 +82,7 @@ Future<T?> showSheet<T>({
         ),
         filter: props.blur && !AdaptivePlatform.useGlass ? commonFilter : null,
         backgroundColor: AdaptivePlatform.useGlass ? Colors.transparent : null,
+        motion: _glassSideSheetMotion(context),
         builder: (_) => builder(context, SheetType.sideSheet),
       ),
   };
@@ -106,9 +107,29 @@ Future<T?> showExtend<T>(
         ),
         filter: props.blur && !AdaptivePlatform.useGlass ? commonFilter : null,
         backgroundColor: AdaptivePlatform.useGlass ? Colors.transparent : null,
+        motion: _glassSideSheetMotion(context),
         builder: (context) => builder(context, SheetType.sideSheet),
       ),
   };
+}
+
+/// Darwin: the glass panel slides in on a spring, instantly with Reduce
+/// Motion. Material keeps the side sheet's stock timing (`null`).
+SideSheetMotion? _glassSideSheetMotion(BuildContext context) {
+  if (!AdaptivePlatform.useGlass) return null;
+  final reduceMotion = GlassAccessibility.of(context).reduceMotion;
+  return SideSheetMotion(
+    enterDuration: GlassTokens.motion(
+      GlassTokens.sideSheetEnterDuration,
+      reduceMotion: reduceMotion,
+    ),
+    exitDuration: GlassTokens.motion(
+      GlassTokens.sideSheetExitDuration,
+      reduceMotion: reduceMotion,
+    ),
+    curve: GlassTokens.sideSheetEnterCurve,
+    reverseCurve: GlassTokens.sideSheetExitCurve,
+  );
 }
 
 class AdaptiveSheetScaffold extends StatefulWidget {

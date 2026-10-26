@@ -33,6 +33,12 @@ pixel-for-pixel. Code: `lib/widgets/adaptive/` (import `adaptive.dart`).
 - `SheetType.page` (phones, `showExtend`) is an opaque full-screen route with nothing behind it to
   blur: `AdaptiveSheetScaffold` renders it without glass, on the theme's opaque page background.
   Glass there would only tint an empty backdrop flat grey.
+- Navigation motion (`BaseNavigator.push`, `showSheet` / `showExtend`): on Darwin a phone push is
+  `GlassPageRoute` (Cupertino slide + parallax + edge back swipe); a macOS / iPad full-window push is a
+  `CupertinoPageTransition` slide without the swipe; the floating side sheet enters on a
+  `GlassSpringCurve` (`sideSheetSpring*`) and leaves on an ease via `SideSheetMotion`. Never fade a
+  glass page (`Opacity` over `BackdropFilter`). Material keeps `CommonRoute` / `CommonDesktopRoute` and
+  the stock 300/200 ms side sheet (`motion: null`). Pinned by `test/adaptive_settings_motion_test.dart`.
 - All numbers (sigmas, radii, opacities, sizes, durations) live in `glass_tokens.dart`.
 
 ## Toolbar (app bar)

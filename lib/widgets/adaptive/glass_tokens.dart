@@ -1,5 +1,7 @@
 import 'package:flutter/widgets.dart';
 
+import 'glass_motion.dart';
+
 /// The one place for every number of the Darwin glass chrome.
 ///
 /// Widgets read blur strength, tint opacity, specular rim, radii, shadows and
@@ -521,6 +523,29 @@ abstract final class GlassTokens {
   static const Duration morphDuration = Duration(milliseconds: 240);
   static const Curve morphCurve = Curves.easeOutCubic;
   static const Duration hoverDuration = Duration(milliseconds: 120);
+
+  // Opening a settings sub-page. All zeroed by [GlassAccessibility.reduceMotion].
+  // iPhone: UINavigationController push (slide in from the right, parallax of
+  // the page below, back swipe from the left edge).
+  static const Duration pushDuration = Duration(milliseconds: 500);
+  // macOS / iPad full-window page: a NavigationStack push (slide in from the
+  // trailing edge, no back swipe for the mouse). Never a cross-fade: an
+  // Opacity over a glass page would flatten its blur.
+  static const Duration desktopPushDuration = Duration(milliseconds: 350);
+  // Side sheet (macOS / iPad): the floating glass panel slides in from the
+  // trailing edge on `.spring(response: 0.45, dampingFraction: 0.9)` and
+  // leaves on a plain ease. The exit curve is applied to the falling route
+  // value, so ease-out here means "starts slow, leaves fast".
+  static const double sideSheetSpringResponse = 0.45;
+  static const double sideSheetSpringDamping = 0.9;
+  static const Duration sideSheetEnterDuration = Duration(milliseconds: 450);
+  static const Duration sideSheetExitDuration = Duration(milliseconds: 250);
+  static const Curve sideSheetEnterCurve = GlassSpringCurve(
+    response: sideSheetSpringResponse,
+    dampingFraction: sideSheetSpringDamping,
+    duration: sideSheetEnterDuration,
+  );
+  static const Curve sideSheetExitCurve = Curves.easeOutCubic;
 
   static bool _isDark(Brightness brightness) => brightness == Brightness.dark;
 

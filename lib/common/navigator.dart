@@ -2,11 +2,16 @@ import 'package:meowclash/common/common.dart';
 import 'package:meowclash/enum/enum.dart';
 import 'package:meowclash/models/models.dart';
 import 'package:meowclash/state.dart';
+import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:meowclash/widgets/dialog.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class BaseNavigator {
   static Future<T?> push<T>(BuildContext context, Widget child) async {
+    if (AdaptivePlatform.useGlass) {
+      return Navigator.of(context).push<T>(_glassRoute<T>(context, child));
+    }
     if (globalState.appState.viewMode != ViewMode.mobile) {
       return Navigator.of(context).push<T>(
         CommonDesktopRoute(
@@ -18,6 +23,35 @@ class BaseNavigator {
       CommonRoute(
         builder: (context) => child,
       ),
+    );
+  }
+
+  /// Darwin: an iPhone push (slide + parallax + back swipe), or a macOS /
+  /// iPad NavigationStack slide without the edge swipe. Instant with Reduce
+  /// Motion.
+  static Route<T> _glassRoute<T>(BuildContext context, Widget child) {
+    final reduceMotion = GlassAccessibility.of(context).reduceMotion;
+    if (globalState.appState.viewMode != ViewMode.mobile) {
+      final duration = GlassTokens.motion(
+        GlassTokens.desktopPushDuration,
+        reduceMotion: reduceMotion,
+      );
+      return PageRouteBuilder<T>(
+        pageBuilder: (context, animation, secondaryAnimation) => child,
+        transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+            CupertinoPageTransition(
+              primaryRouteAnimation: animation,
+              secondaryRouteAnimation: secondaryAnimation,
+              linearTransition: false,
+              child: child,
+            ),
+        transitionDuration: duration,
+        reverseTransitionDuration: duration,
+      );
+    }
+    return GlassPageRoute<T>(
+      builder: (context) => child,
+      reduceMotion: reduceMotion,
     );
   }
 
@@ -87,6 +121,28 @@ class CommonRoute<T> extends MaterialPageRoute<T> {
 
   @override
   Duration get reverseTransitionDuration => const Duration(milliseconds: 250);
+}
+
+/// iPhone navigation push for the Darwin glass UI: Cupertino slide with the
+/// parallax of the page below and the back swipe from the leading edge.
+/// Reduce Motion swaps pages instantly.
+class GlassPageRoute<T> extends CupertinoPageRoute<T> {
+  GlassPageRoute({
+    required super.builder,
+    this.reduceMotion = false,
+    super.settings,
+  });
+
+  final bool reduceMotion;
+
+  @override
+  Duration get transitionDuration => GlassTokens.motion(
+        GlassTokens.pushDuration,
+        reduceMotion: reduceMotion,
+      );
+
+  @override
+  Duration get reverseTransitionDuration => transitionDuration;
 }
 
 final Animatable<Offset> _kRightMiddleTween = Tween<Offset>(

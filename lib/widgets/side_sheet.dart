@@ -9,6 +9,28 @@ const Duration _bottomSheetExitDuration = Duration(milliseconds: 200);
 const Curve _modalBottomSheetCurve = Easing.standardDecelerate;
 const double _defaultScrollControlDisabledMaxHeightRatio = 9.0 / 16.0;
 
+/// Overrides the side sheet's timing. `null` (Material) keeps the stock
+/// 300/200 ms standard-decelerate slide; the Darwin glass panel passes its
+/// spring from `GlassTokens` (zero durations with Reduce Motion).
+@immutable
+class SideSheetMotion {
+  const SideSheetMotion({
+    required this.enterDuration,
+    required this.exitDuration,
+    required this.curve,
+    required this.reverseCurve,
+  });
+
+  final Duration enterDuration;
+  final Duration exitDuration;
+
+  /// Applied to the rising route value while the sheet opens.
+  final Curve curve;
+
+  /// Applied to the falling route value while the sheet closes.
+  final Curve reverseCurve;
+}
+
 class SideSheet extends StatefulWidget {
   const SideSheet({
     super.key,
@@ -62,9 +84,12 @@ class SideSheet extends StatefulWidget {
   @override
   State<SideSheet> createState() => _SideSheetState();
 
-  static AnimationController createAnimationController(TickerProvider vsync) => AnimationController(
-      duration: _bottomSheetEnterDuration,
-      reverseDuration: _bottomSheetExitDuration,
+  static AnimationController createAnimationController(
+    TickerProvider vsync, {
+    SideSheetMotion? motion,
+  }) => AnimationController(
+      duration: motion?.enterDuration ?? _bottomSheetEnterDuration,
+      reverseDuration: motion?.exitDuration ?? _bottomSheetExitDuration,
       debugLabel: 'SideSheet',
       vsync: vsync,
     );
@@ -363,9 +388,14 @@ class _ModalSideSheetState<T> extends State<_ModalSideSheet<T>> {
         showDragHandle: widget.showDragHandle,
       ),
       builder: (context, child) {
-        final animationValue = animationCurve.transform(
-          widget.route.animation!.value,
-        );
+        final animation = widget.route.animation!;
+        final motion = widget.route.motion;
+        final curve = motion == null
+            ? animationCurve
+            : animation.status == AnimationStatus.reverse
+                ? motion.reverseCurve
+                : motion.curve;
+        final animationValue = curve.transform(animation.value);
         return Semantics(
           scopesRoute: true,
           namesRoute: true,
@@ -409,6 +439,7 @@ class ModalSideSheetRoute<T> extends PopupRoute<T> {
       this.transitionAnimationController,
       this.anchorPoint,
       this.useSafeArea = false,
+      this.motion,
       super.filter});
 
   final WidgetBuilder builder;
@@ -441,6 +472,8 @@ class ModalSideSheetRoute<T> extends PopupRoute<T> {
 
   final String? barrierOnTapHint;
 
+  final SideSheetMotion? motion;
+
   final ValueNotifier<EdgeInsets> _clipDetailsNotifier =
       ValueNotifier<EdgeInsets>(EdgeInsets.zero);
 
@@ -451,10 +484,12 @@ class ModalSideSheetRoute<T> extends PopupRoute<T> {
   }
 
   @override
-  Duration get transitionDuration => _bottomSheetEnterDuration;
+  Duration get transitionDuration =>
+      motion?.enterDuration ?? _bottomSheetEnterDuration;
 
   @override
-  Duration get reverseTransitionDuration => _bottomSheetExitDuration;
+  Duration get reverseTransitionDuration =>
+      motion?.exitDuration ?? _bottomSheetExitDuration;
 
   @override
   bool get barrierDismissible => isDismissible;
@@ -474,7 +509,8 @@ class ModalSideSheetRoute<T> extends PopupRoute<T> {
       _animationController = transitionAnimationController;
       willDisposeAnimationController = false;
     } else {
-      _animationController = SideSheet.createAnimationController(navigator!);
+      _animationController =
+          SideSheet.createAnimationController(navigator!, motion: motion);
     }
     return _animationController!;
   }
@@ -559,6 +595,7 @@ Future<T?> showModalSideSheet<T>({
   AnimationController? transitionAnimationController,
   Offset? anchorPoint,
   ImageFilter? filter,
+  SideSheetMotion? motion,
 }) {
   assert(debugCheckHasMediaQuery(context));
   assert(debugCheckHasMaterialLocalizations(context));
@@ -588,5 +625,6 @@ Future<T?> showModalSideSheet<T>({
     transitionAnimationController: transitionAnimationController,
     anchorPoint: anchorPoint,
     useSafeArea: useSafeArea,
+    motion: motion,
   ));
 }

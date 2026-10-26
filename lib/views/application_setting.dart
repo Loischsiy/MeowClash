@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:meowclash/common/common.dart';
 import 'package:meowclash/providers/config.dart';
 import 'package:meowclash/state.dart';
+import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:meowclash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -108,7 +109,10 @@ class OpenLogsFolderItem extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) => ListItem(
         title: Text(appLocalizations.openLogsFolder),
         leading: const Icon(Icons.folder_open),
-        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+        // Darwin: an action row, not navigation, so no disclosure arrow.
+        trailing: AdaptivePlatform.useGlass
+            ? null
+            : const Icon(Icons.arrow_forward_ios, size: 16),
         onTap: _openLogsFolder,
       );
 }
@@ -116,8 +120,34 @@ class OpenLogsFolderItem extends ConsumerWidget {
 class ResetAppItem extends ConsumerWidget {
   const ResetAppItem({super.key});
 
+  Future<void> _reset(BuildContext context) async {
+    final res = await globalState.showMessage(
+      title: appLocalizations.clearData,
+      message: TextSpan(
+        text: appLocalizations.clearDataTip,
+        style: TextStyle(
+          color: context.colorScheme.onSurface,
+        ),
+      ),
+    );
+    if (res == true) {
+      await globalState.appController.handleClear();
+      system.exit();
+    }
+  }
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) => ListItem(
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (AdaptivePlatform.useGlass && GlassListScope.maybeOf(context) != null) {
+      // Apple's destructive row: title and symbol in the system red.
+      return GlassListRow(
+        title: Text(appLocalizations.clearData),
+        leading: const Icon(Icons.delete_forever),
+        destructive: true,
+        onTap: () => _reset(context),
+      );
+    }
+    return ListItem(
         title: Text(
           appLocalizations.clearData,
           style: TextStyle(
@@ -129,22 +159,9 @@ class ResetAppItem extends ConsumerWidget {
         Icons.delete_forever,
         color: context.colorScheme.error,
       ),
-      onTap: () async {
-        final res = await globalState.showMessage(
-          title: appLocalizations.clearData,
-          message: TextSpan(
-            text: appLocalizations.clearDataTip,
-            style: TextStyle(
-              color: context.colorScheme.onSurface,
-            ),
-          ),
-        );
-        if (res == true) {
-          await globalState.appController.handleClear();
-          system.exit();
-        }
-      },
+      onTap: () => _reset(context),
     );
+  }
 }
 
 class CloseConnectionsItem extends ConsumerWidget {
@@ -405,7 +422,10 @@ class RestartCoreItem extends ConsumerWidget {
         title: Text(appLocalizations.restartCore),
         subtitle: Text(appLocalizations.restartCoreDesc),
         leading: const Icon(Icons.restart_alt),
-        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+        // Darwin: an action row, not navigation, so no disclosure arrow.
+        trailing: AdaptivePlatform.useGlass
+            ? null
+            : const Icon(Icons.arrow_forward_ios, size: 16),
         onTap: () async {
           final res = await globalState.showMessage(
             title: appLocalizations.restartCore,
@@ -440,8 +460,38 @@ class ApplicationSettingView extends StatelessWidget {
     return Intl.message(locale.toString());
   }
 
+  /// Darwin: the switches, the maintenance actions and the destructive
+  /// reset as three grouped sections, like iOS Settings.
+  Widget _buildGlass() => GlassListView(
+        children: [
+          GlassListSection(
+            children: [
+              const MinimizeItem(),
+              if (system.isDesktop) ...[
+                const AutoLaunchItem(),
+                const SilentLaunchItem(),
+              ],
+              const AutoRunItem(),
+              if (Platform.isAndroid) const HiddenItem(),
+              const AnimateTabItem(),
+              const OpenLogsItem(),
+              const CloseConnectionsItem(),
+              const AutoCheckUpdateItem(),
+            ],
+          ),
+          GlassListSection(
+            children: [
+              if (system.isDesktop) const OpenLogsFolderItem(),
+              const RestartCoreItem(),
+            ],
+          ),
+          const GlassListSection(children: [ResetAppItem()]),
+        ],
+      );
+
   @override
   Widget build(BuildContext context) {
+    if (AdaptivePlatform.useGlass) return _buildGlass();
     List<Widget> items = [
       MinimizeItem(),
       if (system.isDesktop) ...[

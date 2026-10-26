@@ -1,18 +1,5 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:meowclash/common/constant.dart';
-import 'package:meowclash/common/measure.dart';
-import 'package:meowclash/common/path.dart';
-import 'package:meowclash/common/theme.dart';
-import 'package:meowclash/controller.dart';
-import 'package:meowclash/l10n/l10n.dart';
-import 'package:meowclash/providers/providers.dart';
-import 'package:meowclash/state.dart';
 import 'package:meowclash/views/about.dart';
 import 'package:meowclash/views/application_setting.dart';
 import 'package:meowclash/views/backup_and_recovery.dart';
@@ -29,10 +16,8 @@ import 'package:meowclash/views/resources.dart';
 import 'package:meowclash/views/theme.dart';
 import 'package:meowclash/views/tools.dart';
 import 'package:meowclash/widgets/widgets.dart';
-import 'package:package_info_plus/package_info_plus.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-import 'performance_test_support.dart';
+import 'settings_test_support.dart';
 
 /// Pixel baseline of the Material settings screens (Tools tab and every page
 /// it opens, plus the other `ListItem` / `generateSection` lists: proxies
@@ -47,71 +32,7 @@ void main() {
   // Tall enough for the longest page (General) without scrolling.
   const size = Size(400, 1400);
 
-  setUpAll(() async {
-    // Network and resources read app directories: point them at an empty
-    // temp dir and resolve them outside any test's fake-async zone.
-    final dir = await Directory.systemTemp.createTemp('material_settings');
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(
-      const MethodChannel('plugins.flutter.io/path_provider'),
-      (call) async => dir.path,
-    );
-    await appPath.dataDir.future;
-    await appPath.tempDir.future;
-    await appPath.downloadDir.future;
-    // About and Theme read the startup values `globalState.init` would set.
-    globalState.packageInfo = PackageInfo(
-      appName: 'MeowClash',
-      packageName: 'com.meowclash.app',
-      version: '1.0.0',
-      buildNumber: '1',
-    );
-    globalState.accentColor = const Color(defaultPrimaryColor);
-  });
-
-  Future<void> setUp(WidgetTester tester) async {
-    SharedPreferences.setMockInitialValues({});
-    await AppLocalizations.load(const Locale('en'));
-    initializePerformanceState();
-    globalState.appState = globalState.appState.copyWith(viewSize: size);
-    tester.view
-      ..physicalSize = size
-      ..devicePixelRatio = 1;
-    addTearDown(tester.view.reset);
-  }
-
-  Widget host(Brightness brightness, WidgetBuilder builder) => ProviderScope(
-        overrides: [
-          backgroundUrlProvider.overrideWith((ref) => null),
-        ],
-        child: MaterialApp(
-          navigatorKey: globalState.navigatorKey,
-          debugShowCheckedModeBanner: false,
-          locale: const Locale('en'),
-          supportedLocales: AppLocalizations.delegate.supportedLocales,
-          localizationsDelegates: const [
-            AppLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          theme: ThemeData(
-            useMaterial3: true,
-            colorScheme: ColorScheme.fromSeed(
-              seedColor: const Color(0xFF6750A4),
-              brightness: brightness,
-            ),
-          ),
-          home: Scaffold(
-            body: Consumer(builder: (context, ref, _) {
-              globalState.appController = AppController(context, ref);
-              globalState.measure = Measure.of(context, 1);
-              globalState.theme = CommonTheme.of(context, 1);
-              return builder(context);
-            }),
-          ),
-        ),
-      );
+  setUpAll(() => setUpSettingsEnvironment('material_settings'));
 
   final screens = <String, WidgetBuilder>{
     'tools': (_) => const ToolsView(),
@@ -142,13 +63,9 @@ void main() {
     final b = brightness.name;
     for (final MapEntry(key: name, value: builder) in screens.entries) {
       testWidgets('$name, $b', (tester) async {
-        await setUp(tester);
-        await tester.pumpWidget(host(brightness, builder));
-        // Some pages keep a spinner or a polling timer alive, so never wait
-        // for the tree to settle: pump a fixed second of frames.
-        for (var i = 0; i < 20; i++) {
-          await tester.pump(const Duration(milliseconds: 50));
-        }
+        await setUpSettingsScreen(tester, size);
+        await tester.pumpWidget(settingsHost(brightness, builder));
+        await pumpSettingsFrames(tester);
         expect(tester.takeException(), isNull);
         await expectLater(
           find.byType(MaterialApp),

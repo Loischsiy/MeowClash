@@ -114,13 +114,23 @@ class _RequestsViewState extends ConsumerState<RequestsView> with PageMixin {
   /// Darwin: flat stream rows without divider items (the hairline is part of
   /// the row), Apple scrollbar, empty state and spinner; no blur.
   Widget _buildGlass(ConnectionsState state, List<Connection> connections) {
+    // Scrolls under the glass toolbar (`scrollUnderToolbar` in home.dart).
+    // In the reverse list the top padding lies past the oldest row, at the
+    // visual top.
+    final topInset = AdaptiveAppBar.topInset(context);
     final Widget content;
     if (state.loading) {
-      content = const Center(child: AdaptiveActivityIndicator());
+      content = Padding(
+        padding: EdgeInsets.only(top: topInset),
+        child: const Center(child: AdaptiveActivityIndicator()),
+      );
     } else if (connections.isEmpty) {
-      content = AdaptiveEmptyState(
-        label: appLocalizations.nullTip(appLocalizations.requests),
-        icon: Icons.history,
+      content = Padding(
+        padding: EdgeInsets.only(top: topInset),
+        child: AdaptiveEmptyState(
+          label: appLocalizations.nullTip(appLocalizations.requests),
+          icon: Icons.history,
+        ),
       );
     } else {
       content = Align(
@@ -137,6 +147,7 @@ class _RequestsViewState extends ConsumerState<RequestsView> with PageMixin {
               shrinkWrap: true,
               physics: const NextClampingScrollPhysics(),
               controller: _scrollController,
+              padding: EdgeInsets.only(top: topInset),
               itemExtentBuilder: (index) =>
                   _calcCacheHeight(connections[index]),
               itemBuilder: (context, index) {

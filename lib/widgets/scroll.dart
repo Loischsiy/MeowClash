@@ -123,6 +123,7 @@ class CacheItemExtentListView extends StatefulWidget {
     required this.itemCount,
     required this.itemExtentBuilder,
     required this.tag,
+    this.padding,
   });
   final NullableIndexedWidgetBuilder itemBuilder;
   final int itemCount;
@@ -133,6 +134,11 @@ class CacheItemExtentListView extends StatefulWidget {
   final bool reverse;
   final ScrollController controller;
   final CacheTag tag;
+
+  /// Passed to the [ListView]; `null` keeps its default (the `MediaQuery`
+  /// padding). Darwin pages scrolling under the glass toolbar add
+  /// `AdaptiveAppBar.topInset` here.
+  final EdgeInsetsGeometry? padding;
 
   @override
   State<CacheItemExtentListView> createState() =>
@@ -159,6 +165,7 @@ class CacheItemExtentListViewState extends State<CacheItemExtentListView> {
       reverse: widget.reverse,
       shrinkWrap: widget.shrinkWrap,
       controller: widget.controller,
+      padding: widget.padding,
       itemExtentBuilder: (index, __) {
         _updateCacheHeightMap();
         return globalState.cacheHeightMap[widget.tag]?.updateCacheValue(

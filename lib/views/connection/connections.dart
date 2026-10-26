@@ -96,6 +96,9 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
         controller: _scrollController,
         child: ListView.builder(
           controller: _scrollController,
+          // Scrolls under the glass toolbar (`scrollUnderToolbar` in
+          // home.dart).
+          padding: EdgeInsets.only(top: AdaptiveAppBar.topInset(context)),
           itemCount: connections.length,
           itemBuilder: (context, index) {
             final connection = connections[index];
@@ -128,10 +131,15 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
         builder: (_, state, __) {
           final connections = state.list;
           if (connections.isEmpty) {
-            return AdaptiveEmptyState(
+            final empty = AdaptiveEmptyState(
               label: appLocalizations.nullTip(appLocalizations.connections),
               icon: Icons.cable_outlined,
             );
+            // Darwin: below the glass toolbar it scrolls under; 0 on Material.
+            final topInset = AdaptiveAppBar.topInset(context);
+            return topInset > 0
+                ? Padding(padding: EdgeInsets.only(top: topInset), child: empty)
+                : empty;
           }
           if (AdaptivePlatform.useGlass) {
             return _buildGlassList(connections);

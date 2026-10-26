@@ -55,12 +55,18 @@ class OpenDelegate extends Delegate {
     this.maxWidth,
     this.action,
     this.blur = true,
+    this.scrollUnderToolbar = false,
   });
   final Widget widget;
   final String title;
   final double? maxWidth;
   final Widget? action;
   final bool blur;
+
+  /// Darwin glass only: when pushed full screen (iPhone), [widget] scrolls
+  /// under the glass toolbar; it must add `AdaptiveAppBar.topInset` itself
+  /// (see `scrollUnderToolbarPages`). No effect on Material or in sheets.
+  final bool scrollUnderToolbar;
 }
 
 class NextDelegate extends Delegate {
@@ -314,6 +320,7 @@ class ListItem<T> extends StatelessWidget implements GlassLeadingHint {
     required Widget? action,
     required double? maxWidth,
     required bool blur,
+    bool scrollUnderToolbar = false,
   }) {
     final child = SafeArea(child: body);
     final actions = [if (action != null) action];
@@ -337,9 +344,11 @@ class ListItem<T> extends StatelessWidget implements GlassLeadingHint {
         key: Key(title),
         onBack: navigator.pop,
         title: title,
-        body: child,
+        // Scrolling under the toolbar: the page adds the top inset itself.
+        body: scrollUnderToolbar ? SafeArea(top: false, child: body) : child,
         disableBackground: true,
         actions: actions,
+        scrollUnderToolbar: scrollUnderToolbar,
       ),
     );
   }
@@ -357,6 +366,7 @@ class ListItem<T> extends StatelessWidget implements GlassLeadingHint {
           action: delegate.action,
           maxWidth: delegate.maxWidth,
           blur: delegate.blur,
+          scrollUnderToolbar: delegate.scrollUnderToolbar,
         ),
       );
     }

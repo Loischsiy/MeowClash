@@ -192,13 +192,23 @@ class _LogsViewState extends ConsumerState<LogsView> with PageMixin {
   }
 
   Widget _buildGlass(LogsState state, List<Log> logs) {
+    // Scrolls under the glass toolbar (`scrollUnderToolbar` in home.dart).
+    // In the reverse list the top padding lies past the oldest row, at the
+    // visual top.
+    final topInset = AdaptiveAppBar.topInset(context);
     final Widget content;
     if (state.loading) {
-      content = const Center(child: AdaptiveActivityIndicator());
+      content = Padding(
+        padding: EdgeInsets.only(top: topInset),
+        child: const Center(child: AdaptiveActivityIndicator()),
+      );
     } else if (logs.isEmpty) {
-      content = AdaptiveEmptyState(
-        label: appLocalizations.nullTip(appLocalizations.logs),
-        icon: Icons.article_outlined,
+      content = Padding(
+        padding: EdgeInsets.only(top: topInset),
+        child: AdaptiveEmptyState(
+          label: appLocalizations.nullTip(appLocalizations.logs),
+          icon: Icons.article_outlined,
+        ),
       );
     } else {
       content = Align(
@@ -215,6 +225,7 @@ class _LogsViewState extends ConsumerState<LogsView> with PageMixin {
               shrinkWrap: true,
               physics: const NextClampingScrollPhysics(),
               controller: _scrollController,
+              padding: EdgeInsets.only(top: topInset),
               itemExtentBuilder: (index) => _getItemHeight(logs[index]),
               itemBuilder: (context, index) {
                 final log = logs[index];

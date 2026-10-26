@@ -45,6 +45,7 @@ class CommonScaffold extends ConsumerStatefulWidget {
     required Function onBack,
     required List<Widget> actions,
     bool disableBackground = false,
+    bool scrollUnderToolbar = false,
   }) : this(
           key: key,
           body: body,
@@ -52,6 +53,7 @@ class CommonScaffold extends ConsumerStatefulWidget {
           automaticallyImplyLeading: false,
           actions: actions,
           disableBackground: disableBackground,
+          scrollUnderToolbar: scrollUnderToolbar,
           leading: IconButton(
             icon: const BackButtonIcon(),
             onPressed: () {

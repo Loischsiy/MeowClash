@@ -438,6 +438,10 @@ abstract final class GlassTokens {
   static const double listRowChevronSizeIos = 18;
   // Chevron of rows that open something, as alpha of the secondary text.
   static const double listRowChevronOpacity = 0.6;
+
+  /// Widest share of a row the current value (`GlassListRow.value`) may
+  /// take before it is ellipsized, as in iOS Settings.
+  static const double listRowValueMaxFraction = 0.5;
   // Type scale: macOS body 13 / caption 11 / headline 13, iOS body 17 /
   // subheadline 15 / footnote 13.
   static const double listRowTitleSizeMac = 13;

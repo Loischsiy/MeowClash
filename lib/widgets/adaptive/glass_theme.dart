@@ -109,4 +109,75 @@ abstract final class GlassTheme {
       ),
     );
   }
+
+  /// Darwin overlay for controls inside a list row (the trailing buttons a
+  /// settings `ListItem` passes): Material buttons become Apple capsules —
+  /// filled / elevated / outlined ones accent-tinted as `GlassButton`, text
+  /// buttons plain accent text — so the call sites keep their widgets.
+  static ThemeData row(ThemeData base) {
+    final scheme = base.colorScheme;
+    final brightness = base.brightness;
+    final mac = defaultTargetPlatform == TargetPlatform.macOS;
+    ButtonStyle capsule(Color fill) => ButtonStyle(
+          minimumSize: WidgetStatePropertyAll(
+            Size(
+              0,
+              mac ? GlassTokens.buttonHeightMac : GlassTokens.buttonHeightIos,
+            ),
+          ),
+          padding: WidgetStatePropertyAll(
+            EdgeInsets.symmetric(
+              horizontal: mac
+                  ? GlassTokens.buttonPaddingMac
+                  : GlassTokens.buttonPaddingIos,
+            ),
+          ),
+          shape: const WidgetStatePropertyAll(StadiumBorder()),
+          side: const WidgetStatePropertyAll(BorderSide.none),
+          textStyle: WidgetStatePropertyAll(
+            GlassTextStyles.button(base.textTheme),
+          ),
+          elevation: const WidgetStatePropertyAll(0),
+          shadowColor: const WidgetStatePropertyAll(Colors.transparent),
+          surfaceTintColor: const WidgetStatePropertyAll(Colors.transparent),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          visualDensity: VisualDensity.standard,
+          splashFactory: NoSplash.splashFactory,
+          backgroundColor: WidgetStateProperty.resolveWith(
+            (states) => states.contains(WidgetState.disabled) &&
+                    fill != Colors.transparent
+                ? scheme.onSurface.withValues(
+                    alpha: GlassTokens.buttonTintOpacity(brightness),
+                  )
+                : fill,
+          ),
+          foregroundColor: WidgetStateProperty.resolveWith(
+            (states) => states.contains(WidgetState.disabled)
+                ? scheme.onSurface
+                    .withValues(alpha: GlassTokens.disabledOpacity)
+                : scheme.primary,
+          ),
+          overlayColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.pressed)) {
+              return scheme.onSurface.withValues(
+                  alpha: GlassTokens.menuPressedOpacity(brightness));
+            }
+            if (states.contains(WidgetState.hovered)) {
+              return scheme.onSurface
+                  .withValues(alpha: GlassTokens.hoverOpacity(brightness));
+            }
+            return Colors.transparent;
+          }),
+        );
+    final tinted = capsule(
+      scheme.primary
+          .withValues(alpha: GlassTokens.buttonTintOpacity(brightness)),
+    );
+    return base.copyWith(
+      filledButtonTheme: FilledButtonThemeData(style: tinted),
+      elevatedButtonTheme: ElevatedButtonThemeData(style: tinted),
+      outlinedButtonTheme: OutlinedButtonThemeData(style: tinted),
+      textButtonTheme: TextButtonThemeData(style: capsule(Colors.transparent)),
+    );
+  }
 }

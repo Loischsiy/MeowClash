@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 
+import 'adaptive_app_bar.dart';
 import 'adaptive_platform.dart';
 import 'glass_accessibility.dart';
 import 'glass_text_styles.dart';
@@ -27,6 +29,70 @@ double get _leadingGap =>
 Color _systemRed(Brightness brightness) => brightness == Brightness.dark
     ? CupertinoColors.systemRed.darkColor
     : CupertinoColors.systemRed.color;
+
+/// Marks a subtree laid out as an Apple grouped list ([GlassListView] or a
+/// [GlassListSection]). The app-wide `ListItem` / `ListHeader` render their
+/// Darwin rows only inside it, so lists that are not migrated (connections,
+/// logs, the dashboard mode radios) keep the Material tiles.
+class GlassListScope extends InheritedWidget {
+  const GlassListScope({
+    super.key,
+    this.inSection = false,
+    required super.child,
+  });
+
+  /// `true` inside the card of a [GlassListSection]; `false` directly in a
+  /// [GlassListView], where a lone row wraps itself in a section.
+  final bool inSection;
+
+  static GlassListScope? maybeOf(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<GlassListScope>();
+
+  @override
+  bool updateShouldNotify(GlassListScope oldWidget) =>
+      inSection != oldWidget.inSection;
+}
+
+/// A child of a [GlassListSection] that is not a [GlassListRow] but knows
+/// whether its row has a leading symbol (so the hairline above it starts at
+/// the text without waiting for the row to report it).
+abstract interface class GlassLeadingHint {
+  bool get hasGlassLeading;
+}
+
+/// Scroll view of an Apple grouped list: the [GlassListSection.listPadding]
+/// insets (plus the toolbar inset of pages that scroll under the bar) and
+/// [GlassListSection.gap] between the children, none right after a
+/// [GlassSectionHeader]. Never blurred. Darwin only.
+class GlassListView extends StatelessWidget {
+  const GlassListView({super.key, required this.children});
+
+  /// Usually [GlassListSection]s.
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    final padding = GlassListSection.listPadding;
+    return GlassListScope(
+      child: ListView.builder(
+        padding: padding.copyWith(
+          top: padding.top + AdaptiveAppBar.topInset(context),
+        ),
+        itemCount: children.length,
+        itemBuilder: (_, index) {
+          final child = children[index];
+          if (index == 0 || children[index - 1] is GlassSectionHeader) {
+            return child;
+          }
+          return Padding(
+            padding: EdgeInsets.only(top: GlassListSection.gap),
+            child: child,
+          );
+        },
+      ),
+    );
+  }
+}
 
 /// On/off switch.
 ///
@@ -137,11 +203,12 @@ class GlassSectionHeader extends StatelessWidget {
 ///
 /// Flat translucent fill, no blur; opaque with Reduce Transparency or the
 /// blur kill switch. Darwin only.
-class GlassListSection extends StatelessWidget {
+class GlassListSection extends StatefulWidget {
   const GlassListSection({
     super.key,
     required this.children,
     this.header,
+    this.headerSubtitle,
     this.headerTrailing,
     this.footer,
     this.dividerInset,
@@ -150,6 +217,9 @@ class GlassListSection extends StatelessWidget {
   /// Usually [GlassListRow]s.
   final List<Widget> children;
   final String? header;
+
+  /// Second header line in the footer style.
+  final String? headerSubtitle;
 
   /// Control at the end of the header line.
   final Widget? headerTrailing;
@@ -177,16 +247,52 @@ class GlassListSection extends StatelessWidget {
           vertical: GlassTokens.listInsetVerticalIos,
         );
 
-  double get _dividerInset {
-    final inset = dividerInset;
+  @override
+  State<GlassListSection> createState() => _GlassListSectionState();
+}
+
+class _GlassListSectionState extends State<GlassListSection> {
+  /// Leading symbols reported by rows the section cannot see directly (a
+  /// `ListItem` inside a wrapper widget), by child index.
+  final Map<int, bool> _reportedLeading = {};
+  bool _rebuildScheduled = false;
+
+  bool get _sectionHasLeading => widget.children.any(
+        (child) => switch (child) {
+          GlassListRow(leading: != null) => true,
+          GlassLeadingHint(hasGlassLeading: true) => true,
+          _ => false,
+        },
+      );
+
+  bool _leadingAt(int index) =>
+      _sectionHasLeading || (_reportedLeading[index] ?? false);
+
+  /// Called by a [GlassListRow] while it builds. A changed inset is applied
+  /// one frame later (the hairline above the row is already built).
+  void _report(int index, bool hasLeading) {
+    if (_reportedLeading[index] == hasLeading) return;
+    final before = _leadingAt(index);
+    _reportedLeading[index] = hasLeading;
+    if (before == _leadingAt(index) || _rebuildScheduled) return;
+    _rebuildScheduled = true;
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      _rebuildScheduled = false;
+      if (mounted) setState(() {});
+    });
+  }
+
+  double _dividerInset(int index) {
+    final inset = widget.dividerInset;
     if (inset != null) return inset;
-    final hasLeading =
-        children.any((child) => child is GlassListRow && child.leading != null);
-    return hasLeading ? _rowPadding + _leadingSize + _leadingGap : _rowPadding;
+    return _leadingAt(index)
+        ? _rowPadding + _leadingSize + _leadingGap
+        : _rowPadding;
   }
 
   @override
   Widget build(BuildContext context) {
+    final children = widget.children;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final brightness = theme.brightness;
@@ -206,22 +312,26 @@ class GlassListSection extends StatelessWidget {
           ? GlassTokens.listSectionRadiusMac
           : GlassTokens.listSectionRadiusIos,
     );
-    final separator = Padding(
-      padding: EdgeInsetsDirectional.only(start: _dividerInset),
-      child: SizedBox(
-        height: GlassTokens.hairlineWidth,
-        child: ColoredBox(color: separatorColor),
-      ),
-    );
+    Widget separator(int index) => Padding(
+          padding: EdgeInsetsDirectional.only(start: _dividerInset(index)),
+          child: SizedBox(
+            height: GlassTokens.hairlineWidth,
+            child: ColoredBox(color: separatorColor),
+          ),
+        );
 
-    final header = this.header;
-    final footer = this.footer;
+    final header = widget.header;
+    final footer = widget.footer;
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (header != null)
-          GlassSectionHeader(title: header, trailing: headerTrailing),
+          GlassSectionHeader(
+            title: header,
+            subtitle: widget.headerSubtitle,
+            trailing: widget.headerTrailing,
+          ),
         if (children.isNotEmpty)
           DecoratedBox(
             position: DecorationPosition.foreground,
@@ -241,15 +351,22 @@ class GlassListSection extends StatelessWidget {
               ),
               child: ClipRSuperellipse(
                 borderRadius: radius,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    for (var i = 0; i < children.length; i++) ...[
-                      if (i > 0) separator,
-                      children[i],
+                child: GlassListScope(
+                  inSection: true,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      for (var i = 0; i < children.length; i++) ...[
+                        if (i > 0) separator(i),
+                        _GlassSectionSlot(
+                          section: this,
+                          index: i,
+                          child: children[i],
+                        ),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
               ),
             ),
@@ -272,6 +389,21 @@ class GlassListSection extends StatelessWidget {
   }
 }
 
+/// Lets a row inside child [index] of a section report its leading symbol.
+class _GlassSectionSlot extends InheritedWidget {
+  const _GlassSectionSlot({
+    required this.section,
+    required this.index,
+    required super.child,
+  });
+
+  final _GlassListSectionState section;
+  final int index;
+
+  @override
+  bool updateShouldNotify(_GlassSectionSlot oldWidget) => false;
+}
+
 /// What a [GlassListRow] shows at its trailing edge after [GlassListRow.trailing].
 enum GlassRowAccessory {
   none,
@@ -281,6 +413,9 @@ enum GlassRowAccessory {
 
   /// The row is the current choice of a single-choice list.
   checkmark,
+
+  /// Opens a menu of choices (`chevron.up.chevron.down`).
+  popUp,
 }
 
 /// One row of a [GlassListSection]: leading symbol, title, optional
@@ -292,12 +427,14 @@ class GlassListRow extends StatefulWidget {
     required this.title,
     this.subtitle,
     this.leading,
+    this.value,
     this.trailing,
     this.accessory = GlassRowAccessory.none,
     this.onTap,
     this.onLongPress,
     this.selected = false,
     this.enabled = true,
+    this.destructive = false,
   });
 
   /// Usually a `Text`; styled by the row.
@@ -306,6 +443,11 @@ class GlassListRow extends StatefulWidget {
 
   /// Usually an `Icon`; drawn in the accent at the row symbol size.
   final Widget? leading;
+
+  /// The current value (usually a `Text`) in the secondary color before
+  /// [trailing]: one line, at most [GlassTokens.listRowValueMaxFraction] of
+  /// the row, ellipsized.
+  final Widget? value;
 
   /// A control (switch, button) or a secondary value text.
   final Widget? trailing;
@@ -316,6 +458,9 @@ class GlassListRow extends StatefulWidget {
   /// Reported to accessibility (single-choice lists).
   final bool selected;
   final bool enabled;
+
+  /// Removes or resets something: title and symbol in the system red.
+  final bool destructive;
 
   @override
   State<GlassListRow> createState() => _GlassListRowState();
@@ -342,6 +487,9 @@ class _GlassListRowState extends State<GlassListRow> {
     final enabled = widget.enabled;
     final disabled =
         scheme.onSurface.withValues(alpha: GlassTokens.disabledOpacity);
+    final slot = context.getInheritedWidgetOfExactType<_GlassSectionSlot>();
+    slot?.section._report(slot.index, widget.leading != null);
+    final red = _systemRed(brightness);
 
     final double washOpacity;
     if (!_interactive) {
@@ -358,8 +506,13 @@ class _GlassListRowState extends State<GlassListRow> {
             .withValues(alpha: GlassTokens.selectionOpacity(brightness))
         : scheme.onSurface.withValues(alpha: washOpacity);
 
-    final titleStyle = GlassTextStyles.listRowTitle(theme.textTheme)
-        .copyWith(color: enabled ? scheme.onSurface : disabled);
+    final titleStyle = GlassTextStyles.listRowTitle(theme.textTheme).copyWith(
+      color: !enabled
+          ? disabled
+          : widget.destructive
+              ? red
+              : scheme.onSurface,
+    );
     final secondaryStyle = GlassTextStyles.listRowSubtitle(theme.textTheme)
         .copyWith(color: enabled ? scheme.onSurfaceVariant : disabled);
     final chevronSize = _mac
@@ -368,61 +521,97 @@ class _GlassListRowState extends State<GlassListRow> {
 
     final leading = widget.leading;
     final subtitle = widget.subtitle;
+    final value = widget.value;
     final trailing = widget.trailing;
-    final row = Row(
-      children: [
-        if (leading != null) ...[
-          IconTheme.merge(
-            data: IconThemeData(
-              size: _leadingSize,
-              color: enabled ? scheme.primary : disabled,
-            ),
-            child: SizedBox.square(
-              dimension: _leadingSize,
-              child: Center(child: leading),
-            ),
-          ),
-          SizedBox(width: _leadingGap),
-        ],
-        Expanded(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              DefaultTextStyle.merge(style: titleStyle, child: widget.title),
-              if (subtitle != null) ...[
-                const SizedBox(height: GlassTokens.listRowSubtitleGap),
-                DefaultTextStyle.merge(style: secondaryStyle, child: subtitle),
-              ],
+    Widget buildRow(double maxValueWidth) => Row(
+          children: [
+            if (leading != null) ...[
+              IconTheme.merge(
+                data: IconThemeData(
+                  size: _leadingSize,
+                  color: !enabled
+                      ? disabled
+                      : widget.destructive
+                          ? red
+                          : scheme.primary,
+                ),
+                child: SizedBox.square(
+                  dimension: _leadingSize,
+                  child: Center(child: leading),
+                ),
+              ),
+              SizedBox(width: _leadingGap),
             ],
-          ),
-        ),
-        if (trailing != null) ...[
-          const SizedBox(width: GlassTokens.listRowTrailingGap),
-          DefaultTextStyle.merge(
-            style: titleStyle.copyWith(color: secondaryStyle.color),
-            child: trailing,
-          ),
-        ],
-        if (widget.accessory == GlassRowAccessory.chevron) ...[
-          const SizedBox(width: GlassTokens.listRowTrailingGap),
-          Icon(
-            Icons.chevron_right_rounded,
-            size: chevronSize,
-            color: scheme.onSurfaceVariant
-                .withValues(alpha: GlassTokens.listRowChevronOpacity),
-          ),
-        ],
-        if (widget.accessory == GlassRowAccessory.checkmark) ...[
-          const SizedBox(width: GlassTokens.listRowTrailingGap),
-          Icon(
-            Icons.check_rounded,
-            size: GlassTokens.optionCheckSize,
-            color: enabled ? scheme.primary : disabled,
-          ),
-        ],
-      ],
-    );
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  DefaultTextStyle.merge(
+                      style: titleStyle, child: widget.title),
+                  if (subtitle != null) ...[
+                    const SizedBox(height: GlassTokens.listRowSubtitleGap),
+                    DefaultTextStyle.merge(
+                        style: secondaryStyle, child: subtitle),
+                  ],
+                ],
+              ),
+            ),
+            if (value != null) ...[
+              const SizedBox(width: GlassTokens.listRowTrailingGap),
+              ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: maxValueWidth),
+                child: DefaultTextStyle.merge(
+                  style: titleStyle.copyWith(color: secondaryStyle.color),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.end,
+                  child: value,
+                ),
+              ),
+            ],
+            if (trailing != null) ...[
+              const SizedBox(width: GlassTokens.listRowTrailingGap),
+              DefaultTextStyle.merge(
+                style: titleStyle.copyWith(color: secondaryStyle.color),
+                child: trailing,
+              ),
+            ],
+            if (widget.accessory == GlassRowAccessory.popUp) ...[
+              const SizedBox(width: GlassTokens.buttonIconGap),
+              Icon(
+                Icons.unfold_more_rounded,
+                size: chevronSize,
+                color: scheme.onSurfaceVariant
+                    .withValues(alpha: GlassTokens.listRowChevronOpacity),
+              ),
+            ],
+            if (widget.accessory == GlassRowAccessory.chevron) ...[
+              const SizedBox(width: GlassTokens.listRowTrailingGap),
+              Icon(
+                Icons.chevron_right_rounded,
+                size: chevronSize,
+                color: scheme.onSurfaceVariant
+                    .withValues(alpha: GlassTokens.listRowChevronOpacity),
+              ),
+            ],
+            if (widget.accessory == GlassRowAccessory.checkmark) ...[
+              const SizedBox(width: GlassTokens.listRowTrailingGap),
+              Icon(
+                Icons.check_rounded,
+                size: GlassTokens.optionCheckSize,
+                color: enabled ? scheme.primary : disabled,
+              ),
+            ],
+          ],
+        );
+    final row = value == null
+        ? buildRow(double.infinity)
+        : LayoutBuilder(
+            builder: (_, constraints) => buildRow(
+              constraints.maxWidth * GlassTokens.listRowValueMaxFraction,
+            ),
+          );
 
     Widget content = AnimatedContainer(
       duration: GlassTokens.motion(

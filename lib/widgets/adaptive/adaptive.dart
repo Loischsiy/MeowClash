@@ -32,3 +32,4 @@ export 'glass_text_styles.dart';
 export 'glass_theme.dart';
 export 'glass_tokens.dart';
 export 'glass_toolbar_group.dart';
+export 'glass_window_appearance.dart';

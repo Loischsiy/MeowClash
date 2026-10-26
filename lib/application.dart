@@ -188,7 +188,7 @@ class ApplicationState extends ConsumerState<Application> {
                           ?.toARGB32() ??
                       themeProps.primaryColor
                   : themeProps.primaryColor;
-              return MaterialApp(
+              final app = MaterialApp(
                 debugShowCheckedModeBanner: false,
                 shortcuts: {
                   ...WidgetsApp.defaultShortcuts,
@@ -247,6 +247,14 @@ class ApplicationState extends ConsumerState<Application> {
                 )),
                 home: child,
               );
+              // macOS: the native sidebar material and menus follow the
+              // app's theme mode, not only the system's.
+              return AdaptivePlatform.useGlass
+                  ? GlassWindowAppearance(
+                      themeMode: themeProps.themeMode,
+                      child: app,
+                    )
+                  : app;
             },
             child: Consumer(
               builder: (_, ref, __) => SuspendableUi(

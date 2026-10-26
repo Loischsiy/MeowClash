@@ -140,6 +140,62 @@ void main() {
     });
   });
 
+  group('GlassWindowAppearance', () {
+    const channel = GlassAccessibilityController.channel;
+    final messenger =
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+    late List<Object?> modes;
+
+    setUp(() {
+      modes = [];
+      messenger.setMockMethodCallHandler(channel, (call) async {
+        if (call.method == 'setAppearance') {
+          modes.add((call.arguments as Map)['mode']);
+        }
+        return null;
+      });
+    });
+    tearDown(() => messenger.setMockMethodCallHandler(channel, null));
+
+    Widget host(ThemeMode mode) => GlassWindowAppearance(
+          themeMode: mode,
+          child: const SizedBox(),
+        );
+
+    testWidgets('macOS: sends the theme mode at start and on change',
+        (tester) async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
+      await tester.pumpWidget(host(ThemeMode.light));
+      expect(modes, ['light']);
+      await tester.pumpWidget(host(ThemeMode.light));
+      expect(modes, ['light'], reason: 'no call when nothing changed');
+      await tester.pumpWidget(host(ThemeMode.dark));
+      await tester.pumpWidget(host(ThemeMode.system));
+      expect(modes, ['light', 'dark', 'system']);
+      debugDefaultTargetPlatformOverride = null;
+    });
+
+    for (final platform in [TargetPlatform.iOS, TargetPlatform.android]) {
+      testWidgets('${platform.name}: never touches the channel',
+          (tester) async {
+        debugDefaultTargetPlatformOverride = platform;
+        await tester.pumpWidget(host(ThemeMode.light));
+        await tester.pumpWidget(host(ThemeMode.dark));
+        expect(modes, isEmpty);
+        debugDefaultTargetPlatformOverride = null;
+      });
+    }
+
+    testWidgets('survives an older runner without the method',
+        (tester) async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
+      messenger.setMockMethodCallHandler(channel, null);
+      await tester.pumpWidget(host(ThemeMode.dark));
+      expect(tester.takeException(), isNull);
+      debugDefaultTargetPlatformOverride = null;
+    });
+  });
+
   group('GlassSurface', () {
     Widget host(
       Widget child, {

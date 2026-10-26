@@ -24,7 +24,7 @@ const _chains = [
   ['Japan Tokyo 03 | IEPL', 'Auto', 'Streaming', 'Final'],
 ];
 
-/// Deterministic connection [i]; [start] stays a few hours back so
+/// Deterministic connection [i]; `start` stays a few hours back so
 /// `lastUpdateTimeDesc` reads the same for the whole run.
 Connection sampleConnection(int i) => Connection(
       id: 'c$i',

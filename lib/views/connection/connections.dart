@@ -6,6 +6,7 @@ import 'package:meowclash/enum/enum.dart';
 import 'package:meowclash/models/models.dart';
 import 'package:meowclash/providers/providers.dart';
 import 'package:meowclash/services/async_polling_loop.dart';
+import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:meowclash/widgets/visibility_polling.dart';
 import 'package:meowclash/widgets/widgets.dart';
 
@@ -89,6 +90,33 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
     await polling.refresh();
   }
 
+  /// Darwin: flat stream rows (hairlines inside the rows, no dividers), ↑/↓
+  /// traffic, close by ✕ / swipe / context menu; no blur anywhere.
+  Widget _buildGlassList(List<Connection> connections) => AdaptiveScrollbar(
+        controller: _scrollController,
+        child: ListView.builder(
+          controller: _scrollController,
+          // Scrolls under the glass toolbar (`scrollUnderToolbar` in
+          // home.dart).
+          padding: EdgeInsets.only(top: AdaptiveAppBar.topInset(context)),
+          itemCount: connections.length,
+          itemBuilder: (context, index) {
+            final connection = connections[index];
+            return ConnectionItem(
+              key: Key(connection.id),
+              connection: connection,
+              showTraffic: true,
+              onClickKeyword: (value) {
+                context.commonScaffoldState?.addKeyword(value);
+              },
+              onClose: () {
+                _handleBlockConnection(connection.id);
+              },
+            );
+          },
+        ),
+      );
+
   @override
   void dispose() {
     _connectionsStateNotifier.dispose();
@@ -103,9 +131,18 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
         builder: (_, state, __) {
           final connections = state.list;
           if (connections.isEmpty) {
-            return NullStatus(
+            final empty = AdaptiveEmptyState(
               label: appLocalizations.nullTip(appLocalizations.connections),
+              icon: Icons.cable_outlined,
             );
+            // Darwin: below the glass toolbar it scrolls under; 0 on Material.
+            final topInset = AdaptiveAppBar.topInset(context);
+            return topInset > 0
+                ? Padding(padding: EdgeInsets.only(top: topInset), child: empty)
+                : empty;
+          }
+          if (AdaptivePlatform.useGlass) {
+            return _buildGlassList(connections);
           }
           return CommonScrollBar(
             controller: _scrollController,

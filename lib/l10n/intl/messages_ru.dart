@@ -218,6 +218,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "clipboardImport": MessageLookupByLibrary.simpleMessage(
       "Импорт из буфера обмена",
     ),
+    "closeConnection": MessageLookupByLibrary.simpleMessage(
+      "Закрыть соединение",
+    ),
     "color": MessageLookupByLibrary.simpleMessage("Цвет"),
     "colorSchemes": MessageLookupByLibrary.simpleMessage("Цветовые схемы"),
     "columns": MessageLookupByLibrary.simpleMessage("Столбцы"),
@@ -241,6 +244,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "copyEnvVar": MessageLookupByLibrary.simpleMessage(
       "Копирование переменных окружения",
     ),
+    "copyHost": MessageLookupByLibrary.simpleMessage("Скопировать хост"),
     "copyLink": MessageLookupByLibrary.simpleMessage("Копировать ссылку"),
     "copySuccess": MessageLookupByLibrary.simpleMessage("Копирование успешно"),
     "core": MessageLookupByLibrary.simpleMessage("Ядро"),
@@ -362,6 +366,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "fileIsUpdate": MessageLookupByLibrary.simpleMessage(
       "Файл был изменён. Сохранить изменения?",
+    ),
+    "filterByProcess": MessageLookupByLibrary.simpleMessage(
+      "Фильтр по процессу",
     ),
     "filterSystemApp": MessageLookupByLibrary.simpleMessage(
       "Фильтровать системные приложения",

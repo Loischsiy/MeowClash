@@ -39,6 +39,9 @@ pixel-for-pixel. Code: `lib/widgets/adaptive/` (import `adaptive.dart`).
   `GlassSpringCurve` (`sideSheetSpring*`) and leaves on an ease via `SideSheetMotion`. Never fade a
   glass page (`Opacity` over `BackdropFilter`). Material keeps `CommonRoute` / `CommonDesktopRoute` and
   the stock 300/200 ms side sheet (`motion: null`). Pinned by `test/adaptive_settings_motion_test.dart`.
+- Specular rim (`_GlassRimPainter`): light = 1 pt white 0.72 → 0.10 (unchanged, liked on device); dark
+  = 0.5 pt (one Retina pixel) white 0.12 → 0.03 (`GlassTokens.rimWidth/rimTopOpacity/rimBottomOpacity`).
+  A full 1 pt rim at 0.26 read as a gray frame around dark side sheets and dialogs.
 - All numbers (sigmas, radii, opacities, sizes, durations) live in `glass_tokens.dart`.
 
 ## Toolbar (app bar)
@@ -61,14 +64,24 @@ pixel-for-pixel. Code: `lib/widgets/adaptive/` (import `adaptive.dart`).
   still keeps `toolbarMinTopInsetIos` above the capsules. Bar height always comes from
   `AdaptiveAppBar.preferredHeight`; pages read it only through `AdaptiveAppBar.topInset` (MediaQuery).
 - A capsule inside an already blurring surface (e.g. `CommonScaffold` in a glass sheet) switches to
-  `GlassBackdrop.native` via `GlassSurface.isOverBlur` — never blur over blur.
+  `GlassBackdrop.native` via `GlassSurface.isOverBlur` — never blur over blur. Its fill is then
+  `GlassTokens.toolbarItemTintOverGlass` (light 0.18 = the native wash, dark 0.56) so in dark it reads as
+  a filled disc, not a bare rim (`GlassSurface.tintOpacity` now applies to both backdrops).
+- Close glyph: `GlassCloseIcon` (SF `xmark`, round caps, `closeGlyphSpan/Stroke` of the icon size).
+  `GlassTheme.apply` installs it via `ActionIconThemeData.closeButtonIconBuilder`, so every Material
+  `CloseButton` / `CloseButtonIcon` on Darwin draws it; Material keeps `Icons.close`. Use
+  `CloseButtonIcon()` (or `GlassCloseIcon` in glass-only code) for new Darwin close buttons.
 - Scrolling under the bar is **opt-in per page**: `CommonScaffold(scrollUnderToolbar: true)` →
   `extendBodyBehindAppBar`, `SafeArea(top: false)` and the bar's scroll-edge fade (a gradient in the
   window color, `toolbarFade*`, no blur, `IgnorePointer`). The page must pad its scroll view with
   `AdaptiveAppBar.topInset(context)` (0 on Material and on pages that do not opt in). Keyword chips stay
-  below the bar and remove the top padding for the page under them. Home opts in per tab via
-  `_scrollUnderToolbarPages` in `lib/pages/home.dart` (currently Tools, Proxies and Profiles); other pages keep their own
-  top padding, which would hide content under the bar if enabled globally.
+  below the bar and remove the top padding for the page under them. Home opts in per page via
+  `scrollUnderToolbarPages` in `lib/common/navigation.dart` (Tools, Proxies, Profiles, Requests,
+  Connections, Logs); other pages keep their own top padding, which would hide content under the bar if
+  enabled globally. On iPhone, Requests / Connections / Logs are pushed from the Tools "More" section:
+  `tools.dart` sets `OpenDelegate.scrollUnderToolbar` from the same set and `_showGlassPage`
+  (`lib/widgets/list.dart`) then pushes `CommonScaffold.open(scrollUnderToolbar: true)` inside
+  `SafeArea(top: false)` — a new pushed page needs the same flag, not only the Home set.
 - Fallbacks: `opaque` → solid window-colored bar + hairline, no fade, opaque capsules. Nothing in the bar
   animates (no `Opacity` above the capsules), and with Reduce Motion the search hint does not fade.
 - Tests: `test/adaptive_toolbar_test.dart` (layout, blur count, search, back, drag, scroll-under,
@@ -132,8 +145,8 @@ pixel-for-pixel. Code: `lib/widgets/adaptive/` (import `adaptive.dart`).
   glass checks live in `test/adaptive_profile_editors_glass_test.dart`.
 - Settings (app-wide `ListItem`, `lib/widgets/list.dart`): `ListItem`, `ListHeader`, `generateSection(V2)`
   and `generateListView` render `GlassListRow` / `GlassListSection` only inside a `GlassListScope`
-  (`GlassListView` provides it); outside it they stay Material verbatim, so connections, logs and the
-  dashboard mode radios are untouched. `_groupGlassSections` turns a flat header + items list into
+  (`GlassListView` provides it); outside it they stay Material verbatim, so the dashboard mode radios are
+  untouched (connections and logs have their own flat rows, see below). `_groupGlassSections` turns a flat header + items list into
   sections. Row kinds: `options` → `GlassPopUpButton` with the value at the trailing edge (macOS
   `NSMenu`, iOS glass menu); `input` → value + chevron; `open` / `next` → chevron (phone: `GlassPageRoute` push,
   desktop: `showExtend` side sheet on the spring); `switch` → `AdaptiveSwitch`; `radio` / `checkbox` →
@@ -149,6 +162,33 @@ pixel-for-pixel. Code: `lib/widgets/adaptive/` (import `adaptive.dart`).
   `test/adaptive_settings_glass_test.dart` (rows, fallbacks, long list without blur),
   `test/adaptive_settings_pages_glass_test.dart`, `test/adaptive_settings_motion_test.dart`; shared host
   `test/settings_test_support.dart`.
+- Connections & Logs (`lib/views/connection/{requests,connections,item}.dart`, `lib/views/logs.dart`):
+  long live lists, so rows are flat `GlassStreamRow`s (`glass_stream_row.dart`: transparent, hairline
+  from the text, hover / press tint, `onContextMenu(globalPosition)` = right click / long press,
+  `swipeAction` iOS only) — never a card, section or blur per row. Tags are `GlassTag`s
+  (`glass_tag.dart`: small capsule without blur, neutral / accent / colored; `large` + ✕ = the keyword
+  filter that `CommonScaffold` draws below the bar on Darwin). A connection row: host
+  (`listRowTitle`), "process · time", ↑/↓ traffic (`streamMetric`, live Connections only:
+  `showTraffic`), the chain as tags (tap = keyword filter). One menu for both (`AdaptiveMenuEntry`:
+  Copy Host, Filter by Process, Close Connection `destructive`): macOS — ✕ at the trailing edge + the
+  native right-click `NSMenu`; iOS — long swipe to close + the long-press glass menu.
+  The dead Chinese `CommonPopupBox` stays in the Material branch only. A log row: `SelectableText`
+  payload in `GlassTextStyles.logPayload` (`.AppleSystemUIFontMonospaced`, fallback Menlo / Courier),
+  then the level tag (debug / silent gray, info blue, warning orange, error red, app accent; tap =
+  filter) and the time. Row heights are precomputed and cached in `globalState.cacheHeightMap[tag]`:
+  on Darwin they come from the same styles via `ConnectionItem.glassExtent` / `_GlassLogItem.extentOf`
+  (`GlassStreamRow.extentOf`, `contentWidth − selectableCaretReserve` for the payload) — change the row
+  and its extent together, and clear the tag's cache in tests that flip the platform. Empty →
+  `AdaptiveEmptyState`, loading → `AdaptiveActivityIndicator` (never `NullStatus` /
+  `CircularProgressIndicator` on Darwin), scrollbar → `AdaptiveScrollbar` (Material = `CommonScrollBar`
+  verbatim, iOS Cupertino, macOS thin auto-hiding overlay). `ScrollToEndBox` jumps instead of animating
+  with Reduce Motion. The reversed lists pad with `AdaptiveAppBar.topInset` through
+  `CacheItemExtentListView(padding:)` (null on Material). Material: `test/material_connections_logs_golden_test.dart`;
+  glass: `test/adaptive_connections_logs_glass_test.dart` (extents incl. 1.5× text, 1000 logs without
+  blur, filters, closing, fallbacks, scrolling under the bar); frame times of 1000 logs glass vs
+  Material: `test/connections_logs_performance_test.dart` (printed, not asserted); shared host
+  `test/connections_logs_test_support.dart`. In tests the list is the `Scrollable` with
+  `axisDirection == AxisDirection.up` — every `SelectableText` has its own `Scrollable`.
 - Dialogs (`lib/widgets/adaptive/adaptive_dialog.dart`): on Darwin `showCommonDialog` goes through
   `showGlassDialog` / `GlassDialogRoute` and `CommonDialog` / `CommonModal` render `GlassDialog` /
   `GlassModalPanel` — one `GlassSurface` each, no blur behind. `dialogBarrierColor`: macOS does not dim
@@ -200,6 +240,11 @@ pixel-for-pixel. Code: `lib/widgets/adaptive/` (import `adaptive.dart`).
   Material icons to SF Symbols in `AdaptiveContextMenu.sfSymbolFor`. macOS 27 hides symbol images in
   menus by default (`NSMenuItem.preferredImageVisibility = .automatic`); this is kept on purpose to match
   the system. Falls back to the Flutter menu when the channel is missing.
+- App theme → window appearance: `GlassWindowAppearance` (wraps `MaterialApp` in `application.dart` on
+  Darwin) sends `setAppearance {mode: system|light|dark}` over `meowclash/glass_accessibility` and
+  `AppDelegate.swift` sets `NSApp.appearance` (nil / `.aqua` / `.darkAqua`). Without it the native
+  sidebar material and `NSMenu`s follow the *system* theme: dark system + light app = gray sidebar.
+  iOS never calls it; an older runner without the method is ignored. Swift changes need an app rebuild.
 - New Swift code goes into existing files (a new file needs a `project.pbxproj` entry).
 
 ## iOS specifics

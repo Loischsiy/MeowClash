@@ -73,6 +73,13 @@ class AppDelegate: FlutterAppDelegate {
             switch call.method {
             case "snapshot":
                 result(self?.glassAccessibilitySnapshot())
+            case "setAppearance":
+                // The app's own light / dark choice. The sidebar material
+                // and NSMenus are AppKit and would otherwise follow the
+                // system appearance (lib/widgets/adaptive/glass_window_appearance.dart).
+                let mode = (call.arguments as? [String: Any])?["mode"] as? String
+                NSApp.appearance = Self.appearance(forMode: mode)
+                result(nil)
             default:
                 result(FlutterMethodNotImplemented)
             }
@@ -133,6 +140,18 @@ class AppDelegate: FlutterAppDelegate {
             ) { index in
                 result(index)
             }
+        }
+    }
+
+    /// `nil` follows the system appearance.
+    static func appearance(forMode mode: String?) -> NSAppearance? {
+        switch mode {
+        case "light":
+            return NSAppearance(named: .aqua)
+        case "dark":
+            return NSAppearance(named: .darkAqua)
+        default:
+            return nil
         }
     }
 

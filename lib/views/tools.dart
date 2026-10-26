@@ -38,6 +38,8 @@ class _ToolboxViewState extends ConsumerState<ToolsView> {
       delegate: OpenDelegate(
         title: Intl.message(navigationItem.label.name),
         widget: navigationItem.view,
+        scrollUnderToolbar:
+            scrollUnderToolbarPages.contains(navigationItem.label),
       ),
     );
 

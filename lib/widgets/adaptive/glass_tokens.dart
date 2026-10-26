@@ -23,12 +23,15 @@ abstract final class GlassTokens {
   static const double _nativeBackdropTintLight = 0.18;
   static const double _nativeBackdropTintDark = 0.14;
 
-  // Specular rim: a 1px edge, brighter at the top, as light catches glass.
-  static const double rimWidth = 1;
+  // Specular rim: a thin edge, brighter at the top, as light catches glass.
+  // Dark glass keeps it to a faint single device pixel on Retina: a full 1pt
+  // white edge reads as a gray frame on a dark window.
+  static const double _rimWidthLight = 1;
+  static const double _rimWidthDark = 0.5;
   static const double _rimTopOpacityLight = 0.72;
-  static const double _rimTopOpacityDark = 0.26;
+  static const double _rimTopOpacityDark = 0.12;
   static const double _rimBottomOpacityLight = 0.10;
-  static const double _rimBottomOpacityDark = 0.05;
+  static const double _rimBottomOpacityDark = 0.03;
 
   // Hairline separating chrome from content (title bar, tab bar, sidebar).
   static const double hairlineWidth = 0.5;
@@ -231,6 +234,16 @@ abstract final class GlassTokens {
   static const double toolbarIconSizeMac = 17;
   static const double toolbarIconSizeIos = 20;
   static const double toolbarItemSigma = 16;
+  // Tint of a capsule painted inside a glass sheet, where it must not blur
+  // again. Dark glass needs a denser fill to read as a filled disc (Apple's
+  // sheet close button) rather than a bare rim; light stays at the native
+  // wash, which already reads white.
+  static const double _toolbarItemTintOverGlassLight = 0.18;
+  static const double _toolbarItemTintOverGlassDark = 0.56;
+  // SF Symbols `xmark` of close buttons, as fractions of the icon size: the
+  // span of each stroke and its width.
+  static const double closeGlyphSpan = 0.6;
+  static const double closeGlyphStroke = 0.1;
   // Search field capsule (search mode): magnifier, text, clear button.
   static const double toolbarSearchSizeMac = 13;
   static const double toolbarSearchLineMac = 16;
@@ -611,6 +624,79 @@ abstract final class GlassTokens {
   static const double _buttonTintOpacityLight = 0.12;
   static const double _buttonTintOpacityDark = 0.22;
 
+  // Tags: small capsules inside long lists (proxy chain, log level) and the
+  // keyword filters above them. Never blurred: a faint neutral, accent or
+  // system-color wash only. `Large` is the removable filter capsule.
+  static const double tagHeightMac = 18;
+  static const double tagHeightIos = 22;
+  static const double tagLargeHeightMac = 24;
+  static const double tagLargeHeightIos = 30;
+  static const double tagPaddingMac = 7;
+  static const double tagPaddingIos = 8;
+  static const double tagLargePaddingMac = 10;
+  static const double tagLargePaddingIos = 12;
+  static const double tagGap = 6;
+  static const double tagTextSizeMac = 11;
+  static const double tagTextLineMac = 14;
+  static const double tagTextSizeIos = 13;
+  static const double tagTextLineIos = 18;
+  static const double tagLargeTextSizeMac = 12;
+  static const double tagLargeTextLineMac = 16;
+  static const double tagLargeTextSizeIos = 15;
+  static const double tagLargeTextLineIos = 20;
+  static const double tagRemoveIconSizeMac = 12;
+  static const double tagRemoveIconSizeIos = 15;
+  static const double tagRemoveGap = 4;
+  static const double _tagFillOpacityLight = 0.06;
+  static const double _tagFillOpacityDark = 0.12;
+  static const double _tagTintOpacityLight = 0.14;
+  static const double _tagTintOpacityDark = 0.24;
+  // Keyword filter bar above a stream page.
+  static const double filterBarPaddingMac = 12;
+  static const double filterBarPaddingIos = 16;
+  static const double filterBarVerticalPadding = 8;
+
+  // Stream rows: flat rows of long live lists (requests, connections, logs),
+  // like Console.app / Mail — on the window background, no card, a hairline
+  // from the row text to the trailing edge. Fixed heights so the lists can
+  // use item extents.
+  static const double streamRowPaddingMac = 16;
+  static const double streamRowPaddingIos = 16;
+  static const double streamRowVerticalPaddingMac = 8;
+  static const double streamRowVerticalPaddingIos = 10;
+  static const double streamRowLineGap = 2;
+  static const double streamRowTagGapMac = 6;
+  static const double streamRowTagGapIos = 8;
+  static const double streamRowTrailingGap = 8;
+  static const double streamRowCloseSizeMac = 24;
+  static const double streamRowCloseSizeIos = 30;
+  static const double streamRowCloseIconSizeMac = 14;
+  static const double streamRowCloseIconSizeIos = 17;
+  // `SelectableText` lays its text out narrower than its box by the caret
+  // (`RenderEditable`: 1 px gap + 2 px cursor). Measured heights subtract it.
+  static const double selectableCaretReserve = 3;
+  // iOS trailing swipe action ("Close"), as in Mail.
+  static const double swipeActionWidth = 84;
+  // A swipe past this share of the row width runs the action at once.
+  static const double swipeActionFullFraction = 0.6;
+  static const Duration swipeSettleDuration = Duration(milliseconds: 250);
+
+  // Overlay scrollbar of long lists. macOS: the thin AppKit overlay scroller
+  // that fades out when the list rests; iOS: `CupertinoScrollbar` (its own
+  // metrics).
+  static const double scrollbarThicknessMac = 6;
+  static const double scrollbarMarginMac = 3;
+  static const double _scrollbarOpacityLight = 0.38;
+  static const double _scrollbarOpacityDark = 0.42;
+  static const Duration scrollbarFadeDuration = Duration(milliseconds: 200);
+  static const Duration scrollbarTimeToFade = Duration(milliseconds: 900);
+
+  // Further system colors (log levels: debug gray, info blue).
+  static const Color _systemBlueLight = Color(0xFF007AFF);
+  static const Color _systemBlueDark = Color(0xFF0A84FF);
+  static const Color _systemGrayLight = Color(0xFF8E8E93);
+  static const Color _systemGrayDark = Color(0xFF98989D);
+
   // Shadows cast by floating glass (tab bar, menus, sheets).
   static const List<BoxShadow> _floatingShadowLight = [
     BoxShadow(
@@ -667,6 +753,9 @@ abstract final class GlassTokens {
 
   static double nativeBackdropTint(Brightness brightness) =>
       _isDark(brightness) ? _nativeBackdropTintDark : _nativeBackdropTintLight;
+
+  static double rimWidth(Brightness brightness) =>
+      _isDark(brightness) ? _rimWidthDark : _rimWidthLight;
 
   static double rimTopOpacity(Brightness brightness) =>
       _isDark(brightness) ? _rimTopOpacityDark : _rimTopOpacityLight;
@@ -737,6 +826,21 @@ abstract final class GlassTokens {
   static Color systemRed(Brightness brightness) =>
       _isDark(brightness) ? _systemRedDark : _systemRedLight;
 
+  static Color systemBlue(Brightness brightness) =>
+      _isDark(brightness) ? _systemBlueDark : _systemBlueLight;
+
+  static Color systemGray(Brightness brightness) =>
+      _isDark(brightness) ? _systemGrayDark : _systemGrayLight;
+
+  static double tagFillOpacity(Brightness brightness) =>
+      _isDark(brightness) ? _tagFillOpacityDark : _tagFillOpacityLight;
+
+  static double tagTintOpacity(Brightness brightness) =>
+      _isDark(brightness) ? _tagTintOpacityDark : _tagTintOpacityLight;
+
+  static double scrollbarOpacity(Brightness brightness) =>
+      _isDark(brightness) ? _scrollbarOpacityDark : _scrollbarOpacityLight;
+
   static double sliderTrackOpacity(Brightness brightness) =>
       _isDark(brightness) ? _sliderTrackOpacityDark : _sliderTrackOpacityLight;
 
@@ -788,6 +892,11 @@ abstract final class GlassTokens {
 
   static double toolbarFadeOpacity(Brightness brightness) =>
       _isDark(brightness) ? _toolbarFadeOpacityDark : _toolbarFadeOpacityLight;
+
+  static double toolbarItemTintOverGlass(Brightness brightness) =>
+      _isDark(brightness)
+          ? _toolbarItemTintOverGlassDark
+          : _toolbarItemTintOverGlassLight;
 
   static List<BoxShadow> toolbarItemShadow(Brightness brightness) =>
       _isDark(brightness) ? _toolbarItemShadowDark : _toolbarItemShadowLight;

@@ -3,6 +3,19 @@ import 'package:meowclash/models/models.dart';
 import 'package:meowclash/views/views.dart';
 import 'package:flutter/material.dart';
 
+/// Pages whose scroll view adds `AdaptiveAppBar.topInset` and so may scroll
+/// under the Darwin glass toolbar, both as a home page (sidebar / tab) and
+/// when pushed from "More" on iPhone. Opt-in: other pages keep their own top
+/// padding and would hide content under the bar.
+const scrollUnderToolbarPages = {
+  PageLabel.tools,
+  PageLabel.proxies,
+  PageLabel.profiles,
+  PageLabel.requests,
+  PageLabel.connections,
+  PageLabel.logs,
+};
+
 class Navigation {
 
   factory Navigation() {

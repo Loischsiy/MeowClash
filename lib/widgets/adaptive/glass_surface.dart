@@ -62,7 +62,7 @@ class GlassSurface extends StatelessWidget {
   /// Fill used when glass is disabled. Defaults to the theme surface color.
   final Color? opaqueColor;
 
-  /// Draw the 1px specular edge.
+  /// Draw the specular edge ([GlassTokens.rimWidth]).
   final bool rim;
 
   /// Cast [GlassTokens.floatingShadow] around the shape (floating chrome).
@@ -78,8 +78,9 @@ class GlassSurface extends StatelessWidget {
   /// blur. The iOS tab bar is the only user.
   final GlassRefraction? refraction;
 
-  /// Alpha of the tint over the blur; defaults to
-  /// [GlassTokens.tintOpacity]. Denser panels (dialogs) pass their own.
+  /// Alpha of the tint; defaults to [GlassTokens.tintOpacity] over the blur
+  /// and [GlassTokens.nativeBackdropTint] over native glass. Denser panels
+  /// (dialogs, capsules inside a glass sheet) pass their own.
   final double? tintOpacity;
 
   /// How far the surface has appeared, 0..1. Below 1 the blur strength, the
@@ -109,10 +110,11 @@ class GlassSurface extends StatelessWidget {
       final solid = opaqueColor ?? theme.colorScheme.surface;
       fill = presence == 1 ? solid : solid.withValues(alpha: solid.a * presence);
     } else {
-      final alpha = switch (backdrop) {
-        GlassBackdrop.blur => tintOpacity ?? GlassTokens.tintOpacity(brightness),
-        GlassBackdrop.native => GlassTokens.nativeBackdropTint(brightness),
-      };
+      final alpha = tintOpacity ??
+          switch (backdrop) {
+            GlassBackdrop.blur => GlassTokens.tintOpacity(brightness),
+            GlassBackdrop.native => GlassTokens.nativeBackdropTint(brightness),
+          };
       fill = base.withValues(alpha: alpha * presence);
     }
     final sigma = this.sigma * presence;
@@ -230,7 +232,7 @@ class _GlassFillPainter extends CustomPainter {
       oldDelegate.color != color || oldDelegate.borderRadius != borderRadius;
 }
 
-/// A 1px edge that is brighter at the top, as light catches real glass.
+/// A thin edge that is brighter at the top, as light catches real glass.
 class _GlassRimPainter extends CustomPainter {
   const _GlassRimPainter({
     required this.borderRadius,
@@ -247,7 +249,7 @@ class _GlassRimPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     if (presence == 0) return;
-    const width = GlassTokens.rimWidth;
+    final width = GlassTokens.rimWidth(brightness);
     final rect = (Offset.zero & size).deflate(width / 2);
     Color top;
     Color bottom;

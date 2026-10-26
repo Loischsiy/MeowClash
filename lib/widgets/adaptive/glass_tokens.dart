@@ -788,6 +788,51 @@ abstract final class GlassTokens {
   // Cross-fade when a tile swaps its content (loading → value → error).
   static const Duration widgetContentFadeDuration = Duration(milliseconds: 200);
 
+  // Start/Stop button (the cat). The shape and the cat stay; the fill is a
+  // system color: green when connected, a neutral gray fill (secondarySystem
+  // Fill) when idle and an accent tint while connecting. A press dims the fill
+  // instead of scaling the button.
+  /// Minimum height: the button grows with larger text instead of clipping.
+  static const double startButtonHeight = 96;
+  static const double startButtonMargin = 16;
+  static const double startButtonRadiusMac = 16;
+  static const double startButtonRadiusIos = 22;
+  static const double startButtonPaddingH = 16;
+  static const double startButtonPaddingV = 8;
+  static const double startButtonCatSize = 80;
+  static const double startButtonCatGap = 12;
+  static const double startButtonTitleGap = 4;
+  static const double startButtonActionGap = 4;
+  // Title: title2 on macOS (17/22), title3 on iOS (20/25), semibold.
+  static const double startButtonTitleSizeMac = 17;
+  static const double startButtonTitleLineMac = 22;
+  static const double startButtonTitleSizeIos = 20;
+  static const double startButtonTitleLineIos = 25;
+  // Status line: body on macOS (13/16), subheadline on iOS (15/20).
+  static const double startButtonStatusSizeMac = 13;
+  static const double startButtonStatusLineMac = 16;
+  static const double startButtonStatusSizeIos = 15;
+  static const double startButtonStatusLineIos = 20;
+
+  /// Opacity of the status line under the title.
+  static const double startButtonStatusOpacity = 0.85;
+  static const Color _startButtonIdleBase = Color(0xFF787880);
+  static const double _startButtonIdleOpacityLight = 0.16;
+  static const double _startButtonIdleOpacityDark = 0.32;
+  static const double _startButtonConnectingOpacityLight = 0.16;
+  static const double _startButtonConnectingOpacityDark = 0.28;
+
+  /// Opacity of the whole button while pressed.
+  static const double startButtonPressedOpacity = 0.8;
+
+  /// The cat's eyes on the green fill.
+  static const Color startButtonCatAccentConnected = Color(0xFFFFE082);
+  static const Color startButtonForegroundConnected = Color(0xFFFFFFFF);
+
+  /// Letter spacing of the "···" progress dots while connecting.
+  static const double startButtonDotsSpacing = 4;
+  static const Duration startButtonFillDuration = Duration(milliseconds: 350);
+
   // Segmented control (dashboard mode picker), as in System Settings: a
   // recessed capsule track and a neutral raised thumb — never the accent.
   static const double segmentedHeightMac = 24;
@@ -1003,6 +1048,25 @@ abstract final class GlassTokens {
   /// Sent traffic (↑) in dashboard charts.
   static Color chartUpload(Brightness brightness) =>
       _isDark(brightness) ? _systemOrangeDark : _systemOrangeLight;
+
+  static double startButtonRadius({required bool mac}) =>
+      mac ? startButtonRadiusMac : startButtonRadiusIos;
+
+  /// Fill of the idle Start button: a neutral system fill, never the accent.
+  static Color startButtonIdleFill(Brightness brightness) =>
+      _startButtonIdleBase.withValues(
+        alpha: _isDark(brightness)
+            ? _startButtonIdleOpacityDark
+            : _startButtonIdleOpacityLight,
+      );
+
+  /// Fill of the Start button while connecting / disconnecting.
+  static Color startButtonConnectingFill(Color accent, Brightness brightness) =>
+      accent.withValues(
+        alpha: _isDark(brightness)
+            ? _startButtonConnectingOpacityDark
+            : _startButtonConnectingOpacityLight,
+      );
 
   static Duration motion(Duration duration, {required bool reduceMotion}) =>
       reduceMotion ? Duration.zero : duration;

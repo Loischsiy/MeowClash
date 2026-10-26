@@ -6,6 +6,7 @@ import 'package:meowclash/common/common.dart';
 import 'package:meowclash/enum/enum.dart';
 import 'package:meowclash/providers/providers.dart';
 import 'package:meowclash/state.dart';
+import 'package:meowclash/widgets/adaptive/adaptive.dart';
 
 enum CatConnectionPhase {
   idle,
@@ -43,7 +44,7 @@ class _StartButtonState extends ConsumerState<StartButton>
     _ambientController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 4),
-    )..repeat();
+    );
 
     _phaseController = AnimationController(
       vsync: this,
@@ -76,6 +77,25 @@ class _StartButtonState extends ConsumerState<StartButton>
       },
       fireImmediately: true,
     );
+  }
+
+  /// Darwin with Reduce Motion: the cat sits still and swaps poses without the
+  /// morph. Material always animates, as before.
+  bool _reduceMotion = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _reduceMotion = AdaptivePlatform.useGlass &&
+        GlassAccessibility.of(context).reduceMotion;
+    if (_reduceMotion) {
+      _ambientController
+        ..stop()
+        ..value = 0;
+      _phaseController.value = 1;
+    } else if (!_ambientController.isAnimating) {
+      _ambientController.repeat();
+    }
   }
 
   @override
@@ -119,6 +139,10 @@ class _StartButtonState extends ConsumerState<StartButton>
           ? DateTime.now()
           : null;
     });
+    if (_reduceMotion) {
+      _phaseController.value = 1;
+      return;
+    }
     _phaseController
       ..stop()
       ..forward(from: 0);
@@ -157,6 +181,9 @@ class _StartButtonState extends ConsumerState<StartButton>
     final state = ref.watch(startButtonSelectorStateProvider);
     if (!state.isInit || !state.hasProfile) {
       return Container();
+    }
+    if (AdaptivePlatform.useGlass) {
+      return _buildGlass(context);
     }
 
     final colorScheme = Theme.of(context).colorScheme;
@@ -277,6 +304,125 @@ class _StartButtonState extends ConsumerState<StartButton>
     );
   }
 
+  /// Darwin: the same shape and cat on a system fill — green when connected,
+  /// a neutral gray when idle, an accent tint while connecting. A press dims
+  /// the button instead of scaling it.
+  Widget _buildGlass(BuildContext context) {
+    final theme = Theme.of(context);
+    final brightness = theme.brightness;
+    final accent = theme.colorScheme.primary;
+    final mac = AdaptivePlatform.isMacOSGlass;
+    final (fill, foreground, catAccent) = switch (_phase) {
+      CatConnectionPhase.idle => (
+          GlassTokens.startButtonIdleFill(brightness),
+          theme.colorScheme.onSurface,
+          accent,
+        ),
+      CatConnectionPhase.connecting || CatConnectionPhase.disconnecting => (
+          GlassTokens.startButtonConnectingFill(accent, brightness),
+          theme.colorScheme.onSurface,
+          accent,
+        ),
+      CatConnectionPhase.connected => (
+          GlassTokens.systemGreen(brightness),
+          GlassTokens.startButtonForegroundConnected,
+          GlassTokens.startButtonCatAccentConnected,
+        ),
+    };
+
+    return Padding(
+      padding: const EdgeInsets.all(GlassTokens.startButtonMargin),
+      child: Semantics(
+        button: true,
+        container: true,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTapDown: _onTapDown,
+          onTapUp: _onTapUp,
+          onTapCancel: _onTapCancel,
+          onTap: _handleTap,
+          child: AnimatedBuilder(
+            animation: Listenable.merge([
+              _ambientController,
+              _phaseController,
+              _pressController,
+            ]),
+            builder: (context, _) => Opacity(
+              opacity: 1 -
+                  (1 - GlassTokens.startButtonPressedOpacity) *
+                      _pressController.value,
+              child: AnimatedContainer(
+                duration: GlassTokens.motion(
+                  GlassTokens.startButtonFillDuration,
+                  reduceMotion: _reduceMotion,
+                ),
+                curve: Curves.easeOutCubic,
+                width: double.infinity,
+                constraints: const BoxConstraints(
+                  minHeight: GlassTokens.startButtonHeight,
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: GlassTokens.startButtonPaddingH,
+                  vertical: GlassTokens.startButtonPaddingV,
+                ),
+                decoration: BoxDecoration(
+                  color: fill,
+                  borderRadius: BorderRadius.circular(
+                    GlassTokens.startButtonRadius(mac: mac),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    SizedBox.square(
+                      dimension: GlassTokens.startButtonCatSize,
+                      child: CustomPaint(
+                        painter: _CatPainter(
+                          phase: _phase,
+                          previousPhase: _previousPhase,
+                          phaseProgress: _phaseAnimation.value,
+                          ambient: _ambientController.value,
+                          foregroundColor: foreground,
+                          accentColor: catAccent,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: GlassTokens.startButtonCatGap),
+                    Expanded(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _phaseTitle(),
+                            style: GlassTextStyles.startButtonTitle(
+                              theme.textTheme,
+                            ).copyWith(color: foreground),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(
+                            height: GlassTokens.startButtonTitleGap,
+                          ),
+                          _StatusLine(
+                            phase: _phase,
+                            foregroundColor: foreground,
+                            ambient: _ambientController.value,
+                            glass: true,
+                            reduceMotion: _reduceMotion,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   String _phaseTitle() {
     switch (_phase) {
       case CatConnectionPhase.idle:
@@ -294,14 +440,96 @@ class _StatusLine extends ConsumerWidget {
     required this.phase,
     required this.foregroundColor,
     required this.ambient,
+    this.glass = false,
+    this.reduceMotion = false,
   });
 
   final CatConnectionPhase phase;
   final Color foregroundColor;
   final double ambient;
 
+  /// Darwin: SF text scale, Glass buttons for the TUN error, no cross-fade.
+  final bool glass;
+
+  /// Darwin with Reduce Motion: the progress dots stand still.
+  final bool reduceMotion;
+
+  Widget _buildGlass(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final mac = AdaptivePlatform.isMacOSGlass;
+    final style = GlassTextStyles.startButtonStatus(theme.textTheme).copyWith(
+      color: foregroundColor.withValues(
+        alpha: GlassTokens.startButtonStatusOpacity,
+      ),
+    );
+    final tunFailure = ref.watch(tunStartFailureProvider);
+    if (tunFailure != null) {
+      // A Wrap, not a Row: with large text or a narrow window the buttons
+      // move under the message instead of overflowing.
+      return Wrap(
+        spacing: GlassTokens.startButtonActionGap,
+        runSpacing: GlassTokens.startButtonActionGap,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          Text(
+            appLocalizations.tunStartFailed,
+            style: style.copyWith(
+              color: GlassTokens.systemRed(theme.brightness),
+              fontWeight: FontWeight.w600,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          GlassIconButton(
+            icon: const Icon(Icons.info_outline_rounded),
+            tooltip: appLocalizations.logs,
+            size: mac
+                ? GlassTokens.widgetHeaderButtonSizeMac
+                : GlassTokens.widgetHeaderButtonSizeIos,
+            iconSize: mac
+                ? GlassTokens.widgetHeaderButtonIconSizeMac
+                : GlassTokens.widgetHeaderButtonIconSizeIos,
+            onPressed: () => _showTunFailure(context, tunFailure),
+          ),
+          GlassButton(
+            label: appLocalizations.repair,
+            onPressed: globalState.appController.repairTun,
+            kind: GlassButtonKind.plain,
+            destructive: true,
+          ),
+        ],
+      );
+    }
+    switch (phase) {
+      case CatConnectionPhase.connecting:
+      case CatConnectionPhase.disconnecting:
+        final dotCount = reduceMotion ? 3 : ((ambient * 6) % 3).floor() + 1;
+        return ExcludeSemantics(
+          child: Text(
+            '·' * dotCount,
+            style: style.copyWith(
+              fontWeight: FontWeight.w700,
+              letterSpacing: GlassTokens.startButtonDotsSpacing,
+            ),
+          ),
+        );
+      case CatConnectionPhase.connected:
+        final runTime = ref.watch(runTimeProvider);
+        if (runTime == null) return const SizedBox.shrink();
+        return Text(
+          utils.getTimeText(runTime),
+          style: style,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        );
+      case CatConnectionPhase.idle:
+        return const SizedBox.shrink();
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    if (glass) return _buildGlass(context, ref);
     final textStyle = context.textTheme.bodyMedium?.copyWith(
       color: foregroundColor.withValues(alpha: 0.85),
     );
@@ -321,26 +549,7 @@ class _StatusLine extends ConsumerWidget {
             ),
           ),
           IconButton(
-            onPressed: () {
-              globalState.showCommonDialog<void>(
-                child: AlertDialog(
-                  title: Text(appLocalizations.tunStartFailed),
-                  content: SingleChildScrollView(
-                    child: SelectableText(
-                      tunFailure.isEmpty
-                          ? appLocalizations.tunStartFailed
-                          : tunFailure,
-                    ),
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      child: Text(appLocalizations.confirm),
-                    ),
-                  ],
-                ),
-              );
-            },
+            onPressed: () => _showTunFailure(context, tunFailure),
             icon: const Icon(Icons.info_outline_rounded, size: 18),
             tooltip: appLocalizations.logs,
             visualDensity: VisualDensity.compact,
@@ -394,6 +603,26 @@ class _StatusLine extends ConsumerWidget {
       child: child,
     );
   }
+}
+
+/// The TUN start error in full. D.7 moves Darwin to `CommonDialog`.
+void _showTunFailure(BuildContext context, String tunFailure) {
+  globalState.showCommonDialog<void>(
+    child: AlertDialog(
+      title: Text(appLocalizations.tunStartFailed),
+      content: SingleChildScrollView(
+        child: SelectableText(
+          tunFailure.isEmpty ? appLocalizations.tunStartFailed : tunFailure,
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(appLocalizations.confirm),
+        ),
+      ],
+    ),
+  );
 }
 
 double _lerpDouble(double a, double b, double t) => a + (b - a) * t;

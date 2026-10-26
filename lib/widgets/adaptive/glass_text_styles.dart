@@ -303,6 +303,31 @@ abstract final class GlassTextStyles {
         weight: FontWeight.w400,
       ).copyWith(fontFeatures: const [FontFeature.tabularFigures()]);
 
+  /// "Start" / "Stop" on the dashboard button.
+  static TextStyle startButtonTitle(TextTheme textTheme) => _style(
+        textTheme.titleMedium,
+        size: _mac
+            ? GlassTokens.startButtonTitleSizeMac
+            : GlassTokens.startButtonTitleSizeIos,
+        line: _mac
+            ? GlassTokens.startButtonTitleLineMac
+            : GlassTokens.startButtonTitleLineIos,
+        weight: FontWeight.w600,
+      );
+
+  /// Status line of the Start button (run time, progress dots, TUN error),
+  /// tabular so the run time does not jitter.
+  static TextStyle startButtonStatus(TextTheme textTheme) => _style(
+        textTheme.bodyMedium,
+        size: _mac
+            ? GlassTokens.startButtonStatusSizeMac
+            : GlassTokens.startButtonStatusSizeIos,
+        line: _mac
+            ? GlassTokens.startButtonStatusLineMac
+            : GlassTokens.startButtonStatusLineIos,
+        weight: FontWeight.w400,
+      ).copyWith(fontFeatures: const [FontFeature.tabularFigures()]);
+
   /// Segment label of the segmented control.
   static TextStyle segment(TextTheme textTheme, {required bool selected}) =>
       _style(

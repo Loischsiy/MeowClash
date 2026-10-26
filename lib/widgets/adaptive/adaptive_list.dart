@@ -416,6 +416,9 @@ enum GlassRowAccessory {
 
   /// Opens a menu of choices (`chevron.up.chevron.down`).
   popUp,
+
+  /// Opens a web page outside the app (`arrow.up.forward`).
+  link,
 }
 
 /// One row of a [GlassListSection]: leading symbol, title, optional
@@ -581,6 +584,15 @@ class _GlassListRowState extends State<GlassListRow> {
               const SizedBox(width: GlassTokens.buttonIconGap),
               Icon(
                 Icons.unfold_more_rounded,
+                size: chevronSize,
+                color: scheme.onSurfaceVariant
+                    .withValues(alpha: GlassTokens.listRowChevronOpacity),
+              ),
+            ],
+            if (widget.accessory == GlassRowAccessory.link) ...[
+              const SizedBox(width: GlassTokens.listRowTrailingGap),
+              Icon(
+                Icons.north_east_rounded,
                 size: chevronSize,
                 color: scheme.onSurfaceVariant
                     .withValues(alpha: GlassTokens.listRowChevronOpacity),

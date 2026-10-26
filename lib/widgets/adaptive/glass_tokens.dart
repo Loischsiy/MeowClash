@@ -462,6 +462,49 @@ abstract final class GlassTokens {
   static const double listSectionFooterLineMac = 14;
   static const double listSectionFooterSizeIos = 13;
   static const double listSectionFooterLineIos = 18;
+  // Keyboard shortcuts as key caps (hotkeys page, shortcut recorder): the
+  // modifiers in the macOS order ⌃⌥⇧⌘, then the key, each on a small
+  // rounded cap with a hairline edge. Content, so never blurred.
+  static const double keyCapHeightMac = 20;
+  static const double keyCapHeightIos = 26;
+  static const double keyCapLargeHeight = 44;
+  static const double keyCapRadiusMac = 5;
+  static const double keyCapRadiusIos = 6;
+  static const double keyCapLargeRadius = 10;
+  static const double keyCapPaddingMac = 6;
+  static const double keyCapPaddingIos = 8;
+  static const double keyCapLargePadding = 14;
+  static const double keyCapGap = 4;
+  static const double keyCapLargeGap = 8;
+  static const double keyCapTextSizeMac = 12;
+  static const double keyCapTextLineMac = 16;
+  static const double keyCapTextSizeIos = 15;
+  static const double keyCapTextLineIos = 20;
+  static const double keyCapLargeTextSize = 20;
+  static const double keyCapLargeTextLine = 24;
+  static const double keyCapEdgeWidth = 0.5;
+  static const double _keyCapFillOpacityLight = 0.06;
+  static const double _keyCapFillOpacityDark = 0.12;
+  static const double _keyCapEdgeOpacityLight = 0.14;
+  static const double _keyCapEdgeOpacityDark = 0.2;
+  // Reachability of a remote account (WebDAV backup): a dot in the system
+  // green / red, a spinner of the same size while it is checked.
+  static const double statusDotSize = 8;
+  static const double statusSpinnerRadius = 6;
+  static const double statusGap = 6;
+  // About page header: app icon, name and versions centered above the
+  // sections, as the macOS About window and iOS app info.
+  static const double aboutIconSizeMac = 64;
+  static const double aboutIconSizeIos = 80;
+  static const double aboutIconRadiusMac = 14;
+  static const double aboutIconRadiusIos = 18;
+  static const double aboutHeaderGap = 8;
+  static const double aboutTitleSizeMac = 20;
+  static const double aboutTitleLineMac = 24;
+  static const double aboutTitleSizeIos = 22;
+  static const double aboutTitleLineIos = 28;
+  static const double aboutAvatarSize = 48;
+  static const double aboutAvatarGap = 16;
   // Rules of a profile override: a long reorderable list, so one small
   // content card per rule instead of a grouped section; monospaced value and
   // a selection circle at the end, as in Mail's edit mode.
@@ -605,6 +648,19 @@ abstract final class GlassTokens {
     }
     return dark ? _systemGreenDark : _systemGreenLight;
   }
+
+  /// Reachability dot: system green when [ok], else system red.
+  static Color statusColor({required bool ok, required Brightness brightness}) {
+    final dark = _isDark(brightness);
+    if (ok) return dark ? _systemGreenDark : _systemGreenLight;
+    return dark ? _systemRedDark : _systemRedLight;
+  }
+
+  static double keyCapFillOpacity(Brightness brightness) =>
+      _isDark(brightness) ? _keyCapFillOpacityDark : _keyCapFillOpacityLight;
+
+  static double keyCapEdgeOpacity(Brightness brightness) =>
+      _isDark(brightness) ? _keyCapEdgeOpacityDark : _keyCapEdgeOpacityLight;
 
   static double dialogTintOpacity(Brightness brightness) =>
       _isDark(brightness) ? _dialogTintOpacityDark : _dialogTintOpacityLight;

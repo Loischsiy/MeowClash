@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:meowclash/common/common.dart';
 import 'package:meowclash/state.dart';
+import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:meowclash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 
@@ -19,8 +20,170 @@ class Contributor {
   final bool clickable;
 }
 
+const _contributors = [
+  Contributor(
+    avatar: "assets/images/avatars/loischsiy.jpeg",
+    name: "Loischsiy",
+    link: "https://github.com/Loischsiy",
+  ),
+];
+
 class AboutView extends StatelessWidget {
   const AboutView({super.key});
+
+  void _showEasterEgg(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text(
+          'REMNAFAMILY ONE LOVE',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontFamily: 'Unbounded',
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              '❤️',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 48),
+            ),
+            const SizedBox(height: 16),
+            InkWell(
+              onTap: () {
+                globalState.openUrl('https://docs.rw');
+              },
+              child: const Text(
+                'TRY REMNAWAVE',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.blue,
+                  fontFamily: 'Unbounded',
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+        actionsAlignment: MainAxisAlignment.center,
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Darwin: the app icon, name and versions centered on top (macOS About
+  /// window), then Contributors and More as grouped sections; web links get
+  /// the `arrow.up.forward` accessory.
+  Widget _buildGlass(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final mac = AdaptivePlatform.isMacOSGlass;
+    final iconSize =
+        mac ? GlassTokens.aboutIconSizeMac : GlassTokens.aboutIconSizeIos;
+    final iconRadius =
+        mac ? GlassTokens.aboutIconRadiusMac : GlassTokens.aboutIconRadiusIos;
+    final secondary = GlassTextStyles.listRowSubtitle(theme.textTheme)
+        .copyWith(color: scheme.onSurfaceVariant);
+    final footnote = GlassTextStyles.listSectionFooter(theme.textTheme)
+        .copyWith(color: scheme.onSurfaceVariant);
+    final coreVersion = globalState.coreVersion;
+    return GlassListView(
+      children: [
+        Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: GlassListSection.rowPadding,
+          ),
+          child: Column(
+            children: [
+              _EasterEggDetector(
+                onEasterEgg: () => _showEasterEgg(context),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(iconRadius),
+                      child: Image.asset(
+                        'assets/images/icon.png',
+                        width: iconSize,
+                        height: iconSize,
+                      ),
+                    ),
+                    const SizedBox(height: GlassTokens.aboutHeaderGap),
+                    Text(
+                      appName,
+                      style: GlassTextStyles.aboutTitle(theme.textTheme)
+                          .copyWith(color: scheme.onSurface),
+                    ),
+                    Text(globalState.packageInfo.version, style: secondary),
+                    if (coreVersion != null && coreVersion.isNotEmpty)
+                      Text('Core: $coreVersion', style: footnote),
+                  ],
+                ),
+              ),
+              const SizedBox(height: GlassTokens.aboutHeaderGap),
+              Text(
+                appLocalizations.desc,
+                style: footnote,
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+        GlassListSection(
+          header: appLocalizations.otherContributors,
+          children: [
+            GlassListField(
+              child: Wrap(
+                spacing: GlassTokens.aboutAvatarGap,
+                runSpacing: GlassTokens.aboutAvatarGap,
+                children: [
+                  for (final contributor in _contributors)
+                    Avatar(
+                      contributor: contributor,
+                      size: GlassTokens.aboutAvatarSize,
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        GlassListSection(
+          header: appLocalizations.more,
+          children: [
+            GlassListRow(
+              title: Text(appLocalizations.checkUpdate),
+              onTap: () => _checkUpdate(context),
+            ),
+            GlassListRow(
+              title: Text(appLocalizations.project),
+              accessory: GlassRowAccessory.link,
+              onTap: () => globalState.openUrl(
+                "https://github.com/Loischsiy/MeowClash",
+              ),
+            ),
+            GlassListRow(
+              title: Text(appLocalizations.originalRepository),
+              accessory: GlassRowAccessory.link,
+              onTap: () => globalState.openUrl(
+                "https://github.com/pluralplay/FlClashX",
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
 
   Future<void> _checkUpdate(BuildContext context) async {
     final commonScaffoldState = context.commonScaffoldState;
@@ -68,13 +231,7 @@ class AboutView extends StatelessWidget {
       );
 
   List<Widget> _buildContributorsSection() {
-    const contributors = [
-      Contributor(
-        avatar: "assets/images/avatars/loischsiy.jpeg",
-        name: "Loischsiy",
-        link: "https://github.com/Loischsiy",
-      ),
-    ];
+    const contributors = _contributors;
     return generateSection(
       separated: false,
       title: appLocalizations.otherContributors,
@@ -97,6 +254,7 @@ class AboutView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (AdaptivePlatform.useGlass) return _buildGlass(context);
     final items = [
       ListTile(
         title: Column(
@@ -132,56 +290,7 @@ class AboutView extends StatelessWidget {
                   )
                 ],
               ),
-              onEasterEgg: () {
-                showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (dialogContext) => AlertDialog(
-                    title: const Text(
-                      'REMNAFAMILY ONE LOVE',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontFamily: 'Unbounded',
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    content: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Text(
-                          '❤️',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(fontSize: 48),
-                        ),
-                        const SizedBox(height: 16),
-                        InkWell(
-                          onTap: () {
-                            globalState.openUrl('https://docs.rw');
-                          },
-                          child: const Text(
-                            'TRY REMNAWAVE',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: Colors.blue,
-                              fontFamily: 'Unbounded',
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    actionsAlignment: MainAxisAlignment.center,
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.of(dialogContext).pop(),
-                        child: const Text('OK'),
-                      ),
-                    ],
-                  ),
-                );
-              },
+              onEasterEgg: () => _showEasterEgg(context),
             ),
             const SizedBox(
               height: 24,

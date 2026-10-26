@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:meowclash/enum/enum.dart';
+import 'package:meowclash/models/models.dart';
+import 'package:meowclash/views/about.dart';
 import 'package:meowclash/views/application_setting.dart';
+import 'package:meowclash/views/backup_and_recovery.dart';
 import 'package:meowclash/views/config/config.dart';
 import 'package:meowclash/views/config/dns.dart';
 import 'package:meowclash/views/config/general.dart';
 import 'package:meowclash/views/config/network.dart';
+import 'package:meowclash/views/developer.dart';
+import 'package:meowclash/views/hotkey.dart';
 import 'package:meowclash/views/tools.dart';
 import 'package:meowclash/widgets/adaptive/adaptive.dart';
 
@@ -173,6 +180,116 @@ void main() {
       expect(find.byType(GlassListSection), findsNWidgets(3));
       expect(find.text('Options'), findsOneWidget);
       expect(rows(tester).length, greaterThanOrEqualTo(20));
+    }, variant: darwin);
+  });
+
+  group('Backup, hotkeys, about, developer', () {
+    List<String?> headers(WidgetTester tester) => tester
+        .widgetList<GlassListSection>(find.byType(GlassListSection))
+        .map((section) => section.header)
+        .toList();
+
+    for (final brightness in Brightness.values) {
+      testWidgets('Backup: Remote / Local / Options, capsule, pop-up, '
+          '$brightness', (tester) async {
+        await pumpPage(
+          tester,
+          (_) => const BackupAndRecovery(),
+          brightness: brightness,
+        );
+        expectGroupedList();
+        expect(headers(tester), ['Remote', 'Local', 'Options']);
+        // No account yet: the bind action is a glass capsule.
+        expect(
+          find.widgetWithText(GlassButton, 'Bind'),
+          findsOneWidget,
+        );
+        expect(find.byType(FilledButton), findsNothing);
+        final strategy = rows(tester).singleWhere(
+          (row) => (row.title as Text).data == 'Recovery strategy',
+        );
+        expect(strategy.accessory, GlassRowAccessory.popUp);
+        expect(strategy.value, isNotNull);
+      }, variant: darwin);
+    }
+
+    testWidgets('Hotkeys: one section, a row per action', (tester) async {
+      await pumpPage(tester, (_) => const HotKeyView());
+      expectGroupedList();
+      expect(find.byType(GlassListSection), findsOneWidget);
+      expect(rows(tester), hasLength(HotAction.values.length));
+      expect(find.byType(KeyboardKeyBox), findsNothing);
+      expect(rows(tester).every((row) => row.onTap != null), isTrue);
+    }, variant: darwin);
+
+    test('Hotkey caps: macOS modifier order, Apple key symbols', () {
+      expect(
+        glassHotKeyLabels(
+          {
+            KeyboardModifier.meta,
+            KeyboardModifier.shift,
+            KeyboardModifier.alt,
+            KeyboardModifier.control,
+          },
+          LogicalKeyboardKey.keyK.keyId,
+        ),
+        ['⌃', '⌥', '⇧', '⌘', 'K'],
+      );
+      expect(
+        glassHotKeyLabels(
+          {KeyboardModifier.meta},
+          LogicalKeyboardKey.enter.keyId,
+        ),
+        ['⌘', '↩'],
+      );
+      expect(GlassKeyCaps.labelOf(LogicalKeyboardKey.arrowUp), '↑');
+    });
+
+    testWidgets('Hotkey recorder: large caps instead of Material key boxes',
+        (tester) async {
+      await pumpPage(
+        tester,
+        (_) => HotKeyRecorder(
+          hotKeyAction: HotKeyAction(
+            action: HotAction.view,
+            key: LogicalKeyboardKey.keyM.keyId,
+            modifiers: const {KeyboardModifier.meta, KeyboardModifier.shift},
+          ),
+        ),
+      );
+      final caps = tester.widget<GlassKeyCaps>(find.byType(GlassKeyCaps));
+      expect(caps.large, isTrue);
+      expect(caps.keys, ['⇧', '⌘', 'M']);
+      expect(find.byType(KeyboardKeyBox), findsNothing);
+      expect(find.text('+'), findsNothing);
+    }, variant: darwin);
+
+    testWidgets('About: centered header, Contributors and More with links',
+        (tester) async {
+      await pumpPage(tester, (_) => const AboutView());
+      expectGroupedList();
+      expect(headers(tester), ['Contributors', 'More']);
+      expect(find.text('MeowClash'), findsOneWidget);
+      expect(find.text('1.0.0'), findsOneWidget);
+      expect(
+        rows(tester).where((row) => row.accessory == GlassRowAccessory.link),
+        hasLength(2),
+      );
+      expect(find.byType(Avatar), findsOneWidget);
+    }, variant: darwin);
+
+    testWidgets('Developer: mode switch alone, then the test actions',
+        (tester) async {
+      await pumpPage(tester, (_) => const DeveloperView());
+      expectGroupedList();
+      expect(headers(tester), [null, 'Options']);
+      expect(find.byType(AdaptiveSwitch), findsOneWidget);
+      final first = find.byType(GlassListSection).first;
+      expect(
+        find.descendant(of: first, matching: find.byType(GlassListRow)),
+        findsOneWidget,
+      );
+      expect(rows(tester), hasLength(5));
     }, variant: darwin);
   });
 }

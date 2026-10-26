@@ -326,6 +326,9 @@ abstract final class GlassTokens {
   static const double dialogContentMaxHeight = 500;
   static const double dialogPadding = 20;
   static const double dialogTitleGap = 8;
+  // Between the controls of a form inside a dialog (editors of override
+  // rules and proxy chains).
+  static const double dialogFieldGap = 12;
   // macOS: push buttons in a row at the trailing edge below the content.
   static const double dialogActionsGapMac = 16;
   static const double dialogButtonHeightMac = 28;

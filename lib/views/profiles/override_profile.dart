@@ -1050,6 +1050,124 @@ class _AddRuleDialogState extends State<AddRuleDialog> {
     Navigator.of(context).pop(rule);
   }
 
+  String? _emptyError(TextEditingController controller, String label) =>
+      controller.text.isEmpty ? appLocalizations.emptyTip(label) : null;
+
+  String? _ruleProviderError(Object? _) =>
+      _emptyError(_ruleProviderController, appLocalizations.ruleProviders);
+
+  String? _contentError(Object? _) =>
+      _emptyError(_contentController, appLocalizations.content);
+
+  String? _subRuleError(Object? _) =>
+      _emptyError(_subRuleController, appLocalizations.subRule);
+
+  String? _ruleTargetError(Object? _) =>
+      _emptyError(_ruleTargetController, appLocalizations.ruleTarget);
+
+  /// Darwin: an Apple pop-up button bound to [controller], validated by the
+  /// same [validator] as the Material dropdown.
+  Widget _glassPopUp({
+    required String label,
+    required TextEditingController controller,
+    required List<DropdownMenuEntry<String>> items,
+    required FormFieldValidator<String> validator,
+  }) =>
+      FormField<String>(
+        validator: validator,
+        builder: (field) => GlassPopUpButton<String>(
+          label: label,
+          value: controller.text.isEmpty ? null : controller.text,
+          options: [for (final item in items) item.value],
+          textBuilder: (item) => item,
+          errorText: field.errorText,
+          onChanged: (value) {
+            setState(() => controller.text = value);
+            field.didChange(value);
+            if (field.hasError) field.validate();
+          },
+        ),
+      );
+
+  /// Darwin: pop-up buttons with a checkmark menu instead of the dropdowns
+  /// and the rule-type dialog, switch rows for the parameters; the fields
+  /// take the Apple style from the glass dialog.
+  Widget _buildGlassForm(BuildContext context) {
+    const gap = SizedBox(height: GlassTokens.dialogFieldGap);
+    return Form(
+      key: _formKey,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          GlassPopUpButton<RuleAction>(
+            label: appLocalizations.ruleName,
+            value: _ruleAction,
+            options: RuleAction.values,
+            textBuilder: (item) => item.value,
+            onChanged: (value) => setState(() => _ruleAction = value),
+          ),
+          gap,
+          if (_ruleAction == RuleAction.RULE_SET) ...[
+            _glassPopUp(
+              label: appLocalizations.ruleProviders,
+              controller: _ruleProviderController,
+              items: _ruleProviderItems,
+              validator: _ruleProviderError,
+            ),
+            gap,
+          ] else if (_ruleAction != RuleAction.MATCH) ...[
+            TextFormField(
+              controller: _contentController,
+              decoration: InputDecoration(
+                labelText: appLocalizations.content,
+              ),
+              validator: _contentError,
+            ),
+            gap,
+          ],
+          if (_ruleAction == RuleAction.SUB_RULE)
+            _glassPopUp(
+              label: appLocalizations.subRule,
+              controller: _subRuleController,
+              items: _subRuleItems,
+              validator: _subRuleError,
+            )
+          else
+            _glassPopUp(
+              label: appLocalizations.ruleTarget,
+              controller: _ruleTargetController,
+              items: _targetItems,
+              validator: _ruleTargetError,
+            ),
+          if (_ruleAction.hasParams) ...[
+            gap,
+            GlassListSection(
+              children: [
+                GlassListRow(
+                  title: Text(appLocalizations.sourceIp),
+                  trailing: AdaptiveSwitch(
+                    value: _src,
+                    onChanged: (value) => setState(() => _src = value),
+                  ),
+                  onTap: () => setState(() => _src = !_src),
+                ),
+                GlassListRow(
+                  title: Text(appLocalizations.noResolve),
+                  trailing: AdaptiveSwitch(
+                    value: _noResolve,
+                    onChanged: (value) => setState(() => _noResolve = value),
+                  ),
+                  onTap: () => setState(() => _noResolve = !_noResolve),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) => CommonDialog(
       title: appLocalizations.addRule,
@@ -1061,7 +1179,9 @@ class _AddRuleDialogState extends State<AddRuleDialog> {
           ),
         ),
       ],
-      child: DropdownMenuTheme(
+      child: AdaptivePlatform.useGlass
+          ? _buildGlassForm(context)
+          : DropdownMenuTheme(
         data: DropdownMenuThemeData(
           inputDecorationTheme: InputDecorationTheme(
             border: const OutlineInputBorder(),
@@ -1096,13 +1216,7 @@ class _AddRuleDialogState extends State<AddRuleDialog> {
                   ),
                   if (_ruleAction == RuleAction.RULE_SET) ...[
                     FormField(
-                      validator: (_) {
-                        if (_ruleProviderController.text.isEmpty) {
-                          return appLocalizations
-                              .emptyTip(appLocalizations.ruleProviders);
-                        }
-                        return null;
-                      },
+                      validator: _ruleProviderError,
                       builder: (field) => DropdownMenu(
                         expandedInsets: EdgeInsets.zero,
                         controller: _ruleProviderController,
@@ -1122,13 +1236,7 @@ class _AddRuleDialogState extends State<AddRuleDialog> {
                         border: const OutlineInputBorder(),
                         labelText: appLocalizations.content,
                       ),
-                      validator: (_) {
-                        if (_contentController.text.isEmpty) {
-                          return appLocalizations
-                              .emptyTip(appLocalizations.content);
-                        }
-                        return null;
-                      },
+                      validator: _contentError,
                     ),
                     const SizedBox(
                       height: 24,
@@ -1136,13 +1244,7 @@ class _AddRuleDialogState extends State<AddRuleDialog> {
                   ],
                   _ruleAction == RuleAction.SUB_RULE
                       ? FormField(
-                          validator: (_) {
-                            if (_subRuleController.text.isEmpty) {
-                              return appLocalizations
-                                  .emptyTip(appLocalizations.subRule);
-                            }
-                            return null;
-                          },
+                          validator: _subRuleError,
                           builder: (filed) => DropdownMenu(
                               width: 200,
                               enableFilter: false,
@@ -1154,14 +1256,7 @@ class _AddRuleDialogState extends State<AddRuleDialog> {
                             ),
                         )
                       : FormField<String>(
-                          validator: (_) {
-                            if (_ruleTargetController.text.isEmpty) {
-                              return appLocalizations.emptyTip(
-                                appLocalizations.ruleTarget,
-                              );
-                            }
-                            return null;
-                          },
+                          validator: _ruleTargetError,
                           builder: (filed) => DropdownMenu(
                               controller: _ruleTargetController,
                               label: Text(appLocalizations.ruleTarget),
@@ -1614,6 +1709,113 @@ class _AddChainDialogState extends State<AddChainDialog> {
     Navigator.of(context).pop(chain);
   }
 
+  String? _nameError(String? _) {
+    final value = _nameController.text.trim();
+    if (value.isEmpty) {
+      return appLocalizations.emptyTip(
+        appLocalizations.chainName,
+      );
+    }
+    final groupNames =
+        widget.snippet.proxyGroups.map((group) => group.name).toSet();
+    if (groupNames.contains(value)) {
+      return appLocalizations.existsTip(
+        appLocalizations.proxyGroup,
+      );
+    }
+    return null;
+  }
+
+  String? _hopError(int index) => _hopControllers[index].text.trim().isEmpty
+      ? appLocalizations.emptyTip(_hopLabel(index))
+      : null;
+
+  void _addHop() {
+    setState(() {
+      _hopControllers.add(TextEditingController());
+    });
+  }
+
+  void _removeHop(int index) {
+    setState(() {
+      _hopControllers.removeAt(index).dispose();
+    });
+  }
+
+  Widget _nameField() => TextFormField(
+        controller: _nameController,
+        decoration: InputDecoration(
+          border: const OutlineInputBorder(),
+          labelText: appLocalizations.chainName,
+        ),
+        validator: _nameError,
+      );
+
+  /// Darwin: a pop-up button with a checkmark menu per hop (the menu scrolls
+  /// for hundreds of nodes), a minus button to drop extra hops and an inline
+  /// "Add hop" button; the same controllers and validators.
+  Widget _buildGlassForm() {
+    const gap = SizedBox(height: GlassTokens.dialogFieldGap);
+    return Form(
+      key: _formKey,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _nameField(),
+          for (var index = 0; index < _hopControllers.length; index++) ...[
+            gap,
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: FormField<String>(
+                    validator: (_) => _hopError(index),
+                    builder: (field) {
+                      final controller = _hopControllers[index];
+                      final items =
+                          index == 0 ? _entryHopItems : _nodeHopItems;
+                      return GlassPopUpButton<String>(
+                        label: _hopLabel(index),
+                        value: controller.text.isEmpty ? null : controller.text,
+                        options: [for (final item in items) item.value],
+                        textBuilder: (item) => item,
+                        errorText: field.errorText,
+                        onChanged: (value) {
+                          setState(() => controller.text = value);
+                          field.didChange(value);
+                          if (field.hasError) field.validate();
+                        },
+                      );
+                    },
+                  ),
+                ),
+                if (_hopControllers.length > 2) ...[
+                  const SizedBox(width: GlassTokens.listRowTrailingGap),
+                  GlassIconButton(
+                    icon: const Icon(Icons.remove_circle_outline_rounded),
+                    tooltip: appLocalizations.delete,
+                    onPressed: () => _removeHop(index),
+                  ),
+                ],
+              ],
+            ),
+          ],
+          gap,
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: GlassButton(
+              label: appLocalizations.addHop,
+              icon: Icons.add_rounded,
+              kind: GlassButtonKind.plain,
+              onPressed: _addHop,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) => CommonDialog(
         title: appLocalizations.proxyChains,
@@ -1625,7 +1827,9 @@ class _AddChainDialogState extends State<AddChainDialog> {
             ),
           ),
         ],
-        child: DropdownMenuTheme(
+        child: AdaptivePlatform.useGlass
+            ? _buildGlassForm()
+            : DropdownMenuTheme(
           data: DropdownMenuThemeData(
             inputDecorationTheme: InputDecorationTheme(
               border: const OutlineInputBorder(),
@@ -1639,30 +1843,7 @@ class _AddChainDialogState extends State<AddChainDialog> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                TextFormField(
-                  controller: _nameController,
-                  decoration: InputDecoration(
-                    border: const OutlineInputBorder(),
-                    labelText: appLocalizations.chainName,
-                  ),
-                  validator: (_) {
-                    final value = _nameController.text.trim();
-                    if (value.isEmpty) {
-                      return appLocalizations.emptyTip(
-                        appLocalizations.chainName,
-                      );
-                    }
-                    final groupNames = widget.snippet.proxyGroups
-                        .map((group) => group.name)
-                        .toSet();
-                    if (groupNames.contains(value)) {
-                      return appLocalizations.existsTip(
-                        appLocalizations.proxyGroup,
-                      );
-                    }
-                    return null;
-                  },
-                ),
+                _nameField(),
                 const SizedBox(
                   height: 24,
                 ),
@@ -1676,14 +1857,7 @@ class _AddChainDialogState extends State<AddChainDialog> {
                       children: [
                         Expanded(
                           child: FormField<String>(
-                            validator: (_) {
-                              if (_hopControllers[index].text.trim().isEmpty) {
-                                return appLocalizations.emptyTip(
-                                  _hopLabel(index),
-                                );
-                              }
-                              return null;
-                            },
+                            validator: (_) => _hopError(index),
                             builder: (field) => DropdownMenu<String>(
                               expandedInsets: EdgeInsets.zero,
                               controller: _hopControllers[index],
@@ -1700,11 +1874,7 @@ class _AddChainDialogState extends State<AddChainDialog> {
                         if (_hopControllers.length > 2)
                           IconButton(
                             icon: const Icon(Icons.remove_circle_outline),
-                            onPressed: () {
-                              setState(() {
-                                _hopControllers.removeAt(index).dispose();
-                              });
-                            },
+                            onPressed: () => _removeHop(index),
                           ),
                       ],
                     ),
@@ -1713,11 +1883,7 @@ class _AddChainDialogState extends State<AddChainDialog> {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: TextButton.icon(
-                    onPressed: () {
-                      setState(() {
-                        _hopControllers.add(TextEditingController());
-                      });
-                    },
+                    onPressed: _addHop,
                     icon: const Icon(Icons.add),
                     label: Text(appLocalizations.addHop),
                   ),

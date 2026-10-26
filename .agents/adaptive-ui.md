@@ -102,8 +102,24 @@ pixel-for-pixel. Code: `lib/widgets/adaptive/` (import `adaptive.dart`).
   `trafficWarningThreshold`, red above `trafficCriticalThreshold`). The trailing `GlassIconButton`
   opens the same `CommonPopupBox` menu and turns into the spinner while the profile updates. The sort
   sheet rows are flat `AdaptiveCard`s `listRowHeight` tall (the card hairline counts in), the dragged
-  row lifts with `floatingShadow` and `listRowDragScale` (no scale with Reduce Motion). Profile
-  editors are still Material-in-glass — next PR.
+  row lifts with `floatingShadow` and `listRowDragScale` (no scale with Reduce Motion).
+- Profile editors (add / edit / scripts / override + its rule and chain dialogs): settings-style
+  primitives from `lib/widgets/adaptive/adaptive_list.dart` — `GlassListSection` (rounded group of rows,
+  inset hairlines, header / footer, never blurred; `listPadding` / `gap` for the page),
+  `GlassSectionHeader` (title, optional subtitle and trailing `GlassButton`), `GlassListRow` (chevron /
+  checkmark / custom trailing), `GlassListField` (a form field inside a section under `GlassTheme.form`),
+  `AdaptiveSwitch` (Material keeps `Switch` verbatim; Darwin `CupertinoSwitch` in the accent, smaller on
+  macOS) and `GlassButton` (tinted / filled / plain capsule, `busy`, `destructive`). Choices go through
+  `GlassPopUpButton<T>` (`glass_pop_up_button.dart`): macOS opens the native `NSMenu` over the control with
+  the current item checked (`AdaptiveMenuEntry.checked` → `state = .on`), iOS the glass menu scrolled to
+  the current item; wrap it in a `FormField` with the Material validator and pass `field.errorText`. The
+  override rule list stays one flat `AdaptiveCard` per rule (hundreds of rows, no blur) with a selection
+  circle; its `itemExtentBuilder` is computed from the same tokens (`ruleRow*`, `ruleCheck*`,
+  `GlassTextStyles.codeLine`) and the text width `maxWidth − RuleContent.glassTextReserve` — change both
+  together. Branch with `AdaptivePlatform.useGlass` around the Material tree and share validators /
+  handlers as methods; the Material editors are pinned by `test/material_profile_editors_golden_test.dart`,
+  glass checks live in `test/adaptive_profile_editors_glass_test.dart`. App-wide `ListItem` (settings)
+  is not migrated yet.
 - Dialogs (`lib/widgets/adaptive/adaptive_dialog.dart`): on Darwin `showCommonDialog` goes through
   `showGlassDialog` / `GlassDialogRoute` and `CommonDialog` / `CommonModal` render `GlassDialog` /
   `GlassModalPanel` — one `GlassSurface` each, no blur behind. `dialogBarrierColor`: macOS does not dim

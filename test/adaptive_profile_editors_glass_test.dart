@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -18,6 +20,7 @@ import 'package:meowclash/views/profiles/edit_profile.dart';
 import 'package:meowclash/views/profiles/override_profile.dart';
 import 'package:meowclash/views/profiles/scripts.dart';
 import 'package:meowclash/widgets/adaptive/adaptive.dart';
+import 'package:meowclash/widgets/widgets.dart';
 
 import 'performance_test_support.dart';
 import 'profile_editors_test_support.dart';
@@ -62,27 +65,34 @@ void main() {
     addTearDown(tester.view.reset);
   }
 
-  Widget host(WidgetBuilder builder, {List<Override> overrides = const []}) =>
+  Widget host(
+    WidgetBuilder builder, {
+    List<Override> overrides = const [],
+    GlassAccessibilityController? accessibility,
+  }) =>
       ProviderScope(
         overrides: [
           backgroundUrlProvider.overrideWith((ref) => null),
           ...overrides,
         ],
-        child: MaterialApp(
-          navigatorKey: globalState.navigatorKey,
-          debugShowCheckedModeBanner: false,
-          theme: ThemeData(
-            colorScheme: ColorScheme.fromSeed(
-              seedColor: const Color(0xFF6750A4),
+        child: _maybeAccessibility(
+          accessibility,
+          MaterialApp(
+            navigatorKey: globalState.navigatorKey,
+            debugShowCheckedModeBanner: false,
+            theme: ThemeData(
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: const Color(0xFF6750A4),
+              ),
             ),
-          ),
-          home: Scaffold(
-            body: Consumer(builder: (context, ref, _) {
-              globalState.appController = AppController(context, ref);
-              globalState.measure = Measure.of(context, 1);
-              globalState.theme = CommonTheme.of(context, 1);
-              return builder(context);
-            }),
+            home: Scaffold(
+              body: Consumer(builder: (context, ref, _) {
+                globalState.appController = AppController(context, ref);
+                globalState.measure = Measure.of(context, 1);
+                globalState.theme = CommonTheme.of(context, 1);
+                return builder(context);
+              }),
+            ),
           ),
         ),
       );
@@ -417,7 +427,290 @@ void main() {
       expect(find.text(appLocalizations.overrideOriginRules), findsOneWidget);
     }, variant: darwin);
   });
+
+  group('Override dialogs', () {
+    final messenger =
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+    tearDown(
+      () =>
+          messenger.setMockMethodCallHandler(AdaptiveContextMenu.channel, null),
+    );
+
+    /// macOS: the native pop-up menu "picks" the entry labelled [label] and
+    /// records which entry came checked.
+    void nativePick(String label, {void Function(String? checked)? onMenu}) {
+      messenger.setMockMethodCallHandler(AdaptiveContextMenu.channel,
+          (call) async {
+        final items = ((call.arguments as Map)['items'] as List)
+            .cast<Map<Object?, Object?>>();
+        onMenu?.call(
+          items
+              .where((item) => item['checked'] == true)
+              .map((item) => item['title'] as String?)
+              .firstOrNull,
+        );
+        return items.indexWhere((item) => item['title'] == label);
+      });
+    }
+
+    Future<T?> Function() openDialog<T>(
+      WidgetTester tester,
+      Widget dialog,
+    ) {
+      T? result;
+      var done = false;
+      globalState.showCommonDialog<T>(child: dialog).then((value) {
+        result = value;
+        done = true;
+      });
+      return () async {
+        await tester.pumpAndSettle();
+        expect(done, isTrue);
+        return result;
+      };
+    }
+
+    Future<void> pumpHost(WidgetTester tester) async {
+      await setUp(tester);
+      await tester.pumpWidget(host((_) => const SizedBox()));
+    }
+
+    testWidgets('add rule: pop-up buttons instead of dropdowns',
+        (tester) async {
+      await pumpHost(tester);
+      openDialog<Rule>(
+        tester,
+        const AddRuleDialog(snippet: editorSnippet, chainNames: ['Via Tokyo']),
+      );
+      await settle(tester);
+      expect(find.byType(GlassPopUpButton<RuleAction>), findsOneWidget);
+      // Default DOMAIN rule: content field + target.
+      expect(find.byType(GlassPopUpButton<String>), findsOneWidget);
+      expect(find.text('Via Tokyo'), findsOneWidget);
+      expect(find.byType(DropdownMenu<String>), findsNothing);
+      expect(find.byType(FilledButton), findsNothing);
+      expect(find.byType(CommonCard), findsNothing);
+    }, variant: darwin);
+
+    testWidgets('add rule: RULE-SET from the native menu, checked current',
+        (tester) async {
+      await pumpHost(tester);
+      String? checked;
+      nativePick(RuleAction.RULE_SET.value, onMenu: (value) => checked = value);
+      final result = openDialog<Rule>(
+        tester,
+        const AddRuleDialog(snippet: editorSnippet, chainNames: ['Via Tokyo']),
+      );
+      await settle(tester);
+      await tester.tap(find.byType(GlassPopUpButton<RuleAction>));
+      await tester.pumpAndSettle();
+      expect(checked, RuleAction.DOMAIN.value);
+      // Provider + target.
+      expect(find.byType(GlassPopUpButton<String>), findsNWidgets(2));
+      expect(find.text('ads'), findsOneWidget);
+      nativePick('Proxy');
+      await tester.tap(find.byType(GlassPopUpButton<String>).last);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(appLocalizations.confirm));
+      expect((await result())?.value, 'RULE-SET,ads,Proxy');
+    }, variant: TargetPlatformVariant.only(TargetPlatform.macOS));
+
+    testWidgets('add rule: parameters are switch rows', (tester) async {
+      await pumpHost(tester);
+      nativePick(RuleAction.GEOIP.value);
+      final result = openDialog<Rule>(
+        tester,
+        const AddRuleDialog(snippet: editorSnippet),
+      );
+      await settle(tester);
+      await tester.tap(find.byType(GlassPopUpButton<RuleAction>));
+      await tester.pumpAndSettle();
+      expect(find.byType(CupertinoSwitch), findsNWidgets(2));
+      await tester.enterText(find.byType(EditableText), 'CN');
+      await tester.tap(find.text(appLocalizations.noResolve));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(appLocalizations.confirm));
+      expect((await result())?.value, 'GEOIP,CN,Proxy,no-resolve');
+    }, variant: TargetPlatformVariant.only(TargetPlatform.macOS));
+
+    testWidgets('add rule: empty fields show errors, dialog stays',
+        (tester) async {
+      await pumpHost(tester);
+      openDialog<Rule>(tester, const AddRuleDialog(snippet: editorSnippet));
+      await settle(tester);
+      await tester.tap(find.text(appLocalizations.confirm));
+      await tester.pumpAndSettle();
+      expect(
+        find.text(appLocalizations.emptyTip(appLocalizations.content)),
+        findsOneWidget,
+      );
+      expect(find.byType(AddRuleDialog), findsOneWidget);
+      await tester.pump(const Duration(seconds: 1));
+    }, variant: darwin);
+
+    testWidgets('add chain: hop pop-ups, add and remove hops', (tester) async {
+      await pumpHost(tester);
+      final result = openDialog<ProxyChain>(
+        tester,
+        AddChainDialog(
+          snippet: editorSnippet,
+          chain: editorOverrideData().chains.first,
+        ),
+      );
+      await settle(tester);
+      expect(find.byType(GlassPopUpButton<String>), findsNWidgets(2));
+      expect(find.byType(DropdownMenu<String>), findsNothing);
+      expect(find.byType(GlassIconButton), findsNothing);
+      await tester.tap(
+        find.widgetWithText(GlassButton, appLocalizations.addHop),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byType(GlassPopUpButton<String>), findsNWidgets(3));
+      expect(find.byType(GlassIconButton), findsNWidgets(3));
+      // iOS: the glass menu (no native channel call).
+      await tester.tap(find.byType(GlassPopUpButton<String>).last);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Auto').last);
+      await tester.pumpAndSettle();
+      expect(find.text('Auto'), findsOneWidget);
+      await tester.tap(find.text(appLocalizations.confirm));
+      expect((await result())?.hops, ['Tokyo', 'Frankfurt', 'Auto']);
+    }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+
+    testWidgets('add chain: removing a hop drops its minus buttons',
+        (tester) async {
+      await pumpHost(tester);
+      openDialog<ProxyChain>(
+        tester,
+        const AddChainDialog(
+          snippet: editorSnippet,
+          chain: ProxyChain(
+            id: 'c3',
+            name: 'Three',
+            hops: ['Tokyo', 'Auto', 'Frankfurt'],
+          ),
+        ),
+      );
+      await settle(tester);
+      expect(find.byType(GlassIconButton), findsNWidgets(3));
+      await tester.tap(find.byType(GlassIconButton).at(1));
+      await tester.pumpAndSettle();
+      expect(find.byType(GlassPopUpButton<String>), findsNWidgets(2));
+      expect(find.byType(GlassIconButton), findsNothing);
+      expect(find.text('Auto'), findsNothing);
+    }, variant: darwin);
+
+    testWidgets('add chain: empty hops show errors under the pop-ups',
+        (tester) async {
+      await pumpHost(tester);
+      openDialog<ProxyChain>(
+        tester,
+        const AddChainDialog(snippet: editorSnippet),
+      );
+      await settle(tester);
+      await tester.enterText(find.byType(EditableText), 'New');
+      await tester.tap(find.text(appLocalizations.confirm));
+      await tester.pumpAndSettle();
+      expect(
+        find.text(appLocalizations.emptyTip(appLocalizations.firstHop)),
+        findsOneWidget,
+      );
+      expect(
+        find.text(appLocalizations.emptyTip(appLocalizations.secondHop)),
+        findsOneWidget,
+      );
+      expect(find.byType(AddChainDialog), findsOneWidget);
+      await tester.pump(const Duration(seconds: 1));
+    }, variant: darwin);
+  });
+
+  group('Fallbacks', () {
+    testWidgets(
+        'Reduce Transparency and the kill switch: rule dialog and its '
+        'pop-up menu do not blur', (tester) async {
+      await setUp(tester);
+      final accessibility = GlassAccessibilityController();
+      addTearDown(accessibility.dispose);
+      accessibility.value = const GlassAccessibility(reduceTransparency: true);
+      await tester.pumpWidget(
+        host((_) => const SizedBox(), accessibility: accessibility),
+      );
+      Future<void> openMenu() async {
+        unawaited(globalState.showCommonDialog<Rule>(
+          child: const AddRuleDialog(snippet: editorSnippet),
+        ));
+        await settle(tester);
+        // iOS: the glass menu of the rule type.
+        await tester.tap(find.byType(GlassPopUpButton<RuleAction>));
+        await tester.pumpAndSettle();
+        expect(find.byType(GlassSurface), findsWidgets);
+      }
+
+      await openMenu();
+      expect(find.byType(BackdropFilter), findsNothing);
+      await tester.tap(find.text(RuleAction.DOMAIN.value).last);
+      await tester.pumpAndSettle();
+      Navigator.of(globalState.navigatorKey.currentContext!).pop();
+      await tester.pumpAndSettle();
+
+      accessibility.value = GlassAccessibility.fallback;
+      GlassFlags.backdropBlurEnabled = false;
+      await openMenu();
+      expect(find.byType(BackdropFilter), findsNothing);
+    }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+
+    Future<double> draggedWidth(
+      WidgetTester tester, {
+      required bool reduceMotion,
+    }) async {
+      await setUp(tester);
+      final accessibility = GlassAccessibilityController();
+      addTearDown(accessibility.dispose);
+      accessibility.value = GlassAccessibility(reduceMotion: reduceMotion);
+      await tester.pumpWidget(
+        host(
+          (_) => const _GlassOverrideSections(),
+          overrides: [fixedOverrideState()],
+          accessibility: accessibility,
+        ),
+      );
+      await settle(tester);
+      const value = 'DOMAIN-SUFFIX,example0.com,Proxy';
+      double width() =>
+          tester.getBottomRight(find.text(value).last).dx -
+          tester.getTopLeft(find.text(value).last).dx;
+      final resting = width();
+      final gesture = await tester.startGesture(
+        tester.getCenter(find.text(value)),
+      );
+      await tester.pump(kLongPressTimeout + const Duration(milliseconds: 50));
+      await tester.pumpAndSettle();
+      final lifted = width();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      return lifted / resting;
+    }
+
+    testWidgets('a dragged rule grows a little', (tester) async {
+      expect(
+        await draggedWidth(tester, reduceMotion: false),
+        moreOrLessEquals(GlassTokens.listRowDragScale, epsilon: 0.01),
+      );
+    }, variant: darwin);
+
+    testWidgets('Reduce Motion: a dragged rule keeps its size', (tester) async {
+      expect(await draggedWidth(tester, reduceMotion: true), 1);
+    }, variant: darwin);
+  });
 }
+
+Widget _maybeAccessibility(
+  GlassAccessibilityController? controller,
+  Widget child,
+) =>
+    controller == null
+        ? child
+        : GlassAccessibilityScope(controller: controller, child: child);
 
 /// The Darwin sections of `OverrideProfileView` (`_buildGlassList`) without
 /// the disk loading: same paddings and the same rule text width.

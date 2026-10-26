@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:meowclash/common/common.dart';
 import 'package:meowclash/enum/enum.dart';
 import 'package:meowclash/state.dart';
+import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:flutter/material.dart';
 
 class CommonScrollBar extends StatelessWidget {
@@ -71,6 +72,14 @@ class _ScrollToEndBoxState<T> extends State<ScrollToEndBox<T>> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final offset = globalState.cacheScrollPosition[widget.tag] ?? -1;
       if (offset < 0) {
+        // Darwin with Reduce Motion: jump instead of animating the scroll.
+        if (mounted &&
+            AdaptivePlatform.useGlass &&
+            GlassAccessibility.of(context).reduceMotion) {
+          if (!widget.controller.hasClients) return;
+          widget.controller.jumpTo(widget.controller.position.maxScrollExtent);
+          return;
+        }
         widget.controller.animateTo(
           duration: kThemeAnimationDuration,
           widget.controller.position.maxScrollExtent,

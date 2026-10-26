@@ -594,13 +594,19 @@ void main() {
       key.currentState!.addKeyword('hk');
       await tester.pump();
 
+      // Darwin keywords are removable glass tags, padded by the filter bar
+      // tokens.
+      expect(find.byType(GlassTag), findsOneWidget);
       final chips = tester.getRect(find.byType(Wrap));
-      expect(chips.top, macBar + 16);
+      expect(chips.top, macBar + GlassTokens.filterBarVerticalPadding);
       expect(
         tester.getTopLeft(find.text('Row 0')).dy,
         tester.getRect(find.byType(ListView)).top,
       );
-      expect(tester.getRect(find.byType(ListView)).top, chips.bottom + 16);
+      expect(
+        tester.getRect(find.byType(ListView)).top,
+        chips.bottom + GlassTokens.filterBarVerticalPadding,
+      );
     }, variant: _darwin);
 
     testWidgets('Material ignores the flag', (tester) async {

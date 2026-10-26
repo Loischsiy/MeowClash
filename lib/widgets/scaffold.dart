@@ -610,6 +610,34 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
         ),
       );
 
+  /// Darwin keyword filters: removable glass tags, on the window background
+  /// (no blur), padded like the stream rows below them.
+  Widget _buildGlassKeywords(BuildContext context, List<String> keywords) {
+    final horizontal = AdaptivePlatform.isMacOSGlass
+        ? GlassTokens.filterBarPaddingMac
+        : GlassTokens.filterBarPaddingIos;
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        horizontal,
+        GlassTokens.filterBarVerticalPadding + AdaptiveAppBar.topInset(context),
+        horizontal,
+        GlassTokens.filterBarVerticalPadding,
+      ),
+      child: Wrap(
+        runSpacing: GlassTokens.tagGap,
+        spacing: GlassTokens.tagGap,
+        children: [
+          for (final keyword in keywords)
+            GlassTag(
+              label: keyword,
+              large: true,
+              onRemove: () => _deleteKeyword(keyword),
+            ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(widget.appBar != null || widget.title != null);
@@ -640,6 +668,9 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
               });
               if (keywords.isEmpty) {
                 return const SizedBox();
+              }
+              if (AdaptivePlatform.useGlass) {
+                return _buildGlassKeywords(context, keywords);
               }
               return Padding(
                 padding: EdgeInsets.fromLTRB(

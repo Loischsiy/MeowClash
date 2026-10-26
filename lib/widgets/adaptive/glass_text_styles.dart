@@ -240,6 +240,46 @@ abstract final class GlassTextStyles {
         weight: FontWeight.w400,
       );
 
+  /// Label of a tag capsule; [large] for the removable keyword filter.
+  static TextStyle tag(TextTheme textTheme, {bool large = false}) => _style(
+        textTheme.labelMedium,
+        size: large
+            ? _mac
+                ? GlassTokens.tagLargeTextSizeMac
+                : GlassTokens.tagLargeTextSizeIos
+            : _mac
+                ? GlassTokens.tagTextSizeMac
+                : GlassTokens.tagTextSizeIos,
+        line: large
+            ? _mac
+                ? GlassTokens.tagLargeTextLineMac
+                : GlassTokens.tagLargeTextLineIos
+            : _mac
+                ? GlassTokens.tagTextLineMac
+                : GlassTokens.tagTextLineIos,
+        weight: FontWeight.w500,
+      );
+
+  /// Numbers at the trailing edge of a stream row (traffic ↑/↓, times):
+  /// secondary size with tabular figures so columns do not jitter.
+  static TextStyle streamMetric(TextTheme textTheme) =>
+      listRowSubtitle(textTheme)
+          .copyWith(fontFeatures: const [FontFeature.tabularFigures()]);
+
+  /// The system monospaced face (SF Mono, as in Console.app). It has no
+  /// public family name: `.AppleSystemUIFontMonospaced` is what
+  /// `NSFont.monospacedSystemFont` reports; Menlo (shipped with macOS and iOS)
+  /// is the fallback when the engine cannot resolve the private name.
+  static const String monospacedFamily = '.AppleSystemUIFontMonospaced';
+  static const List<String> monospacedFallback = ['Menlo', 'Courier'];
+
+  /// A log line: [codeLine] metrics in the system monospaced face.
+  static TextStyle logPayload(TextTheme textTheme) =>
+      codeLine(textTheme).copyWith(
+        fontFamily: monospacedFamily,
+        fontFamilyFallback: monospacedFallback,
+      );
+
   /// Label of a content push button.
   static TextStyle button(TextTheme textTheme) => _style(
         textTheme.labelLarge,

@@ -444,6 +444,11 @@ abstract final class GlassTokens {
   /// Widest share of a row the current value (`GlassListRow.value`) may
   /// take before it is ellipsized, as in iOS Settings.
   static const double listRowValueMaxFraction = 0.5;
+  // Action buttons under a row subtitle (provider upload / sync).
+  static const double listRowActionsGap = 8;
+  static const double listRowActionsSpacing = 8;
+  // Filter capsules above a grouped list (media unlock categories).
+  static const double filterCapsuleGap = 8;
   // Type scale: macOS body 13 / caption 11 / headline 13, iOS body 17 /
   // subheadline 15 / footnote 13.
   static const double listRowTitleSizeMac = 13;
@@ -720,6 +725,17 @@ abstract final class GlassTokens {
     if (ok) return dark ? _systemGreenDark : _systemGreenLight;
     return dark ? _systemRedDark : _systemRedLight;
   }
+
+  /// System colors of a check result (media unlock): passed / partial /
+  /// failed.
+  static Color systemGreen(Brightness brightness) =>
+      _isDark(brightness) ? _systemGreenDark : _systemGreenLight;
+
+  static Color systemOrange(Brightness brightness) =>
+      _isDark(brightness) ? _systemOrangeDark : _systemOrangeLight;
+
+  static Color systemRed(Brightness brightness) =>
+      _isDark(brightness) ? _systemRedDark : _systemRedLight;
 
   static double sliderTrackOpacity(Brightness brightness) =>
       _isDark(brightness) ? _sliderTrackOpacityDark : _sliderTrackOpacityLight;

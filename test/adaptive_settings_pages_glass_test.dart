@@ -18,10 +18,17 @@ import 'package:meowclash/views/config/general.dart';
 import 'package:meowclash/views/config/network.dart';
 import 'package:meowclash/views/developer.dart';
 import 'package:meowclash/views/hotkey.dart';
+import 'package:meowclash/views/media_unlock/media_unlock_page.dart';
+import 'package:meowclash/views/proxies/providers.dart';
+import 'package:meowclash/views/proxies/setting.dart';
+import 'package:meowclash/views/resources.dart';
 import 'package:meowclash/views/theme.dart';
 import 'package:meowclash/views/tools.dart';
 import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:meowclash/widgets/color_scheme_box.dart' show ColorSchemeBox;
+import 'package:meowclash/widgets/widgets.dart'
+    show CommonChip, SettingInfoCard, SettingTextCard, generateListView,
+        generateSection;
 
 import 'settings_test_support.dart';
 
@@ -402,6 +409,143 @@ void main() {
       await pumpSettingsFrames(tester);
       final reset = rows(tester).singleWhere((row) => row.destructive);
       expect((reset.title as Text).data, 'Reset');
+    }, variant: darwin);
+  });
+
+  // Decision 2: the other `ListItem` / `generateSection` lists outside the
+  // settings pages get the grouped style in the same PR.
+  group('Decision 2: proxies sheets, quick options, resources, media unlock',
+      () {
+    testWidgets('proxies settings sheet: one section of pop-up rows',
+        (tester) async {
+      await pumpPage(tester, (_) => const ProxiesSetting());
+      expect(find.byType(SettingInfoCard), findsNothing);
+      expect(find.byType(SettingTextCard), findsNothing);
+      expect(find.byType(ListTile), findsNothing);
+      expect(find.byType(BackdropFilter), findsNothing);
+      expect(find.byType(GlassListSection), findsOneWidget);
+      // Style, sort, layout, size and (list type, the default) icon style.
+      final accessories = rows(tester).map((row) => row.accessory).toList();
+      expect(accessories, hasLength(5));
+      expect(accessories, everyElement(GlassRowAccessory.popUp));
+    }, variant: darwin);
+
+    testWidgets('provider rows: capsule actions instead of chips',
+        (tester) async {
+      Widget item(ExternalProvider provider) => GlassListView(
+            children: [
+              GlassListSection(children: [ProviderItem(provider: provider)]),
+            ],
+          );
+      final http = ExternalProvider(
+        name: 'sub',
+        type: 'Proxy',
+        count: 3,
+        vehicleType: 'HTTP',
+        updateAt: DateTime(2026),
+      );
+      await pumpPage(tester, (_) => item(http));
+      expectGroupedList();
+      expect(find.byType(CommonChip), findsNothing);
+      expect(find.byType(GlassButton), findsNWidgets(2));
+      expect(find.byType(AdaptiveActivityIndicator), findsNothing);
+
+      await pumpPage(
+        tester,
+        (_) => item(http.copyWith(isUpdating: true)),
+      );
+      expect(
+        tester
+            .widgetList<GlassButton>(find.byType(GlassButton))
+            .where((button) => button.busy),
+        hasLength(1),
+      );
+      expect(find.byType(AdaptiveActivityIndicator), findsNothing);
+
+      await pumpPage(
+        tester,
+        (_) => item(http.copyWith(vehicleType: 'File', isUpdating: true)),
+      );
+      expect(find.byType(GlassButton), findsOneWidget);
+      expect(find.byType(AdaptiveActivityIndicator), findsOneWidget);
+    }, variant: darwin);
+
+    testWidgets('dashboard quick options: one grouped section',
+        (tester) async {
+      await pumpPage(
+        tester,
+        (_) => generateListView(
+          generateSection(
+            items: const [TUNItem(), AutoSetSystemDnsItem(), TunStackItem()],
+          ),
+        ),
+      );
+      expectGroupedList();
+      expect(find.byType(GlassListSection), findsOneWidget);
+      expect(rows(tester), hasLength(3));
+      expect(find.byType(AdaptiveSwitch), findsWidgets);
+    }, variant: darwin);
+
+    for (final brightness in Brightness.values) {
+      testWidgets('resources: grouped files, glass buttons, $brightness',
+          (tester) async {
+        await pumpPage(
+          tester,
+          (_) => const ResourcesView(),
+          brightness: brightness,
+        );
+        expectGroupedList();
+        expect(find.byType(GlassListSection), findsOneWidget);
+        expect(rows(tester), hasLength(4));
+        expect(find.byType(GlassIconButton), findsNWidgets(4));
+        expect(find.byType(IconButton), findsNothing);
+        expect(find.byType(FilledButton), findsNothing);
+        expect(find.byType(CircularProgressIndicator), findsNothing);
+        final updateAll = tester.widget<GlassButton>(find.byType(GlassButton));
+        expect(updateAll.kind, GlassButtonKind.filled);
+        expect(updateAll.onPressed, isNotNull);
+      }, variant: darwin);
+    }
+
+    testWidgets('media unlock: summary, capsules and status sections',
+        (tester) async {
+      await pumpPage(tester, (_) => const MediaUnlockPage());
+      expectGroupedList();
+      expect(find.byType(FilterChip), findsNothing);
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+      // Summary + at least one status section.
+      expect(find.byType(GlassListSection), findsAtLeastNWidgets(2));
+      expect(rows(tester), isNotEmpty);
+      expect(
+        rows(tester).every((row) => row.trailing is GlassIconButton),
+        isTrue,
+      );
+
+      List<GlassButton> capsules() =>
+          tester.widgetList<GlassButton>(find.byType(GlassButton)).toList();
+      expect(capsules().first.kind, GlassButtonKind.filled);
+      await tester.tap(find.byWidget(capsules()[1]));
+      await pumpSettingsFrames(tester);
+      expect(capsules().first.kind, GlassButtonKind.tinted);
+      expect(capsules()[1].kind, GlassButtonKind.filled);
+    }, variant: darwin);
+
+    testWidgets('media unlock dialogs: pinned checkmarks, misc switches',
+        (tester) async {
+      await pumpPage(tester, (_) => const MediaUnlockPage());
+      await tester.tap(find.byIcon(Icons.tune_rounded));
+      await pumpSettingsFrames(tester);
+      expect(tester.takeException(), isNull);
+      expect(find.byType(CheckboxListTile), findsNothing);
+      final checked = rows(tester)
+          .where((row) => row.accessory == GlassRowAccessory.checkmark);
+      expect(checked, isNotEmpty);
+
+      await tester.tap(find.byIcon(Icons.settings_outlined));
+      await pumpSettingsFrames(tester);
+      expect(tester.takeException(), isNull);
+      expect(find.byType(AdaptiveSwitch), findsNWidgets(5));
+      expect(find.byType(Switch), findsNothing);
     }, variant: darwin);
   });
 

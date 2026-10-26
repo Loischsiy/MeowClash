@@ -6,6 +6,7 @@ import 'package:meowclash/common/common.dart';
 import 'package:meowclash/models/core.dart';
 import 'package:meowclash/providers/app.dart';
 import 'package:meowclash/state.dart';
+import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:meowclash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -168,8 +169,57 @@ class ProviderItem extends StatelessWidget {
     };
   }
 
+  /// Darwin: a plain row; the actions are capsule buttons under the subtitle
+  /// and Sync shows its own spinner while updating.
+  Widget _buildGlass() {
+    final canSync = provider.vehicleType == "HTTP";
+    return ListItem(
+      title: Text(provider.name),
+      subtitle: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(_buildProviderDesc()),
+          if (provider.subscriptionInfo != null) ...[
+            const SizedBox(height: GlassTokens.listRowSubtitleGap),
+            SubscriptionInfoView(
+              subscriptionInfo: provider.subscriptionInfo,
+            ),
+          ],
+          const SizedBox(height: GlassTokens.listRowActionsGap),
+          Wrap(
+            spacing: GlassTokens.listRowActionsSpacing,
+            runSpacing: GlassTokens.listRowActionsSpacing,
+            children: [
+              GlassButton(
+                icon: Icons.upload_rounded,
+                label: appLocalizations.upload,
+                onPressed: _handleSideLoadProvider,
+              ),
+              if (canSync)
+                GlassButton(
+                  icon: Icons.sync_rounded,
+                  label: appLocalizations.sync,
+                  busy: provider.isUpdating,
+                  onPressed: _handleUpdateProvider,
+                ),
+            ],
+          ),
+        ],
+      ),
+      trailing: provider.isUpdating && !canSync
+          ? const AdaptiveActivityIndicator()
+          : null,
+    );
+  }
+
   @override
-  Widget build(BuildContext context) => ListItem(
+  Widget build(BuildContext context) {
+    if (AdaptivePlatform.useGlass) return _buildGlass();
+    return _buildMaterial();
+  }
+
+  Widget _buildMaterial() => ListItem(
         padding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 4,

@@ -1,6 +1,7 @@
 import 'package:meowclash/common/common.dart';
 import 'package:meowclash/enum/enum.dart';
 import 'package:meowclash/providers/config.dart';
+import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:meowclash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -221,8 +222,111 @@ class ProxiesSetting extends StatelessWidget {
       ],
     );
 
+  /// Darwin: one grouped section of pop-up rows (value at the end, a menu on
+  /// tap) instead of the Material chip cards. A plain scroll view, not a
+  /// `GlassListView`: the sheet sizes itself to the content.
+  Widget _buildGlass(BuildContext context) {
+    final padding = GlassListSection.listPadding;
+    return SingleChildScrollView(
+      padding: padding.copyWith(
+        top: padding.top + AdaptiveAppBar.topInset(context),
+      ),
+      child: Consumer(
+        builder: (_, ref, __) {
+          final setting = ref.watch(proxiesStyleSettingProvider);
+          final notifier = ref.read(proxiesStyleSettingProvider.notifier);
+          return GlassListSection(
+            children: [
+              ListItem<ProxiesType>.options(
+                title: Text(appLocalizations.style),
+                delegate: OptionsDelegate<ProxiesType>(
+                  title: appLocalizations.style,
+                  options: ProxiesType.values,
+                  value: setting.type,
+                  textBuilder: (item) => Intl.message(item.name),
+                  onChanged: (item) {
+                    if (item == null) return;
+                    notifier.updateState(
+                      (state) => state.copyWith(type: item),
+                    );
+                  },
+                ),
+              ),
+              ListItem<ProxiesSortType>.options(
+                title: Text(appLocalizations.sort),
+                delegate: OptionsDelegate<ProxiesSortType>(
+                  title: appLocalizations.sort,
+                  options: ProxiesSortType.values,
+                  value: setting.sortType,
+                  textBuilder: _getStringProxiesSortType,
+                  onChanged: (item) {
+                    if (item == null) return;
+                    notifier.updateState(
+                      (state) => state.copyWith(sortType: item),
+                    );
+                  },
+                ),
+              ),
+              ListItem<ProxiesLayout>.options(
+                title: Text(appLocalizations.layout),
+                delegate: OptionsDelegate<ProxiesLayout>(
+                  title: appLocalizations.layout,
+                  options: ProxiesLayout.values,
+                  value: setting.layout,
+                  textBuilder: getTextForProxiesLayout,
+                  onChanged: (item) {
+                    if (item == null) return;
+                    notifier.updateState(
+                      (state) => state.copyWith(layout: item),
+                    );
+                  },
+                ),
+              ),
+              ListItem<ProxyCardType>.options(
+                title: Text(appLocalizations.size),
+                delegate: OptionsDelegate<ProxyCardType>(
+                  title: appLocalizations.size,
+                  options: ProxyCardType.values,
+                  value: setting.cardType,
+                  textBuilder: (item) => Intl.message(item.name),
+                  onChanged: (item) {
+                    if (item == null) return;
+                    notifier.updateState(
+                      (state) => state.copyWith(cardType: item),
+                    );
+                  },
+                ),
+              ),
+              if (setting.type == ProxiesType.list)
+                ListItem<ProxiesIconStyle>.options(
+                  title: Text(appLocalizations.iconStyle),
+                  delegate: OptionsDelegate<ProxiesIconStyle>(
+                    title: appLocalizations.iconStyle,
+                    options: ProxiesIconStyle.values,
+                    value: setting.iconStyle,
+                    textBuilder: _getTextWithProxiesIconStyle,
+                    onChanged: (item) {
+                      if (item == null) return;
+                      notifier.updateState(
+                        (state) => state.copyWith(iconStyle: item),
+                      );
+                    },
+                  ),
+                ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
   @override
-  Widget build(BuildContext context) => SingleChildScrollView(
+  Widget build(BuildContext context) {
+    if (AdaptivePlatform.useGlass) return _buildGlass(context);
+    return _buildMaterial();
+  }
+
+  Widget _buildMaterial() => SingleChildScrollView(
       padding: const EdgeInsets.only(bottom: 32),
       child: Column(
         mainAxisSize: MainAxisSize.min,

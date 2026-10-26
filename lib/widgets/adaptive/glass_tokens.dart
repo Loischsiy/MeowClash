@@ -45,6 +45,13 @@ abstract final class GlassTokens {
   // Corner radii.
   static const double tabBarRadius = 30;
   static const double sheetRadius = 26;
+  // Desktop side sheet (`showSheet` / `showExtend` on a wide window): a
+  // floating panel, like the macOS 26 inspector — this gap to the window
+  // edges and every corner rounded (the window's own corner never stands in
+  // for the panel's).
+  static const double sideSheetInset = 8;
+  static const double sideSheetRadiusMac = 18;
+  static const double sideSheetRadiusIos = 26;
   static const double menuRadius = 14;
   static const double selectionRadius = 10;
   static const double sidebarRowRadius = 8;

@@ -453,6 +453,82 @@ void main() {
     }, variant: TargetPlatformVariant.only(TargetPlatform.android));
   });
 
+  group('CommonScaffold with its own Material AppBar (editor)', () {
+    var saves = 0;
+    setUp(() => saves = 0);
+
+    Future<void> pushEditor(WidgetTester tester) async {
+      await _pumpScaffold(tester);
+      final navigator = tester.state<NavigatorState>(find.byType(Navigator));
+      unawaited(navigator.push(MaterialPageRoute<void>(
+        builder: (_) => CommonScaffold(
+          appBar: AppBar(
+            // Like `EditorPage`: an editable title field.
+            title: TextField(
+              controller: TextEditingController(text: 'Default Subscription'),
+              decoration: const InputDecoration(
+                border: InputBorder.none,
+                isDense: true,
+                contentPadding: EdgeInsets.zero,
+              ),
+            ),
+            actions: genActions([
+              IconButton(
+                onPressed: () => saves++,
+                icon: const Icon(Icons.save_sharp),
+              ),
+              IconButton(onPressed: () {}, icon: const Icon(Icons.more_vert)),
+            ]),
+          ),
+          body: const SizedBox.expand(),
+        ),
+      )));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('Darwin: glass toolbar — back capsule, one actions capsule',
+        (tester) async {
+      await pushEditor(tester);
+      expect(find.byType(AppBar), findsNothing);
+      expect(find.byType(GlassToolbar), findsOneWidget);
+      expect(find.text('Default Subscription'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      final back = find.ancestor(
+        of: find.byType(BackButton),
+        matching: find.byType(GlassToolbarGroup),
+      );
+      expect(back, findsOneWidget);
+      final actions = find.ancestor(
+        of: find.byIcon(Icons.save_sharp),
+        matching: find.byType(GlassToolbarGroup),
+      );
+      expect(actions, findsOneWidget);
+      expect(
+        find.descendant(of: actions, matching: find.byIcon(Icons.more_vert)),
+        findsOneWidget,
+      );
+      // `genActions` spacers are dropped: two square buttons, nothing else.
+      expect(
+        tester.getSize(actions).width,
+        2 * GlassToolbarGroup.itemSize,
+      );
+      // Back capsule + actions capsule.
+      expect(_backdropLayers(tester), 2);
+      await tester.tap(find.byIcon(Icons.save_sharp));
+      expect(saves, 1);
+      await tester.tap(find.byType(BackButton));
+      await tester.pumpAndSettle();
+      expect(find.text('Default Subscription'), findsNothing);
+    }, variant: _darwin);
+
+    testWidgets('Material keeps the page AppBar verbatim', (tester) async {
+      await pushEditor(tester);
+      expect(find.byType(AppBar), findsWidgets);
+      expect(find.byType(GlassToolbar), findsNothing);
+      expect(find.byType(GlassToolbarGroup), findsNothing);
+    }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+  });
+
   group('CommonScaffold scrollUnderToolbar', () {
     const macBar = _macTop + GlassTokens.toolbarHeightMac;
     setUp(() => _syncTaps = 0);

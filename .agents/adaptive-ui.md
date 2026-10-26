@@ -27,7 +27,9 @@ pixel-for-pixel. Code: `lib/widgets/adaptive/` (import `adaptive.dart`).
   menus); `GlassBackdrop.native` = faint tint only, the AppKit glass behind the transparent Flutter view
   shows through (macOS sidebar and title bar, zero `BackdropFilter`).
 - Sheets: on Darwin `showSheet` / `showExtend` skip the old full-screen `BackdropFilter` and
-  `AdaptiveSheetScaffold` blurs only its own surface.
+  `AdaptiveSheetScaffold` blurs only its own surface. A side sheet is a floating panel: inset
+  `sideSheetInset` from the window edges, every corner rounded (`sideSheetRadiusMac/Ios`), the window
+  insets inside reduced by the gap so its toolbar still clears the macOS title bar strip.
 - `SheetType.page` (phones, `showExtend`) is an opaque full-screen route with nothing behind it to
   blur: `AdaptiveSheetScaffold` renders it without glass, on the theme's opaque page background.
   Glass there would only tint an empty backdrop flat grey.
@@ -35,9 +37,11 @@ pixel-for-pixel. Code: `lib/widgets/adaptive/` (import `adaptive.dart`).
 
 ## Toolbar (app bar)
 
-- Every page's bar comes from `CommonScaffold`: on Darwin (and without a custom `appBar`) it builds
+- Every page's bar comes from `CommonScaffold`: on Darwin it builds
   `AdaptiveAppBar(child: GlassToolbar(...))` instead of the Material `AppBar`; the Material branch is the
   old code verbatim. Pages keep passing plain `IconButton`s as `actions` — never restyle them per page.
+  A page with its own `appBar: AppBar(...)` (editor, side sheets) is converted the same way: its title,
+  leading (or the implied back / close button) and actions; `genActions` spacers are dropped.
 - macOS 26 / iOS 26 model: the bar itself has **no fill and no blur**; only its capsules are glass
   (`GlassToolbarGroup`, one `GlassSurface` each). Page actions share one capsule, search is its own
   round capsule, the leading button (back / close / edit-exit) another. While searching,

@@ -104,8 +104,9 @@ pixel-for-pixel. Code: `lib/widgets/adaptive/` (import `adaptive.dart`).
   Plain top padding would pin them under the bar — glass under glass. Floating overlays (the proxies
   group bar) are positioned at `top: topInset` and the content below them adds the inset too.
 - Proxies screen: in the list mode the expanded group header pins; in the tab mode the grid scrolls
-  under `AdaptiveGroupSelector`. The Darwin check badge replaces `_ProxyComputedMark`. Proxy-screen
-  sheets (settings, providers, group picker, icons) are still Material-in-glass-sheet — next PR.
+  under `AdaptiveGroupSelector`. The Darwin check badge replaces `_ProxyComputedMark`. The settings and
+  providers sheets are glass (see Settings below); the group picker and icons sheets are still
+  Material-in-glass-sheet.
 - Profiles screen: cards are `AdaptiveCard(checked: false)` — selection is the tint + hairline only, no
   check badge; the name uses `GlassTextStyles.groupTitle`, the details `cardSubtitle`. The traffic bar
   is an `AdaptiveProgressBar` colored by `GlassTokens.trafficColor` (Apple green, orange above
@@ -128,8 +129,26 @@ pixel-for-pixel. Code: `lib/widgets/adaptive/` (import `adaptive.dart`).
   `GlassTextStyles.codeLine`) and the text width `maxWidth − RuleContent.glassTextReserve` — change both
   together. Branch with `AdaptivePlatform.useGlass` around the Material tree and share validators /
   handlers as methods; the Material editors are pinned by `test/material_profile_editors_golden_test.dart`,
-  glass checks live in `test/adaptive_profile_editors_glass_test.dart`. App-wide `ListItem` (settings)
-  is not migrated yet.
+  glass checks live in `test/adaptive_profile_editors_glass_test.dart`.
+- Settings (app-wide `ListItem`, `lib/widgets/list.dart`): `ListItem`, `ListHeader`, `generateSection(V2)`
+  and `generateListView` render `GlassListRow` / `GlassListSection` only inside a `GlassListScope`
+  (`GlassListView` provides it); outside it they stay Material verbatim, so connections, logs and the
+  dashboard mode radios are untouched. `_groupGlassSections` turns a flat header + items list into
+  sections. Row kinds: `options` → `GlassPopUpButton` with the value at the trailing edge (macOS
+  `NSMenu`, iOS glass menu); `input` → value + chevron; `open` / `next` → chevron (phone: `GlassPageRoute` push,
+  desktop: `showExtend` side sheet on the spring); `switch` → `AdaptiveSwitch`; `radio` / `checkbox` →
+  checkmark; Material buttons in `trailing` become capsules via `GlassTheme.row`; `destructive` paints
+  the row red. Section hairlines start at the row text: `_GlassSectionSlot` + `GlassLeadingHint`
+  report the leading width. A top-level item list whose items branch on the platform while it is built
+  (`networkItems` calls `generateSection`) must be a **getter** — a `final` is built once and keeps the
+  first branch (tests flip the platform); `generalItems` stays `final` because Darwin builds its own
+  sections in `GeneralListView`. Pages with their
+  own glass branch (Material moved verbatim): tools, application, general / network, backup, hotkeys
+  (`GlassKeyCaps`), about, developer, theme (`AdaptiveSlider`, swatches), proxies setting and providers
+  sheets, resources, media unlock. Material: `test/material_settings_golden_test.dart`; glass:
+  `test/adaptive_settings_glass_test.dart` (rows, fallbacks, long list without blur),
+  `test/adaptive_settings_pages_glass_test.dart`, `test/adaptive_settings_motion_test.dart`; shared host
+  `test/settings_test_support.dart`.
 - Dialogs (`lib/widgets/adaptive/adaptive_dialog.dart`): on Darwin `showCommonDialog` goes through
   `showGlassDialog` / `GlassDialogRoute` and `CommonDialog` / `CommonModal` render `GlassDialog` /
   `GlassModalPanel` — one `GlassSurface` each, no blur behind. `dialogBarrierColor`: macOS does not dim

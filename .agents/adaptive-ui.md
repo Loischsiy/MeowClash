@@ -39,6 +39,9 @@ pixel-for-pixel. Code: `lib/widgets/adaptive/` (import `adaptive.dart`).
   `GlassSpringCurve` (`sideSheetSpring*`) and leaves on an ease via `SideSheetMotion`. Never fade a
   glass page (`Opacity` over `BackdropFilter`). Material keeps `CommonRoute` / `CommonDesktopRoute` and
   the stock 300/200 ms side sheet (`motion: null`). Pinned by `test/adaptive_settings_motion_test.dart`.
+- Specular rim (`_GlassRimPainter`): light = 1 pt white 0.72 → 0.10 (unchanged, liked on device); dark
+  = 0.5 pt (one Retina pixel) white 0.12 → 0.03 (`GlassTokens.rimWidth/rimTopOpacity/rimBottomOpacity`).
+  A full 1 pt rim at 0.26 read as a gray frame around dark side sheets and dialogs.
 - All numbers (sigmas, radii, opacities, sizes, durations) live in `glass_tokens.dart`.
 
 ## Toolbar (app bar)
@@ -61,7 +64,13 @@ pixel-for-pixel. Code: `lib/widgets/adaptive/` (import `adaptive.dart`).
   still keeps `toolbarMinTopInsetIos` above the capsules. Bar height always comes from
   `AdaptiveAppBar.preferredHeight`; pages read it only through `AdaptiveAppBar.topInset` (MediaQuery).
 - A capsule inside an already blurring surface (e.g. `CommonScaffold` in a glass sheet) switches to
-  `GlassBackdrop.native` via `GlassSurface.isOverBlur` — never blur over blur.
+  `GlassBackdrop.native` via `GlassSurface.isOverBlur` — never blur over blur. Its fill is then
+  `GlassTokens.toolbarItemTintOverGlass` (light 0.18 = the native wash, dark 0.56) so in dark it reads as
+  a filled disc, not a bare rim (`GlassSurface.tintOpacity` now applies to both backdrops).
+- Close glyph: `GlassCloseIcon` (SF `xmark`, round caps, `closeGlyphSpan/Stroke` of the icon size).
+  `GlassTheme.apply` installs it via `ActionIconThemeData.closeButtonIconBuilder`, so every Material
+  `CloseButton` / `CloseButtonIcon` on Darwin draws it; Material keeps `Icons.close`. Use
+  `CloseButtonIcon()` (or `GlassCloseIcon` in glass-only code) for new Darwin close buttons.
 - Scrolling under the bar is **opt-in per page**: `CommonScaffold(scrollUnderToolbar: true)` →
   `extendBodyBehindAppBar`, `SafeArea(top: false)` and the bar's scroll-edge fade (a gradient in the
   window color, `toolbarFade*`, no blur, `IgnorePointer`). The page must pad its scroll view with
@@ -231,6 +240,11 @@ pixel-for-pixel. Code: `lib/widgets/adaptive/` (import `adaptive.dart`).
   Material icons to SF Symbols in `AdaptiveContextMenu.sfSymbolFor`. macOS 27 hides symbol images in
   menus by default (`NSMenuItem.preferredImageVisibility = .automatic`); this is kept on purpose to match
   the system. Falls back to the Flutter menu when the channel is missing.
+- App theme → window appearance: `GlassWindowAppearance` (wraps `MaterialApp` in `application.dart` on
+  Darwin) sends `setAppearance {mode: system|light|dark}` over `meowclash/glass_accessibility` and
+  `AppDelegate.swift` sets `NSApp.appearance` (nil / `.aqua` / `.darkAqua`). Without it the native
+  sidebar material and `NSMenu`s follow the *system* theme: dark system + light app = gray sidebar.
+  iOS never calls it; an older runner without the method is ignored. Swift changes need an app rebuild.
 - New Swift code goes into existing files (a new file needs a `project.pbxproj` entry).
 
 ## iOS specifics

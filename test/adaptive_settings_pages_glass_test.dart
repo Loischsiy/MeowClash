@@ -1,8 +1,14 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:meowclash/common/constant.dart'
+    show defaultPrimaryColor, defaultPrimaryColors;
 import 'package:meowclash/enum/enum.dart';
 import 'package:meowclash/models/models.dart';
+import 'package:meowclash/providers/config.dart';
 import 'package:meowclash/views/about.dart';
 import 'package:meowclash/views/application_setting.dart';
 import 'package:meowclash/views/backup_and_recovery.dart';
@@ -12,8 +18,10 @@ import 'package:meowclash/views/config/general.dart';
 import 'package:meowclash/views/config/network.dart';
 import 'package:meowclash/views/developer.dart';
 import 'package:meowclash/views/hotkey.dart';
+import 'package:meowclash/views/theme.dart';
 import 'package:meowclash/views/tools.dart';
 import 'package:meowclash/widgets/adaptive/adaptive.dart';
+import 'package:meowclash/widgets/color_scheme_box.dart' show ColorSchemeBox;
 
 import 'settings_test_support.dart';
 
@@ -291,5 +299,145 @@ void main() {
       );
       expect(rows(tester), hasLength(5));
     }, variant: darwin);
+  });
+
+  group('Theme', () {
+    List<String?> headers(WidgetTester tester) => tester
+        .widgetList<GlassListSection>(find.byType(GlassListSection))
+        .map((section) => section.header)
+        .toList();
+
+    ProviderContainer container(WidgetTester tester) =>
+        ProviderScope.containerOf(tester.element(find.byType(ThemeView)));
+
+    for (final brightness in Brightness.values) {
+      testWidgets('appearance previews, swatches, scheme pop-up, slider, '
+          '$brightness', (tester) async {
+        await pumpPage(
+          tester,
+          (_) => const ThemeView(),
+          brightness: brightness,
+        );
+        expectGroupedList();
+        expect(headers(tester), ['Theme mode', 'Theme color', null, null]);
+        // Material pieces are gone.
+        expect(find.byType(ColorSchemeBox), findsNothing);
+        expect(find.byType(ItemCard), findsNothing);
+        expect(find.byType(IconButton), findsNothing);
+        // Three appearance previews, labelled.
+        for (final label in ['Auto', 'Light', 'Dark']) {
+          expect(find.text(label), findsOneWidget);
+        }
+        // Pure black + text scale.
+        expect(find.byType(AdaptiveSwitch), findsNWidgets(2));
+        expect(find.byType(AdaptiveSlider), findsOneWidget);
+        if (defaultTargetPlatform == TargetPlatform.iOS) {
+          expect(find.byType(CupertinoSlider), findsOneWidget);
+          expect(find.byType(Slider), findsNothing);
+        } else {
+          expect(find.byType(CupertinoSlider), findsNothing);
+        }
+        final scheme = rows(tester).singleWhere(
+          (row) => (row.title as Text).data == 'Color schemes',
+        );
+        expect(scheme.accessory, GlassRowAccessory.popUp);
+        expect(scheme.value, isNotNull);
+      }, variant: darwin);
+    }
+
+    testWidgets('a tap on a preview changes the theme mode', (tester) async {
+      await pumpPage(tester, (_) => const ThemeView());
+      await tester.tap(find.text('Dark'));
+      await tester.pump();
+      expect(
+        container(tester).read(themeSettingProvider).themeMode,
+        ThemeMode.dark,
+      );
+      final semantics = tester.widget<Semantics>(
+        find.byWidgetPredicate(
+          (widget) => widget is Semantics && widget.properties.label == 'Dark',
+        ),
+      );
+      expect(semantics.properties.button, isTrue);
+      expect(semantics.properties.selected, isTrue);
+    }, variant: darwin);
+
+    testWidgets('the slider follows the text scale switch', (tester) async {
+      await pumpPage(tester, (_) => const ThemeView());
+      final enabled =
+          container(tester).read(themeSettingProvider).textScale.enable;
+      AdaptiveSlider slider() =>
+          tester.widget<AdaptiveSlider>(find.byType(AdaptiveSlider));
+      expect(slider().onChanged != null, enabled);
+      final row = find.ancestor(
+        of: find.text('Text Scaling'),
+        matching: find.byType(GlassListRow),
+      );
+      await tester.tap(row);
+      await pumpSettingsFrames(tester);
+      expect(
+        container(tester).read(themeSettingProvider).textScale.enable,
+        !enabled,
+      );
+      expect(slider().onChanged != null, !enabled);
+      expect(find.text('100%'), findsOneWidget);
+    }, variant: darwin);
+
+    testWidgets('the red reset row only while the colors are not default',
+        (tester) async {
+      await pumpPage(tester, (_) => const ThemeView());
+      ThemeSetting notifier() =>
+          container(tester).read(themeSettingProvider.notifier);
+      notifier().updateState(
+        (state) => state.copyWith(
+          primaryColors: defaultPrimaryColors,
+          primaryColor: defaultPrimaryColor,
+        ),
+      );
+      await pumpSettingsFrames(tester);
+      expect(rows(tester).where((row) => row.destructive), isEmpty);
+      notifier().updateState(
+        (state) => state.copyWith(primaryColor: null),
+      );
+      await pumpSettingsFrames(tester);
+      final reset = rows(tester).singleWhere((row) => row.destructive);
+      expect((reset.title as Text).data, 'Reset');
+    }, variant: darwin);
+  });
+
+  group('AdaptiveSlider', () {
+    Widget host(Widget child) => MaterialApp(
+          home: Scaffold(body: Center(child: child)),
+        );
+
+    testWidgets('Darwin: Cupertino on iOS, thin AppKit track on macOS',
+        (tester) async {
+      AdaptivePlatform.debugUseGlassOverride = true;
+      double? changed;
+      await tester.pumpWidget(
+        host(AdaptiveSlider(value: 0.5, onChanged: (v) => changed = v)),
+      );
+      if (defaultTargetPlatform == TargetPlatform.iOS) {
+        expect(find.byType(CupertinoSlider), findsOneWidget);
+      } else {
+        expect(find.byType(CupertinoSlider), findsNothing);
+        final theme = SliderTheme.of(tester.element(find.byType(Slider)));
+        expect(theme.trackHeight, GlassTokens.sliderTrackHeightMac);
+        expect(theme.overlayShape, SliderComponentShape.noOverlay);
+      }
+      await tester.drag(find.byType(AdaptiveSlider), const Offset(60, 0));
+      expect(changed, isNotNull);
+    }, variant: darwin);
+
+    testWidgets('Material: the stock Slider', (tester) async {
+      AdaptivePlatform.debugUseGlassOverride = false;
+      await tester.pumpWidget(
+        host(AdaptiveSlider(value: 0.5, onChanged: (_) {})),
+      );
+      expect(find.byType(Slider), findsOneWidget);
+      expect(find.byType(CupertinoSlider), findsNothing);
+      final theme = SliderTheme.of(tester.element(find.byType(Slider)));
+      expect(theme.trackHeight, isNot(GlassTokens.sliderTrackHeightMac));
+    });
   });
 }

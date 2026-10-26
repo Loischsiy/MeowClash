@@ -14,6 +14,7 @@ export 'adaptive_group_selector.dart';
 export 'adaptive_list.dart';
 export 'adaptive_platform.dart';
 export 'adaptive_sidebar.dart';
+export 'adaptive_slider.dart';
 export 'adaptive_status.dart';
 export 'adaptive_tab_bar.dart';
 export 'glass_accessibility.dart';

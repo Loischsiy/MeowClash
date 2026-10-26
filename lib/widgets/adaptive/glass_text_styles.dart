@@ -199,6 +199,27 @@ abstract final class GlassTextStyles {
         weight: FontWeight.w500,
       );
 
+  /// The small or [large] "A" at the ends of the text size slider.
+  static TextStyle scaleGlyph(TextTheme textTheme, {required bool large}) =>
+      _style(
+        textTheme.bodyMedium,
+        size: large
+            ? _mac
+                ? GlassTokens.scaleGlyphLargeSizeMac
+                : GlassTokens.scaleGlyphLargeSizeIos
+            : _mac
+                ? GlassTokens.scaleGlyphSmallSizeMac
+                : GlassTokens.scaleGlyphSmallSizeIos,
+        line: large
+            ? _mac
+                ? GlassTokens.scaleGlyphLargeLineMac
+                : GlassTokens.scaleGlyphLargeLineIos
+            : _mac
+                ? GlassTokens.scaleGlyphSmallLineMac
+                : GlassTokens.scaleGlyphSmallLineIos,
+        weight: FontWeight.w400,
+      );
+
   /// App name in the About header.
   static TextStyle aboutTitle(TextTheme textTheme) => _style(
         textTheme.titleLarge,

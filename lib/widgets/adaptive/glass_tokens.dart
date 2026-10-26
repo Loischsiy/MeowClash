@@ -505,6 +505,71 @@ abstract final class GlassTokens {
   static const double aboutTitleLineIos = 28;
   static const double aboutAvatarSize = 48;
   static const double aboutAvatarGap = 16;
+  // Theme page: appearance previews (Auto / Light / Dark) as in macOS
+  // Appearance, accent swatches as the macOS accent color row, the text
+  // size slider as in iOS Text Size. Content, so never blurred.
+  static const double themePreviewWidthMac = 68;
+  static const double themePreviewWidthIos = 84;
+  static const double themePreviewHeightMac = 46;
+  static const double themePreviewHeightIos = 56;
+  static const double themePreviewRadiusMac = 7;
+  static const double themePreviewRadiusIos = 10;
+  static const double themePreviewInset = 6;
+  static const double themePreviewBarFraction = 0.22;
+  static const double themePreviewPillWidthFraction = 0.45;
+  static const double themePreviewPillHeight = 6;
+  static const double themePreviewLineWidthFraction = 0.7;
+  static const double themePreviewLineHeight = 4;
+  static const double themePreviewLineGap = 4;
+  static const double themePreviewRingWidth = 2.5;
+  static const double themePreviewRingGap = 2;
+  static const double themePreviewLabelGap = 6;
+  static const double themePickerPaddingMac = 12;
+  static const double themePickerPaddingIos = 16;
+  static const Color themePreviewLightFill = Color(0xFFF2F2F7);
+  static const Color themePreviewLightBar = Color(0xFFFFFFFF);
+  static const Color themePreviewLightLine = Color(0xFFD1D1D6);
+  static const Color themePreviewDarkFill = Color(0xFF1C1C1E);
+  static const Color themePreviewDarkBar = Color(0xFF2C2C2E);
+  static const Color themePreviewDarkLine = Color(0xFF48484A);
+  static const double themeSwatchSizeMac = 22;
+  static const double themeSwatchSizeIos = 30;
+  static const double themeSwatchGapMac = 10;
+  static const double themeSwatchGapIos = 14;
+  static const double themeSwatchRingWidth = 2;
+  static const double themeSwatchRingGap = 2;
+  static const double themeSwatchCheckFraction = 0.6;
+  static const double themeSwatchEdgeWidth = 0.5;
+  static const double themeSwatchRowPaddingMac = 10;
+  static const double themeSwatchRowPaddingIos = 14;
+  // Multicolor swatch (follow the system accent), the macOS accent order.
+  static const List<Color> themeSwatchMulticolor = [
+    Color(0xFFFF3B30),
+    Color(0xFFFF9500),
+    Color(0xFFFFCC00),
+    Color(0xFF34C759),
+    Color(0xFF007AFF),
+    Color(0xFFAF52DE),
+    Color(0xFFFF2D55),
+    Color(0xFFFF3B30),
+  ];
+  // macOS slider: thin AppKit track, small white knob (iOS uses the stock
+  // CupertinoSlider).
+  static const double sliderTrackHeightMac = 4;
+  static const double sliderThumbRadiusMac = 9;
+  static const double sliderThumbElevationMac = 1.5;
+  static const double _sliderTrackOpacityLight = 0.12;
+  static const double _sliderTrackOpacityDark = 0.24;
+  // Small and large "A" at the ends of the text size slider.
+  static const double scaleGlyphSmallSizeMac = 11;
+  static const double scaleGlyphSmallLineMac = 14;
+  static const double scaleGlyphLargeSizeMac = 17;
+  static const double scaleGlyphLargeLineMac = 20;
+  static const double scaleGlyphSmallSizeIos = 13;
+  static const double scaleGlyphSmallLineIos = 16;
+  static const double scaleGlyphLargeSizeIos = 22;
+  static const double scaleGlyphLargeLineIos = 26;
+  static const double scaleGlyphGap = 12;
   // Rules of a profile override: a long reorderable list, so one small
   // content card per rule instead of a grouped section; monospaced value and
   // a selection circle at the end, as in Mail's edit mode.
@@ -655,6 +720,9 @@ abstract final class GlassTokens {
     if (ok) return dark ? _systemGreenDark : _systemGreenLight;
     return dark ? _systemRedDark : _systemRedLight;
   }
+
+  static double sliderTrackOpacity(Brightness brightness) =>
+      _isDark(brightness) ? _sliderTrackOpacityDark : _sliderTrackOpacityLight;
 
   static double keyCapFillOpacity(Brightness brightness) =>
       _isDark(brightness) ? _keyCapFillOpacityDark : _keyCapFillOpacityLight;

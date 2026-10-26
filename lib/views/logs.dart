@@ -1,7 +1,10 @@
+import 'dart:math' as math;
+
 import 'package:meowclash/common/common.dart';
 import 'package:meowclash/enum/enum.dart';
 import 'package:meowclash/providers/providers.dart';
 import 'package:meowclash/state.dart';
+import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -109,6 +112,15 @@ class _LogsViewState extends ConsumerState<LogsView> with PageMixin {
   }
 
   double _getItemHeight(Log log) {
+    if (AdaptivePlatform.useGlass) {
+      // Darwin rows: measured with the styles and tokens they paint with;
+      // [_currentMaxWidth] is the full list width there.
+      return _GlassLogItem.extentOf(
+        log,
+        width: _currentMaxWidth,
+        textTheme: context.textTheme,
+      );
+    }
     final measure = globalState.measure;
     final bodySmallHeight = measure.bodySmallHeight;
     final bodyMediumHeight = measure.bodyMediumHeight;
@@ -179,15 +191,65 @@ class _LogsViewState extends ConsumerState<LogsView> with PageMixin {
     });
   }
 
+  Widget _buildGlass(LogsState state, List<Log> logs) {
+    final Widget content;
+    if (state.loading) {
+      content = const Center(child: AdaptiveActivityIndicator());
+    } else if (logs.isEmpty) {
+      content = AdaptiveEmptyState(
+        label: appLocalizations.nullTip(appLocalizations.logs),
+        icon: Icons.article_outlined,
+      );
+    } else {
+      content = Align(
+        alignment: Alignment.topCenter,
+        child: AdaptiveScrollbar(
+          controller: _scrollController,
+          child: ScrollToEndBox(
+            controller: _scrollController,
+            tag: _tag,
+            dataSource: logs,
+            child: CacheItemExtentListView(
+              tag: _tag,
+              reverse: true,
+              shrinkWrap: true,
+              physics: const NextClampingScrollPhysics(),
+              controller: _scrollController,
+              itemExtentBuilder: (index) => _getItemHeight(logs[index]),
+              itemBuilder: (context, index) {
+                final log = logs[index];
+                return _GlassLogItem(
+                  key: Key(log.dateTime),
+                  log: log,
+                  onClick: (value) {
+                    context.commonScaffoldState?.addKeyword(value);
+                  },
+                );
+              },
+              itemCount: logs.length,
+              keyBuilder: (index) => logs[index].payload,
+            ),
+          ),
+        ),
+      );
+    }
+    return FadeBox(child: content);
+  }
+
   @override
   Widget build(BuildContext context) => LayoutBuilder(
         builder: (_, constraints) {
-          _currentMaxWidth = constraints.maxWidth - 40;
+          _currentMaxWidth = AdaptivePlatform.useGlass
+              ? constraints.maxWidth
+              : constraints.maxWidth - 40;
           return ValueListenableBuilder<LogsState>(
             valueListenable: _logsStateNotifier,
             builder: (_, state, __) {
               _preLoad();
               final logs = state.list;
+              if (AdaptivePlatform.useGlass) {
+                return _buildGlass(state, logs);
+              }
               final items = logs
                   .map<Widget>(
                     (log) => LogItem(
@@ -299,4 +361,95 @@ class LogItem extends StatelessWidget {
           ],
         ),
       );
+}
+
+/// Darwin log row (Console.app): the line in SF Mono, selectable, over a
+/// colored level capsule (tap = filter by level) and the time.
+class _GlassLogItem extends StatelessWidget {
+  const _GlassLogItem({
+    super.key,
+    required this.log,
+    required this.onClick,
+  });
+
+  final Log log;
+  final ValueChanged<String>? onClick;
+
+  /// Item extent of the row of [log] in a list [width] wide, from the same
+  /// styles and tokens [build] paints with.
+  static double extentOf(
+    Log log, {
+    required double width,
+    required TextTheme textTheme,
+  }) {
+    final measure = globalState.measure;
+    final payloadWidth = GlassStreamRow.contentWidth(width) -
+        GlassTokens.selectableCaretReserve;
+    final payload = measure.computeTextSize(
+      Text(log.payload, style: GlassTextStyles.logPayload(textTheme)),
+      maxWidth: payloadWidth,
+    );
+    final meta = math.max(
+      GlassTag.heightOf(),
+      measure.heightOf(GlassTextStyles.streamMetric(textTheme)),
+    );
+    return GlassStreamRow.extentOf(
+      payload.height + GlassStreamRow.tagGap + meta,
+    );
+  }
+
+  /// Level capsule color: system colors by severity, the accent for the
+  /// app's own messages.
+  static Color levelColor(LogLevel level, ColorScheme scheme) {
+    final brightness = scheme.brightness;
+    return switch (level) {
+      LogLevel.debug || LogLevel.silent => GlassTokens.systemGray(brightness),
+      LogLevel.info => GlassTokens.systemBlue(brightness),
+      LogLevel.warning => GlassTokens.systemOrange(brightness),
+      LogLevel.error => GlassTokens.systemRed(brightness),
+      LogLevel.app => scheme.primary,
+    };
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final scheme = theme.colorScheme;
+    final level = log.logLevel;
+    final onClick = this.onClick;
+    return GlassStreamRow(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SelectableText(
+            log.payload,
+            style: GlassTextStyles.logPayload(textTheme),
+          ),
+          SizedBox(height: GlassStreamRow.tagGap),
+          Row(
+            children: [
+              GlassTag(
+                label: level.name,
+                color: levelColor(level, scheme),
+                onPressed: onClick == null ? null : () => onClick(level.name),
+              ),
+              const SizedBox(width: GlassTokens.streamRowTrailingGap),
+              Flexible(
+                child: Text(
+                  log.dateTime,
+                  style: GlassTextStyles.streamMetric(textTheme).copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 }

@@ -746,6 +746,69 @@ abstract final class GlassTokens {
   );
   static const Curve sideSheetExitCurve = Curves.easeOutCubic;
 
+  // Dashboard widget tiles, after the macOS 26 / iOS 26 widgets: a larger
+  // corner than the proxy cards, the symbol in the accent next to a small
+  // secondary title, and large tabular figures. They live in a scrolling
+  // grid, so they never blur (fill and edge are the content card's).
+  static const double widgetTileRadiusMac = 16;
+  static const double widgetTileRadiusIos = 20;
+  static const double widgetTilePaddingMac = 12;
+  static const double widgetTilePaddingIos = 14;
+  static const double widgetTileSymbolSizeMac = 13;
+  static const double widgetTileSymbolSizeIos = 15;
+  static const double widgetTileSymbolGap = 5;
+  static const double widgetTitleSizeMac = 11;
+  static const double widgetTitleLineMac = 14;
+  static const double widgetTitleSizeIos = 13;
+  static const double widgetTitleLineIos = 16;
+  static const double widgetValueSizeMac = 20;
+  static const double widgetValueLineMac = 24;
+  static const double widgetValueSizeIos = 24;
+  static const double widgetValueLineIos = 29;
+  static const double widgetCaptionSizeMac = 11;
+  static const double widgetCaptionLineMac = 14;
+  static const double widgetCaptionSizeIos = 12;
+  static const double widgetCaptionLineIos = 16;
+  // Gap between stacked lines inside a tile (value over caption, legend).
+  static const double widgetLineGap = 2;
+  static const double widgetRowGap = 8;
+
+  // Segmented control (dashboard mode picker), as in System Settings: a
+  // recessed capsule track and a neutral raised thumb — never the accent.
+  static const double segmentedHeightMac = 24;
+  static const double segmentedHeightIos = 32;
+  static const double segmentedLargeHeightMac = 30;
+  static const double segmentedLargeHeightIos = 36;
+  static const double segmentedInset = 2;
+  static const double segmentedTextSizeMac = 13;
+  static const double segmentedTextLineMac = 16;
+  static const double segmentedTextSizeIos = 13;
+  static const double segmentedTextLineIos = 18;
+  // Track: a gray fill (tertiarySystemFill), as alpha of [_segmentedTrackBase].
+  static const Color _segmentedTrackBase = Color(0xFF767680);
+  static const double _segmentedTrackOpacityLight = 0.12;
+  static const double _segmentedTrackOpacityDark = 0.24;
+  static const Color _segmentedThumbLight = Color(0xFFFFFFFF);
+  static const Color _segmentedThumbDark = Color(0xFF636366);
+  static const List<BoxShadow> _segmentedThumbShadowLight = [
+    BoxShadow(color: Color(0x1F000000), blurRadius: 8, offset: Offset(0, 3)),
+    BoxShadow(color: Color(0x0A000000), blurRadius: 1, offset: Offset(0, 3)),
+  ];
+  static const List<BoxShadow> _segmentedThumbShadowDark = [
+    BoxShadow(color: Color(0x33000000), blurRadius: 8, offset: Offset(0, 3)),
+  ];
+  static const Duration segmentedDuration = Duration(milliseconds: 220);
+  static const Curve segmentedCurve = Curves.easeOutCubic;
+
+  // Dashboard charts, colored as Activity Monitor's network graph:
+  // received (down) blue, sent (up) orange. Thin line, faint fill.
+  static const double chartLineWidth = 1.5;
+  static const double chartFillTopOpacity = 0.22;
+  static const double chartFillBottomOpacity = 0;
+  static const double chartLegendDotSize = 8;
+  static const double chartLegendGap = 6;
+  static const double chartDonutStrokeFraction = 0.16;
+
   static bool _isDark(Brightness brightness) => brightness == Brightness.dark;
 
   static double tintOpacity(Brightness brightness) =>
@@ -900,6 +963,31 @@ abstract final class GlassTokens {
 
   static List<BoxShadow> toolbarItemShadow(Brightness brightness) =>
       _isDark(brightness) ? _toolbarItemShadowDark : _toolbarItemShadowLight;
+
+  static double widgetTileRadius({required bool mac}) =>
+      mac ? widgetTileRadiusMac : widgetTileRadiusIos;
+
+  static Color segmentedTrack(Brightness brightness) =>
+      _segmentedTrackBase.withValues(
+        alpha: _isDark(brightness)
+            ? _segmentedTrackOpacityDark
+            : _segmentedTrackOpacityLight,
+      );
+
+  static Color segmentedThumb(Brightness brightness) =>
+      _isDark(brightness) ? _segmentedThumbDark : _segmentedThumbLight;
+
+  static List<BoxShadow> segmentedThumbShadow(Brightness brightness) =>
+      _isDark(brightness)
+          ? _segmentedThumbShadowDark
+          : _segmentedThumbShadowLight;
+
+  /// Received traffic (↓) in dashboard charts.
+  static Color chartDownload(Brightness brightness) => systemBlue(brightness);
+
+  /// Sent traffic (↑) in dashboard charts.
+  static Color chartUpload(Brightness brightness) =>
+      _isDark(brightness) ? _systemOrangeDark : _systemOrangeLight;
 
   static Duration motion(Duration duration, {required bool reduceMotion}) =>
       reduceMotion ? Duration.zero : duration;

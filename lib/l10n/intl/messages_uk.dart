@@ -223,6 +223,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "clipboardImport": MessageLookupByLibrary.simpleMessage(
       "Імпорт із буфера обміну",
     ),
+    "closeConnection": MessageLookupByLibrary.simpleMessage(
+      "Закрити з’єднання",
+    ),
     "color": MessageLookupByLibrary.simpleMessage("Колір"),
     "colorSchemes": MessageLookupByLibrary.simpleMessage("Колірні схеми"),
     "columns": MessageLookupByLibrary.simpleMessage("Стовпці"),
@@ -246,6 +249,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "copyEnvVar": MessageLookupByLibrary.simpleMessage(
       "Копіювання змінних середовища",
     ),
+    "copyHost": MessageLookupByLibrary.simpleMessage("Скопіювати хост"),
     "copyLink": MessageLookupByLibrary.simpleMessage("Копіювати посилання"),
     "copySuccess": MessageLookupByLibrary.simpleMessage("Копіювання успішне"),
     "core": MessageLookupByLibrary.simpleMessage("Ядро"),
@@ -367,6 +371,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "fileIsUpdate": MessageLookupByLibrary.simpleMessage(
       "Файл було змінено. Зберегти зміни?",
+    ),
+    "filterByProcess": MessageLookupByLibrary.simpleMessage(
+      "Фільтр за процесом",
     ),
     "filterSystemApp": MessageLookupByLibrary.simpleMessage(
       "Фільтрувати системні застосунки",

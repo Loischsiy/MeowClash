@@ -292,5 +292,8 @@
   "tunRecoveryComplete": "Odottamaton sammutus havaittiin TUN-tilan ollessa käytössä — verkkoasetukset on palautettu",
   "tunRecoveryPartial": "TUN-palautus jäi kesken. Avaa palautusloki saadaksesi lisätietoja",
   "tunStartFailed": "TUN-käynnistys epäonnistui",
-  "repair": "Korjaa"
+  "repair": "Korjaa",
+  "copyHost": "Kopioi isäntä",
+  "filterByProcess": "Suodata prosessin mukaan",
+  "closeConnection": "Sulje yhteys"
 }

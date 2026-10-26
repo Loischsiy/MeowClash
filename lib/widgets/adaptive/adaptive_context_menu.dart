@@ -136,6 +136,9 @@ class AdaptiveContextMenu extends StatelessWidget {
     Icons.search: 'magnifyingglass',
     Icons.undo: 'arrow.uturn.backward',
     Icons.redo: 'arrow.uturn.forward',
+    Icons.content_copy_outlined: 'doc.on.doc',
+    Icons.filter_alt_outlined: 'line.3.horizontal.decrease.circle',
+    Icons.close_rounded: 'xmark',
   };
 
   /// Opens the Flutter glass menu next to [anchor] (global coordinates):

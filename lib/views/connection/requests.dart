@@ -5,6 +5,7 @@ import 'package:meowclash/enum/enum.dart';
 import 'package:meowclash/models/models.dart';
 import 'package:meowclash/providers/providers.dart';
 import 'package:meowclash/state.dart';
+import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:meowclash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -78,6 +79,15 @@ class _RequestsViewState extends ConsumerState<RequestsView> with PageMixin {
   }
 
   double _calcCacheHeight(Connection item) {
+    if (AdaptivePlatform.useGlass) {
+      // Darwin rows: measured with the styles and tokens they paint with;
+      // [_currentMaxWidth] is the full list width there.
+      return ConnectionItem.glassExtent(
+        item,
+        width: _currentMaxWidth,
+        textTheme: context.textTheme,
+      );
+    }
     final size = globalState.measure.computeTextSize(
       Text(
         item.desc,
@@ -99,6 +109,54 @@ class _RequestsViewState extends ConsumerState<RequestsView> with PageMixin {
     final computerHeight =
         size.height + chainSize.height + 24 + 24 * (lines - 1);
     return computerHeight + 8 + 32 + globalState.measure.bodyMediumHeight;
+  }
+
+  /// Darwin: flat stream rows without divider items (the hairline is part of
+  /// the row), Apple scrollbar, empty state and spinner; no blur.
+  Widget _buildGlass(ConnectionsState state, List<Connection> connections) {
+    final Widget content;
+    if (state.loading) {
+      content = const Center(child: AdaptiveActivityIndicator());
+    } else if (connections.isEmpty) {
+      content = AdaptiveEmptyState(
+        label: appLocalizations.nullTip(appLocalizations.requests),
+        icon: Icons.history,
+      );
+    } else {
+      content = Align(
+        alignment: Alignment.topCenter,
+        child: ScrollToEndBox(
+          controller: _scrollController,
+          tag: _tag,
+          dataSource: connections,
+          child: AdaptiveScrollbar(
+            controller: _scrollController,
+            child: CacheItemExtentListView(
+              tag: _tag,
+              reverse: true,
+              shrinkWrap: true,
+              physics: const NextClampingScrollPhysics(),
+              controller: _scrollController,
+              itemExtentBuilder: (index) =>
+                  _calcCacheHeight(connections[index]),
+              itemBuilder: (context, index) {
+                final connection = connections[index];
+                return ConnectionItem(
+                  key: Key(connection.id),
+                  connection: connection,
+                  onClickKeyword: (value) {
+                    context.commonScaffoldState?.addKeyword(value);
+                  },
+                );
+              },
+              itemCount: connections.length,
+              keyBuilder: (index) => connections[index].id,
+            ),
+          ),
+        ),
+      );
+    }
+    return FadeBox(child: content);
   }
 
   @override
@@ -175,7 +233,9 @@ class _RequestsViewState extends ConsumerState<RequestsView> with PageMixin {
                     Platform.isAndroid,
               ),
             );
-            _currentMaxWidth = constraints.maxWidth - 40 - (value ? 60 : 0);
+            _currentMaxWidth = AdaptivePlatform.useGlass
+                ? constraints.maxWidth
+                : constraints.maxWidth - 40 - (value ? 60 : 0);
             return child!;
           },
           child: TextScaleNotification(
@@ -184,6 +244,9 @@ class _RequestsViewState extends ConsumerState<RequestsView> with PageMixin {
               builder: (_, state, __) {
                 _preLoad();
                 final connections = state.list;
+                if (AdaptivePlatform.useGlass) {
+                  return _buildGlass(state, connections);
+                }
                 final items = connections
                     .map<Widget>(
                       (connection) => ConnectionItem(

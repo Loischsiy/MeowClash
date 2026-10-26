@@ -120,6 +120,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "checkFailed": MessageLookupByLibrary.simpleMessage("Aikakatkaisu"),
     "checkUpdate": MessageLookupByLibrary.simpleMessage("Tarkista päivitykset"),
     "checking": MessageLookupByLibrary.simpleMessage("Tarkistetaan..."),
+    "closeConnection": MessageLookupByLibrary.simpleMessage("Sulje yhteys"),
     "columns": MessageLookupByLibrary.simpleMessage("Sarakkeet"),
     "compatible": MessageLookupByLibrary.simpleMessage("Yhteensopivuustila"),
     "confirm": MessageLookupByLibrary.simpleMessage("Vahvista"),
@@ -131,6 +132,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Näytä nykyisten yhteyksien tiedot",
     ),
     "copy": MessageLookupByLibrary.simpleMessage("Kopioi"),
+    "copyHost": MessageLookupByLibrary.simpleMessage("Kopioi isäntä"),
     "copySuccess": MessageLookupByLibrary.simpleMessage("Kopiointi onnistui"),
     "core": MessageLookupByLibrary.simpleMessage("Ydin"),
     "coreInfo": MessageLookupByLibrary.simpleMessage("Ytimen tiedot"),
@@ -181,6 +183,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "fi": MessageLookupByLibrary.simpleMessage("Suomi"),
     "file": MessageLookupByLibrary.simpleMessage("Tiedosto"),
     "fileDesc": MessageLookupByLibrary.simpleMessage("Lataa profiili suoraan"),
+    "filterByProcess": MessageLookupByLibrary.simpleMessage(
+      "Suodata prosessin mukaan",
+    ),
     "filterSystemApp": MessageLookupByLibrary.simpleMessage(
       "Suodata järjestelmäsovellukset",
     ),

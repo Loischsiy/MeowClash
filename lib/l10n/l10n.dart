@@ -1,7 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-
 import 'intl/messages_all.dart';
 
 // **************************************************************************
@@ -4590,6 +4589,31 @@ class AppLocalizations {
     return Intl.message(
       'Enter a number from 0 to 1000; 0 removes the limit',
       name: 'delayTestConcurrencyTip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Copy Host`
+  String get copyHost {
+    return Intl.message('Copy Host', name: 'copyHost', desc: '', args: []);
+  }
+
+  /// `Filter by Process`
+  String get filterByProcess {
+    return Intl.message(
+      'Filter by Process',
+      name: 'filterByProcess',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Close Connection`
+  String get closeConnection {
+    return Intl.message(
+      'Close Connection',
+      name: 'closeConnection',
       desc: '',
       args: [],
     );

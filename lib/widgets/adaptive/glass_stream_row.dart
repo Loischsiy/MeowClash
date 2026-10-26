@@ -85,12 +85,15 @@ class _GlassStreamRowState extends State<GlassStreamRow>
   bool _pressed = false;
 
   /// Swipe offset, 0 (closed) .. -row width; negative = to the leading edge.
-  late final AnimationController _swipe = AnimationController(
-    vsync: this,
-    lowerBound: -double.maxFinite,
-    upperBound: 0,
-    value: 0,
-  );
+  /// Created on first use (iOS rows with a swipe action only), never from
+  /// [dispose].
+  AnimationController? _swipeController;
+  AnimationController get _swipe => _swipeController ??= AnimationController(
+        vsync: this,
+        lowerBound: -double.maxFinite,
+        upperBound: 0,
+        value: 0,
+      );
   double _width = 0;
 
   bool get _interactive => widget.onTap != null || widget.onContextMenu != null;
@@ -100,7 +103,7 @@ class _GlassStreamRowState extends State<GlassStreamRow>
 
   @override
   void dispose() {
-    _swipe.dispose();
+    _swipeController?.dispose();
     super.dispose();
   }
 

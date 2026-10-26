@@ -582,5 +582,8 @@
   "tunRecoveryComplete": "检测到 TUN 运行时异常关机 — 网络设置已恢复",
   "tunRecoveryPartial": "TUN 网络恢复未完成。打开恢复日志查看详情",
   "tunStartFailed": "TUN 启动失败",
-  "repair": "修复"
+  "repair": "修复",
+  "copyHost": "复制主机",
+  "filterByProcess": "按进程筛选",
+  "closeConnection": "关闭连接"
 }

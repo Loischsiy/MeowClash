@@ -7,6 +7,7 @@ import 'package:meowclash/enum/enum.dart';
 import 'package:meowclash/models/models.dart';
 import 'package:meowclash/providers/providers.dart';
 import 'package:meowclash/state.dart';
+import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:meowclash/widgets/card.dart';
 import 'package:meowclash/widgets/dialog.dart';
 import 'package:meowclash/widgets/list.dart';
@@ -14,6 +15,27 @@ import 'package:meowclash/widgets/list.dart';
 extension IntlExt on Intl {
   static String actionMessage(String messageText) =>
       Intl.message("action_$messageText");
+}
+
+/// Darwin key caps of a shortcut: modifiers in the macOS menu order
+/// (fn ⌃ ⌥ ⇧ ⌘, caps lock last), then the key.
+List<String> glassHotKeyLabels(
+  Set<KeyboardModifier> modifiers,
+  int key,
+) {
+  const order = {
+    KeyboardModifier.fn: GlassKeyCaps.function,
+    KeyboardModifier.control: GlassKeyCaps.control,
+    KeyboardModifier.alt: GlassKeyCaps.option,
+    KeyboardModifier.shift: GlassKeyCaps.shift,
+    KeyboardModifier.meta: GlassKeyCaps.command,
+    KeyboardModifier.capsLock: GlassKeyCaps.capsLock,
+  };
+  return [
+    for (final MapEntry(key: modifier, value: symbol) in order.entries)
+      if (modifiers.contains(modifier)) symbol,
+    GlassKeyCaps.labelOf(LogicalKeyboardKey(key)),
+  ];
 }
 
 class HotKeyView extends StatelessWidget {
@@ -37,8 +59,52 @@ class HotKeyView extends StatelessWidget {
     return text;
   }
 
+  void _record(HotKeyAction hotKeyAction) {
+    globalState.showCommonDialog(
+      child: HotKeyRecorder(
+        hotKeyAction: hotKeyAction,
+      ),
+    );
+  }
+
+  /// Darwin: one grouped section, the shortcut drawn as key caps at the
+  /// trailing edge (macOS Keyboard Shortcuts).
+  Widget _buildGlass() => GlassListView(
+        children: [
+          GlassListSection(
+            children: [
+              for (final hotAction in HotAction.values)
+                Consumer(
+                  builder: (_, ref, __) {
+                    final hotKeyAction =
+                        ref.watch(getHotKeyActionProvider(hotAction));
+                    final key = hotKeyAction.key;
+                    return GlassListRow(
+                      title: Text(IntlExt.actionMessage(hotAction.name)),
+                      value: key == null
+                          ? Text(appLocalizations.noHotKey)
+                          : GlassKeyCaps(
+                              keys: glassHotKeyLabels(
+                                hotKeyAction.modifiers,
+                                key,
+                              ),
+                            ),
+                      onTap: () => _record(hotKeyAction),
+                    );
+                  },
+                ),
+            ],
+          ),
+        ],
+      );
+
   @override
-  Widget build(BuildContext context) => ListView.builder(
+  Widget build(BuildContext context) {
+    if (AdaptivePlatform.useGlass) return _buildGlass();
+    return _buildMaterial(context);
+  }
+
+  Widget _buildMaterial(BuildContext context) => ListView.builder(
         itemCount: HotAction.values.length,
         itemBuilder: (_, index) {
           final hotAction = HotAction.values[index];
@@ -191,6 +257,21 @@ class _HotKeyRecorderState extends State<HotKeyRecorder> {
             builder: (_, hotKeyAction, ___) {
               final key = hotKeyAction.key;
               final modifiers = hotKeyAction.modifiers;
+              if (AdaptivePlatform.useGlass) {
+                return SizedBox(
+                  width: dialogCommonWidth,
+                  child: key != null
+                      ? GlassKeyCaps(
+                          keys: glassHotKeyLabels(modifiers, key),
+                          large: true,
+                          alignment: WrapAlignment.center,
+                        )
+                      : Text(
+                          appLocalizations.pressKeyboard,
+                          textAlign: TextAlign.center,
+                        ),
+                );
+              }
               return SizedBox(
                 width: dialogCommonWidth,
                 child: key != null

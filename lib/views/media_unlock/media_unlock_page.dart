@@ -5,6 +5,7 @@ import 'package:meowclash/common/common.dart';
 import 'package:meowclash/models/models.dart';
 import 'package:meowclash/providers/providers.dart';
 import 'package:meowclash/state.dart';
+import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:meowclash/widgets/widgets.dart';
 
 class MediaUnlockPage extends ConsumerStatefulWidget {
@@ -234,6 +235,14 @@ class _MediaUnlockPageState extends ConsumerState<MediaUnlockPage> {
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          if (AdaptivePlatform.useGlass)
+                            for (final category in availableCategories)
+                              _buildGlassPinnedSection(
+                                category,
+                                currentPinned,
+                                setDialogState,
+                              )
+                          else
                           for (final category in availableCategories) ...[
                             Padding(
                               padding: const EdgeInsets.only(
@@ -349,7 +358,7 @@ class _MediaUnlockPageState extends ConsumerState<MediaUnlockPage> {
                 endIndent: 16,
               );
 
-              return Column(
+              final column = Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   ListItem.switchItem(
@@ -418,6 +427,16 @@ class _MediaUnlockPageState extends ConsumerState<MediaUnlockPage> {
                   ),
                 ],
               );
+              if (AdaptivePlatform.useGlass) {
+                // One grouped section; it draws its own hairlines.
+                return GlassListSection(
+                  children: [
+                    for (final child in column.children)
+                      if (child is! Divider) child,
+                  ],
+                );
+              }
+              return column;
             },
           ),
         ),
@@ -778,6 +797,248 @@ class _MediaUnlockPageState extends ConsumerState<MediaUnlockPage> {
     ];
   }
 
+  // Darwin: an Apple grouped list (summary section, category capsules,
+  // one section per status) and grouped pinned / misc dialogs. Rows never
+  // blur; the Material page below is unchanged.
+
+  double get _glassLeadingSize => AdaptivePlatform.isMacOSGlass
+      ? GlassTokens.listRowLeadingSizeMac
+      : GlassTokens.listRowLeadingSizeIos;
+
+  Color _glassStatusColor(MediaUnlockStatus status) {
+    final brightness = Theme.of(context).brightness;
+    return switch (status) {
+      MediaUnlockStatus.unlocked => GlassTokens.systemGreen(brightness),
+      MediaUnlockStatus.limited ||
+      MediaUnlockStatus.flagged =>
+        GlassTokens.systemOrange(brightness),
+      MediaUnlockStatus.blocked ||
+      MediaUnlockStatus.failed =>
+        GlassTokens.systemRed(brightness),
+      MediaUnlockStatus.testing => context.colorScheme.primary,
+      MediaUnlockStatus.unknown => context.colorScheme.onSurfaceVariant,
+    };
+  }
+
+  void _togglePinned(
+    List<MediaPlatform> currentPinned,
+    MediaPlatform platform,
+    StateSetter setDialogState,
+  ) {
+    if (!currentPinned.contains(platform)) {
+      if (currentPinned.length >= 4) {
+        globalState.showNotifier(appLocalizations.mediaUnlockSelectLimit);
+        return;
+      }
+      setDialogState(() => currentPinned.add(platform));
+    } else {
+      if (currentPinned.length <= 1) return;
+      setDialogState(() => currentPinned.remove(platform));
+    }
+  }
+
+  Widget _buildGlassPinnedSection(
+    MediaCategory category,
+    List<MediaPlatform> currentPinned,
+    StateSetter setDialogState,
+  ) {
+    final showMore =
+        ref.read(appSettingProvider).mediaUnlockMoreStreamingPlatforms;
+    final platforms = MediaPlatform.values
+        .where(
+          (p) =>
+              p.category == category &&
+              (showMore || !moreStreamingPlatforms.contains(p)),
+        )
+        .toList();
+    if (platforms.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: EdgeInsets.only(bottom: GlassListSection.gap),
+      child: GlassListSection(
+        header: _getCategoryLabel(category),
+        children: [
+          for (final platform in platforms)
+            GlassListRow(
+              leading: _buildPlatformIcon(platform, size: _glassLeadingSize),
+              title: Text(platform.defaultName),
+              accessory: currentPinned.contains(platform)
+                  ? GlassRowAccessory.checkmark
+                  : GlassRowAccessory.none,
+              selected: currentPinned.contains(platform),
+              onTap: () =>
+                  _togglePinned(currentPinned, platform, setDialogState),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGlassSummary(
+    int unlocked,
+    int blocked,
+    int other, {
+    bool isStreaming = false,
+  }) {
+    final brightness = Theme.of(context).brightness;
+    return GlassListSection(
+      children: [
+        Padding(
+          padding: EdgeInsets.all(GlassListSection.rowPadding),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildSummaryItem(
+                isStreaming
+                    ? appLocalizations.mediaUnlocked
+                    : appLocalizations.unlocked,
+                '$unlocked',
+                GlassTokens.systemGreen(brightness),
+              ),
+              _buildSummaryItem(
+                appLocalizations.notUnlocked,
+                '$blocked',
+                GlassTokens.systemRed(brightness),
+              ),
+              _buildSummaryItem(
+                appLocalizations.other,
+                '$other',
+                GlassTokens.systemOrange(brightness),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildGlassCategoryCapsules(bool isChinese) {
+    final availableCategories = isChinese
+        ? MediaCategory.values
+        : MediaCategory.values.where((c) => c != MediaCategory.china).toList();
+    final categories = [null, ...availableCategories];
+    return SizedBox(
+      height: AdaptivePlatform.isMacOSGlass
+          ? GlassTokens.buttonHeightMac
+          : GlassTokens.buttonHeightIos,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: categories.length,
+        separatorBuilder: (_, __) =>
+            const SizedBox(width: GlassTokens.filterCapsuleGap),
+        itemBuilder: (_, index) {
+          final cat = categories[index];
+          return GlassButton(
+            key: ValueKey(cat),
+            kind: _selectedCategory == cat
+                ? GlassButtonKind.filled
+                : GlassButtonKind.tinted,
+            label: _getCategoryLabel(cat),
+            onPressed: () => setState(() => _selectedCategory = cat),
+          );
+        },
+      ),
+    );
+  }
+
+  GlassListRow _buildGlassPlatformRow(
+    MediaPlatform platform,
+    MediaUnlockResult? result, {
+    required bool isItemTesting,
+    required bool showExtraDetails,
+  }) {
+    final isTesting =
+        isItemTesting || result?.status == MediaUnlockStatus.testing;
+    final status = result?.status ??
+        (isTesting ? MediaUnlockStatus.testing : MediaUnlockStatus.unknown);
+    final rawRegion = result?.region;
+    final region = rawRegion != null && rawRegion.isNotEmpty
+        ? normalizeRegion(rawRegion)
+        : null;
+    final isChinaCategory = platform.category == MediaCategory.china;
+    final colo = result?.colo;
+    final ip = result?.ip;
+    final details = [
+      if (region != null && region.isNotEmpty)
+        region.length == 2 ? '${countryCodeToEmoji(region)} $region' : region,
+      if (!isChinaCategory &&
+          (showExtraDetails || platform.pinColoBadge) &&
+          colo != null &&
+          colo.isNotEmpty)
+        colo,
+      if (!isChinaCategory && showExtraDetails && result?.isWarp == true)
+        'WARP',
+      if (showExtraDetails && ip != null && ip.isNotEmpty) ip,
+      if (result?.latency != null && !status.isUnavailable)
+        '${result!.latency}ms',
+    ];
+    return GlassListRow(
+      key: ValueKey(platform),
+      leading: _buildPlatformIcon(
+        platform,
+        status: status,
+        size: _glassLeadingSize,
+      ),
+      title: Text(platform.defaultName),
+      subtitle: details.isEmpty ? null : EmojiText(details.join(' · ')),
+      value: Text(
+        isTesting ? appLocalizations.testing : _getStatusText(status, platform),
+        style: TextStyle(color: _glassStatusColor(status)),
+      ),
+      trailing: GlassIconButton(
+        icon: const Icon(Icons.refresh_rounded),
+        tooltip: appLocalizations.retry,
+        busy: isTesting,
+        onPressed: isTesting ? null : () => mediaUnlockState.checkSingle(platform),
+      ),
+    );
+  }
+
+  Widget _buildGlassBody({
+    required MediaUnlockState state,
+    required List<MediaPlatform> unlockedList,
+    required List<MediaPlatform> blockedList,
+    required List<MediaPlatform> otherList,
+    required MediaCategory? effectiveCategory,
+    required bool isChinese,
+    required bool showExtraDetails,
+  }) {
+    final sections = [
+      (
+        _selectedCategory == MediaCategory.streaming
+            ? appLocalizations.mediaUnlocked
+            : appLocalizations.unlocked,
+        unlockedList,
+      ),
+      (appLocalizations.notUnlocked, blockedList),
+      (appLocalizations.other, otherList),
+    ];
+    return GlassListView(
+      children: [
+        _buildGlassSummary(
+          unlockedList.length,
+          blockedList.length,
+          otherList.length,
+          isStreaming: effectiveCategory == MediaCategory.streaming,
+        ),
+        _buildGlassCategoryCapsules(isChinese),
+        for (final (title, platforms) in sections)
+          if (platforms.isNotEmpty)
+            GlassListSection(
+              header: '$title (${platforms.length})',
+              children: [
+                for (final platform in platforms)
+                  _buildGlassPlatformRow(
+                    platform,
+                    state.results[platform],
+                    isItemTesting: state.testingPlatforms.contains(platform),
+                    showExtraDetails: showExtraDetails,
+                  ),
+              ],
+            ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isChinese = Localizations.localeOf(context).languageCode == 'zh';
@@ -853,7 +1114,9 @@ class _MediaUnlockPageState extends ConsumerState<MediaUnlockPage> {
                       );
                     },
               tooltip: appLocalizations.retry,
-              icon: isCategoryLoading
+              icon: isCategoryLoading && AdaptivePlatform.useGlass
+                  ? const AdaptiveActivityIndicator()
+                  : isCategoryLoading
                   ? RepaintBoundary(
                       child: SizedBox(
                         width: 16,
@@ -867,7 +1130,17 @@ class _MediaUnlockPageState extends ConsumerState<MediaUnlockPage> {
                   : const Icon(Icons.sync),
             ),
           ],
-          body: CustomScrollView(
+          body: AdaptivePlatform.useGlass
+              ? _buildGlassBody(
+                  state: state,
+                  unlockedList: unlockedList,
+                  blockedList: blockedList,
+                  otherList: otherList,
+                  effectiveCategory: effectiveCategory,
+                  isChinese: isChinese,
+                  showExtraDetails: showExtraDetails,
+                )
+              : CustomScrollView(
             slivers: [
               SliverToBoxAdapter(
                 child: _buildSummaryCard(

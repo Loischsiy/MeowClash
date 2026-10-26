@@ -6,6 +6,7 @@ import 'package:meowclash/enum/enum.dart';
 import 'package:meowclash/models/models.dart';
 import 'package:meowclash/providers/config.dart';
 import 'package:meowclash/state.dart';
+import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:meowclash/widgets/dialog.dart';
 import 'package:meowclash/widgets/fade_box.dart';
 import 'package:meowclash/widgets/input.dart';
@@ -160,10 +161,136 @@ class BackupAndRecovery extends ConsumerWidget {
         );
   }
 
+  void _handleUpdateRecoveryStrategyValue(
+    WidgetRef ref,
+    RecoveryStrategy? value,
+  ) {
+    if (value == null) return;
+    ref.read(appSettingProvider.notifier).updateState(
+          (state) => state.copyWith(
+            recoveryStrategy: value,
+          ),
+        );
+  }
+
+  /// Darwin: Remote / Local / Options as grouped sections; the account
+  /// buttons are glass capsules and the strategy is a pop-up menu.
+  Widget _buildGlass(
+    BuildContext context,
+    WidgetRef ref,
+    DAV? dav,
+    DAVClient? client,
+  ) =>
+      GlassListView(
+        children: [
+          GlassListSection(
+            header: appLocalizations.remote,
+            children: [
+              if (dav == null || client == null)
+                GlassListRow(
+                  leading: const Icon(Icons.account_box),
+                  title: Text(appLocalizations.noInfo),
+                  subtitle: Text(appLocalizations.pleaseBindWebDAV),
+                  trailing: GlassButton(
+                    label: appLocalizations.bind,
+                    onPressed: () => _showAddWebDAV(dav),
+                  ),
+                )
+              else ...[
+                GlassListRow(
+                  leading: const Icon(Icons.account_box),
+                  title: Text(
+                    dav.user,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  subtitle: _GlassConnectivity(client: client),
+                  trailing: GlassButton(
+                    label: appLocalizations.edit,
+                    onPressed: () => _showAddWebDAV(dav),
+                  ),
+                ),
+                ListItem.input(
+                  title: Text(appLocalizations.file),
+                  subtitle: Text(dav.fileName),
+                  delegate: InputDelegate(
+                    title: appLocalizations.file,
+                    value: dav.fileName,
+                    resetValue: defaultDavFileName,
+                    onChanged: (value) {
+                      _handleChange(value, ref);
+                    },
+                  ),
+                ),
+                ListItem(
+                  onTap: () {
+                    _backupOnWebDAV(context, client);
+                  },
+                  title: Text(appLocalizations.backup),
+                  subtitle: Text(appLocalizations.remoteBackupDesc),
+                ),
+                ListItem(
+                  onTap: () {
+                    _handleRecoveryOnWebDAV(context, client);
+                  },
+                  title: Text(appLocalizations.recovery),
+                  subtitle: Text(appLocalizations.remoteRecoveryDesc),
+                ),
+              ],
+            ],
+          ),
+          GlassListSection(
+            header: appLocalizations.local,
+            children: [
+              ListItem(
+                onTap: () {
+                  _backupOnLocal(context);
+                },
+                title: Text(appLocalizations.backup),
+                subtitle: Text(appLocalizations.localBackupDesc),
+              ),
+              ListItem(
+                onTap: () {
+                  _handleRecoveryOnLocal(context);
+                },
+                title: Text(appLocalizations.recovery),
+                subtitle: Text(appLocalizations.localRecoveryDesc),
+              ),
+            ],
+          ),
+          GlassListSection(
+            header: appLocalizations.options,
+            children: [
+              Consumer(builder: (_, ref, __) {
+                final recoveryStrategy = ref.watch(appSettingProvider.select(
+                  (state) => state.recoveryStrategy,
+                ));
+                return ListItem<RecoveryStrategy>.options(
+                  title: Text(appLocalizations.recoveryStrategy),
+                  delegate: OptionsDelegate<RecoveryStrategy>(
+                    title: appLocalizations.recoveryStrategy,
+                    options: RecoveryStrategy.values,
+                    textBuilder: (mode) => Intl.message(
+                      "recoveryStrategy_${mode.name}",
+                    ),
+                    value: recoveryStrategy,
+                    onChanged: (value) =>
+                        _handleUpdateRecoveryStrategyValue(ref, value),
+                  ),
+                );
+              }),
+            ],
+          ),
+        ],
+      );
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final dav = ref.watch(appDAVSettingProvider);
     final client = dav != null ? DAVClient(dav) : null;
+    if (AdaptivePlatform.useGlass) {
+      return _buildGlass(context, ref, dav, client);
+    }
     return ListView(
       children: [
         ListHeader(title: appLocalizations.remote),
@@ -305,6 +432,47 @@ class BackupAndRecovery extends ConsumerWidget {
   }
 }
 
+/// Darwin: "Connectivity" and a system green / red dot (a spinner while the
+/// server is checked) under the WebDAV account.
+class _GlassConnectivity extends StatelessWidget {
+  const _GlassConnectivity({required this.client});
+
+  final DAVClient client;
+
+  @override
+  Widget build(BuildContext context) {
+    final brightness = Theme.of(context).brightness;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Flexible(child: Text(appLocalizations.connectivity)),
+        const SizedBox(width: GlassTokens.statusGap),
+        FutureBuilder<bool>(
+          future: client.pingCompleter.future,
+          builder: (_, snapshot) {
+            if (snapshot.connectionState != ConnectionState.done) {
+              return const AdaptiveActivityIndicator(
+                radius: GlassTokens.statusSpinnerRadius,
+              );
+            }
+            return Container(
+              width: GlassTokens.statusDotSize,
+              height: GlassTokens.statusDotSize,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: GlassTokens.statusColor(
+                  ok: snapshot.data == true,
+                  brightness: brightness,
+                ),
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+}
+
 class RecoveryOptionsDialog extends StatefulWidget {
   const RecoveryOptionsDialog({super.key});
 
@@ -325,7 +493,24 @@ class _RecoveryOptionsDialogState extends State<RecoveryOptionsDialog> {
         horizontal: 8,
         vertical: 16,
       ),
-      child: Wrap(
+      child: AdaptivePlatform.useGlass
+          ? Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                GlassOptionRow(
+                  label: Text(appLocalizations.recoveryProfiles),
+                  selected: false,
+                  onTap: () => _handleOnTab(RecoveryOption.onlyProfiles),
+                ),
+                GlassOptionRow(
+                  label: Text(appLocalizations.recoveryAll),
+                  selected: false,
+                  onTap: () => _handleOnTab(RecoveryOption.all),
+                ),
+              ],
+            )
+          : Wrap(
         children: [
           ListItem(
             onTap: () {

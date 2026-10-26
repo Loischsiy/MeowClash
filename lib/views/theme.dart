@@ -3,14 +3,17 @@
 import 'dart:math';
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:meowclash/common/common.dart';
 import 'package:meowclash/enum/enum.dart';
+import 'package:meowclash/models/config.dart' show TextScale;
 import 'package:meowclash/models/selector.dart';
 import 'package:meowclash/providers/config.dart';
 import 'package:meowclash/state.dart';
+import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:meowclash/widgets/widgets.dart';
 
 class ThemeModeItem {
@@ -37,20 +40,36 @@ class ThemeView extends StatelessWidget {
   const ThemeView({super.key});
 
   @override
-  Widget build(BuildContext context) => const SingleChildScrollView(
-        child: Column(
-          spacing: 24,
-          children: [
-            _ThemeModeItem(),
-            _PrimaryColorItem(),
-            _PrueBlackItem(),
-            _TextScaleFactorItem(),
-            SizedBox(
-              height: 64,
-            ),
-          ],
-        ),
+  Widget build(BuildContext context) {
+    if (AdaptivePlatform.useGlass) {
+      // Darwin: an Apple grouped list, as System Settings > Appearance.
+      return GlassListView(
+        children: [
+          GlassListSection(
+            header: appLocalizations.themeMode,
+            children: const [_ThemeModeItem()],
+          ),
+          const _PrimaryColorItem(),
+          const GlassListSection(children: [_PrueBlackItem()]),
+          const _TextScaleFactorItem(),
+        ],
       );
+    }
+    return const SingleChildScrollView(
+      child: Column(
+        spacing: 24,
+        children: [
+          _ThemeModeItem(),
+          _PrimaryColorItem(),
+          _PrueBlackItem(),
+          _TextScaleFactorItem(),
+          SizedBox(
+            height: 64,
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class ItemCard extends StatelessWidget {
@@ -101,6 +120,17 @@ class _ThemeModeItem extends ConsumerWidget {
         themeMode: ThemeMode.dark,
       ),
     ];
+    if (AdaptivePlatform.useGlass) {
+      return _GlassAppearancePicker(
+        items: themeModeItems,
+        value: themeMode,
+        onChanged: (mode) {
+          ref.read(themeSettingProvider.notifier).updateState(
+                (state) => state.copyWith(themeMode: mode),
+              );
+        },
+      );
+    }
     return ItemCard(
       info: Info(
         label: appLocalizations.themeMode,
@@ -277,6 +307,92 @@ class _PrimaryColorItemState extends ConsumerState<_PrimaryColorItem> {
         );
   }
 
+  /// Darwin: a long press (or a secondary click) asks to delete the color
+  /// right away instead of entering the Material delete mode.
+  Future<void> _handleGlassDelete(int color) async {
+    setState(() {
+      _removablePrimaryColor = color;
+    });
+    await _handleDel();
+    if (mounted && _removablePrimaryColor != null) {
+      setState(() {
+        _removablePrimaryColor = null;
+      });
+    }
+  }
+
+  /// Darwin: the colors as round swatches (the macOS accent color row), the
+  /// scheme variant as a pop-up row and a red reset row while the colors
+  /// differ from the defaults.
+  Widget _buildGlass({
+    required int? primaryColor,
+    required List<int?> primaryColors,
+    required DynamicSchemeVariant schemeVariant,
+    required bool isEquals,
+  }) {
+    final mac = defaultTargetPlatform == TargetPlatform.macOS;
+    final gap =
+        mac ? GlassTokens.themeSwatchGapMac : GlassTokens.themeSwatchGapIos;
+    return GlassListSection(
+      header: appLocalizations.themeColor,
+      children: [
+        Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: GlassListSection.rowPadding,
+            vertical: mac
+                ? GlassTokens.themeSwatchRowPaddingMac
+                : GlassTokens.themeSwatchRowPaddingIos,
+          ),
+          child: Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: Wrap(
+              spacing: gap,
+              runSpacing: gap,
+              children: [
+                for (final color in primaryColors)
+                  _GlassColorSwatch(
+                    color: color,
+                    selected: color == primaryColor,
+                    onTap: () {
+                      ref.read(themeSettingProvider.notifier).updateState(
+                            (state) => state.copyWith(primaryColor: color),
+                          );
+                    },
+                    onDelete:
+                        color == null ? null : () => _handleGlassDelete(color),
+                  ),
+                _GlassAddSwatch(onTap: _handleAdd),
+              ],
+            ),
+          ),
+        ),
+        ListItem<DynamicSchemeVariant>.options(
+          title: Text(appLocalizations.colorSchemes),
+          delegate: OptionsDelegate<DynamicSchemeVariant>(
+            title: appLocalizations.colorSchemes,
+            options: DynamicSchemeVariant.values,
+            textBuilder: (item) => Intl.message("${item.name}Scheme"),
+            value: schemeVariant,
+            onChanged: (value) {
+              if (value == null) {
+                return;
+              }
+              ref.read(themeSettingProvider.notifier).updateState(
+                    (state) => state.copyWith(schemeVariant: value),
+                  );
+            },
+          ),
+        ),
+        if (!isEquals)
+          GlassListRow(
+            title: Text(appLocalizations.reset),
+            destructive: true,
+            onTap: _handleReset,
+          ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final vm4 = ref.watch(
@@ -295,6 +411,14 @@ class _PrimaryColorItemState extends ConsumerState<_PrimaryColorItem> {
     final schemeVariant = vm4.c;
     final isEquals = vm4.d;
 
+    if (AdaptivePlatform.useGlass) {
+      return _buildGlass(
+        primaryColor: primaryColor,
+        primaryColors: primaryColors,
+        schemeVariant: schemeVariant,
+        isEquals: isEquals,
+      );
+    }
     return CommonPopScope(
       onPop: () {
         if (_removablePrimaryColor != null) {
@@ -443,6 +567,20 @@ class _PrueBlackItem extends ConsumerWidget {
         (state) => state.pureBlack,
       ),
     );
+    if (AdaptivePlatform.useGlass) {
+      return ListItem.switchItem(
+        leading: const Icon(Icons.contrast),
+        title: Text(appLocalizations.pureBlackMode),
+        delegate: SwitchDelegate(
+          value: prueBlack,
+          onChanged: (value) {
+            ref.read(themeSettingProvider.notifier).updateState(
+                  (state) => state.copyWith(pureBlack: value),
+                );
+          },
+        ),
+      );
+    }
     return ListItem.switchItem(
       leading: const Icon(
         Icons.contrast,
@@ -479,6 +617,9 @@ class _TextScaleFactorItem extends ConsumerWidget {
       ),
     );
     final process = "${((textScale.scale * 100) as double).round()}%";
+    if (AdaptivePlatform.useGlass) {
+      return _buildGlass(context, ref, textScale, process);
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -549,6 +690,442 @@ class _TextScaleFactorItem extends ConsumerWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+extension on _TextScaleFactorItem {
+  /// Darwin: the switch row with the current size as its value, then the
+  /// slider between a small and a large "A", as iOS Text Size.
+  Widget _buildGlass(
+    BuildContext context,
+    WidgetRef ref,
+    TextScale textScale,
+    String process,
+  ) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final glyphColor = textScale.enable
+        ? scheme.onSurfaceVariant
+        : scheme.onSurface.withValues(alpha: GlassTokens.disabledOpacity);
+    void setEnabled({required bool enable}) {
+      ref.read(themeSettingProvider.notifier).updateState(
+            (state) => state.copyWith.textScale(enable: enable),
+          );
+    }
+
+    return GlassListSection(
+      children: [
+        GlassListRow(
+          leading: const Icon(Icons.text_fields),
+          title: Text(appLocalizations.textScale),
+          value: Text(process),
+          trailing: AdaptiveSwitch(
+            value: textScale.enable,
+            onChanged: (value) => setEnabled(enable: value),
+          ),
+          onTap: () => setEnabled(enable: !textScale.enable),
+        ),
+        GlassListField(
+          child: Row(
+            children: [
+              ExcludeSemantics(
+                child: Text(
+                  'A',
+                  style: GlassTextStyles.scaleGlyph(
+                    theme.textTheme,
+                    large: false,
+                  ).copyWith(color: glyphColor),
+                ),
+              ),
+              const SizedBox(width: GlassTokens.scaleGlyphGap),
+              Expanded(
+                child: AdaptiveSlider(
+                  min: minTextScale,
+                  max: maxTextScale,
+                  value: textScale.scale,
+                  onChanged: textScale.enable
+                      ? (value) {
+                          ref.read(themeSettingProvider.notifier).updateState(
+                                (state) => state.copyWith.textScale(
+                                  scale: value,
+                                ),
+                              );
+                        }
+                      : null,
+                ),
+              ),
+              const SizedBox(width: GlassTokens.scaleGlyphGap),
+              ExcludeSemantics(
+                child: Text(
+                  'A',
+                  style: GlassTextStyles.scaleGlyph(
+                    theme.textTheme,
+                    large: true,
+                  ).copyWith(color: glyphColor),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Darwin: the theme modes as window previews with a selection ring, as
+/// macOS Appearance (Auto is split light / dark).
+class _GlassAppearancePicker extends StatelessWidget {
+  const _GlassAppearancePicker({
+    required this.items,
+    required this.value,
+    required this.onChanged,
+  });
+
+  final List<ThemeModeItem> items;
+  final ThemeMode value;
+  final ValueChanged<ThemeMode> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final mac = defaultTargetPlatform == TargetPlatform.macOS;
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: GlassListSection.rowPadding,
+        vertical: mac
+            ? GlassTokens.themePickerPaddingMac
+            : GlassTokens.themePickerPaddingIos,
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          for (final item in items)
+            _GlassAppearanceOption(
+              item: item,
+              selected: item.themeMode == value,
+              onTap: () => onChanged(item.themeMode),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GlassAppearanceOption extends StatelessWidget {
+  const _GlassAppearanceOption({
+    required this.item,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final ThemeModeItem item;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final mac = defaultTargetPlatform == TargetPlatform.macOS;
+    final reduceMotion = GlassAccessibility.of(context).reduceMotion;
+    final width = mac
+        ? GlassTokens.themePreviewWidthMac
+        : GlassTokens.themePreviewWidthIos;
+    final height = mac
+        ? GlassTokens.themePreviewHeightMac
+        : GlassTokens.themePreviewHeightIos;
+    final radius = mac
+        ? GlassTokens.themePreviewRadiusMac
+        : GlassTokens.themePreviewRadiusIos;
+    const ringInset =
+        GlassTokens.themePreviewRingGap + GlassTokens.themePreviewRingWidth;
+    final accent = scheme.primary;
+    Widget pane({required bool dark}) => _AppearancePane(
+          dark: dark,
+          accent: accent,
+          width: width,
+          height: height,
+        );
+    final preview = switch (item.themeMode) {
+      ThemeMode.light => pane(dark: false),
+      ThemeMode.dark => pane(dark: true),
+      ThemeMode.system => Stack(
+          children: [
+            pane(dark: false),
+            PositionedDirectional(
+              top: 0,
+              bottom: 0,
+              end: 0,
+              child: ClipRect(
+                child: Align(
+                  alignment: AlignmentDirectional.centerEnd,
+                  widthFactor: 0.5,
+                  child: pane(dark: true),
+                ),
+              ),
+            ),
+          ],
+        ),
+    };
+    final labelStyle =
+        GlassTextStyles.listRowSubtitle(theme.textTheme).copyWith(
+      color: selected ? scheme.onSurface : scheme.onSurfaceVariant,
+      fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+    );
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: item.label,
+      excludeSemantics: true,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AnimatedContainer(
+              duration: GlassTokens.motion(
+                GlassTokens.hoverDuration,
+                reduceMotion: reduceMotion,
+              ),
+              padding: const EdgeInsets.all(ringInset),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(radius + ringInset),
+                border: Border.all(
+                  color: accent.withValues(alpha: selected ? 1 : 0),
+                  width: GlassTokens.themePreviewRingWidth,
+                ),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(radius),
+                child: DecoratedBox(
+                  position: DecorationPosition.foreground,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(radius),
+                    border: Border.all(
+                      color: scheme.onSurface.withValues(
+                        alpha: GlassTokens.hairlineOpacity(theme.brightness),
+                      ),
+                      width: GlassTokens.themeSwatchEdgeWidth,
+                    ),
+                  ),
+                  child: SizedBox(
+                    width: width,
+                    height: height,
+                    child: preview,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: GlassTokens.themePreviewLabelGap),
+            Text(item.label, style: labelStyle),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// A miniature window in the light or [dark] system colors: title bar, an
+/// accent pill and a text line.
+class _AppearancePane extends StatelessWidget {
+  const _AppearancePane({
+    required this.dark,
+    required this.accent,
+    required this.width,
+    required this.height,
+  });
+
+  final bool dark;
+  final Color accent;
+  final double width;
+  final double height;
+
+  @override
+  Widget build(BuildContext context) {
+    BorderRadius pill(double size) => BorderRadius.circular(size / 2);
+    return SizedBox(
+      width: width,
+      height: height,
+      child: ColoredBox(
+        color: dark
+            ? GlassTokens.themePreviewDarkFill
+            : GlassTokens.themePreviewLightFill,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              height: height * GlassTokens.themePreviewBarFraction,
+              color: dark
+                  ? GlassTokens.themePreviewDarkBar
+                  : GlassTokens.themePreviewLightBar,
+            ),
+            Padding(
+              padding: const EdgeInsets.all(GlassTokens.themePreviewInset),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: width * GlassTokens.themePreviewPillWidthFraction,
+                    height: GlassTokens.themePreviewPillHeight,
+                    decoration: BoxDecoration(
+                      color: accent,
+                      borderRadius: pill(GlassTokens.themePreviewPillHeight),
+                    ),
+                  ),
+                  const SizedBox(height: GlassTokens.themePreviewLineGap),
+                  Container(
+                    width: width * GlassTokens.themePreviewLineWidthFraction,
+                    height: GlassTokens.themePreviewLineHeight,
+                    decoration: BoxDecoration(
+                      color: dark
+                          ? GlassTokens.themePreviewDarkLine
+                          : GlassTokens.themePreviewLightLine,
+                      borderRadius: pill(GlassTokens.themePreviewLineHeight),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+double get _swatchSize => defaultTargetPlatform == TargetPlatform.macOS
+    ? GlassTokens.themeSwatchSizeMac
+    : GlassTokens.themeSwatchSizeIos;
+
+const _swatchRingInset =
+    GlassTokens.themeSwatchRingGap + GlassTokens.themeSwatchRingWidth;
+
+/// Darwin: one theme color as a round swatch of the picked color itself (as
+/// the macOS accent row, not a scheme tone); the selected one gets a ring
+/// and a white checkmark. `null` follows the system accent and is drawn
+/// multicolor, as on macOS.
+class _GlassColorSwatch extends StatelessWidget {
+  const _GlassColorSwatch({
+    required this.color,
+    required this.selected,
+    required this.onTap,
+    this.onDelete,
+  });
+
+  final int? color;
+  final bool selected;
+  final VoidCallback onTap;
+  final VoidCallback? onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    final value = color;
+    final theme = Theme.of(context);
+    final fill = value != null ? ui.Color(value) : theme.colorScheme.primary;
+    final size = _swatchSize;
+    final reduceMotion = GlassAccessibility.of(context).reduceMotion;
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: value == null ? appLocalizations.system : fill.hex,
+      excludeSemantics: true,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        onLongPress: onDelete,
+        onSecondaryTap: onDelete,
+        child: AnimatedContainer(
+          duration: GlassTokens.motion(
+            GlassTokens.hoverDuration,
+            reduceMotion: reduceMotion,
+          ),
+          padding: const EdgeInsets.all(_swatchRingInset),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: fill.withValues(alpha: selected ? 1 : 0),
+              width: GlassTokens.themeSwatchRingWidth,
+            ),
+          ),
+          child: Container(
+            width: size,
+            height: size,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: value == null ? null : fill,
+              gradient: value == null
+                  ? const SweepGradient(
+                      colors: GlassTokens.themeSwatchMulticolor,
+                    )
+                  : null,
+              border: Border.all(
+                color: theme.colorScheme.onSurface.withValues(
+                  alpha: GlassTokens.hairlineOpacity(theme.brightness),
+                ),
+                width: GlassTokens.themeSwatchEdgeWidth,
+              ),
+            ),
+            child: selected
+                ? Icon(
+                    Icons.check_rounded,
+                    size: size * GlassTokens.themeSwatchCheckFraction,
+                    color: Colors.white,
+                  )
+                : null,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Darwin: the "add color" swatch at the end of the swatch row.
+class _GlassAddSwatch extends StatelessWidget {
+  const _GlassAddSwatch({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final size = _swatchSize;
+    return Semantics(
+      button: true,
+      label: appLocalizations.add,
+      excludeSemantics: true,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(_swatchRingInset),
+          child: Container(
+            width: size,
+            height: size,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: scheme.onSurface.withValues(
+                alpha: GlassTokens.inputFillOpacity(theme.brightness),
+              ),
+              border: Border.all(
+                color: scheme.onSurface.withValues(
+                  alpha: GlassTokens.hairlineOpacity(theme.brightness),
+                ),
+                width: GlassTokens.themeSwatchEdgeWidth,
+              ),
+            ),
+            child: Icon(
+              Icons.add_rounded,
+              size: size * GlassTokens.themeSwatchCheckFraction,
+              color: scheme.onSurfaceVariant,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

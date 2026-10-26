@@ -26,9 +26,7 @@ class _ConfigViewState extends State<ConfigView> {
         leading: const Icon(Icons.build),
         delegate: OpenDelegate(
           title: appLocalizations.general,
-          widget: generateListView(
-            generalItems,
-          ),
+          widget: const GeneralListView(),
           blur: false,
         ),
       ),

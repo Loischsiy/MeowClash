@@ -5,6 +5,7 @@ import 'package:meowclash/state.dart';
 import 'package:meowclash/widgets/open_container.dart';
 import 'package:flutter/material.dart';
 
+import 'adaptive/adaptive.dart';
 import 'card.dart';
 import 'input.dart';
 import 'scaffold.dart';
@@ -113,7 +114,14 @@ class InputDelegate extends Delegate {
   final String? resetValue;
 }
 
-class ListItem<T> extends StatelessWidget {
+/// A settings row.
+///
+/// * Darwin, inside a [GlassListScope] (`generateListView`,
+///   `generateSection`, a [GlassListSection]): a [GlassListRow] — open /
+///   next / input get a chevron, options a menu over the value, switches an
+///   `AdaptiveSwitch`, checkbox / radio a checkmark.
+/// * Everywhere else: the Material `ListTile`, unchanged.
+class ListItem<T> extends StatelessWidget implements GlassLeadingHint {
 
   const ListItem({
     super.key,
@@ -247,6 +255,9 @@ class ListItem<T> extends StatelessWidget {
   final TextStyle? subtitleTextStyle;
   final void Function()? onTap;
 
+  @override
+  bool get hasGlassLeading => leading != null;
+
   ListTile _buildListTile({
     void Function()? onTap,
     Widget? trailing,
@@ -267,8 +278,181 @@ class ListItem<T> extends StatelessWidget {
       contentPadding: padding,
     );
 
+  Widget _buildGlassRow(
+    BuildContext context, {
+    VoidCallback? onTap,
+    Widget? value,
+    Widget? trailing,
+    GlassRowAccessory accessory = GlassRowAccessory.none,
+    bool selected = false,
+    bool enabled = true,
+    bool showSubtitle = true,
+  }) {
+    final rowTrailing = trailing ?? this.trailing;
+    return GlassListRow(
+      title: title,
+      subtitle: showSubtitle ? subtitle : null,
+      leading: leading,
+      value: value,
+      trailing: rowTrailing == null
+          ? null
+          : Theme(
+              data: GlassTheme.row(Theme.of(context)),
+              child: rowTrailing,
+            ),
+      accessory: accessory,
+      onTap: enabled ? onTap : null,
+      selected: selected,
+      enabled: enabled,
+    );
+  }
+
+  void _showGlassPage(
+    BuildContext context, {
+    required String title,
+    required Widget body,
+    required Widget? action,
+    required double? maxWidth,
+    required bool blur,
+  }) {
+    final child = SafeArea(child: body);
+    final actions = [if (action != null) action];
+    if (globalState.appState.viewMode != ViewMode.mobile) {
+      showExtend(
+        context,
+        props: ExtendProps(blur: blur, maxWidth: maxWidth),
+        builder: (_, type) => AdaptiveSheetScaffold(
+          actions: actions,
+          type: type,
+          body: child,
+          title: title,
+        ),
+      );
+      return;
+    }
+    final navigator = Navigator.of(context);
+    BaseNavigator.push(
+      context,
+      CommonScaffold.open(
+        key: Key(title),
+        onBack: navigator.pop,
+        title: title,
+        body: child,
+        disableBackground: true,
+        actions: actions,
+      ),
+    );
+  }
+
+  Widget _buildGlass(BuildContext context) {
+    final delegate = this.delegate;
+    if (delegate is OpenDelegate) {
+      return _buildGlassRow(
+        context,
+        accessory: GlassRowAccessory.chevron,
+        onTap: () => _showGlassPage(
+          context,
+          title: delegate.title,
+          body: delegate.widget,
+          action: delegate.action,
+          maxWidth: delegate.maxWidth,
+          blur: delegate.blur,
+        ),
+      );
+    }
+    if (delegate is NextDelegate) {
+      return _buildGlassRow(
+        context,
+        accessory: GlassRowAccessory.chevron,
+        onTap: () => _showGlassPage(
+          context,
+          title: delegate.title,
+          body: delegate.widget,
+          action: delegate.action,
+          maxWidth: delegate.maxWidth,
+          blur: delegate.blur,
+        ),
+      );
+    }
+    if (delegate is OptionsDelegate) {
+      return _GlassOptionsItem<T>(
+        item: this,
+        delegate: delegate as OptionsDelegate<T>,
+      );
+    }
+    if (delegate is InputDelegate) {
+      final suffix = delegate.suffixText;
+      return _buildGlassRow(
+        context,
+        // Input rows show their current value as the subtitle on Material.
+        value: subtitle ??
+            Text(suffix == null ? delegate.value : '${delegate.value} $suffix'),
+        showSubtitle: false,
+        accessory: GlassRowAccessory.chevron,
+        onTap: () async {
+          final value = await globalState.showCommonDialog<String>(
+            child: InputDialog(
+              title: delegate.title,
+              value: delegate.value,
+              suffixText: delegate.suffixText,
+              resetValue: delegate.resetValue,
+              validator: delegate.validator,
+            ),
+          );
+          delegate.onChanged(value);
+        },
+      );
+    }
+    if (delegate is CheckboxDelegate) {
+      final onChanged = delegate.onChanged;
+      return _buildGlassRow(
+        context,
+        accessory: delegate.value
+            ? GlassRowAccessory.checkmark
+            : GlassRowAccessory.none,
+        selected: delegate.value,
+        enabled: onChanged != null,
+        onTap: () => onChanged?.call(!delegate.value),
+      );
+    }
+    if (delegate is SwitchDelegate) {
+      final onChanged = delegate.onChanged;
+      return _buildGlassRow(
+        context,
+        trailing: AdaptiveSwitch(
+          value: delegate.value,
+          onChanged: onChanged,
+        ),
+        enabled: onChanged != null,
+        onTap: () => onChanged?.call(!delegate.value),
+      );
+    }
+    if (delegate is RadioDelegate) {
+      final radioDelegate = delegate as RadioDelegate<T>;
+      final onChanged = radioDelegate.onChanged;
+      final checked = radioDelegate.value == radioDelegate.groupValue;
+      return _buildGlassRow(
+        context,
+        accessory:
+            checked ? GlassRowAccessory.checkmark : GlassRowAccessory.none,
+        selected: checked,
+        enabled: onChanged != null,
+        onTap: () => onChanged?.call(radioDelegate.value),
+      );
+    }
+    return _buildGlassRow(context, onTap: onTap);
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (AdaptivePlatform.useGlass) {
+      final scope = GlassListScope.maybeOf(context);
+      if (scope != null) {
+        final row = _buildGlass(context);
+        // A row placed straight into a glass list is a section of its own.
+        return scope.inSection ? row : GlassListSection(children: [row]);
+      }
+    }
     if (delegate is OpenDelegate) {
       final openDelegate = delegate as OpenDelegate;
       final child = SafeArea(
@@ -427,6 +611,70 @@ class ListItem<T> extends StatelessWidget {
   }
 }
 
+/// Darwin options row: the current value at the trailing edge and a menu of
+/// the choices over it (macOS native `NSMenu`, iOS glass menu).
+class _GlassOptionsItem<T> extends StatefulWidget {
+  const _GlassOptionsItem({required this.item, required this.delegate});
+
+  final ListItem<T> item;
+  final OptionsDelegate<T> delegate;
+
+  @override
+  State<_GlassOptionsItem<T>> createState() => _GlassOptionsItemState<T>();
+}
+
+class _GlassOptionsItemState<T> extends State<_GlassOptionsItem<T>> {
+  final _valueKey = GlobalKey();
+
+  Future<void> _open() async {
+    final delegate = widget.delegate;
+    final box = (_valueKey.currentContext ?? context).findRenderObject();
+    if (box is! RenderBox || !box.hasSize) return;
+    final anchor = box.localToGlobal(Offset.zero) & box.size;
+    final entries = [
+      for (final option in delegate.options)
+        AdaptiveMenuEntry(
+          label: delegate.textBuilder(option),
+          checked: option == delegate.value,
+          onPressed: () => delegate.onChanged(option),
+        ),
+    ];
+    final shown = await AdaptiveContextMenu.showNative(
+      anchor: anchor,
+      entries: entries,
+      popUp: true,
+    );
+    if (shown || !mounted) return;
+    await AdaptiveContextMenu.showGlass(
+      context: context,
+      anchor: anchor,
+      entries: entries,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final delegate = widget.delegate;
+    return widget.item._buildGlassRow(
+      context,
+      // Options rows show their current value as the subtitle on Material.
+      value: Text(delegate.textBuilder(delegate.value), key: _valueKey),
+      showSubtitle: false,
+      accessory: GlassRowAccessory.popUp,
+      enabled: delegate.options.isNotEmpty,
+      onTap: _open,
+    );
+  }
+}
+
+Widget? _glassHeaderActions(List<Widget>? actions, {double? space}) {
+  if (actions == null || actions.isEmpty) return null;
+  return Row(
+    mainAxisSize: MainAxisSize.min,
+    children: genActions(actions, space: space),
+  );
+}
+
 class ListHeader extends StatelessWidget {
 
   const ListHeader({
@@ -444,7 +692,18 @@ class ListHeader extends StatelessWidget {
   final double? space;
 
   @override
-  Widget build(BuildContext context) => Container(
+  Widget build(BuildContext context) {
+    if (AdaptivePlatform.useGlass && GlassListScope.maybeOf(context) != null) {
+      return GlassSectionHeader(
+        title: title,
+        subtitle: subTitle,
+        trailing: _glassHeaderActions(actions, space: space),
+      );
+    }
+    return _buildMaterial(context);
+  }
+
+  Widget _buildMaterial(BuildContext context) => Container(
       alignment: Alignment.centerLeft,
       padding: padding ??
           const EdgeInsets.only(
@@ -502,6 +761,18 @@ List<Widget> generateSection({
   List<Widget>? actions,
   bool separated = true,
 }) {
+  if (AdaptivePlatform.useGlass) {
+    // One rounded group; it draws its own hairlines.
+    final children = items.where((item) => item is! Divider).toList();
+    if (children.isEmpty) return const [];
+    return [
+      GlassListSection(
+        header: title,
+        headerTrailing: _glassHeaderActions(actions),
+        children: children,
+      ),
+    ];
+  }
   final genItems = separated
       ? items.separated(
           const Divider(
@@ -524,7 +795,15 @@ Widget generateSectionV2({
   required Iterable<Widget> items,
   List<Widget>? actions,
   bool separated = true,
-}) => Column(
+}) {
+  if (AdaptivePlatform.useGlass) {
+    return GlassListSection(
+      header: items.isNotEmpty ? title : null,
+      headerTrailing: _glassHeaderActions(actions),
+      children: items.where((item) => item is! Divider).toList(),
+    );
+  }
+  return Column(
     children: [
       if (items.isNotEmpty && title != null)
         ListHeader(
@@ -542,6 +821,7 @@ Widget generateSectionV2({
       )
     ],
   );
+}
 
 List<Widget> generateInfoSection({
   required Info info,
@@ -566,10 +846,70 @@ List<Widget> generateInfoSection({
   ];
 }
 
-Widget generateListView(List<Widget> items) => ListView.builder(
+Widget generateListView(List<Widget> items) {
+  if (AdaptivePlatform.useGlass) {
+    return GlassListView(children: _groupGlassSections(items));
+  }
+  return ListView.builder(
     itemCount: items.length,
     itemBuilder: (_, index) => items[index],
     padding: const EdgeInsets.only(
       bottom: 16,
     ),
   );
+}
+
+/// Darwin: a [ListHeader] and the bare [ListItem]s after it become one
+/// [GlassListSection]; dividers are dropped (sections draw hairlines); any
+/// other child (a section from `generateSection`, a custom block) stays.
+List<Widget> _groupGlassSections(List<Widget> items) {
+  final result = <Widget>[];
+  ListHeader? header;
+  final rows = <Widget>[];
+  void flush() {
+    final currentHeader = header;
+    if (rows.isNotEmpty) {
+      result.add(
+        GlassListSection(
+          header: currentHeader?.title,
+          headerSubtitle: currentHeader?.subTitle,
+          headerTrailing: currentHeader == null
+              ? null
+              : _glassHeaderActions(
+                  currentHeader.actions,
+                  space: currentHeader.space,
+                ),
+          children: List.of(rows),
+        ),
+      );
+    } else if (currentHeader != null) {
+      result.add(
+        GlassSectionHeader(
+          title: currentHeader.title,
+          subtitle: currentHeader.subTitle,
+          trailing: _glassHeaderActions(
+            currentHeader.actions,
+            space: currentHeader.space,
+          ),
+        ),
+      );
+    }
+    header = null;
+    rows.clear();
+  }
+
+  for (final item in items) {
+    if (item is Divider) continue;
+    if (item is ListHeader) {
+      flush();
+      header = item;
+    } else if (item is ListItem) {
+      rows.add(item);
+    } else {
+      flush();
+      result.add(item);
+    }
+  }
+  flush();
+  return result;
+}

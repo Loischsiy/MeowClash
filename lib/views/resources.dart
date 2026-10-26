@@ -7,7 +7,9 @@ import 'package:meowclash/models/models.dart';
 import 'package:meowclash/providers/config.dart';
 import 'package:meowclash/providers/providers.dart';
 import 'package:meowclash/state.dart';
+import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:meowclash/widgets/widgets.dart';
+import 'package:flutter/cupertino.dart' show CupertinoActivityIndicator;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' hide context;
@@ -135,6 +137,8 @@ class _ResourcesViewState extends ConsumerState<ResourcesView> {
       ),
     ];
 
+    if (AdaptivePlatform.useGlass) return _buildGlass(geoItems);
+
     return Column(
       children: [
         Expanded(
@@ -190,6 +194,52 @@ class _ResourcesViewState extends ConsumerState<ResourcesView> {
                             await globalState.safeRun(_updateAllGeoFiles);
                           },
                   ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Darwin: the files in one grouped section, the update-all action as a
+  /// filled capsule under the list (no Material shadow bar).
+  Widget _buildGlass(List<GeoItem> geoItems) {
+    final padding = GlassListSection.listPadding;
+    return Column(
+      children: [
+        Expanded(
+          child: GlassListView(
+            children: [
+              GlassListSection(
+                children: [
+                  for (final geoItem in geoItems)
+                    GeoDataListItem(
+                      geoItem: geoItem,
+                      isGlobalUpdating: _isUpdatingAll,
+                      currentlyUpdatingFile: _currentlyUpdating,
+                      onUpdateStatusChanged: _setFileUpdating,
+                    ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        SafeArea(
+          top: false,
+          child: Padding(
+            padding: padding,
+            child: Center(
+              child: GlassButton(
+                kind: GlassButtonKind.filled,
+                icon: Icons.sync_rounded,
+                label: appLocalizations.updateAllGeoData,
+                busy: _isUpdatingAll,
+                onPressed: _individuallyUpdating.isNotEmpty
+                    ? null
+                    : () async {
+                        await globalState.safeRun(_updateAllGeoFiles);
+                      },
               ),
             ),
           ),
@@ -347,8 +397,56 @@ class _GeoDataListItemState extends State<GeoDataListItem> {
 
 
 
+  /// Darwin subtitle: file info and source URL in the row subtitle style, a
+  /// Cupertino spinner while the file info loads.
+  Widget _buildGlassSubtitle() => Consumer(
+        builder: (_, ref, __) => FutureBuilder<String?>(
+          future: _getActiveGeoUrl(ref),
+          builder: (context, urlSnapshot) {
+            final url = urlSnapshot.data;
+            if (url == null) return const SizedBox();
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                FutureBuilder<FileInfo>(
+                  future: _getGeoFileLastModified(geoItem.fileName),
+                  builder: (_, snapshot) => snapshot.data == null
+                      ? const CupertinoActivityIndicator(
+                          radius: GlassTokens.statusSpinnerRadius,
+                        )
+                      : Text(snapshot.data!.desc),
+                ),
+                Text(
+                  url,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            );
+          },
+        ),
+      );
+
+  Widget _buildGlass() {
+    final isThisFileUpdating = widget.isGlobalUpdating &&
+        widget.currentlyUpdatingFile == geoItem.fileName;
+    final isDisabled = widget.isGlobalUpdating || _isUpdating;
+    return ListItem(
+      title: Text(geoItem.label),
+      subtitle: _buildGlassSubtitle(),
+      trailing: GlassIconButton(
+        icon: const Icon(Icons.sync_rounded),
+        tooltip: appLocalizations.update,
+        busy: _isUpdating || isThisFileUpdating,
+        onPressed: isDisabled ? null : _updateGeoFile,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (AdaptivePlatform.useGlass) return _buildGlass();
     final isThisFileUpdating = widget.isGlobalUpdating && 
                                 widget.currentlyUpdatingFile == geoItem.fileName;
     final isDisabled = widget.isGlobalUpdating || _isUpdating;

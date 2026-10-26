@@ -1,5 +1,7 @@
 import 'package:flutter/widgets.dart';
 
+import 'glass_motion.dart';
+
 /// The one place for every number of the Darwin glass chrome.
 ///
 /// Widgets read blur strength, tint opacity, specular rim, radii, shadows and
@@ -438,6 +440,15 @@ abstract final class GlassTokens {
   static const double listRowChevronSizeIos = 18;
   // Chevron of rows that open something, as alpha of the secondary text.
   static const double listRowChevronOpacity = 0.6;
+
+  /// Widest share of a row the current value (`GlassListRow.value`) may
+  /// take before it is ellipsized, as in iOS Settings.
+  static const double listRowValueMaxFraction = 0.5;
+  // Action buttons under a row subtitle (provider upload / sync).
+  static const double listRowActionsGap = 8;
+  static const double listRowActionsSpacing = 8;
+  // Filter capsules above a grouped list (media unlock categories).
+  static const double filterCapsuleGap = 8;
   // Type scale: macOS body 13 / caption 11 / headline 13, iOS body 17 /
   // subheadline 15 / footnote 13.
   static const double listRowTitleSizeMac = 13;
@@ -456,6 +467,114 @@ abstract final class GlassTokens {
   static const double listSectionFooterLineMac = 14;
   static const double listSectionFooterSizeIos = 13;
   static const double listSectionFooterLineIos = 18;
+  // Keyboard shortcuts as key caps (hotkeys page, shortcut recorder): the
+  // modifiers in the macOS order ⌃⌥⇧⌘, then the key, each on a small
+  // rounded cap with a hairline edge. Content, so never blurred.
+  static const double keyCapHeightMac = 20;
+  static const double keyCapHeightIos = 26;
+  static const double keyCapLargeHeight = 44;
+  static const double keyCapRadiusMac = 5;
+  static const double keyCapRadiusIos = 6;
+  static const double keyCapLargeRadius = 10;
+  static const double keyCapPaddingMac = 6;
+  static const double keyCapPaddingIos = 8;
+  static const double keyCapLargePadding = 14;
+  static const double keyCapGap = 4;
+  static const double keyCapLargeGap = 8;
+  static const double keyCapTextSizeMac = 12;
+  static const double keyCapTextLineMac = 16;
+  static const double keyCapTextSizeIos = 15;
+  static const double keyCapTextLineIos = 20;
+  static const double keyCapLargeTextSize = 20;
+  static const double keyCapLargeTextLine = 24;
+  static const double keyCapEdgeWidth = 0.5;
+  static const double _keyCapFillOpacityLight = 0.06;
+  static const double _keyCapFillOpacityDark = 0.12;
+  static const double _keyCapEdgeOpacityLight = 0.14;
+  static const double _keyCapEdgeOpacityDark = 0.2;
+  // Reachability of a remote account (WebDAV backup): a dot in the system
+  // green / red, a spinner of the same size while it is checked.
+  static const double statusDotSize = 8;
+  static const double statusSpinnerRadius = 6;
+  static const double statusGap = 6;
+  // About page header: app icon, name and versions centered above the
+  // sections, as the macOS About window and iOS app info.
+  static const double aboutIconSizeMac = 64;
+  static const double aboutIconSizeIos = 80;
+  static const double aboutIconRadiusMac = 14;
+  static const double aboutIconRadiusIos = 18;
+  static const double aboutHeaderGap = 8;
+  static const double aboutTitleSizeMac = 20;
+  static const double aboutTitleLineMac = 24;
+  static const double aboutTitleSizeIos = 22;
+  static const double aboutTitleLineIos = 28;
+  static const double aboutAvatarSize = 48;
+  static const double aboutAvatarGap = 16;
+  // Theme page: appearance previews (Auto / Light / Dark) as in macOS
+  // Appearance, accent swatches as the macOS accent color row, the text
+  // size slider as in iOS Text Size. Content, so never blurred.
+  static const double themePreviewWidthMac = 68;
+  static const double themePreviewWidthIos = 84;
+  static const double themePreviewHeightMac = 46;
+  static const double themePreviewHeightIos = 56;
+  static const double themePreviewRadiusMac = 7;
+  static const double themePreviewRadiusIos = 10;
+  static const double themePreviewInset = 6;
+  static const double themePreviewBarFraction = 0.22;
+  static const double themePreviewPillWidthFraction = 0.45;
+  static const double themePreviewPillHeight = 6;
+  static const double themePreviewLineWidthFraction = 0.7;
+  static const double themePreviewLineHeight = 4;
+  static const double themePreviewLineGap = 4;
+  static const double themePreviewRingWidth = 2.5;
+  static const double themePreviewRingGap = 2;
+  static const double themePreviewLabelGap = 6;
+  static const double themePickerPaddingMac = 12;
+  static const double themePickerPaddingIos = 16;
+  static const Color themePreviewLightFill = Color(0xFFF2F2F7);
+  static const Color themePreviewLightBar = Color(0xFFFFFFFF);
+  static const Color themePreviewLightLine = Color(0xFFD1D1D6);
+  static const Color themePreviewDarkFill = Color(0xFF1C1C1E);
+  static const Color themePreviewDarkBar = Color(0xFF2C2C2E);
+  static const Color themePreviewDarkLine = Color(0xFF48484A);
+  static const double themeSwatchSizeMac = 22;
+  static const double themeSwatchSizeIos = 30;
+  static const double themeSwatchGapMac = 10;
+  static const double themeSwatchGapIos = 14;
+  static const double themeSwatchRingWidth = 2;
+  static const double themeSwatchRingGap = 2;
+  static const double themeSwatchCheckFraction = 0.6;
+  static const double themeSwatchEdgeWidth = 0.5;
+  static const double themeSwatchRowPaddingMac = 10;
+  static const double themeSwatchRowPaddingIos = 14;
+  // Multicolor swatch (follow the system accent), the macOS accent order.
+  static const List<Color> themeSwatchMulticolor = [
+    Color(0xFFFF3B30),
+    Color(0xFFFF9500),
+    Color(0xFFFFCC00),
+    Color(0xFF34C759),
+    Color(0xFF007AFF),
+    Color(0xFFAF52DE),
+    Color(0xFFFF2D55),
+    Color(0xFFFF3B30),
+  ];
+  // macOS slider: thin AppKit track, small white knob (iOS uses the stock
+  // CupertinoSlider).
+  static const double sliderTrackHeightMac = 4;
+  static const double sliderThumbRadiusMac = 9;
+  static const double sliderThumbElevationMac = 1.5;
+  static const double _sliderTrackOpacityLight = 0.12;
+  static const double _sliderTrackOpacityDark = 0.24;
+  // Small and large "A" at the ends of the text size slider.
+  static const double scaleGlyphSmallSizeMac = 11;
+  static const double scaleGlyphSmallLineMac = 14;
+  static const double scaleGlyphLargeSizeMac = 17;
+  static const double scaleGlyphLargeLineMac = 20;
+  static const double scaleGlyphSmallSizeIos = 13;
+  static const double scaleGlyphSmallLineIos = 16;
+  static const double scaleGlyphLargeSizeIos = 22;
+  static const double scaleGlyphLargeLineIos = 26;
+  static const double scaleGlyphGap = 12;
   // Rules of a profile override: a long reorderable list, so one small
   // content card per rule instead of a grouped section; monospaced value and
   // a selection circle at the end, as in Mail's edit mode.
@@ -518,6 +637,29 @@ abstract final class GlassTokens {
   static const Curve morphCurve = Curves.easeOutCubic;
   static const Duration hoverDuration = Duration(milliseconds: 120);
 
+  // Opening a settings sub-page. All zeroed by [GlassAccessibility.reduceMotion].
+  // iPhone: UINavigationController push (slide in from the right, parallax of
+  // the page below, back swipe from the left edge).
+  static const Duration pushDuration = Duration(milliseconds: 500);
+  // macOS / iPad full-window page: a NavigationStack push (slide in from the
+  // trailing edge, no back swipe for the mouse). Never a cross-fade: an
+  // Opacity over a glass page would flatten its blur.
+  static const Duration desktopPushDuration = Duration(milliseconds: 350);
+  // Side sheet (macOS / iPad): the floating glass panel slides in from the
+  // trailing edge on `.spring(response: 0.45, dampingFraction: 0.9)` and
+  // leaves on a plain ease. The exit curve is applied to the falling route
+  // value, so ease-out here means "starts slow, leaves fast".
+  static const double sideSheetSpringResponse = 0.45;
+  static const double sideSheetSpringDamping = 0.9;
+  static const Duration sideSheetEnterDuration = Duration(milliseconds: 450);
+  static const Duration sideSheetExitDuration = Duration(milliseconds: 250);
+  static const Curve sideSheetEnterCurve = GlassSpringCurve(
+    response: sideSheetSpringResponse,
+    dampingFraction: sideSheetSpringDamping,
+    duration: sideSheetEnterDuration,
+  );
+  static const Curve sideSheetExitCurve = Curves.easeOutCubic;
+
   static bool _isDark(Brightness brightness) => brightness == Brightness.dark;
 
   static double tintOpacity(Brightness brightness) =>
@@ -576,6 +718,33 @@ abstract final class GlassTokens {
     }
     return dark ? _systemGreenDark : _systemGreenLight;
   }
+
+  /// Reachability dot: system green when [ok], else system red.
+  static Color statusColor({required bool ok, required Brightness brightness}) {
+    final dark = _isDark(brightness);
+    if (ok) return dark ? _systemGreenDark : _systemGreenLight;
+    return dark ? _systemRedDark : _systemRedLight;
+  }
+
+  /// System colors of a check result (media unlock): passed / partial /
+  /// failed.
+  static Color systemGreen(Brightness brightness) =>
+      _isDark(brightness) ? _systemGreenDark : _systemGreenLight;
+
+  static Color systemOrange(Brightness brightness) =>
+      _isDark(brightness) ? _systemOrangeDark : _systemOrangeLight;
+
+  static Color systemRed(Brightness brightness) =>
+      _isDark(brightness) ? _systemRedDark : _systemRedLight;
+
+  static double sliderTrackOpacity(Brightness brightness) =>
+      _isDark(brightness) ? _sliderTrackOpacityDark : _sliderTrackOpacityLight;
+
+  static double keyCapFillOpacity(Brightness brightness) =>
+      _isDark(brightness) ? _keyCapFillOpacityDark : _keyCapFillOpacityLight;
+
+  static double keyCapEdgeOpacity(Brightness brightness) =>
+      _isDark(brightness) ? _keyCapEdgeOpacityDark : _keyCapEdgeOpacityLight;
 
   static double dialogTintOpacity(Brightness brightness) =>
       _isDark(brightness) ? _dialogTintOpacityDark : _dialogTintOpacityLight;

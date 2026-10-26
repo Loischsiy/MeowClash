@@ -183,6 +183,55 @@ abstract final class GlassTextStyles {
         weight: FontWeight.w400,
       );
 
+  /// Symbol on a key cap; [large] in the shortcut recorder.
+  static TextStyle keyCap(TextTheme textTheme, {bool large = false}) => _style(
+        textTheme.labelLarge,
+        size: large
+            ? GlassTokens.keyCapLargeTextSize
+            : _mac
+                ? GlassTokens.keyCapTextSizeMac
+                : GlassTokens.keyCapTextSizeIos,
+        line: large
+            ? GlassTokens.keyCapLargeTextLine
+            : _mac
+                ? GlassTokens.keyCapTextLineMac
+                : GlassTokens.keyCapTextLineIos,
+        weight: FontWeight.w500,
+      );
+
+  /// The small or [large] "A" at the ends of the text size slider.
+  static TextStyle scaleGlyph(TextTheme textTheme, {required bool large}) =>
+      _style(
+        textTheme.bodyMedium,
+        size: large
+            ? _mac
+                ? GlassTokens.scaleGlyphLargeSizeMac
+                : GlassTokens.scaleGlyphLargeSizeIos
+            : _mac
+                ? GlassTokens.scaleGlyphSmallSizeMac
+                : GlassTokens.scaleGlyphSmallSizeIos,
+        line: large
+            ? _mac
+                ? GlassTokens.scaleGlyphLargeLineMac
+                : GlassTokens.scaleGlyphLargeLineIos
+            : _mac
+                ? GlassTokens.scaleGlyphSmallLineMac
+                : GlassTokens.scaleGlyphSmallLineIos,
+        weight: FontWeight.w400,
+      );
+
+  /// App name in the About header.
+  static TextStyle aboutTitle(TextTheme textTheme) => _style(
+        textTheme.titleLarge,
+        size: _mac
+            ? GlassTokens.aboutTitleSizeMac
+            : GlassTokens.aboutTitleSizeIos,
+        line: _mac
+            ? GlassTokens.aboutTitleLineMac
+            : GlassTokens.aboutTitleLineIos,
+        weight: FontWeight.w700,
+      );
+
   /// A line of code (override rules); callers apply the monospaced family.
   static TextStyle codeLine(TextTheme textTheme) => _style(
         textTheme.bodyMedium,

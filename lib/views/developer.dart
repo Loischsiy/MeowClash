@@ -4,6 +4,7 @@ import 'package:meowclash/enum/enum.dart';
 import 'package:meowclash/models/common.dart';
 import 'package:meowclash/providers/config.dart';
 import 'package:meowclash/state.dart';
+import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:meowclash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -73,6 +74,24 @@ class DeveloperView extends ConsumerWidget {
       ],
     );
 
+  Widget _buildModeItem(WidgetRef ref, bool enable) => ListItem.switchItem(
+        padding: const EdgeInsets.only(
+          left: 16,
+          right: 16,
+        ),
+        title: Text(appLocalizations.developerMode),
+        delegate: SwitchDelegate(
+          value: enable,
+          onChanged: (value) {
+            ref.read(appSettingProvider.notifier).updateState(
+                  (state) => state.copyWith(
+                    developerMode: value,
+                  ),
+                );
+          },
+        ),
+      );
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final enable = ref.watch(
@@ -80,6 +99,16 @@ class DeveloperView extends ConsumerWidget {
         (state) => state.developerMode,
       ),
     );
+    if (AdaptivePlatform.useGlass) {
+      // Darwin: the mode switch alone in the first section, the test
+      // actions in a second one.
+      return GlassListView(
+        children: [
+          GlassListSection(children: [_buildModeItem(ref, enable)]),
+          _getDeveloperList(context, ref),
+        ],
+      );
+    }
     return SingleChildScrollView(
       padding: baseInfoEdgeInsets,
       child: Column(
@@ -87,23 +116,7 @@ class DeveloperView extends ConsumerWidget {
           CommonCard(
             type: CommonCardType.filled,
             radius: 18,
-            child: ListItem.switchItem(
-              padding: const EdgeInsets.only(
-                left: 16,
-                right: 16,
-              ),
-              title: Text(appLocalizations.developerMode),
-              delegate: SwitchDelegate(
-                value: enable,
-                onChanged: (value) {
-                  ref.read(appSettingProvider.notifier).updateState(
-                        (state) => state.copyWith(
-                          developerMode: value,
-                        ),
-                      );
-                },
-              ),
-            ),
+            child: _buildModeItem(ref, enable),
           ),
           const SizedBox(
             height: 16,

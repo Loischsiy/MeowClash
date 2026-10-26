@@ -85,6 +85,9 @@ class _ToolboxViewState extends ConsumerState<ToolsView> {
       ),
     );
     final appLocale = AppLocalizations.of(context);
+    if (AdaptivePlatform.useGlass) {
+      return _buildGlass(context, enableDeveloperMode: vm2.b);
+    }
     final items = [
       Consumer(
         builder: (_, ref, __) {
@@ -112,6 +115,30 @@ class _ToolboxViewState extends ConsumerState<ToolsView> {
         top: AdaptiveAppBar.topInset(context),
         bottom: 20,
       ),
+    );
+  }
+
+  /// Darwin: iOS Settings / System Settings grouped list. "More" is read
+  /// here, not in a [Consumer], so an empty group leaves no section gap.
+  Widget _buildGlass(
+    BuildContext context, {
+    required bool enableDeveloperMode,
+  }) {
+    final navigationItems =
+        ref.watch(moreToolsSelectorStateProvider).navigationItems;
+    return GlassListView(
+      children: [
+        if (navigationItems.isNotEmpty)
+          GlassListSection(
+            header: AppLocalizations.of(context).more,
+            children: [
+              for (final navigationItem in navigationItems)
+                _buildNavigationMenuItem(navigationItem),
+            ],
+          ),
+        ..._getSettingList(context),
+        ..._getOtherList(context, enableDeveloperMode),
+      ],
     );
   }
 }

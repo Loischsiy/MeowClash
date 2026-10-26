@@ -5,6 +5,9 @@ import 'package:meowclash/enum/enum.dart';
 import 'package:meowclash/models/models.dart';
 import 'package:meowclash/providers/config.dart';
 import 'package:meowclash/state.dart';
+import 'package:meowclash/views/config/general.dart'
+    show OverrideNetworkSettingsSection;
+import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:meowclash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -18,23 +21,29 @@ class OverrideNetworkSettingsItemNetwork extends ConsumerWidget {
     final overrideNetworkSettings = ref.watch(
       appSettingProvider.select((state) => state.overrideNetworkSettings),
     );
+    final item = ListItem.switchItem(
+      title: Text(appLocalizations.overrideNetworkSettings),
+      subtitle: Text(appLocalizations.overrideNetworkSettingsDesc),
+      delegate: SwitchDelegate(
+        value: overrideNetworkSettings,
+        onChanged: (value) {
+          ref.read(appSettingProvider.notifier).updateState(
+                (state) => state.copyWith(
+                  overrideNetworkSettings: value,
+                ),
+              );
+        },
+      ),
+    );
+    // Darwin: the "managed by provider" note is the section footer
+    // ([OverrideNetworkSettingsSection]), not a banner inside the card.
+    if (AdaptivePlatform.useGlass && GlassListScope.maybeOf(context) != null) {
+      return item;
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        ListItem.switchItem(
-          title: Text(appLocalizations.overrideNetworkSettings),
-          subtitle: Text(appLocalizations.overrideNetworkSettingsDesc),
-          delegate: SwitchDelegate(
-            value: overrideNetworkSettings,
-            onChanged: (value) {
-              ref.read(appSettingProvider.notifier).updateState(
-                    (state) => state.copyWith(
-                      overrideNetworkSettings: value,
-                    ),
-                  );
-            },
-          ),
-        ),
+        item,
         if (!overrideNetworkSettings)
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -413,7 +422,8 @@ class RouteAddressItem extends ConsumerWidget {
   }
 }
 
-final networkItems = [
+// A getter: the Darwin layout is chosen when the page is built.
+List<Widget> get networkItems => [
   if (Platform.isAndroid) const VPNItem(),
   if (Platform.isAndroid)
     ...generateSection(
@@ -433,10 +443,17 @@ final networkItems = [
         const BypassDomainItem(),
       ],
     ),
+  // Darwin: the override switch is a section of its own so the "managed by
+  // provider" note can be its footer.
+  if (AdaptivePlatform.useGlass)
+    const OverrideNetworkSettingsSection(
+      child: OverrideNetworkSettingsItemNetwork(),
+    ),
   ...generateSection(
     title: appLocalizations.options,
     items: [
-      const OverrideNetworkSettingsItemNetwork(),
+      if (!AdaptivePlatform.useGlass)
+        const OverrideNetworkSettingsItemNetwork(),
       if (system.isDesktop) const TUNItem(),
       if (Platform.isMacOS) const AutoSetSystemDnsItem(),
       const TunStackItem(),

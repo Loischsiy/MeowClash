@@ -6,6 +6,7 @@ import 'package:meowclash/models/models.dart';
 import 'package:meowclash/providers/providers.dart';
 import 'package:meowclash/services/delay_test_runner.dart';
 import 'package:meowclash/state.dart';
+import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:meowclash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -19,23 +20,29 @@ class OverrideNetworkSettingsItem extends ConsumerWidget {
     final overrideNetworkSettings = ref.watch(
       appSettingProvider.select((state) => state.overrideNetworkSettings),
     );
+    final item = ListItem.switchItem(
+      title: Text(appLocalizations.overrideNetworkSettings),
+      subtitle: Text(appLocalizations.overrideNetworkSettingsDesc),
+      delegate: SwitchDelegate(
+        value: overrideNetworkSettings,
+        onChanged: (value) {
+          ref.read(appSettingProvider.notifier).updateState(
+                (state) => state.copyWith(
+                  overrideNetworkSettings: value,
+                ),
+              );
+        },
+      ),
+    );
+    // Darwin: the "managed by provider" note is the section footer
+    // ([OverrideNetworkSettingsSection]), not a banner inside the card.
+    if (AdaptivePlatform.useGlass && GlassListScope.maybeOf(context) != null) {
+      return item;
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        ListItem.switchItem(
-          title: Text(appLocalizations.overrideNetworkSettings),
-          subtitle: Text(appLocalizations.overrideNetworkSettingsDesc),
-          delegate: SwitchDelegate(
-            value: overrideNetworkSettings,
-            onChanged: (value) {
-              ref.read(appSettingProvider.notifier).updateState(
-                    (state) => state.copyWith(
-                      overrideNetworkSettings: value,
-                    ),
-                  );
-            },
-          ),
-        ),
+        item,
         if (!overrideNetworkSettings)
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -62,6 +69,30 @@ class OverrideNetworkSettingsItem extends ConsumerWidget {
             ),
           ),
       ],
+    );
+  }
+}
+
+/// Darwin: the override switch in a section of its own, with the "managed
+/// by provider" note as the section footer while the provider's values win.
+class OverrideNetworkSettingsSection extends ConsumerWidget {
+  const OverrideNetworkSettingsSection({
+    super.key,
+    this.child = const OverrideNetworkSettingsItem(),
+  });
+
+  /// The switch row (General or Network flavour).
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final overrideNetworkSettings = ref.watch(
+      appSettingProvider.select((state) => state.overrideNetworkSettings),
+    );
+    return GlassListSection(
+      footer:
+          overrideNetworkSettings ? null : appLocalizations.managedByProvider,
+      children: [child],
     );
   }
 }
@@ -767,6 +798,51 @@ final generalItems = <Widget>[
       ),
     )
     .toList();
+
+/// The General page. Material: [generalItems] in one divided list, as
+/// before. Darwin: header-less grouped sections like iOS Settings (the rows
+/// are wrapper widgets, so they are grouped here rather than by
+/// [generateListView]).
+class GeneralListView extends StatelessWidget {
+  const GeneralListView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    if (!AdaptivePlatform.useGlass) return generateListView(generalItems);
+    return GlassListView(
+      children: [
+        const OverrideNetworkSettingsSection(),
+        GlassListSection(
+          children: [
+            const LogLevelItem(),
+            const UaItem(),
+            if (system.isDesktop) const KeepAliveIntervalItem(),
+            const TestUrlItem(),
+            const DelayTestConcurrencyItem(),
+          ],
+        ),
+        const GlassListSection(
+          children: [
+            PortItem(),
+            HostsItem(),
+            SendHeadersToggle(),
+            Ipv6Item(),
+            AllowLanItem(),
+          ],
+        ),
+        const GlassListSection(
+          children: [
+            UnifiedDelayItem(),
+            FindProcessItem(),
+            TcpConcurrentItem(),
+            GeodataLoaderItem(),
+            ExternalControllerItem(),
+          ],
+        ),
+      ],
+    );
+  }
+}
 
 class _PortDialog extends ConsumerStatefulWidget {
   const _PortDialog();

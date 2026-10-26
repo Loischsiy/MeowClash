@@ -19,6 +19,7 @@ export 'adaptive_slider.dart';
 export 'adaptive_status.dart';
 export 'adaptive_tab_bar.dart';
 export 'glass_accessibility.dart';
+export 'glass_close_icon.dart';
 export 'glass_field.dart';
 export 'glass_icon_button.dart';
 export 'glass_key_cap.dart';

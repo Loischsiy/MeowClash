@@ -207,13 +207,14 @@ class _GlassToolbarCapsule extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final brightness = theme.brightness;
+    final overBlur = GlassSurface.isOverBlur(context);
     return _HideWhenEmpty(
       child: GlassSurface(
         // Inside a blurring surface (a page in a glass sheet) the capsule
         // keeps its tint, rim and shadow but never blurs a second time.
-        backdrop: GlassSurface.isOverBlur(context)
-            ? GlassBackdrop.native
-            : GlassBackdrop.blur,
+        backdrop: overBlur ? GlassBackdrop.native : GlassBackdrop.blur,
+        tintOpacity:
+            overBlur ? GlassTokens.toolbarItemTintOverGlass(brightness) : null,
         sigma: GlassTokens.toolbarItemSigma,
         borderRadius: BorderRadius.circular(GlassToolbarGroup.itemSize / 2),
         // Light glass reads white over the window; dark glass is a step

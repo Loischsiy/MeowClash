@@ -330,7 +330,7 @@ class _GlassConnectionItem extends StatelessWidget {
           const SizedBox(width: GlassTokens.streamRowTrailingGap),
         if (close)
           GlassIconButton(
-            icon: const Icon(Icons.close_rounded),
+            icon: const GlassCloseIcon(),
             onPressed: onClose,
             size: GlassTokens.streamRowCloseSizeMac,
             iconSize: GlassTokens.streamRowCloseIconSizeMac,

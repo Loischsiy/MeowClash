@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'adaptive_platform.dart';
 import 'glass_accessibility.dart';
+import 'glass_close_icon.dart';
 import 'glass_field.dart';
 import 'glass_text_styles.dart';
 import 'glass_tokens.dart';
@@ -35,6 +36,9 @@ abstract final class GlassTheme {
   static ThemeData apply(ThemeData base) => base.copyWith(
         // Apple controls highlight, they do not ripple.
         splashFactory: NoSplash.splashFactory,
+        // Every CloseButton / CloseButtonIcon draws the SF `xmark`.
+        actionIconTheme: (base.actionIconTheme ?? const ActionIconThemeData())
+            .copyWith(closeButtonIconBuilder: (_) => const GlassCloseIcon()),
         appBarTheme: base.appBarTheme.copyWith(
           // The bar color comes from AdaptiveAppBar (glass on iOS, the
           // unified window toolbar on macOS), never from Material elevation.

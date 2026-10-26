@@ -262,4 +262,96 @@ void main() {
       expect(find.byType(BackdropFilter), findsNothing);
     });
   });
+
+  group('Dark glass rim', () {
+    test('dark rim is a faint hairline, light rim unchanged', () {
+      expect(GlassTokens.rimWidth(Brightness.light), 1);
+      expect(GlassTokens.rimWidth(Brightness.dark), 0.5);
+      expect(GlassTokens.rimTopOpacity(Brightness.light), 0.72);
+      expect(GlassTokens.rimTopOpacity(Brightness.dark), 0.12);
+      expect(GlassTokens.rimBottomOpacity(Brightness.dark), 0.03);
+    });
+  });
+
+  group('Close button', () {
+    testWidgets('GlassTheme draws the SF xmark in every CloseButton',
+        (tester) async {
+      await tester.pumpWidget(MaterialApp(
+        theme: GlassTheme.apply(ThemeData()),
+        home: const Scaffold(body: Center(child: CloseButton())),
+      ));
+      expect(find.byType(GlassCloseIcon), findsOneWidget);
+      expect(find.byIcon(Icons.close), findsNothing);
+      final icon = tester.getSize(find.byType(GlassCloseIcon));
+      expect(icon.width, icon.height);
+    });
+
+    testWidgets('Material theme keeps Icons.close', (tester) async {
+      await tester.pumpWidget(MaterialApp(
+        theme: ThemeData(),
+        home: const Scaffold(body: Center(child: CloseButton())),
+      ));
+      expect(find.byType(GlassCloseIcon), findsNothing);
+      expect(find.byIcon(Icons.close), findsOneWidget);
+    });
+
+    for (final brightness in Brightness.values) {
+      testWidgets('${brightness.name}: capsule inside a glass sheet is a '
+          'filled disc', (tester) async {
+        await tester.pumpWidget(MaterialApp(
+          theme: ThemeData(brightness: brightness),
+          home: Scaffold(
+            body: Center(
+              child: GlassSurface(
+                child: GlassToolbarGroup(
+                  children: [
+                    IconButton(onPressed: () {}, icon: const GlassCloseIcon()),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ));
+        final capsule = tester.widget<GlassSurface>(find.descendant(
+          of: find.byType(GlassToolbarGroup),
+          matching: find.byType(GlassSurface),
+        ));
+        expect(capsule.backdrop, GlassBackdrop.native);
+        expect(
+          capsule.tintOpacity,
+          GlassTokens.toolbarItemTintOverGlass(brightness),
+        );
+        // Light keeps the wash it had; dark gets a denser fill.
+        if (brightness == Brightness.light) {
+          expect(
+            capsule.tintOpacity,
+            GlassTokens.nativeBackdropTint(brightness),
+          );
+        } else {
+          expect(
+            capsule.tintOpacity,
+            greaterThan(GlassTokens.nativeBackdropTint(brightness)),
+          );
+        }
+      });
+    }
+
+    testWidgets('capsule over the window keeps the default blur tint',
+        (tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: GlassToolbarGroup(
+              children: [
+                IconButton(onPressed: () {}, icon: const GlassCloseIcon()),
+              ],
+            ),
+          ),
+        ),
+      ));
+      final capsule = tester.widget<GlassSurface>(find.byType(GlassSurface));
+      expect(capsule.backdrop, GlassBackdrop.blur);
+      expect(capsule.tintOpacity, isNull);
+    });
+  });
 }

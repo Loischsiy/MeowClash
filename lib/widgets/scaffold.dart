@@ -383,7 +383,7 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
     if (_isEdit) {
       return IconButton(
         onPressed: _appBarState.value.editState?.onExit,
-        icon: const Icon(Icons.close_rounded),
+        icon: const CloseButtonIcon(),
       );
     }
     if (_isSearch) {

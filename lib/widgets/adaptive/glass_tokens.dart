@@ -23,12 +23,15 @@ abstract final class GlassTokens {
   static const double _nativeBackdropTintLight = 0.18;
   static const double _nativeBackdropTintDark = 0.14;
 
-  // Specular rim: a 1px edge, brighter at the top, as light catches glass.
-  static const double rimWidth = 1;
+  // Specular rim: a thin edge, brighter at the top, as light catches glass.
+  // Dark glass keeps it to a faint single device pixel on Retina: a full 1pt
+  // white edge reads as a gray frame on a dark window.
+  static const double _rimWidthLight = 1;
+  static const double _rimWidthDark = 0.5;
   static const double _rimTopOpacityLight = 0.72;
-  static const double _rimTopOpacityDark = 0.26;
+  static const double _rimTopOpacityDark = 0.12;
   static const double _rimBottomOpacityLight = 0.10;
-  static const double _rimBottomOpacityDark = 0.05;
+  static const double _rimBottomOpacityDark = 0.03;
 
   // Hairline separating chrome from content (title bar, tab bar, sidebar).
   static const double hairlineWidth = 0.5;
@@ -231,6 +234,16 @@ abstract final class GlassTokens {
   static const double toolbarIconSizeMac = 17;
   static const double toolbarIconSizeIos = 20;
   static const double toolbarItemSigma = 16;
+  // Tint of a capsule painted inside a glass sheet, where it must not blur
+  // again. Dark glass needs a denser fill to read as a filled disc (Apple's
+  // sheet close button) rather than a bare rim; light stays at the native
+  // wash, which already reads white.
+  static const double _toolbarItemTintOverGlassLight = 0.18;
+  static const double _toolbarItemTintOverGlassDark = 0.56;
+  // SF Symbols `xmark` of close buttons, as fractions of the icon size: the
+  // span of each stroke and its width.
+  static const double closeGlyphSpan = 0.6;
+  static const double closeGlyphStroke = 0.1;
   // Search field capsule (search mode): magnifier, text, clear button.
   static const double toolbarSearchSizeMac = 13;
   static const double toolbarSearchLineMac = 16;
@@ -741,6 +754,9 @@ abstract final class GlassTokens {
   static double nativeBackdropTint(Brightness brightness) =>
       _isDark(brightness) ? _nativeBackdropTintDark : _nativeBackdropTintLight;
 
+  static double rimWidth(Brightness brightness) =>
+      _isDark(brightness) ? _rimWidthDark : _rimWidthLight;
+
   static double rimTopOpacity(Brightness brightness) =>
       _isDark(brightness) ? _rimTopOpacityDark : _rimTopOpacityLight;
 
@@ -876,6 +892,11 @@ abstract final class GlassTokens {
 
   static double toolbarFadeOpacity(Brightness brightness) =>
       _isDark(brightness) ? _toolbarFadeOpacityDark : _toolbarFadeOpacityLight;
+
+  static double toolbarItemTintOverGlass(Brightness brightness) =>
+      _isDark(brightness)
+          ? _toolbarItemTintOverGlassDark
+          : _toolbarItemTintOverGlassLight;
 
   static List<BoxShadow> toolbarItemShadow(Brightness brightness) =>
       _isDark(brightness) ? _toolbarItemShadowDark : _toolbarItemShadowLight;

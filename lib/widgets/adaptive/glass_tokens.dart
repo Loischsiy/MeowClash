@@ -45,6 +45,13 @@ abstract final class GlassTokens {
   // Corner radii.
   static const double tabBarRadius = 30;
   static const double sheetRadius = 26;
+  // Desktop side sheet (`showSheet` / `showExtend` on a wide window): a
+  // floating panel, like the macOS 26 inspector — this gap to the window
+  // edges and every corner rounded (the window's own corner never stands in
+  // for the panel's).
+  static const double sideSheetInset = 8;
+  static const double sideSheetRadiusMac = 18;
+  static const double sideSheetRadiusIos = 26;
   static const double menuRadius = 14;
   static const double selectionRadius = 10;
   static const double sidebarRowRadius = 8;
@@ -95,6 +102,10 @@ abstract final class GlassTokens {
   static const double menuGroupGap = 6;
   // Distance between the menu and the control that opened it.
   static const double menuAnchorGap = 4;
+  // Least distance between a menu and the safe-area edges.
+  static const double menuScreenMargin = 8;
+  // Choice menus: gap between the leading checkmark column and the label.
+  static const double menuCheckGap = 8;
   // The menu grows from this scale to 1 while opening.
   static const double menuOpenScale = 0.85;
   static const double _menuPressedOpacityLight = 0.10;
@@ -259,6 +270,11 @@ abstract final class GlassTokens {
   static const double floatingButtonSize = 56;
   static const double floatingButtonIconSize = 24;
   static const double floatingButtonPressedScale = 0.92;
+  // With a label the button becomes a capsule of the same height.
+  static const double floatingButtonLabelPadding = 20;
+  static const double floatingButtonLabelGap = 8;
+  static const double floatingButtonLabelSize = 17;
+  static const double floatingButtonLabelLine = 22;
 
   // Empty and loading states.
   static const double emptyStateIconSize = 44;
@@ -317,6 +333,9 @@ abstract final class GlassTokens {
   static const double dialogContentMaxHeight = 500;
   static const double dialogPadding = 20;
   static const double dialogTitleGap = 8;
+  // Between the controls of a form inside a dialog (editors of override
+  // rules and proxy chains).
+  static const double dialogFieldGap = 12;
   // macOS: push buttons in a row at the trailing edge below the content.
   static const double dialogActionsGapMac = 16;
   static const double dialogButtonHeightMac = 28;
@@ -383,6 +402,95 @@ abstract final class GlassTokens {
   static const double optionRowRadius = 8;
   static const double optionRowPadding = 12;
   static const double optionCheckSize = 18;
+
+  // Grouped list sections (profile editors; later Settings): rows inside one
+  // rounded inset card, as the grouped lists of iOS Settings and macOS
+  // System Settings. They scroll, so they never blur: the card fill and
+  // hairline edge of the content cards; rows are split by hairlines that
+  // start at the row text.
+  static const double listSectionRadiusMac = 10;
+  static const double listSectionRadiusIos = 12;
+  // Space between two sections, and between a section and its header or
+  // footer text (which line up with the row text).
+  static const double listSectionGapMac = 20;
+  static const double listSectionGapIos = 28;
+  static const double listSectionHeaderGap = 6;
+  // Margin between the sections and the edges of the scroll view.
+  static const double listInsetMac = 20;
+  static const double listInsetIos = 16;
+  static const double listInsetVerticalMac = 16;
+  static const double listInsetVerticalIos = 20;
+  static const double listSectionFooterGap = 6;
+  // Rows: least height (one line), paddings, leading symbol.
+  static const double listRowMinHeightMac = 36;
+  static const double listRowMinHeightIos = 44;
+  static const double listRowPaddingMac = 10;
+  static const double listRowPaddingIos = 16;
+  static const double listRowVerticalPaddingMac = 7;
+  static const double listRowVerticalPaddingIos = 10;
+  static const double listRowLeadingSizeMac = 18;
+  static const double listRowLeadingSizeIos = 22;
+  static const double listRowLeadingGapMac = 10;
+  static const double listRowLeadingGapIos = 14;
+  static const double listRowSubtitleGap = 2;
+  static const double listRowTrailingGap = 8;
+  static const double listRowChevronSizeMac = 14;
+  static const double listRowChevronSizeIos = 18;
+  // Chevron of rows that open something, as alpha of the secondary text.
+  static const double listRowChevronOpacity = 0.6;
+  // Type scale: macOS body 13 / caption 11 / headline 13, iOS body 17 /
+  // subheadline 15 / footnote 13.
+  static const double listRowTitleSizeMac = 13;
+  static const double listRowTitleLineMac = 16;
+  static const double listRowTitleSizeIos = 17;
+  static const double listRowTitleLineIos = 22;
+  static const double listRowSubtitleSizeMac = 11;
+  static const double listRowSubtitleLineMac = 14;
+  static const double listRowSubtitleSizeIos = 15;
+  static const double listRowSubtitleLineIos = 20;
+  static const double listSectionHeaderSizeMac = 13;
+  static const double listSectionHeaderLineMac = 16;
+  static const double listSectionHeaderSizeIos = 13;
+  static const double listSectionHeaderLineIos = 18;
+  static const double listSectionFooterSizeMac = 11;
+  static const double listSectionFooterLineMac = 14;
+  static const double listSectionFooterSizeIos = 13;
+  static const double listSectionFooterLineIos = 18;
+  // Rules of a profile override: a long reorderable list, so one small
+  // content card per rule instead of a grouped section; monospaced value and
+  // a selection circle at the end, as in Mail's edit mode.
+  static const double ruleRowGap = 6;
+  static const double ruleRowVerticalPaddingMac = 8;
+  static const double ruleRowVerticalPaddingIos = 12;
+  static const double ruleCheckSizeMac = 18;
+  static const double ruleCheckSizeIos = 22;
+  static const double ruleTextSizeMac = 12;
+  static const double ruleTextLineMac = 16;
+  static const double ruleTextSizeIos = 15;
+  static const double ruleTextLineIos = 20;
+
+  // Switch: the Cupertino switch in the accent. Its track is 31 pt tall in a
+  // 39 pt box (focus margin); macOS scales it down to the 22 pt track of the
+  // AppKit switch.
+  static const double switchTrackHeightIos = 31;
+  static const double switchBoxHeightIos = 39;
+  static const double switchTrackHeightMac = 22;
+
+  // Push buttons inside content (editor actions): capsules, tinted with the
+  // accent (or filled for the main action), never blurred.
+  static const double buttonHeightMac = 28;
+  static const double buttonHeightIos = 34;
+  static const double buttonPaddingMac = 12;
+  static const double buttonPaddingIos = 14;
+  static const double buttonIconSizeMac = 14;
+  static const double buttonIconSizeIos = 17;
+  static const double buttonIconGap = 6;
+  static const double buttonTextSizeMac = 13;
+  static const double buttonTextLineMac = 16;
+  static const double buttonTextSizeIos = 15;
+  static const double buttonTextLineIos = 20;
+  static const double _buttonTintOpacityLight = 0.12;
+  static const double _buttonTintOpacityDark = 0.22;
 
   // Shadows cast by floating glass (tab bar, menus, sheets).
   static const List<BoxShadow> _floatingShadowLight = [
@@ -499,6 +607,9 @@ abstract final class GlassTokens {
               surface,
             )
           : surface;
+
+  static double buttonTintOpacity(Brightness brightness) =>
+      _isDark(brightness) ? _buttonTintOpacityDark : _buttonTintOpacityLight;
 
   static double inputFillOpacity(Brightness brightness) =>
       _isDark(brightness) ? _inputFillOpacityDark : _inputFillOpacityLight;

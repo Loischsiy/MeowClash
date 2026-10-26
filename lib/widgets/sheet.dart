@@ -5,6 +5,7 @@ import 'package:meowclash/enum/enum.dart';
 import 'package:meowclash/models/models.dart';
 import 'package:meowclash/state.dart';
 import 'package:meowclash/widgets/adaptive/adaptive.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'scaffold.dart';
@@ -217,9 +218,47 @@ class _AdaptiveSheetScaffoldState extends State<AdaptiveSheetScaffold> {
       disableBackground: widget.disableBackground,
     );
     if (!useGlass) return scaffold;
-    return GlassSurface(
-      sigma: GlassTokens.sheetSigma,
-      child: scaffold,
+    return _GlassSideSheetPanel(child: scaffold);
+  }
+}
+
+/// Darwin side sheet: a floating glass panel inset from the window edges with
+/// all four corners rounded. The window insets (macOS title bar strip, iPad
+/// status bar) are reduced by the gap, so the toolbar inside still clears
+/// them without an extra step.
+class _GlassSideSheetPanel extends StatelessWidget {
+  const _GlassSideSheetPanel({required this.child});
+
+  final Widget child;
+
+  static double _less(double value) =>
+      (value - GlassTokens.sideSheetInset).clamp(0, double.infinity);
+
+  @override
+  Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    final padding = mediaQuery.padding;
+    final radius = defaultTargetPlatform == TargetPlatform.macOS
+        ? GlassTokens.sideSheetRadiusMac
+        : GlassTokens.sideSheetRadiusIos;
+    return Padding(
+      padding: const EdgeInsets.all(GlassTokens.sideSheetInset),
+      child: MediaQuery(
+        data: mediaQuery.copyWith(
+          padding: EdgeInsets.fromLTRB(
+            0,
+            _less(padding.top),
+            _less(padding.right),
+            _less(padding.bottom),
+          ),
+        ),
+        child: GlassSurface(
+          sigma: GlassTokens.sheetSigma,
+          borderRadius: BorderRadius.circular(radius),
+          shadow: true,
+          child: child,
+        ),
+      ),
     );
   }
 }

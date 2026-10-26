@@ -70,7 +70,9 @@ class CommonScaffold extends ConsumerStatefulWidget {
   final bool automaticallyImplyLeading;
   final bool? centerTitle;
   final AppBarEditState? appBarEditState;
-  final FloatingActionButton? floatingActionButton;
+  /// Usually a `FloatingActionButton`; an `AdaptiveFloatingButton` on pages
+  /// with a Darwin glass variant.
+  final Widget? floatingActionButton;
   final bool disableBackground;
 
   /// Darwin glass toolbar only: the body starts at the top of the window and
@@ -390,11 +392,46 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
     }
     if (widget.leading != null) return widget.leading;
     if (!widget.automaticallyImplyLeading) return null;
+    return _impliedGlassLeading();
+  }
+
+  /// The back / close button a Material `AppBar` would imply for this route.
+  Widget? _impliedGlassLeading() {
     final route = ModalRoute.of(context);
     if (route?.impliesAppBarDismissal != true) return null;
     return route is PageRoute && route.fullscreenDialog
         ? const CloseButton()
         : const BackButton();
+  }
+
+  /// Darwin: a page that brings its own Material `AppBar` (the file editor,
+  /// side sheets) gets the same glass toolbar as every other page — its
+  /// title, its (or the implied) back / close button in a round capsule and
+  /// its actions in one capsule. `genActions` spacers are dropped: the
+  /// capsule spaces its buttons itself.
+  Widget _buildGlassAppBarFromMaterial(
+    BuildContext context,
+    AppBar appBar, {
+    required bool isTransparent,
+  }) {
+    final leading = appBar.leading ??
+        (appBar.automaticallyImplyLeading ? _impliedGlassLeading() : null);
+    final actions = [
+      for (final action in appBar.actions ?? const <Widget>[])
+        if (action is! SizedBox || action.child != null) action,
+    ];
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: Theme.of(context).appBarTheme.systemOverlayStyle!,
+      child: AdaptiveAppBar(
+        transparent: isTransparent,
+        onWindowDrag: Platform.isMacOS ? windowManager.startDragging : null,
+        child: GlassToolbar(
+          leading: leading,
+          title: appBar.title ?? const SizedBox.shrink(),
+          actions: actions,
+        ),
+      ),
+    );
   }
 
   /// A page with no back / close button of its own (a tab root): on iOS its
@@ -459,7 +496,7 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
     
     return PreferredSize(
       preferredSize: Size.fromHeight(
-        glass
+        AdaptivePlatform.useGlass
             ? AdaptiveAppBar.preferredHeight(context, largeTitle: largeTitle)
             : kToolbarHeight,
       ),
@@ -486,7 +523,17 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
         child: Stack(
           alignment: Alignment.bottomCenter,
           children: [
-            widget.appBar ??
+            if (widget.appBar case final appBar?)
+              AdaptivePlatform.useGlass
+                  ? Builder(
+                      builder: (context) => _buildGlassAppBarFromMaterial(
+                        context,
+                        appBar,
+                        isTransparent: isTransparent,
+                      ),
+                    )
+                  : appBar
+            else
                 ValueListenableBuilder<AppBarState>(
                   valueListenable: _appBarState,
                   builder: (context, state, __) => glass

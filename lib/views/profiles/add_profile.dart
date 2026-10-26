@@ -2,6 +2,7 @@ import 'package:meowclash/common/common.dart';
 import 'package:meowclash/pages/scan.dart';
 import 'package:meowclash/services/subscription_crypto.dart';
 import 'package:meowclash/state.dart';
+import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:meowclash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -95,6 +96,9 @@ class AddProfileView extends StatelessWidget {
       future: system.isAndroidTV,
       builder: (context, snapshot) {
         final isTV = snapshot.data ?? false;
+        if (AdaptivePlatform.useGlass) {
+          return _buildGlass(isTV);
+        }
         return ListView(
           children: [
             if (isTV)
@@ -125,6 +129,46 @@ class AddProfileView extends StatelessWidget {
           ],
         );
       },
+    );
+
+  /// Apple: one grouped section of the same sources, with chevrons.
+  Widget _buildGlass(bool isTV) => ListView(
+      padding: GlassListSection.listPadding,
+      children: [
+        GlassListSection(
+          children: [
+            if (isTV)
+              GlassListRow(
+                leading: const Icon(Icons.tv_rounded),
+                title: Text(appLocalizations.addFromPhoneTitle),
+                subtitle: Text(appLocalizations.addFromPhoneSubtitle),
+                accessory: GlassRowAccessory.chevron,
+                onTap: _handleReceiveFromPhone,
+              ),
+            GlassListRow(
+              leading: const Icon(Icons.qr_code_rounded),
+              title: Text(appLocalizations.qrcode),
+              subtitle: Text(appLocalizations.qrcodeDesc),
+              accessory: GlassRowAccessory.chevron,
+              onTap: _toScan,
+            ),
+            GlassListRow(
+              leading: const Icon(Icons.upload_file_rounded),
+              title: Text(appLocalizations.file),
+              subtitle: Text(appLocalizations.fileDesc),
+              accessory: GlassRowAccessory.chevron,
+              onTap: _handleAddProfileFormFile,
+            ),
+            GlassListRow(
+              leading: const Icon(Icons.cloud_download_rounded),
+              title: Text(appLocalizations.url),
+              subtitle: Text(appLocalizations.urlDesc),
+              accessory: GlassRowAccessory.chevron,
+              onTap: _toAdd,
+            ),
+          ],
+        ),
+      ],
     );
 }
 

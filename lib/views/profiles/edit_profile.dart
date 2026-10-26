@@ -9,6 +9,7 @@ import 'package:meowclash/models/models.dart';
 import 'package:meowclash/pages/editor.dart';
 import 'package:meowclash/services/subscription_crypto.dart';
 import 'package:meowclash/state.dart';
+import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:meowclash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 
@@ -371,47 +372,239 @@ class _EditProfileViewState extends State<EditProfileView> {
     }
   }
 
+  void _toggleDecryptPassword() {
+    setState(() {
+      _showDecryptPassword = !_showDecryptPassword;
+    });
+  }
+
+  // The fields are shared by the Material and the Apple layouts; on Darwin
+  // GlassListField restyles them through GlassTheme.form.
+
+  Widget _nameField() => TextFormField(
+        textInputAction: TextInputAction.next,
+        controller: labelController,
+        decoration: InputDecoration(
+          border: const OutlineInputBorder(),
+          labelText: appLocalizations.name,
+        ),
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return appLocalizations.profileNameNullValidationDesc;
+          }
+          return null;
+        },
+      );
+
+  Widget _urlField() => TextFormField(
+        textInputAction: TextInputAction.next,
+        keyboardType: TextInputType.url,
+        controller: urlController,
+        maxLines: 5,
+        minLines: 1,
+        decoration: InputDecoration(
+          border: const OutlineInputBorder(),
+          labelText: appLocalizations.url,
+        ),
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return appLocalizations.profileUrlNullValidationDesc;
+          }
+          if (!value.isUrl) {
+            return appLocalizations.profileUrlInvalidValidationDesc;
+          }
+          return null;
+        },
+      );
+
+  Widget _autoUpdateIntervalField() => TextFormField(
+        textInputAction: TextInputAction.next,
+        controller: autoUpdateDurationController,
+        decoration: InputDecoration(
+          border: const OutlineInputBorder(),
+          labelText: appLocalizations.autoUpdateInterval,
+        ),
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return appLocalizations
+                .profileAutoUpdateIntervalNullValidationDesc;
+          }
+          try {
+            int.parse(value);
+          } catch (_) {
+            return appLocalizations
+                .profileAutoUpdateIntervalInvalidValidationDesc;
+          }
+          return null;
+        },
+      );
+
+  Widget _decryptPasswordField({required Widget suffixIcon}) => TextFormField(
+        controller: decryptPasswordController,
+        obscureText: !_showDecryptPassword,
+        textInputAction: TextInputAction.next,
+        autofillHints: const [AutofillHints.password],
+        decoration: InputDecoration(
+          border: const OutlineInputBorder(),
+          labelText: appLocalizations.profileDecryptionPassword,
+          suffixIcon: suffixIcon,
+        ),
+      );
+
+  Widget _decryptIterationsField() => TextFormField(
+        controller: decryptIterationsController,
+        keyboardType: TextInputType.number,
+        textInputAction: TextInputAction.done,
+        decoration: InputDecoration(
+          border: const OutlineInputBorder(),
+          labelText: appLocalizations.profileDecryptionIterations,
+          helperText: appLocalizations.profileDecryptionIterationsHelper,
+        ),
+        validator: (value) {
+          if (value == null || value.trim().isEmpty) {
+            return null;
+          }
+          final parsed = int.tryParse(value.trim());
+          if (parsed == null || parsed <= 0) {
+            return appLocalizations.profileDecryptIterationsInvalid;
+          }
+          return null;
+        },
+      );
+
+  bool _onPop() {
+    if (fileData == null) {
+      return true;
+    }
+    _handleBack();
+    return false;
+  }
+
+  /// Apple: grouped sections (fields, auto update, profile file,
+  /// decryption) and a glass "Save" capsule. Same fields and handlers as the
+  /// Material layout.
+  Widget _buildGlass(BuildContext context) {
+    final isUrl = widget.profile.type == ProfileType.url;
+    final gap = SizedBox(height: GlassListSection.gap);
+    final listPadding = GlassListSection.listPadding;
+    final sections = <Widget>[
+      GlassListSection(
+        children: [
+          GlassListField(child: _nameField()),
+          if (isUrl) GlassListField(child: _urlField()),
+        ],
+      ),
+      if (isUrl) ...[
+        gap,
+        GlassListSection(
+          children: [
+            GlassListRow(
+              title: Text(appLocalizations.autoUpdate),
+              trailing: AdaptiveSwitch(
+                value: autoUpdate,
+                onChanged: _setAutoUpdate,
+              ),
+              onTap: () => _setAutoUpdate(!autoUpdate),
+            ),
+            if (autoUpdate) GlassListField(child: _autoUpdateIntervalField()),
+          ],
+        ),
+      ],
+      ValueListenableBuilder<FileInfo?>(
+        valueListenable: fileInfoNotifier,
+        builder: (_, fileInfo, __) => fileInfo == null
+            ? const SizedBox.shrink()
+            : Padding(
+                padding: EdgeInsets.only(top: GlassListSection.gap),
+                child: GlassListSection(
+                  header: appLocalizations.profile,
+                  footer: fileInfo.desc,
+                  children: [
+                    GlassListRow(
+                      leading: const Icon(Icons.edit_rounded),
+                      title: Text(appLocalizations.edit),
+                      accessory: GlassRowAccessory.chevron,
+                      onTap: _editProfileFile,
+                    ),
+                    GlassListRow(
+                      leading: const Icon(Icons.upload_rounded),
+                      title: Text(appLocalizations.upload),
+                      onTap: _uploadProfileFile,
+                    ),
+                  ],
+                ),
+              ),
+      ),
+      gap,
+      GlassListSection(
+        header: appLocalizations.profileDecryption,
+        footer: appLocalizations.profileDecryptionDesc,
+        children: [
+          GlassListField(
+            child: _decryptPasswordField(
+              suffixIcon: GlassIconButton(
+                icon: Icon(
+                  _showDecryptPassword
+                      ? Icons.visibility_off_rounded
+                      : Icons.visibility_rounded,
+                ),
+                onPressed: _toggleDecryptPassword,
+              ),
+            ),
+          ),
+          GlassListField(child: _decryptIterationsField()),
+          GlassListField(
+            child: Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: GlassButton(
+                label: appLocalizations.profileDecryptionAction,
+                icon: Icons.lock_open_rounded,
+                busy: _isDecrypting,
+                onPressed: _handleDecryptProfile,
+              ),
+            ),
+          ),
+        ],
+      ),
+    ];
+    return CommonPopScope(
+      onPop: _onPop,
+      child: FloatLayout(
+        floatingWidget: FloatWrapper(
+          child: AdaptiveFloatingButton(
+            onPressed: _handleConfirm,
+            label: appLocalizations.save,
+            icon: const Icon(Icons.save),
+            glassIcon: const Icon(Icons.save_rounded),
+          ),
+        ),
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            padding: listPadding.copyWith(
+              bottom: listPadding.bottom +
+                  GlassTokens.floatingButtonSize +
+                  kFloatingActionButtonMargin * 2,
+            ),
+            children: sections,
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (AdaptivePlatform.useGlass) {
+      return _buildGlass(context);
+    }
     final items = [
       ListItem(
-        title: TextFormField(
-          textInputAction: TextInputAction.next,
-          controller: labelController,
-          decoration: InputDecoration(
-            border: const OutlineInputBorder(),
-            labelText: appLocalizations.name,
-          ),
-          validator: (value) {
-            if (value == null || value.isEmpty) {
-              return appLocalizations.profileNameNullValidationDesc;
-            }
-            return null;
-          },
-        ),
+        title: _nameField(),
       ),
       if (widget.profile.type == ProfileType.url) ...[
         ListItem(
-          title: TextFormField(
-            textInputAction: TextInputAction.next,
-            keyboardType: TextInputType.url,
-            controller: urlController,
-            maxLines: 5,
-            minLines: 1,
-            decoration: InputDecoration(
-              border: const OutlineInputBorder(),
-              labelText: appLocalizations.url,
-            ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return appLocalizations.profileUrlNullValidationDesc;
-              }
-              if (!value.isUrl) {
-                return appLocalizations.profileUrlInvalidValidationDesc;
-              }
-              return null;
-            },
-          ),
+          title: _urlField(),
         ),
         ListItem.switchItem(
           title: Text(appLocalizations.autoUpdate),
@@ -422,27 +615,7 @@ class _EditProfileViewState extends State<EditProfileView> {
         ),
         if (autoUpdate)
           ListItem(
-            title: TextFormField(
-              textInputAction: TextInputAction.next,
-              controller: autoUpdateDurationController,
-              decoration: InputDecoration(
-                border: const OutlineInputBorder(),
-                labelText: appLocalizations.autoUpdateInterval,
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return appLocalizations
-                      .profileAutoUpdateIntervalNullValidationDesc;
-                }
-                try {
-                  int.parse(value);
-                } catch (_) {
-                  return appLocalizations
-                      .profileAutoUpdateIntervalInvalidValidationDesc;
-                }
-                return null;
-              },
-            ),
+            title: _autoUpdateIntervalField(),
           ),
       ],
       ValueListenableBuilder<FileInfo?>(
@@ -501,51 +674,18 @@ class _EditProfileViewState extends State<EditProfileView> {
                 ),
               ),
               const SizedBox(height: 12),
-              TextFormField(
-                controller: decryptPasswordController,
-                obscureText: !_showDecryptPassword,
-                textInputAction: TextInputAction.next,
-                autofillHints: const [AutofillHints.password],
-                decoration: InputDecoration(
-                  border: const OutlineInputBorder(),
-                  labelText: appLocalizations.profileDecryptionPassword,
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _showDecryptPassword
-                          ? Icons.visibility_off
-                          : Icons.visibility,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _showDecryptPassword = !_showDecryptPassword;
-                      });
-                    },
+              _decryptPasswordField(
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _showDecryptPassword
+                        ? Icons.visibility_off
+                        : Icons.visibility,
                   ),
+                  onPressed: _toggleDecryptPassword,
                 ),
               ),
               const SizedBox(height: 12),
-              TextFormField(
-                controller: decryptIterationsController,
-                keyboardType: TextInputType.number,
-                textInputAction: TextInputAction.done,
-                decoration: InputDecoration(
-                  border: const OutlineInputBorder(),
-                  labelText: appLocalizations.profileDecryptionIterations,
-                  helperText:
-                      appLocalizations.profileDecryptionIterationsHelper,
-                ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return null;
-                  }
-                  final parsed = int.tryParse(value.trim());
-                  if (parsed == null || parsed <= 0) {
-                    return appLocalizations
-                        .profileDecryptIterationsInvalid;
-                  }
-                  return null;
-                },
-              ),
+              _decryptIterationsField(),
               const SizedBox(height: 12),
               Align(
                 alignment: Alignment.centerLeft,
@@ -567,13 +707,7 @@ class _EditProfileViewState extends State<EditProfileView> {
       ),
     ];
     return CommonPopScope(
-      onPop: () {
-        if (fileData == null) {
-          return true;
-        }
-        _handleBack();
-        return false;
-      },
+      onPop: _onPop,
       child: FloatLayout(
         floatingWidget: FloatWrapper(
           child: FloatingActionButton.extended(

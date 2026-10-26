@@ -3,6 +3,7 @@ import 'package:meowclash/enum/enum.dart';
 import 'package:meowclash/models/common.dart';
 import 'package:meowclash/providers/app.dart';
 import 'package:meowclash/state.dart';
+import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:meowclash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -169,8 +170,14 @@ class _EditorPageState extends ConsumerState<EditorPage> {
             decoration: InputDecoration(
               border: const _NoInputBorder(),
               hintText: appLocalizations.unnamed,
+              // Darwin: the title of the glass toolbar row.
+              isDense: AdaptivePlatform.useGlass ? true : null,
+              contentPadding:
+                  AdaptivePlatform.useGlass ? EdgeInsets.zero : null,
             ),
-            style: context.textTheme.titleLarge,
+            style: AdaptivePlatform.useGlass
+                ? GlassTextStyles.toolbarTitle(context.textTheme)
+                : context.textTheme.titleLarge,
             autofocus: false,
           ),
           actions: genActions([

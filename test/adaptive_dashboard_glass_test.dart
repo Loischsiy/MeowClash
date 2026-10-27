@@ -1,7 +1,14 @@
+import 'dart:async';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meowclash/enum/enum.dart';
+import 'package:meowclash/models/ip_details.dart';
+import 'package:meowclash/state.dart';
+import 'package:meowclash/views/dashboard/widgets/core_status_dialog.dart';
+import 'package:meowclash/views/dashboard/widgets/ip_details_dialog.dart';
 import 'package:meowclash/views/dashboard/widgets/start_button.dart';
 import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:meowclash/widgets/widgets.dart';
@@ -215,5 +222,150 @@ void main() {
       expect(inGrid(find.byType(GlassEditBadge)), findsWidgets);
       await tearDownDashboard(tester);
     }, variant: darwin);
+  });
+
+  group('dialogs', () {
+    Finder inDialog(Finder matching) =>
+        find.descendant(of: find.byType(GlassDialog), matching: matching);
+
+    void expectGlassDialog() {
+      expect(find.byType(GlassDialog), findsOneWidget);
+      expect(find.byType(AlertDialog), findsNothing);
+      expect(inDialog(find.byType(LinearProgressIndicator)), findsNothing);
+      expect(inDialog(find.byType(CircularProgressIndicator)), findsNothing);
+      expect(inDialog(find.byType(IconButton)), findsNothing);
+      // One glass layer at most: the panel (none with the blur kill switch).
+      expect(
+        inDialog(find.byType(BackdropFilter)).evaluate().length,
+        lessThanOrEqualTo(1),
+      );
+    }
+
+    Future<void> showIpDetails(
+      WidgetTester tester,
+      IpDetailsLoader loader,
+    ) async {
+      unawaited(globalState.showCommonDialog<void>(
+        child: IpDetailsDialog(
+          ipInfo: sampleIpInfo,
+          loadDetails: loader,
+          onRefresh: () {},
+        ),
+      ));
+      await pumpSettingsFrames(tester);
+    }
+
+    for (final brightness in Brightness.values) {
+      final b = brightness.name;
+
+      testWidgets('IP details: rows, loading, failure and retry, $b',
+          (tester) async {
+        await setUpDashboardScreen(tester, mobile, widgets: dashboardWidgetsB);
+        await pumpDashboard(tester, dashboardHost(brightness));
+
+        await openIpDetailsDialog(tester);
+        expect(tester.takeException(), isNull);
+        expectGlassDialog();
+        expect(inDialog(find.byType(GlassIconButton)), findsOneWidget);
+        expect(inDialog(find.text('example.net')), findsOneWidget);
+        expect(inDialog(find.byType(CupertinoActivityIndicator)), findsNothing);
+        await tester.tap(inDialog(find.byType(TextButton)).last);
+        await pumpSettingsFrames(tester);
+        expect(find.byType(GlassDialog), findsNothing);
+
+        final pending = Completer<IpDetails?>();
+        await showIpDetails(
+          tester,
+          ({required ip, required languageCode, cancelToken}) =>
+              pending.future,
+        );
+        expectGlassDialog();
+        expect(inDialog(find.byType(CupertinoActivityIndicator)), findsOneWidget);
+        await tester.tap(inDialog(find.byType(TextButton)).last);
+        await pumpSettingsFrames(tester);
+
+        var calls = 0;
+        await showIpDetails(
+          tester,
+          ({required ip, required languageCode, cancelToken}) async {
+            calls++;
+            return null;
+          },
+        );
+        expectGlassDialog();
+        expect(inDialog(find.byType(GlassButton)), findsOneWidget);
+        await tester.tap(inDialog(find.byType(GlassButton)));
+        await pumpSettingsFrames(tester);
+        expect(calls, 2);
+        await tester.tap(inDialog(find.byType(TextButton)).last);
+        await pumpSettingsFrames(tester);
+        await tearDownDashboard(tester);
+      }, variant: darwin);
+
+      testWidgets('IP details fit 1.5x text on a narrow window, $b',
+          (tester) async {
+        tester.platformDispatcher.textScaleFactorTestValue = 1.5;
+        addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+        await setUpDashboardScreen(tester, const Size(320, 600),
+            widgets: dashboardWidgetsB);
+        await pumpDashboard(tester, dashboardHost(brightness));
+        await openIpDetailsDialog(tester);
+        expect(tester.takeException(), isNull);
+        expectGlassDialog();
+        await tester.tap(inDialog(find.byType(TextButton)).last);
+        await pumpSettingsFrames(tester);
+        await tearDownDashboard(tester);
+      }, variant: darwin);
+
+      testWidgets('TUN failure dialog is glass, $b', (tester) async {
+        await setUpDashboardScreen(tester, wide);
+        await pumpDashboard(
+          tester,
+          dashboardHost(brightness, tunFailure: 'route: operation not permitted'),
+        );
+        await tester.tap(find.descendant(
+          of: find.byType(StartButton),
+          matching: find.byType(GlassIconButton),
+        ));
+        await pumpSettingsFrames(tester);
+        expect(tester.takeException(), isNull);
+        expectGlassDialog();
+        expect(
+          inDialog(find.text('route: operation not permitted')),
+          findsOneWidget,
+        );
+        await tester.tap(inDialog(find.byType(TextButton)));
+        await pumpSettingsFrames(tester);
+        expect(find.byType(GlassDialog), findsNothing);
+        await tearDownDashboard(tester);
+      }, variant: darwin);
+
+      testWidgets('core status ring uses the system colors, $b',
+          (tester) async {
+        await setUpDashboardScreen(tester, mobile);
+        await pumpDashboard(tester, dashboardHost(brightness));
+        unawaited(globalState.showCommonDialog<void>(
+          child: CoreStatusDialog(
+            loadStatus: () async => null,
+            readShellMemory: () => (rss: 0, maxRss: 0),
+            coreInAppProcess: true,
+            onReleaseMemory: () {},
+          ),
+        ));
+        await pumpSettingsFrames(tester);
+        expect(tester.takeException(), isNull);
+        expectGlassDialog();
+        Finder dot(Color color) => inDialog(find.byWidgetPredicate((w) =>
+            w is Container &&
+            w.decoration is BoxDecoration &&
+            (w.decoration! as BoxDecoration).shape == BoxShape.circle &&
+            (w.decoration! as BoxDecoration).color == color));
+        expect(dot(GlassTokens.memoryAllocated(brightness)), findsOneWidget);
+        expect(dot(GlassTokens.memoryReclaimable(brightness)), findsOneWidget);
+        await tester.tap(inDialog(find.byType(TextButton)).last);
+        await pumpSettingsFrames(tester);
+        await tearDownDashboard(tester);
+      }, variant: darwin);
+    }
   });
 }

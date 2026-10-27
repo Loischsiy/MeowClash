@@ -7,6 +7,7 @@ import 'package:meowclash/enum/enum.dart';
 import 'package:meowclash/providers/providers.dart';
 import 'package:meowclash/state.dart';
 import 'package:meowclash/widgets/adaptive/adaptive.dart';
+import 'package:meowclash/widgets/dialog.dart';
 
 enum CatConnectionPhase {
   idle,
@@ -605,8 +606,28 @@ class _StatusLine extends ConsumerWidget {
   }
 }
 
-/// The TUN start error in full. D.7 moves Darwin to `CommonDialog`.
+/// The TUN start error in full: a glass `CommonDialog` on Darwin, the
+/// Material `AlertDialog` elsewhere.
 void _showTunFailure(BuildContext context, String tunFailure) {
+  if (AdaptivePlatform.useGlass) {
+    globalState.showCommonDialog<void>(
+      child: Builder(
+        builder: (dialogContext) => CommonDialog(
+          title: appLocalizations.tunStartFailed,
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: Text(appLocalizations.confirm),
+            ),
+          ],
+          child: SelectableText(
+            tunFailure.isEmpty ? appLocalizations.tunStartFailed : tunFailure,
+          ),
+        ),
+      ),
+    );
+    return;
+  }
   globalState.showCommonDialog<void>(
     child: AlertDialog(
       title: Text(appLocalizations.tunStartFailed),

@@ -797,6 +797,17 @@ abstract final class GlassTokens {
   // Cross-fade when a tile swaps its content (loading → value → error).
   static const Duration widgetContentFadeDuration = Duration(milliseconds: 200);
 
+  // Label/value rows of a dashboard dialog (IP details), like an Info pane:
+  // a secondary symbol, a small secondary label over the selectable value.
+  static const double infoRowSymbolSizeMac = 15;
+  static const double infoRowSymbolSizeIos = 17;
+  static const double infoRowSymbolGap = 10;
+  static const double infoRowVerticalPadding = 6;
+  static const double infoRowLabelGap = 2;
+
+  /// Between the rows block and a note / status line under it.
+  static const double infoNoteGap = 8;
+
   // Start/Stop button (the cat). The shape and the cat stay; the fill is a
   // system color: green when connected, a neutral gray fill (secondarySystem
   // Fill) when idle and an accent tint while connecting. A press dims the fill
@@ -1080,6 +1091,14 @@ abstract final class GlassTokens {
   /// Sent traffic (↑) in dashboard charts.
   static Color chartUpload(Brightness brightness) =>
       _isDark(brightness) ? _systemOrangeDark : _systemOrangeLight;
+
+  /// Memory in use (core status ring and legend).
+  static Color memoryAllocated(Brightness brightness) =>
+      systemBlue(brightness);
+
+  /// Reclaimable memory (core status ring and legend).
+  static Color memoryReclaimable(Brightness brightness) =>
+      systemGreen(brightness);
 
   static double startButtonRadius({required bool mac}) =>
       mac ? startButtonRadiusMac : startButtonRadiusIos;

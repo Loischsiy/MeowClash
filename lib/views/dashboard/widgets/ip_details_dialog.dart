@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +8,7 @@ import 'package:meowclash/common/ip_country_names.dart';
 import 'package:meowclash/l10n/l10n.dart';
 import 'package:meowclash/models/common.dart';
 import 'package:meowclash/models/ip_details.dart';
+import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 typedef IpDetailsLoader = Future<IpDetails?> Function({
@@ -127,6 +129,17 @@ class _IpDetailsDialogState extends State<IpDetailsDialog> {
     final missing = busy ? '…' : l10n.ipDetailsUnavailable;
     final ip = widget.ipInfo?.ip;
 
+    if (AdaptivePlatform.useGlass) {
+      return _buildGlass(
+        context,
+        l10n: l10n,
+        ip: ip,
+        country: country,
+        busy: busy,
+        missing: missing,
+      );
+    }
+
     // Let AlertDialog scroll title + content together on narrow/landscape
     // screens and with large system fonts; actions remain reachable.
     return AlertDialog(
@@ -219,6 +232,199 @@ class _IpDetailsDialogState extends State<IpDetailsDialog> {
           child: Text(l10n.confirm),
         ),
       ],
+    );
+  }
+}
+
+extension on _IpDetailsDialogState {
+  /// Darwin: the glass `GlassDialog` panel with Info-pane rows; the busy
+  /// state is a spinner (indeterminate), the actions are styled by
+  /// `GlassDialogActions`.
+  Widget _buildGlass(
+    BuildContext context, {
+    required AppLocalizations l10n,
+    required String? ip,
+    required String? country,
+    required bool busy,
+    required String missing,
+  }) {
+    final theme = Theme.of(context);
+    final secondary = theme.colorScheme.onSurfaceVariant;
+    final caption =
+        GlassTextStyles.widgetCaption(theme.textTheme).copyWith(
+      color: secondary,
+    );
+    final mac = AdaptivePlatform.isMacOSGlass;
+    final maxHeight = math.max(
+      0.0,
+      math.min(
+        MediaQuery.sizeOf(context).height - 2 * GlassTokens.dialogInset,
+        GlassTokens.dialogContentMaxHeight,
+      ),
+    );
+    return GlassDialog(
+      title: l10n.ipDetailsTitle,
+      content: ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: maxHeight),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _GlassIpDetailRow(
+                icon: Icons.place_rounded,
+                label: l10n.ipDetailsAddress,
+                value: ip ?? missing,
+                emphasize: true,
+                action: ip == null
+                    ? null
+                    : GlassIconButton(
+                        tooltip: l10n.ipDetailsOpenInBrowser,
+                        size: mac
+                            ? GlassTokens.widgetHeaderButtonSizeMac
+                            : GlassTokens.widgetHeaderButtonSizeIos,
+                        iconSize: mac
+                            ? GlassTokens.widgetHeaderButtonIconSizeMac
+                            : GlassTokens.widgetHeaderButtonIconSizeIos,
+                        onPressed: _openIp,
+                        icon: const Icon(Icons.open_in_new_rounded),
+                      ),
+              ),
+              _GlassIpDetailRow(
+                icon: Icons.flag_rounded,
+                label: l10n.ipDetailsCountry,
+                value: country ?? missing,
+              ),
+              _GlassIpDetailRow(
+                icon: Icons.location_city_rounded,
+                label: l10n.ipDetailsRegionCity,
+                value: _details?.regionAndCity ?? missing,
+              ),
+              _GlassIpDetailRow(
+                icon: Icons.link_rounded,
+                label: l10n.ipDetailsDomain,
+                value: _details?.domain ?? missing,
+              ),
+              const SizedBox(height: GlassTokens.infoNoteGap),
+              if (busy) ...[
+                Semantics(
+                  label: l10n.ipDetailsLoading,
+                  child: const Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: AdaptiveActivityIndicator(
+                      radius: GlassTokens.widgetSpinnerRadius,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: GlassTokens.infoNoteGap),
+              ],
+              if (_failed) ...[
+                Text(l10n.ipDetailsLoadFailed),
+                const SizedBox(height: GlassTokens.infoNoteGap),
+                Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: GlassButton(
+                    label: l10n.ipDetailsRetry,
+                    icon: Icons.refresh_rounded,
+                    onPressed: _loadDetails,
+                  ),
+                ),
+                const SizedBox(height: GlassTokens.infoNoteGap),
+              ],
+              if (_linkFailed) ...[
+                Text(
+                  l10n.ipDetailsOpenFailed,
+                  style: caption.copyWith(
+                    color: GlassTokens.systemRed(theme.brightness),
+                  ),
+                ),
+                const SizedBox(height: GlassTokens.infoNoteGap),
+              ],
+              if (_details?.regionAndCity != null &&
+                  _details!.geographyLanguage != _languageCode) ...[
+                Text(l10n.ipDetailsEnglishFallback, style: caption),
+                const SizedBox(height: GlassTokens.infoNoteGap),
+              ],
+              Text(l10n.detectionTip, style: caption),
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: widget.isIpLoading ? null : widget.onRefresh,
+          child: Text(l10n.ipDetailsRefresh),
+        ),
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(l10n.confirm),
+        ),
+      ],
+    );
+  }
+}
+
+/// Darwin row: secondary symbol, small secondary label over the value.
+class _GlassIpDetailRow extends StatelessWidget {
+  const _GlassIpDetailRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+    this.emphasize = false,
+    this.action,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+  final bool emphasize;
+  final Widget? action;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final secondary = theme.colorScheme.onSurfaceVariant;
+    final mac = AdaptivePlatform.isMacOSGlass;
+    final valueStyle = GlassTextStyles.listRowTitle(theme.textTheme).copyWith(
+      color: theme.colorScheme.onSurface,
+      fontWeight: emphasize ? FontWeight.w600 : FontWeight.w400,
+      fontFeatures: const [FontFeature.tabularFigures()],
+    );
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        vertical: GlassTokens.infoRowVerticalPadding,
+      ),
+      child: Row(
+        children: [
+          Icon(
+            icon,
+            size: mac
+                ? GlassTokens.infoRowSymbolSizeMac
+                : GlassTokens.infoRowSymbolSizeIos,
+            color: secondary,
+          ),
+          const SizedBox(width: GlassTokens.infoRowSymbolGap),
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: GlassTextStyles.widgetCaption(theme.textTheme)
+                      .copyWith(color: secondary),
+                ),
+                const SizedBox(height: GlassTokens.infoRowLabelGap),
+                SelectableText(value, style: valueStyle),
+              ],
+            ),
+          ),
+          if (action != null) ...[
+            const SizedBox(width: GlassTokens.infoRowSymbolGap),
+            action!,
+          ],
+        ],
+      ),
     );
   }
 }

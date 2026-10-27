@@ -18,6 +18,7 @@ import 'package:meowclash/views/proxies/list.dart';
 import 'package:meowclash/views/proxies/tab.dart';
 import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:meowclash/widgets/card.dart';
+import 'package:meowclash/widgets/setting.dart';
 import 'package:meowclash/widgets/text.dart';
 
 import 'performance_test_support.dart';
@@ -464,6 +465,102 @@ void main() {
       expect(tester.getTopLeft(find.byType(TabBar)).dy, 0);
       await tester.pumpWidget(const SizedBox.shrink());
     }, variant: android);
+  });
+
+  group('group sheet', () {
+    Future<void> openSheet(WidgetTester tester) async {
+      await tester.tap(
+        find.descendant(
+          of: find.byType(AdaptiveGroupSelector),
+          matching: find.byType(GlassIconButton),
+        ),
+      );
+      for (var i = 0; i < 10; i++) {
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+      expect(tester.takeException(), isNull);
+    }
+
+    GlassListRow row(WidgetTester tester, String name) => tester.widget(
+          find.ancestor(
+            of: find.text(name),
+            matching: find.byType(GlassListRow),
+          ),
+        );
+
+    final blurInSection = find.descendant(
+      of: find.byType(GlassListSection),
+      matching: find.byType(BackdropFilter),
+    );
+
+    testWidgets('one grouped section with a checkmark on the current group',
+        (tester) async {
+      await setUp(tester, type: ProxiesType.tab);
+      await pumpScreen(tester, host(const ProxiesTabView()));
+      await openSheet(tester);
+      expect(find.byType(GlassListSection), findsOneWidget);
+      expect(find.byType(GlassListRow), findsNWidgets(groups.length));
+      expect(find.byType(SettingTextCard), findsNothing);
+      final current = row(tester, 'Select');
+      expect(current.selected, isTrue);
+      expect(current.accessory, GlassRowAccessory.checkmark);
+      final other = row(tester, 'Auto');
+      expect(other.selected, isFalse);
+      expect(other.accessory, GlassRowAccessory.none);
+      // Flat rows: the sheet and the group bar are the only blurred layers.
+      expect(blurInSection, findsNothing);
+      expect(blur, findsNWidgets(2));
+      await tester.pumpWidget(const SizedBox.shrink());
+    }, variant: apple);
+
+    testWidgets('tapping a group selects its tab and closes the sheet',
+        (tester) async {
+      await setUp(tester, type: ProxiesType.tab);
+      await pumpScreen(tester, host(const ProxiesTabView()));
+      await openSheet(tester);
+      await tester.tap(
+        find.descendant(
+          of: find.byType(GlassListSection),
+          matching: find.text('Auto'),
+        ),
+      );
+      for (var i = 0; i < 10; i++) {
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+      expect(find.byType(GlassListSection), findsNothing);
+      final selector = tester.widget<AdaptiveGroupSelector>(
+        find.byType(AdaptiveGroupSelector),
+      );
+      expect(selector.controller?.index, 1);
+      await tester.pumpWidget(const SizedBox.shrink());
+    }, variant: ios);
+
+    testWidgets('Reduce Transparency: the open sheet has no blur at all',
+        (tester) async {
+      await setUp(tester, type: ProxiesType.tab);
+      await pumpScreen(
+        tester,
+        host(
+          const ProxiesTabView(),
+          accessibility: const GlassAccessibility(reduceTransparency: true),
+        ),
+      );
+      await openSheet(tester);
+      expect(find.byType(GlassListSection), findsOneWidget);
+      expect(blur, findsNothing);
+      await tester.pumpWidget(const SizedBox.shrink());
+    }, variant: ios);
+
+    testWidgets('kill switch: the open sheet has no blur at all',
+        (tester) async {
+      GlassFlags.backdropBlurEnabled = false;
+      await setUp(tester, type: ProxiesType.tab);
+      await pumpScreen(tester, host(const ProxiesTabView()));
+      await openSheet(tester);
+      expect(find.byType(GlassListSection), findsOneWidget);
+      expect(blur, findsNothing);
+      await tester.pumpWidget(const SizedBox.shrink());
+    }, variant: darwin);
   });
 
   group('states', () {

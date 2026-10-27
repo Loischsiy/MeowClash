@@ -39,7 +39,8 @@ class AdaptiveAppBar extends StatelessWidget {
   final bool scrollEdge;
 
   /// [child] is a [GlassToolbar] with its large title row (iOS root page):
-  /// the bar is taller by [GlassTokens.toolbarLargeTitleHeightIos].
+  /// the bar is [GlassTokens.toolbarLargeTitleHeightIos] tall, the buttons
+  /// share that row with the title.
   final bool largeTitle;
 
   static bool get _ios => defaultTargetPlatform == TargetPlatform.iOS;
@@ -54,12 +55,13 @@ class AdaptiveAppBar extends StatelessWidget {
   }
 
   /// Whether root pages (no back button) put their title in a large title
-  /// row below the buttons: the iOS glass toolbar only.
+  /// row next to the buttons: the iOS glass toolbar only.
   static bool get largeTitles => AdaptivePlatform.useGlass && _ios;
 
   static double _barHeight({required bool largeTitle}) =>
-      toolbarHeight +
-      (largeTitle && largeTitles ? GlassTokens.toolbarLargeTitleHeightIos : 0);
+      largeTitle && largeTitles
+          ? GlassTokens.toolbarLargeTitleHeightIos
+          : toolbarHeight;
 
   /// The `PreferredSize` height of a page's bar, without the top inset the
   /// `Scaffold` adds on its own: the toolbar row, the large title row when
@@ -228,11 +230,12 @@ class _ToolbarInsetDelegate extends SliverPersistentHeaderDelegate {
 /// capsule at the trailing edge. While searching, [searchField] (usually a
 /// [GlassToolbarSearchField]) takes the title's place and the actions hide.
 ///
-/// With [largeTitle] (iOS root pages) the row keeps only the capsules (and
-/// the search field) and the title moves to a second row below, large and
-/// at the leading edge, like the iOS 26 large title. It stays put while the
-/// page scrolls and while searching, so the bar never changes height. Wrap
-/// it in an [AdaptiveAppBar] with the same `largeTitle`.
+/// With [largeTitle] (iOS root pages) the title is large at the leading
+/// edge, like the iOS 26 large title, and the capsules share its row at the
+/// trailing edge, centered on the title's line. While searching the back
+/// capsule ([leading]) and the field take that row, so the bar never changes
+/// height. It stays put while the page scrolls. Wrap it in an
+/// [AdaptiveAppBar] with the same `largeTitle`.
 ///
 /// Pages keep passing plain Material `IconButton`s; the capsules restyle
 /// them. Nothing here animates, so Reduce Motion needs no extra branch (and
@@ -312,31 +315,63 @@ class GlassToolbar extends StatelessWidget {
           : GlassTokens.toolbarTitleGap,
     );
     if (!large) return row;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        SizedBox(height: GlassTokens.toolbarHeightIos, child: row),
-        SizedBox(
-          height: GlassTokens.toolbarLargeTitleHeightIos,
-          child: Padding(
-            padding: EdgeInsetsDirectional.only(
-              start: inset,
-              end: inset,
-              bottom: GlassTokens.toolbarLargeTitleBottomIos,
-            ),
-            child: Align(
-              alignment: AlignmentDirectional.bottomStart,
-              child: Semantics(
-                header: true,
-                child: _title(
-                  GlassTextStyles.toolbarLargeTitle(theme.textTheme),
-                  color,
+    final field = searchField;
+    return SizedBox(
+      height: GlassTokens.toolbarLargeTitleHeightIos,
+      child: Padding(
+        padding: EdgeInsetsDirectional.symmetric(horizontal: inset),
+        child: field != null
+            ? Padding(
+                padding: const EdgeInsets.only(
+                  bottom: GlassTokens.toolbarLargeTitleActionsBottomIos,
                 ),
+                // Search mode: the back capsule that leaves it, then the field.
+                child: Row(
+                  children: [
+                    if (leading != null) ...[
+                      GlassToolbarGroup(children: [leading]),
+                      const SizedBox(width: GlassTokens.toolbarTitleGap),
+                    ],
+                    Expanded(child: field),
+                  ],
+                ),
+              )
+            : Row(
+                children: [
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                        bottom: GlassTokens.toolbarLargeTitleBottomIos,
+                      ),
+                      child: Align(
+                        alignment: AlignmentDirectional.bottomStart,
+                        child: Semantics(
+                          header: true,
+                          child: _title(
+                            GlassTextStyles.toolbarLargeTitle(
+                              theme.textTheme,
+                            ),
+                            color,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  if (trailing.isNotEmpty) ...[
+                    const SizedBox(width: GlassTokens.toolbarTitleGap),
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        bottom: GlassTokens.toolbarLargeTitleActionsBottomIos,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: trailing,
+                      ),
+                    ),
+                  ],
+                ],
               ),
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 }

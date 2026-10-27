@@ -67,9 +67,11 @@ pixel-for-pixel. Code: `lib/widgets/adaptive/` (import `adaptive.dart`).
   `GlassToolbarSearchField` replaces the title and the actions hide. Budget: 1–3 blurs per bar.
 - Sizes (`GlassTokens.toolbar*`): macOS 52 pt bar, compact 15 pt title at the leading edge; iOS 44 pt
   bar under the status bar, centered 17 pt title. macOS keeps window drag on the bar (`onWindowDrag`).
-- iOS root pages (no back / close button, `CommonScaffold._isRootPage`) get the iOS 26 large title: the
-  44 pt row keeps only the capsules and a second 52 pt row holds a 34 pt bold title at the leading edge
-  (`toolbarLargeTitle*`). It stays while searching and scrolling, so the bar never changes height; pushed
+- iOS root pages (no back / close button, `CommonScaffold._isRootPage`) get the iOS 26 large title: one
+  52 pt row with a 34 pt bold title at the leading edge and the capsules at the trailing edge, centered on
+  the title's line (`toolbarLargeTitle*`, `toolbarLargeTitleActionsBottomIos`) — a separate 44 pt button
+  row above it left the capsules stuck in the corner, above the title. While searching the back capsule
+  and the field take that row; it stays while scrolling, so the bar never changes height; pushed
   pages keep the centered 17 pt title, macOS keeps one row. Without a status bar (top inset 0) the bar
   still keeps `toolbarMinTopInsetIos` above the capsules. Bar height always comes from
   `AdaptiveAppBar.preferredHeight`; pages read it only through `AdaptiveAppBar.topInset` (MediaQuery).

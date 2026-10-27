@@ -443,6 +443,82 @@ void main() {
       expect(panel.width, moreOrLessEquals(desktop.width * 0.85));
       expect(panel.height, moreOrLessEquals(desktop.height * 0.85));
     }, variant: mac);
+
+    testWidgets('the blur replaces the backdrop (transparent macOS window)',
+        (tester) async {
+      await open(
+        tester,
+        () => globalState.showCommonDialog<void>(
+          child: const CommonModal(
+            child: Scaffold(body: Center(child: Text('Editor'))),
+          ),
+        ),
+        viewSize: desktop,
+      );
+      expect(
+        tester.widget<BackdropFilter>(blurs()).blendMode,
+        BlendMode.src,
+      );
+    }, variant: mac);
+
+    void showTitleAccessory() => globalState.showCommonDialog<void>(
+          child: CommonDialog(
+            title: 'Display settings',
+            titleAccessory: GlassIconButton(
+              icon: const Icon(Icons.settings_rounded),
+              size: GlassTokens.dialogTitleAccessorySize,
+              iconSize: GlassTokens.dialogTitleAccessoryIconSize,
+              onPressed: () {},
+            ),
+            actions: [
+              TextButton(onPressed: () {}, child: const Text('Cancel')),
+              TextButton(onPressed: () {}, child: const Text('Confirm')),
+            ],
+            child: const Text('Pinned platforms'),
+          ),
+        );
+
+    testWidgets('macOS: the title accessory sits at the end of the title row',
+        (tester) async {
+      await open(tester, showTitleAccessory);
+      final panel = tester.getRect(find.byType(GlassSurface));
+      final title = tester.getRect(find.text('Display settings'));
+      final gear = tester.getRect(find.byType(GlassIconButton));
+      expect(
+        find.descendant(
+          of: find.byType(GlassDialogActions),
+          matching: find.byType(GlassIconButton),
+        ),
+        findsNothing,
+      );
+      expect(gear.center.dy, moreOrLessEquals(title.center.dy, epsilon: 0.5));
+      expect(
+        panel.right - gear.right,
+        moreOrLessEquals(GlassTokens.dialogPadding, epsilon: 0.5),
+      );
+      expect(
+        title.left - panel.left,
+        moreOrLessEquals(GlassTokens.dialogPadding, epsilon: 0.5),
+      );
+    }, variant: mac);
+
+    testWidgets('iOS: the title stays centered beside the accessory',
+        (tester) async {
+      await open(tester, showTitleAccessory);
+      final panel = tester.getRect(find.byType(GlassSurface));
+      final title = tester.getRect(find.text('Display settings'));
+      final gear = tester.getRect(find.byType(GlassIconButton));
+      expect(title.center.dx, moreOrLessEquals(panel.center.dx, epsilon: 0.5));
+      expect(
+        panel.right - gear.right,
+        moreOrLessEquals(GlassTokens.dialogPadding, epsilon: 0.5),
+      );
+      // Two buttons stay side by side: the gear is not one of them.
+      final cancel = tester.getRect(find.widgetWithText(TextButton, 'Cancel'));
+      final confirm =
+          tester.getRect(find.widgetWithText(TextButton, 'Confirm'));
+      expect(cancel.center.dy, confirm.center.dy);
+    }, variant: ios);
   });
 
   group('Material', () {

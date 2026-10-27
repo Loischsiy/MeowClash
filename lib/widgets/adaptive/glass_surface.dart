@@ -159,12 +159,20 @@ class GlassSurface extends StatelessWidget {
       // `grouped` shares one backdrop read with sibling surfaces when an
       // ancestor [BackdropGroup] exists, and behaves like the plain
       // constructor otherwise.
+      //
+      // `src` replaces the backdrop inside the clip with its blurred copy.
+      // The default `srcOver` lays the copy over the original, which hides
+      // it only where the backdrop is opaque: over the transparent parts of
+      // the macOS window (sidebar and title bar on native glass) the crisp
+      // labels would show through the panel. Over opaque content both modes
+      // paint the same pixels.
       surface = BackdropFilter.grouped(
         filter: ui.ImageFilter.blur(
           sigmaX: sigma,
           sigmaY: sigma,
           tileMode: TileMode.clamp,
         ),
+        blendMode: BlendMode.src,
         child: surface,
       );
     }

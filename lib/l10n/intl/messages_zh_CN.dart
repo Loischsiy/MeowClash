@@ -659,6 +659,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "toggle": MessageLookupByLibrary.simpleMessage("切换"),
     "tonalSpotScheme": MessageLookupByLibrary.simpleMessage("调性点缀"),
     "tooFrequentOperation": MessageLookupByLibrary.simpleMessage("请等待15秒后再次刷新"),
+    "toolbarDone": MessageLookupByLibrary.simpleMessage("完成"),
+    "toolbarEdit": MessageLookupByLibrary.simpleMessage("编辑"),
     "tools": MessageLookupByLibrary.simpleMessage("设置"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("Tproxy端口"),
     "trafficUsage": MessageLookupByLibrary.simpleMessage("流量统计"),

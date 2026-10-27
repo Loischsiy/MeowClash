@@ -18,6 +18,7 @@ import 'package:meowclash/services/ui_lifecycle.dart';
 import 'package:meowclash/state.dart';
 import 'package:meowclash/views/dashboard/dashboard.dart';
 import 'package:meowclash/views/dashboard/widgets/ip_details_dialog.dart';
+import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:meowclash/widgets/widgets.dart';
 
 import 'settings_test_support.dart';
@@ -229,10 +230,16 @@ Future<void> openIpDetailsDialog(WidgetTester tester) async {
   await pumpSettingsFrames(tester);
 }
 
-/// Toggles edit mode with the toolbar action.
+/// Toggles edit mode with the toolbar action: the edit / save icons on
+/// Material, the "Edit" / "Done" text button on Darwin glass.
 Future<void> toggleDashboardEdit(WidgetTester tester) async {
   final edit = find.byIcon(Icons.edit);
-  await tester.tap(edit.evaluate().isNotEmpty ? edit : find.byIcon(Icons.save));
+  final save = find.byIcon(Icons.save);
+  await tester.tap(edit.evaluate().isNotEmpty
+      ? edit
+      : save.evaluate().isNotEmpty
+          ? save
+          : find.byType(GlassToolbarTextButton));
   await pumpSettingsFrames(tester);
   await pumpShakeToRest(tester);
 }

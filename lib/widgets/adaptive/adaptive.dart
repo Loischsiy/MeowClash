@@ -21,6 +21,7 @@ export 'adaptive_tab_bar.dart';
 export 'adaptive_widget_tile.dart';
 export 'glass_accessibility.dart';
 export 'glass_close_icon.dart';
+export 'glass_edit_badge.dart';
 export 'glass_field.dart';
 export 'glass_icon_button.dart';
 export 'glass_key_cap.dart';

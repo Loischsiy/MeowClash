@@ -612,5 +612,7 @@
   "delayTestConcurrencyTip": "Enter a number from 0 to 1000; 0 removes the limit",
   "copyHost": "Copy Host",
   "filterByProcess": "Filter by Process",
-  "closeConnection": "Close Connection"
+  "closeConnection": "Close Connection",
+  "toolbarEdit": "Edit",
+  "toolbarDone": "Done"
 }

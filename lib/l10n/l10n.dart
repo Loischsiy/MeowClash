@@ -4618,6 +4618,16 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `Edit`
+  String get toolbarEdit {
+    return Intl.message('Edit', name: 'toolbarEdit', desc: '', args: []);
+  }
+
+  /// `Done`
+  String get toolbarDone {
+    return Intl.message('Done', name: 'toolbarDone', desc: '', args: []);
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

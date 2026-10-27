@@ -5,6 +5,7 @@ import 'package:defer_pointer/defer_pointer.dart';
 import 'package:meowclash/common/common.dart';
 import 'package:meowclash/enum/enum.dart';
 import 'package:meowclash/widgets/activate_box.dart';
+import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:meowclash/widgets/card.dart';
 import 'package:meowclash/widgets/grid.dart';
 import 'package:flutter/material.dart';
@@ -69,6 +70,11 @@ class SuperGridState extends State<SuperGrid> with TickerProviderStateMixin {
   Scrollable? _scrollable;
 
   int get crossCount => widget.crossAxisCount;
+
+  /// Darwin with Reduce Motion: tiles stand still while editing and removing
+  /// one does not animate. Material always animates, as before.
+  bool get _glassReduceMotion =>
+      AdaptivePlatform.useGlass && GlassAccessibility.of(context).reduceMotion;
 
   void _onChildrenChange() {
     _tempIndexList = List.generate(length, (index) => index);
@@ -155,6 +161,8 @@ class SuperGridState extends State<SuperGrid> with TickerProviderStateMixin {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _transformController.duration =
+        _glassReduceMotion ? Duration.zero : commonDuration;
 
     final scrollable = context.findAncestorWidgetOfExactType<Scrollable>();
     if (scrollable == null) {
@@ -420,6 +428,10 @@ class SuperGridState extends State<SuperGrid> with TickerProviderStateMixin {
     );
 
   Widget _buildShake(Widget child) {
+    if (_glassReduceMotion) {
+      _shakeController.stop();
+      return child;
+    }
     final random = 0.7 + Random().nextDouble() * 0.3;
     _shakeController.stop();
     _shakeController.repeat(reverse: true);
@@ -514,6 +526,27 @@ class SuperGridState extends State<SuperGrid> with TickerProviderStateMixin {
       child: Builder(
         builder: (context) {
           _itemContexts[index] = context;
+          if (AdaptivePlatform.useGlass) {
+            return _buildTransform(
+              _buildDraggable(
+                childWhenDragging: ActivateBox(
+                  child: _buildSizeBox(const _GlassDragSlot(), index),
+                ),
+                feedback: ActivateBox(
+                  child: _buildSizeBox(
+                    _GlassDragFeedback(
+                      reduceMotion: _glassReduceMotion,
+                      child: child,
+                    ),
+                    index,
+                  ),
+                ),
+                item: child,
+                index: index,
+              ),
+              index,
+            );
+          }
           final childWhenDragging = ActivateBox(
             child: Opacity(
               opacity: 0.6,
@@ -668,7 +701,12 @@ class _DeletableContainerState extends State<_DeletableContainer>
     setState(() {
       _deleteButtonVisible = false;
     });
-    await _controller.forward(from: 0);
+    if (AdaptivePlatform.useGlass &&
+        GlassAccessibility.of(context).reduceMotion) {
+      _controller.value = 1;
+    } else {
+      await _controller.forward(from: 0);
+    }
     widget.onDelete();
   }
 
@@ -693,7 +731,18 @@ class _DeletableContainerState extends State<_DeletableContainer>
             ),
           child: widget.child,
         ),
-        if (_deleteButtonVisible)
+        if (_deleteButtonVisible && AdaptivePlatform.useGlass)
+          Positioned(
+            top: GlassTokens.editBadgeOffset,
+            left: GlassTokens.editBadgeOffset,
+            child: DeferPointer(
+              child: GlassEditBadge.remove(
+                onPressed: _handleDel,
+                tooltip: appLocalizations.remove,
+              ),
+            ),
+          )
+        else if (_deleteButtonVisible)
           Positioned(
             top: -8,
             right: -8,
@@ -714,4 +763,45 @@ class _DeletableContainerState extends State<_DeletableContainer>
           )
       ],
     );
+}
+
+/// Darwin: the empty place a dragged tile leaves behind — a recessed slot in
+/// the tile shape, as on the iOS home screen (no faded copy of the tile).
+class _GlassDragSlot extends StatelessWidget {
+  const _GlassDragSlot();
+
+  @override
+  Widget build(BuildContext context) => DecoratedBox(
+        decoration: BoxDecoration(
+          color: GlassTokens.segmentedTrack(Theme.of(context).brightness),
+          borderRadius: BorderRadius.circular(
+            GlassTokens.widgetTileRadius(mac: AdaptivePlatform.isMacOSGlass),
+          ),
+        ),
+      );
+}
+
+/// Darwin: the tile under the pointer lifts with the floating shadow and a
+/// slight scale (no scale with Reduce Motion) instead of a Material
+/// elevation inside another card.
+class _GlassDragFeedback extends StatelessWidget {
+  const _GlassDragFeedback({required this.child, required this.reduceMotion});
+
+  final Widget child;
+  final bool reduceMotion;
+
+  @override
+  Widget build(BuildContext context) => Transform.scale(
+        scale: reduceMotion ? 1 : GlassTokens.listRowDragScale,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(
+              GlassTokens.widgetTileRadius(mac: AdaptivePlatform.isMacOSGlass),
+            ),
+            boxShadow: GlassTokens.floatingShadow(Theme.of(context).brightness),
+          ),
+          // The overlay has no Material above it; tiles may use ink.
+          child: Material(type: MaterialType.transparency, child: child),
+        ),
+      );
 }

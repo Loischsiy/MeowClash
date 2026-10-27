@@ -4,6 +4,7 @@ import 'package:defer_pointer/defer_pointer.dart';
 import 'package:meowclash/common/common.dart';
 import 'package:meowclash/enum/enum.dart';
 import 'package:meowclash/providers/providers.dart';
+import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:meowclash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -53,7 +54,34 @@ class _DashboardViewState extends ConsumerState<DashboardView> with PageMixin {
     );
 
   @override
-  List<Widget> get actions => [
+  List<Widget> get actions =>
+      AdaptivePlatform.useGlass ? _glassActions : _materialActions;
+
+  /// Darwin: "Edit" → "Done" as text, as in iOS; "+" while editing.
+  List<Widget> get _glassActions => [
+        _buildIsEdit((isEdit) => isEdit
+            ? ValueListenableBuilder(
+                valueListenable: _addedWidgetsNotifier,
+                builder: (_, addedChildren, child) => addedChildren.isEmpty
+                    ? const SizedBox.shrink()
+                    : child!,
+                child: IconButton(
+                  onPressed: _showAddWidgetsModal,
+                  tooltip: appLocalizations.add,
+                  icon: const Icon(Icons.add_rounded),
+                ),
+              )
+            : const SizedBox.shrink()),
+        _buildIsEdit((isEdit) => GlassToolbarTextButton(
+              label: isEdit
+                  ? appLocalizations.toolbarDone
+                  : appLocalizations.toolbarEdit,
+              prominent: isEdit,
+              onPressed: _handleUpdateIsEdit,
+            )),
+      ];
+
+  List<Widget> get _materialActions => [
         _buildIsEdit((isEdit) => isEdit
               ? ValueListenableBuilder(
                   valueListenable: _addedWidgetsNotifier,
@@ -303,6 +331,18 @@ class _AddedContainerState extends State<_AddedContainer> {
         ActivateBox(
           child: widget.child,
         ),
+        if (AdaptivePlatform.useGlass)
+          Positioned(
+            top: GlassTokens.editBadgeOffset,
+            left: GlassTokens.editBadgeOffset,
+            child: DeferPointer(
+              child: GlassEditBadge.add(
+                onPressed: _handleAdd,
+                tooltip: appLocalizations.add,
+              ),
+            ),
+          )
+        else
         Positioned(
           top: -8,
           right: -8,

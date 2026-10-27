@@ -482,6 +482,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "tlsUntrustedChainHint": MessageLookupByLibrary.simpleMessage(
       "Palvelimen varmennetta ei voitu vahvistaa: varmenneketju on puutteellinen tai sen juurivarmenteeseen ei luoteta tällä laitteella. Jos tilauspalvelin on sinun, varmista että se lähettää koko ketjun (fullchain.pem). Muussa tapauksessa asenna järjestelmäpäivitykset ja yritä uudelleen.",
     ),
+    "toolbarDone": MessageLookupByLibrary.simpleMessage("Valmis"),
+    "toolbarEdit": MessageLookupByLibrary.simpleMessage("Muokkaa"),
     "tools": MessageLookupByLibrary.simpleMessage("Asetukset"),
     "traffic": MessageLookupByLibrary.simpleMessage("Liikenne"),
     "trafficUnlimited": MessageLookupByLibrary.simpleMessage(

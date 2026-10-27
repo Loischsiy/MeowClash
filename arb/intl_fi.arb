@@ -295,5 +295,7 @@
   "repair": "Korjaa",
   "copyHost": "Kopioi isäntä",
   "filterByProcess": "Suodata prosessin mukaan",
-  "closeConnection": "Sulje yhteys"
+  "closeConnection": "Sulje yhteys",
+  "toolbarEdit": "Muokkaa",
+  "toolbarDone": "Valmis"
 }

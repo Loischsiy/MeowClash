@@ -96,6 +96,66 @@ class GlassToolbarGroup extends StatelessWidget {
   }
 }
 
+/// A text action inside a [GlassToolbarGroup] capsule, as the iOS "Edit" /
+/// "Done" bar buttons: the label instead of a symbol, the capsule height, a
+/// faint wash on hover and press. [prominent] paints it semibold in the
+/// accent (the confirming "Done").
+///
+/// Darwin only; Material app bars keep their icon actions.
+class GlassToolbarTextButton extends StatelessWidget {
+  const GlassToolbarTextButton({
+    super.key,
+    required this.label,
+    required this.onPressed,
+    this.prominent = false,
+  });
+
+  final String label;
+  final VoidCallback? onPressed;
+  final bool prominent;
+
+  static bool get _mac => defaultTargetPlatform == TargetPlatform.macOS;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final base = GlassToolbarGroup.buttonStyle(theme);
+    final height = GlassToolbarGroup.itemSize;
+    final padding = _mac
+        ? GlassTokens.toolbarActionPaddingMac
+        : GlassTokens.toolbarActionPaddingIos;
+    return TextButton(
+      onPressed: onPressed,
+      style: base.copyWith(
+        fixedSize: WidgetStatePropertyAll(Size.fromHeight(height)),
+        minimumSize: WidgetStatePropertyAll(Size(height, height)),
+        maximumSize: WidgetStatePropertyAll(Size(double.infinity, height)),
+        padding: WidgetStatePropertyAll(
+          EdgeInsets.symmetric(horizontal: padding),
+        ),
+        shape: const WidgetStatePropertyAll(StadiumBorder()),
+        textStyle: WidgetStatePropertyAll(
+          GlassTextStyles.toolbarAction(
+            theme.textTheme,
+            prominent: prominent,
+          ),
+        ),
+        foregroundColor: prominent
+            ? WidgetStateProperty.resolveWith(
+                (states) => states.contains(WidgetState.disabled)
+                    ? scheme.onSurface.withValues(
+                        alpha: GlassTokens.disabledOpacity,
+                      )
+                    : scheme.primary,
+              )
+            : null,
+      ),
+      child: Text(label, maxLines: 1),
+    );
+  }
+}
+
 /// The toolbar search field: a glass capsule with a magnifier, the text and
 /// a clear button, in place of the title while the page is searching.
 ///
@@ -126,8 +186,7 @@ class GlassToolbarSearchField extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final style =
-        GlassTextStyles.toolbarSearch(theme.textTheme).copyWith(
+    final style = GlassTextStyles.toolbarSearch(theme.textTheme).copyWith(
       color: scheme.onSurface,
     );
     final iconSize = _mac

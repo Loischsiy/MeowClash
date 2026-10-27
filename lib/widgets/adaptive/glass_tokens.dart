@@ -253,6 +253,15 @@ abstract final class GlassTokens {
   static const double toolbarSearchIconSizeIos = 17;
   static const double toolbarSearchPadding = 10;
   static const double toolbarSearchIconGap = 6;
+  // Text action in a toolbar capsule ("Edit" / "Done"): body text on macOS
+  // (13/16), the iOS bar button size (17/22); horizontal padding inside the
+  // capsule.
+  static const double toolbarActionSizeMac = 13;
+  static const double toolbarActionLineMac = 16;
+  static const double toolbarActionSizeIos = 17;
+  static const double toolbarActionLineIos = 22;
+  static const double toolbarActionPaddingMac = 10;
+  static const double toolbarActionPaddingIos = 12;
   // Scroll edge: the window color behind the bar, solid down to
   // [toolbarFadeSolidStop] of the painted height, then fading out to nothing
   // [toolbarFadeExtent] below the bar's bottom edge. No blur, no hairline.
@@ -833,6 +842,18 @@ abstract final class GlassTokens {
   static const double startButtonDotsSpacing = 4;
   static const Duration startButtonFillDuration = Duration(milliseconds: 350);
 
+  // Dashboard editing: round badges at the top leading corner of a tile, as on
+  // the iOS home screen and macOS widgets — a neutral "−" to remove, a green
+  // "+" to add. They sit [editBadgeOffset] outside the tile corner.
+  static const double editBadgeSizeMac = 20;
+  static const double editBadgeSizeIos = 24;
+  static const double editBadgeIconSizeMac = 14;
+  static const double editBadgeIconSizeIos = 18;
+  static const double editBadgeOffset = -8;
+  static const Color _editBadgeRemoveFillLight = Color(0xFFE5E5EA);
+  static const Color _editBadgeRemoveFillDark = Color(0xFF3A3A3C);
+  static const Color editBadgeAddGlyph = Color(0xFFFFFFFF);
+
   // Segmented control (dashboard mode picker), as in System Settings: a
   // recessed capsule track and a neutral raised thumb — never the accent.
   static const double segmentedHeightMac = 24;
@@ -1026,6 +1047,17 @@ abstract final class GlassTokens {
 
   static double widgetTileRadius({required bool mac}) =>
       mac ? widgetTileRadiusMac : widgetTileRadiusIos;
+
+  static double editBadgeSize({required bool mac}) =>
+      mac ? editBadgeSizeMac : editBadgeSizeIos;
+
+  static double editBadgeIconSize({required bool mac}) =>
+      mac ? editBadgeIconSizeMac : editBadgeIconSizeIos;
+
+  /// Fill of the "−" badge (systemGray5); the glyph is the label color.
+  static Color editBadgeRemoveFill(Brightness brightness) => _isDark(brightness)
+      ? _editBadgeRemoveFillDark
+      : _editBadgeRemoveFillLight;
 
   static Color segmentedTrack(Brightness brightness) =>
       _segmentedTrackBase.withValues(

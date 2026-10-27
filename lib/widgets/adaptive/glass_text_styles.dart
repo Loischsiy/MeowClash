@@ -81,6 +81,23 @@ abstract final class GlassTextStyles {
         weight: FontWeight.w700,
       );
 
+  /// Text action in a toolbar capsule ("Edit", "Done"); the prominent one
+  /// is semibold, as the iOS "Done".
+  static TextStyle toolbarAction(
+    TextTheme textTheme, {
+    bool prominent = false,
+  }) =>
+      _style(
+        textTheme.bodyLarge,
+        size: _mac
+            ? GlassTokens.toolbarActionSizeMac
+            : GlassTokens.toolbarActionSizeIos,
+        line: _mac
+            ? GlassTokens.toolbarActionLineMac
+            : GlassTokens.toolbarActionLineIos,
+        weight: prominent ? FontWeight.w600 : FontWeight.w400,
+      );
+
   /// Text of the toolbar search field.
   static TextStyle toolbarSearch(TextTheme textTheme) => _style(
         textTheme.bodyLarge,

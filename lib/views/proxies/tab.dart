@@ -76,43 +76,82 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
       ),
       builder: (_, type) => AdaptiveSheetScaffold(
           type: type,
-          body: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Consumer(
-              builder: (_, ref, __) {
-                final state = ref.watch(proxiesSelectorStateProvider);
-                return SizedBox(
-                  width: double.infinity,
-                  child: Wrap(
-                    alignment: WrapAlignment.center,
-                    runSpacing: 8,
-                    spacing: 8,
-                    children: [
-                      for (final groupName in state.groupNames)
-                        SettingTextCard(
-                          groupName,
-                          onPressed: () {
-                            final index = state.groupNames.indexWhere(
-                              (item) => item == groupName,
-                            );
-                            if (index == -1) return;
-                            _tabController?.animateTo(index);
-                            globalState.appController
-                                .updateCurrentGroupName(groupName);
-                            Navigator.of(context).pop();
-                          },
-                          isSelected: groupName == state.currentGroupName,
-                        )
-                    ],
-                  ),
-                );
-              },
-            ),
-          ),
+          body: AdaptivePlatform.useGlass
+              ? _buildGlassGroupList()
+              : SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Consumer(
+                  builder: (_, ref, __) {
+                    final state = ref.watch(proxiesSelectorStateProvider);
+                    return SizedBox(
+                      width: double.infinity,
+                      child: Wrap(
+                        alignment: WrapAlignment.center,
+                        runSpacing: 8,
+                        spacing: 8,
+                        children: [
+                          for (final groupName in state.groupNames)
+                            SettingTextCard(
+                              groupName,
+                              onPressed: () {
+                                final index = state.groupNames.indexWhere(
+                                  (item) => item == groupName,
+                                );
+                                if (index == -1) return;
+                                _tabController?.animateTo(index);
+                                globalState.appController
+                                    .updateCurrentGroupName(groupName);
+                                Navigator.of(context).pop();
+                              },
+                              isSelected: groupName == state.currentGroupName,
+                            )
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
           title: appLocalizations.proxyGroup,
         ),
     );
   }
+
+  void _selectGlassGroup(List<String> groupNames, String groupName) {
+    final index = groupNames.indexWhere((item) => item == groupName);
+    if (index == -1) return;
+    _tabController?.animateTo(index);
+    globalState.appController.updateCurrentGroupName(groupName);
+    Navigator.of(context).pop();
+  }
+
+  /// Darwin: the groups as one grouped section with a checkmark on the
+  /// current one (an Apple single-choice list) instead of the Material chips.
+  /// Rows are flat (no blur); the sheet is the only glass layer.
+  Widget _buildGlassGroupList() => Consumer(
+        builder: (context, ref, __) {
+          final state = ref.watch(proxiesSelectorStateProvider);
+          final padding = GlassListSection.listPadding;
+          return SingleChildScrollView(
+            padding: padding.copyWith(
+              top: padding.top + AdaptiveAppBar.topInset(context),
+            ),
+            child: GlassListSection(
+              children: [
+                for (final groupName in state.groupNames)
+                  GlassListRow(
+                    key: ValueKey(groupName),
+                    title: Text(groupName),
+                    selected: groupName == state.currentGroupName,
+                    accessory: groupName == state.currentGroupName
+                        ? GlassRowAccessory.checkmark
+                        : GlassRowAccessory.none,
+                    onTap: () => _selectGlassGroup(state.groupNames, groupName),
+                  ),
+              ],
+            ),
+          );
+        },
+      );
 
   void _tabControllerListener([int? index]) {
     var groupIndex = index;

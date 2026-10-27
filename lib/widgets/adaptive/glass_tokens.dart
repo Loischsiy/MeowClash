@@ -357,6 +357,12 @@ abstract final class GlassTokens {
   static const double dialogContentMaxHeight = 500;
   static const double dialogPadding = 20;
   static const double dialogTitleGap = 8;
+  // A small round button beside the title (a secondary action such as the
+  // settings of the dialog), kept out of the push-button row. iOS reserves
+  // the same width on the leading side so the title stays centered.
+  static const double dialogTitleAccessorySize = 28;
+  static const double dialogTitleAccessoryIconSize = 17;
+  static const double dialogTitleAccessoryGap = 8;
   // Between the controls of a form inside a dialog (editors of override
   // rules and proxy chains).
   static const double dialogFieldGap = 12;

@@ -157,11 +157,17 @@ class GlassDialog extends StatelessWidget {
     this.actions = const [],
     this.contentPadding,
     this.color,
+    this.titleAccessory,
   });
 
   final String? title;
   final Widget content;
   final List<Widget> actions;
+
+  /// A secondary control beside the title (usually a `GlassIconButton` of
+  /// [GlassTokens.dialogTitleAccessorySize]), at the trailing edge of the
+  /// title row instead of among the push buttons. Needs a [title].
+  final Widget? titleAccessory;
 
   /// Replaces the default content padding (the dialog edge inset).
   final EdgeInsetsGeometry? contentPadding;
@@ -178,6 +184,30 @@ class GlassDialog extends StatelessWidget {
     final scheme = theme.colorScheme;
     const padding = GlassTokens.dialogPadding;
     final title = this.title;
+    final accessory = titleAccessory;
+    Widget? titleRow;
+    if (title != null) {
+      final text = Text(
+        title,
+        textAlign: _mac ? TextAlign.start : TextAlign.center,
+        style: GlassTextStyles.dialogTitle(theme.textTheme)
+            .copyWith(color: scheme.onSurface),
+      );
+      titleRow = accessory == null
+          ? text
+          : Row(
+              children: [
+                if (!_mac)
+                  const SizedBox(
+                    width: GlassTokens.dialogTitleAccessorySize +
+                        GlassTokens.dialogTitleAccessoryGap,
+                  ),
+                Expanded(child: text),
+                const SizedBox(width: GlassTokens.dialogTitleAccessoryGap),
+                accessory,
+              ],
+            );
+    }
     final body = Material(
       type: MaterialType.transparency,
       child: Theme(
@@ -189,7 +219,7 @@ class GlassDialog extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (title != null)
+              if (titleRow != null)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(
                     padding,
@@ -197,12 +227,7 @@ class GlassDialog extends StatelessWidget {
                     padding,
                     0,
                   ),
-                  child: Text(
-                    title,
-                    textAlign: _mac ? TextAlign.start : TextAlign.center,
-                    style: GlassTextStyles.dialogTitle(theme.textTheme)
-                        .copyWith(color: scheme.onSurface),
-                  ),
+                  child: titleRow,
                 ),
               Flexible(
                 child: Padding(

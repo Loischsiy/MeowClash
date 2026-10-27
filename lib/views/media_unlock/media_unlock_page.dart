@@ -182,19 +182,31 @@ class _MediaUnlockPageState extends ConsumerState<MediaUnlockPage> {
       child: StatefulBuilder(
         builder: (context, setDialogState) => CommonDialog(
           title: appLocalizations.mediaUnlockDisplaySettings,
+          // Darwin: the settings gear sits beside the title, not among the
+          // push buttons.
+          titleAccessory: AdaptivePlatform.useGlass
+              ? GlassIconButton(
+                  icon: const Icon(Icons.settings_rounded),
+                  size: GlassTokens.dialogTitleAccessorySize,
+                  iconSize: GlassTokens.dialogTitleAccessoryIconSize,
+                  tooltip: appLocalizations.mediaUnlockMiscSettings,
+                  onPressed: _showMiscSettingsDialog,
+                )
+              : null,
           actions: [
-            IconButton(
-              icon: Icon(
-                Icons.settings_outlined,
-                size: 20.ap,
-                color: context.colorScheme.onSurfaceVariant,
+            if (!AdaptivePlatform.useGlass)
+              IconButton(
+                icon: Icon(
+                  Icons.settings_outlined,
+                  size: 20.ap,
+                  color: context.colorScheme.onSurfaceVariant,
+                ),
+                tooltip: appLocalizations.mediaUnlockMiscSettings,
+                visualDensity: VisualDensity.compact,
+                padding: EdgeInsets.all(2.ap),
+                constraints: const BoxConstraints(),
+                onPressed: _showMiscSettingsDialog,
               ),
-              tooltip: appLocalizations.mediaUnlockMiscSettings,
-              visualDensity: VisualDensity.compact,
-              padding: EdgeInsets.all(2.ap),
-              constraints: const BoxConstraints(),
-              onPressed: _showMiscSettingsDialog,
-            ),
             TextButton(
               onPressed: () {
                 Navigator.of(context, rootNavigator: true).pop();

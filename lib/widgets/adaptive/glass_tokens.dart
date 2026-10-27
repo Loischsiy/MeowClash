@@ -561,6 +561,13 @@ abstract final class GlassTokens {
   static const double aboutTitleLineIos = 28;
   static const double aboutAvatarSize = 48;
   static const double aboutAvatarGap = 16;
+  // About easter egg: keeps its own look (Unbounded type, the heart, the
+  // blue Remnawave link) inside the glass alert panel.
+  static const double easterEggTitleSize = 18;
+  static const double easterEggHeartSize = 48;
+  static const double easterEggLinkSize = 14;
+  static const double easterEggGap = 16;
+  static const Color easterEggLinkColor = Color(0xFF2196F3);
   // Theme page: appearance previews (Auto / Light / Dark) as in macOS
   // Appearance, accent swatches as the macOS accent color row, the text
   // size slider as in iOS Text Size. Content, so never blurred.

@@ -20,7 +20,7 @@ pixel-for-pixel. Code: `lib/widgets/adaptive/` (import `adaptive.dart`).
 ## Where glass is allowed
 
 - Only chrome: macOS sidebar + title bar, iOS tab bar, app bar, sheets / side sheets, dialogs, context
-  menus.
+  menus, app notifier toasts.
 - Never on scrolling content or list items, never nested (one `BackdropFilter` per surface, no blur
   inside a blurred surface), never an `Opacity` above a blur (animate scale / color instead).
 - `GlassSurface` is the single primitive. `GlassBackdrop.blur` = one `BackdropFilter` (iOS bars, sheets,
@@ -253,6 +253,19 @@ pixel-for-pixel. Code: `lib/widgets/adaptive/` (import `adaptive.dart`).
   Material keeps `showModal` + `FadeScaleTransition` + `AlertDialog` verbatim
   (`test/material_dialogs_golden_test.dart`); glass checks live in
   `test/adaptive_dialogs_glass_test.dart`.
+- Toasts (`lib/widgets/adaptive/glass_toast.dart`): on Darwin `MessageManager` (the app notifier behind
+  `globalState.showNotifier` / `context.showNotifier`) renders `GlassToast` inside a
+  `GlassToastSwitcher` — macOS at the top trailing corner under the toolbar
+  (`toolbarHeightMac + toastTopGap`), iOS top center under the status bar (`padding.top + toastTopGap`),
+  capped by `toastMaxWidthMac/Ios`. One `GlassSurface` (`menuSigma`, `dialogTintOpacity`, opaque
+  `surfaceContainerHigh` under Reduce Transparency / kill switch). Appearing drives
+  `GlassSurface.presence` through a private inherited widget, never an `Opacity`; the slide enters on
+  `toastEnterCurve` (spring) and leaves on `toastExitCurve`, Reduce Motion makes both instant, a leaving
+  toast ignores pointers. `showNotifier(text, actionLabel:, onAction:, duration:)` adds an optional
+  trailing action (`GlassTextStyles.toastAction`) — rendered only on glass; Material callers keep their
+  own `SnackBar` (TUN recovery report in `controller.dart`, glass uses `toastActionDuration` and opens
+  the log in `CommonDialog`). Material notifier card is verbatim
+  (`test/material_notifier_golden_test.dart`); glass checks live in `test/adaptive_toast_glass_test.dart`.
 - `proxy_list_performance_test.dart` looks for `IconButton` inside `ProxyGroupCard` and for
   `FloatingActionButton`: keep them in the Material branches.
 - Proxies goldens (`test/material_proxies_golden_test.dart`) need groups with `hidden: false`, otherwise

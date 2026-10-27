@@ -90,6 +90,14 @@ abstract final class GlassTokens {
   static const double sidebarIconSize = 20;
   static const double sidebarCompactIconSize = 22;
   static const double sidebarLogoSize = 28;
+  // Extended sidebar header: the logo is centred on the row icon column and
+  // the title starts where the row labels start. A row puts its icon at
+  // `sidebarPadding` and its label `sidebarPadding` after the icon; the logo
+  // is wider than an icon, so both offsets shrink by half the difference.
+  static const double sidebarHeaderLogoInset =
+      sidebarPadding - (sidebarLogoSize - sidebarIconSize) / 2;
+  static const double sidebarHeaderTitleGap =
+      sidebarPadding - (sidebarLogoSize - sidebarIconSize) / 2;
   static const double titleBarHeight = 28;
   static const double trafficLightsInset = 78;
 

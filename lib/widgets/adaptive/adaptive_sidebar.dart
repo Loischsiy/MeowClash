@@ -280,10 +280,12 @@ class _SidebarHeader extends StatelessWidget {
       ),
     );
     if (!extended) return image;
+    // Logo centred on the row icons, title flush with the row labels.
     return Row(
       children: [
+        const SizedBox(width: GlassTokens.sidebarHeaderLogoInset),
         image,
-        const SizedBox(width: GlassTokens.sidebarPadding),
+        const SizedBox(width: GlassTokens.sidebarHeaderTitleGap),
         Expanded(
           child: Text(
             title,

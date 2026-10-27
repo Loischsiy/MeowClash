@@ -93,5 +93,20 @@ void main() {
       expect(selected, 1);
       debugDefaultTargetPlatformOverride = null;
     });
+
+    testWidgets('extended header lines up with the rows', (tester) async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
+      AdaptivePlatform.debugUseGlassOverride = true;
+      await tester.pumpWidget(sidebar(showLabel: true));
+      await tester.pumpAndSettle();
+      final logo = tester.getRect(find.byType(CircleAvatar));
+      final icon = tester.getRect(find.byIcon(Icons.home));
+      expect(logo.center.dx, moreOrLessEquals(icon.center.dx));
+      expect(
+        tester.getTopLeft(find.text('MeowClash')).dx,
+        moreOrLessEquals(tester.getTopLeft(find.text('Home')).dx),
+      );
+      debugDefaultTargetPlatformOverride = null;
+    });
   });
 }

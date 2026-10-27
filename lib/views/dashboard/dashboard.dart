@@ -125,6 +125,8 @@ class _DashboardViewState extends ConsumerState<DashboardView> with PageMixin {
             ),
         ),
       context: context,
+      // iPhone: drag the sheet up to see the widgets on the whole screen.
+      props: const SheetProps(expandable: true),
     );
   }
 

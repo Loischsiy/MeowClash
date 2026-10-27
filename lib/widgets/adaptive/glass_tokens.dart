@@ -772,6 +772,23 @@ abstract final class GlassTokens {
     duration: sideSheetEnterDuration,
   );
   static const Curve sideSheetExitCurve = Curves.easeOutCubic;
+  // Resizable iPhone bottom sheet (`SheetProps.expandable`), after
+  // `UISheetPresentationController` detents: it opens at medium (the stock
+  // modal sheet's 9/16, so the first look is unchanged) and drags to large
+  // (the whole safe area). Releasing it settles on the nearest detent; a
+  // downward fling or a release below [sheetDismissDetent] closes it.
+  static const double sheetMediumDetent = 9 / 16;
+  static const double sheetLargeDetent = 1;
+  static const double sheetMinDetent = 0.25;
+  static const double sheetDismissDetent = 0.4;
+  // Fling speed (logical px/s) that picks the detent in its direction.
+  static const double sheetFlingVelocity = 700;
+  static const Duration sheetDetentDuration = Duration(milliseconds: 450);
+  static const Curve sheetDetentCurve = GlassSpringCurve(
+    response: sideSheetSpringResponse,
+    dampingFraction: sideSheetSpringDamping,
+    duration: sheetDetentDuration,
+  );
 
   // Dashboard widget tiles, after the macOS 26 / iOS 26 widgets: a larger
   // corner than the proxy cards, the symbol in the accent next to a small

@@ -7,8 +7,8 @@ import 'package:meowclash/models/common.dart';
 import 'package:meowclash/services/async_polling_loop.dart';
 import 'package:meowclash/state.dart';
 import 'package:meowclash/views/dashboard/widgets/core_status_dialog.dart';
-import 'package:meowclash/widgets/visibility_polling.dart';
 import 'package:meowclash/widgets/adaptive/adaptive.dart';
+import 'package:meowclash/widgets/visibility_polling.dart';
 import 'package:meowclash/widgets/widgets.dart';
 
 final _memoryInfoStateNotifier = ValueNotifier<TrafficValue>(

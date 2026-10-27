@@ -145,8 +145,8 @@ pixel-for-pixel. Code: `lib/widgets/adaptive/` (import `adaptive.dart`).
   glass checks live in `test/adaptive_profile_editors_glass_test.dart`.
 - Settings (app-wide `ListItem`, `lib/widgets/list.dart`): `ListItem`, `ListHeader`, `generateSection(V2)`
   and `generateListView` render `GlassListRow` / `GlassListSection` only inside a `GlassListScope`
-  (`GlassListView` provides it); outside it they stay Material verbatim, so the dashboard mode radios are
-  untouched (connections and logs have their own flat rows, see below). `_groupGlassSections` turns a flat header + items list into
+  (`GlassListView` provides it); outside it they stay Material verbatim (the dashboard and connections /
+  logs have their own glass rows, see below). `_groupGlassSections` turns a flat header + items list into
   sections. Row kinds: `options` → `GlassPopUpButton` with the value at the trailing edge (macOS
   `NSMenu`, iOS glass menu); `input` → value + chevron; `open` / `next` → chevron (phone: `GlassPageRoute` push,
   desktop: `showExtend` side sheet on the spring); `switch` → `AdaptiveSwitch`; `radio` / `checkbox` →
@@ -189,6 +189,32 @@ pixel-for-pixel. Code: `lib/widgets/adaptive/` (import `adaptive.dart`).
   Material: `test/connections_logs_performance_test.dart` (printed, not asserted); shared host
   `test/connections_logs_test_support.dart`. In tests the list is the `Scrollable` with
   `axisDirection == AxisDirection.up` — every `SelectableText` has its own `Scrollable`.
+- Dashboard (`lib/views/dashboard/`): tiles after the macOS 26 / iOS 26 widgets. Every
+  `CommonCard(info:)` is an `AdaptiveWidgetTile` (`adaptive_widget_tile.dart`: Material = `CommonCard`
+  verbatim; Darwin = `AdaptiveCard` with `widgetTileRadius`, a header of the symbol in the accent + a
+  small secondary title, `GlassWidgetTileBody` / `GlassWidgetValue` for the large tabular figure that
+  scales down instead of overflowing). The grid never blurs — not at rest, not in edit mode; Reduce
+  Transparency and the blur kill switch make every tile fill opaque. Outbound mode: V2 =
+  `GlassSegmentedControl` (neutral thumb, instant with Reduce Motion), V1 = three `GlassListRow`s with a
+  checkmark (scaled down to the fixed tile height). TUN / system proxy / VPN toggles are
+  `AdaptiveSwitch`es on `_GlassQuickOptionTile`; spinners `AdaptiveActivityIndicator`, bars
+  `AdaptiveProgressBar`. Charts: ↓ systemBlue, ↑ systemOrange (`chart*` tokens), thinner stroke;
+  `DonutChart` takes `strokeFraction` / `trackColor` (null = the Material ring). Start button: the cat
+  and the shape stay, systemGreen when connected and a neutral fill when idle, press dims instead of
+  scaling, the ambient animation stops with Reduce Motion; the TUN failure line uses `GlassIconButton` /
+  `GlassButton`. Editing: toolbar text "Edit" / "Done" (`GlassToolbarTextButton`, `toolbarEdit` /
+  `toolbarDone` strings), the wiggle stays but not with Reduce Motion, `GlassEditBadge` (gray − to remove,
+  green + in the add sheet), drag feedback = tile × `listRowDragScale` + `floatingShadow` (`SuperGrid`
+  has the Darwin branch next to the Material one). IP details and the TUN failure open `GlassDialog`s
+  (spinner while loading, `GlassButton` to retry); the core status ring uses `memoryAllocated` /
+  `memoryReclaimable`. `PageLabel.dashboard` is in `scrollUnderToolbarPages`: the grid pads by
+  `16 + AdaptiveAppBar.topInset`, the start button stays pinned. Material:
+  `test/material_dashboard_golden_test.dart`; glass: `test/adaptive_dashboard_glass_test.dart` (tiles,
+  start button, editing, scroll under the bar, dialogs, 1.5× text / 320 pt, controls, fallbacks); frame
+  times of live traffic glass vs Material: `test/dashboard_performance_test.dart` (printed, not
+  asserted); shared host `test/dashboard_test_support.dart`. The start button animates forever: never
+  `pumpAndSettle`, use `pumpDashboard` / `tearDownDashboard`. In the test font `MediaUnlockSmall` fits
+  only the wide grid.
 - Dialogs (`lib/widgets/adaptive/adaptive_dialog.dart`): on Darwin `showCommonDialog` goes through
   `showGlassDialog` / `GlassDialogRoute` and `CommonDialog` / `CommonModal` render `GlassDialog` /
   `GlassModalPanel` — one `GlassSurface` each, no blur behind. `dialogBarrierColor`: macOS does not dim

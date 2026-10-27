@@ -32,6 +32,109 @@ class AdaptiveActivityIndicator extends StatelessWidget {
   }
 }
 
+/// Indeterminate bar along the bottom edge of the toolbar while a page runs
+/// a task (`CommonScaffoldState.loadingRun`).
+///
+/// * Darwin: a thin accent capsule sweeping across a clear track, like the
+///   Safari load bar (`loadingBar*` tokens). With Reduce Motion it does not
+///   move: a still full-width accent hairline.
+/// * Everything else: the stock `LinearProgressIndicator`, unchanged.
+class AdaptiveLoadingBar extends StatelessWidget {
+  const AdaptiveLoadingBar({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    if (!AdaptivePlatform.useGlass) return const LinearProgressIndicator();
+    return const _GlassLoadingBar();
+  }
+}
+
+class _GlassLoadingBar extends StatefulWidget {
+  const _GlassLoadingBar();
+
+  @override
+  State<_GlassLoadingBar> createState() => _GlassLoadingBarState();
+}
+
+class _GlassLoadingBarState extends State<_GlassLoadingBar>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: GlassTokens.loadingBarPeriod,
+  );
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (GlassAccessibility.of(context).reduceMotion) {
+      _controller.stop();
+    } else if (!_controller.isAnimating) {
+      _controller.repeat();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final color = Theme.of(context).colorScheme.primary;
+    final still = GlassAccessibility.of(context).reduceMotion;
+    return Semantics(
+      container: true,
+      child: SizedBox(
+        width: double.infinity,
+        height: GlassTokens.loadingBarHeight,
+        child: still
+            ? ColoredBox(color: color)
+            : RepaintBoundary(
+                child: CustomPaint(
+                  painter: _LoadingBarPainter(
+                    animation: _controller,
+                    color: color,
+                  ),
+                ),
+              ),
+      ),
+    );
+  }
+}
+
+class _LoadingBarPainter extends CustomPainter {
+  _LoadingBarPainter({required this.animation, required this.color})
+      : super(repaint: animation);
+
+  final Animation<double> animation;
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final t = GlassTokens.loadingBarCurve.transform(animation.value);
+    final segment = size.width * GlassTokens.loadingBarSegmentFraction;
+    final start = -segment + (size.width + segment) * t;
+    final left = start.clamp(0.0, size.width);
+    final right = (start + segment).clamp(0.0, size.width);
+    if (right <= left) return;
+    canvas.drawRRect(
+      RRect.fromLTRBR(
+        left,
+        0,
+        right,
+        size.height,
+        Radius.circular(size.height / 2),
+      ),
+      Paint()..color = color,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_LoadingBarPainter oldDelegate) =>
+      oldDelegate.color != color || oldDelegate.animation != animation;
+}
+
 /// Determinate progress (e.g. used subscription traffic).
 ///
 /// * Darwin: a thin static capsule filled with [glassColor] (the accent by

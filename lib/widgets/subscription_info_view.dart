@@ -1,6 +1,7 @@
 import 'package:meowclash/common/common.dart';
 import 'package:meowclash/models/models.dart';
 import 'package:flutter/material.dart';
+import 'package:meowclash/widgets/adaptive/adaptive.dart';
 
 class SubscriptionInfoView extends StatelessWidget {
 
@@ -32,11 +33,19 @@ class SubscriptionInfoView extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        LinearProgressIndicator(
-          minHeight: 6,
-          value: progress,
-          backgroundColor: context.colorScheme.primary.opacity15,
-        ),
+        // Darwin: the thin glass capsule of the profile cards; Material: the
+        // stock bar, unchanged.
+        if (AdaptivePlatform.useGlass)
+          AdaptiveProgressBar(
+            value: progress,
+            color: context.colorScheme.primary,
+          )
+        else
+          LinearProgressIndicator(
+            minHeight: 6,
+            value: progress,
+            backgroundColor: context.colorScheme.primary.opacity15,
+          ),
         const SizedBox(
           height: 8,
         ),

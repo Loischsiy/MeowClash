@@ -571,7 +571,7 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
             ValueListenableBuilder(
               valueListenable: _loading,
               builder: (_, value, __) => value == true
-                    ? const LinearProgressIndicator()
+                    ? const AdaptiveLoadingBar()
                     : Container(),
             ),
           ],

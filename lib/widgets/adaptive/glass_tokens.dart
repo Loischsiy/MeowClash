@@ -329,6 +329,14 @@ abstract final class GlassTokens {
   static const double emptyStatePadding = 32;
   static const double activityIndicatorRadius = 10;
 
+  // Loading bar under the toolbar (`CommonScaffoldState.loadingRun`): a thin
+  // accent capsule sweeping across a clear track, like the Safari load bar.
+  // With Reduce Motion it stays still as a full-width accent hairline.
+  static const double loadingBarHeight = 2;
+  static const double loadingBarSegmentFraction = 0.3;
+  static const Duration loadingBarPeriod = Duration(milliseconds: 1400);
+  static const Curve loadingBarCurve = Curves.easeInOut;
+
   // Profile cards: padding of the content and the gaps between its lines.
   static const double profileCardHorizontalPadding = 14;
   static const double profileCardVerticalPadding = 10;

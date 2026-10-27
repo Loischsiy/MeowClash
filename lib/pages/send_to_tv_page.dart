@@ -4,6 +4,9 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meowclash/common/common.dart';
+import 'package:meowclash/state.dart';
+import 'package:meowclash/widgets/adaptive/adaptive.dart';
+import 'package:meowclash/widgets/widgets.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 class SendToTvPage extends ConsumerStatefulWidget {
@@ -105,6 +108,10 @@ class _SendToTvPageState extends ConsumerState<SendToTvPage> {
 
   void _showResultDialog(String title, String content) {
     if (!mounted) return;
+    if (AdaptivePlatform.useGlass) {
+      _showGlassResultDialog(title, content);
+      return;
+    }
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -123,14 +130,49 @@ class _SendToTvPageState extends ConsumerState<SendToTvPage> {
     );
   }
 
+  /// Darwin: the glass alert; OK closes it and leaves the scanner page.
+  void _showGlassResultDialog(String title, String content) {
+    globalState.showCommonDialog<void>(
+      child: Builder(
+        builder: (dialogContext) => CommonDialog(
+          title: title,
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+                if (mounted) Navigator.of(context).pop();
+              },
+              child: const Text('OK'),
+            ),
+          ],
+          child: Text(content),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildScanner() => MobileScanner(
+        controller: _scannerController,
+        onDetect: _handleQrCode,
+      );
+
   @override
-  Widget build(BuildContext context) => Scaffold(
+  Widget build(BuildContext context) {
+    // Darwin: the glass navigation bar of every pushed page.
+    if (AdaptivePlatform.useGlass) {
+      return CommonScaffold(
+        title: appLocalizations.sendToTvTitle,
+        body: _buildScanner(),
+      );
+    }
+    return Scaffold(
         appBar: AppBar(title: Text(appLocalizations.sendToTvTitle)),
         body: MobileScanner(
           controller: _scannerController,
           onDetect: _handleQrCode,
         ),
       );
+  }
 
   @override
   void dispose() {

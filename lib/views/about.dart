@@ -32,6 +32,10 @@ class AboutView extends StatelessWidget {
   const AboutView({super.key});
 
   void _showEasterEgg(BuildContext context) {
+    if (AdaptivePlatform.useGlass) {
+      _showGlassEasterEgg();
+      return;
+    }
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -78,6 +82,62 @@ class AboutView extends StatelessWidget {
             child: const Text('OK'),
           ),
         ],
+      ),
+    );
+  }
+
+  /// Darwin: the same easter egg (Unbounded type, the heart, the Remnawave
+  /// link) inside the glass alert panel instead of a Material `AlertDialog`.
+  void _showGlassEasterEgg() {
+    globalState.showCommonDialog<void>(
+      dismissible: false,
+      child: Builder(
+        builder: (dialogContext) => GlassDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'REMNAFAMILY ONE LOVE',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: 'Unbounded',
+                  fontSize: GlassTokens.easterEggTitleSize,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: GlassTokens.dialogTitleGap),
+              const Text(
+                '❤️',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: GlassTokens.easterEggHeartSize),
+              ),
+              const SizedBox(height: GlassTokens.easterEggGap),
+              MouseRegion(
+                cursor: SystemMouseCursors.click,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => globalState.openUrl('https://docs.rw'),
+                  child: const Text(
+                    'TRY REMNAWAVE',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: GlassTokens.easterEggLinkColor,
+                      fontFamily: 'Unbounded',
+                      fontSize: GlassTokens.easterEggLinkSize,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
       ),
     );
   }

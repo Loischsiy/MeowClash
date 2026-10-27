@@ -15,6 +15,7 @@ import 'package:meowclash/plugins/app.dart';
 import 'package:meowclash/plugins/ios.dart';
 import 'package:meowclash/providers/providers.dart';
 import 'package:meowclash/state.dart';
+import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:meowclash/widgets/dialog.dart';
 import 'package:meowclash/widgets/visibility_polling.dart';
 import 'package:flutter/foundation.dart';
@@ -1260,35 +1261,47 @@ class AppController {
         ];
         final detail = lines.isEmpty ? recovery.toString() : lines.join('\n');
         commonPrint.log('TUN recovery report: $detail');
-        ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-          SnackBar(
-            content: Text(
-              restored
-                  ? appLocalizations.tunRecoveryComplete
-                  : appLocalizations.tunRecoveryPartial,
-            ),
-            duration: const Duration(seconds: 8),
-            action: SnackBarAction(
-              label: appLocalizations.logs,
-              onPressed: () {
-                globalState.showCommonDialog<void>(
-                  child: AlertDialog(
-                    title: Text(appLocalizations.logs),
-                    content: SingleChildScrollView(
-                      child: SelectableText(detail),
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        child: Text(appLocalizations.confirm),
+        if (AdaptivePlatform.useGlass) {
+          // Darwin: the glass toast with a "Logs" action and the glass alert.
+          globalState.showNotifier(
+            restored
+                ? appLocalizations.tunRecoveryComplete
+                : appLocalizations.tunRecoveryPartial,
+            actionLabel: appLocalizations.logs,
+            onAction: () => _showGlassTunRecoveryLog(detail),
+            duration: GlassTokens.toastActionDuration,
+          );
+        } else {
+          ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+            SnackBar(
+              content: Text(
+                restored
+                    ? appLocalizations.tunRecoveryComplete
+                    : appLocalizations.tunRecoveryPartial,
+              ),
+              duration: const Duration(seconds: 8),
+              action: SnackBarAction(
+                label: appLocalizations.logs,
+                onPressed: () {
+                  globalState.showCommonDialog<void>(
+                    child: AlertDialog(
+                      title: Text(appLocalizations.logs),
+                      content: SingleChildScrollView(
+                        child: SelectableText(detail),
                       ),
-                    ],
-                  ),
-                );
-              },
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          child: Text(appLocalizations.confirm),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
             ),
-          ),
-        );
+          );
+        }
       }
       if (globalState.tunRecoveryBlocked) {
         _ref.read(tunStartFailureProvider.notifier).state =
@@ -1347,6 +1360,25 @@ class AppController {
         window?.show();
       }
     }
+  }
+
+  /// Darwin: the TUN recovery report in the glass alert (the toast's
+  /// "Logs" action). Material keeps its AlertDialog from the SnackBar.
+  void _showGlassTunRecoveryLog(String detail) {
+    globalState.showCommonDialog<void>(
+      child: Builder(
+        builder: (dialogContext) => CommonDialog(
+          title: appLocalizations.logs,
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: Text(appLocalizations.confirm),
+            ),
+          ],
+          child: SelectableText(detail),
+        ),
+      ),
+    );
   }
 
   Future<void> _initStatus() async {

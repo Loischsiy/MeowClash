@@ -294,6 +294,10 @@ abstract final class GlassTokens {
   static const double floatingButtonSize = 56;
   static const double floatingButtonIconSize = 24;
   static const double floatingButtonPressedScale = 0.92;
+  // Prominent variant (the primary action of a page, `.glassProminent`):
+  // the glass is tinted with the accent, dense enough to carry a white
+  // symbol over any backdrop.
+  static const double floatingButtonProminentTintOpacity = 0.88;
   // With a label the button becomes a capsule of the same height.
   static const double floatingButtonLabelPadding = 20;
   static const double floatingButtonLabelGap = 8;

@@ -586,6 +586,48 @@ void main() {
       expect(scale.duration, Duration.zero);
     }, variant: darwin);
 
+    testWidgets('prominent button is accent glass with an onPrimary symbol',
+        (tester) async {
+      await setUp(tester, type: ProxiesType.tab);
+      Widget button({required bool prominent}) => AdaptiveFloatingButton(
+            onPressed: () {},
+            icon: const Icon(Icons.add),
+            glassIcon: const Icon(Icons.add_rounded),
+            prominent: prominent,
+          );
+      await pumpScreen(
+        tester,
+        host(Center(child: button(prominent: true))),
+      );
+      final context = tester.element(find.byType(AdaptiveFloatingButton));
+      final scheme = Theme.of(context).colorScheme;
+      final surface = tester.widget<GlassSurface>(find.byType(GlassSurface));
+      expect(surface.color, scheme.primary);
+      expect(surface.opaqueColor, scheme.primary);
+      expect(
+        surface.tintOpacity,
+        GlassTokens.floatingButtonProminentTintOpacity,
+      );
+      final icon = tester.widget<IconTheme>(
+        find
+            .ancestor(
+              of: find.byIcon(Icons.add_rounded),
+              matching: find.byType(IconTheme),
+            )
+            .first,
+      );
+      expect(icon.data.color, scheme.onPrimary);
+      expect(blur, findsOneWidget);
+
+      await pumpScreen(
+        tester,
+        host(Center(child: button(prominent: false))),
+      );
+      final plain = tester.widget<GlassSurface>(find.byType(GlassSurface));
+      expect(plain.color, isNull);
+      expect(plain.tintOpacity, isNull);
+    }, variant: darwin);
+
     test('Material is chosen off Darwin', () {
       for (final platform in TargetPlatform.values) {
         debugDefaultTargetPlatformOverride = platform;

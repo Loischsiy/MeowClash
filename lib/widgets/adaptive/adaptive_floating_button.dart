@@ -12,7 +12,10 @@ import 'glass_tokens.dart';
 /// * Darwin: a round Liquid Glass button (one blurred surface) that shrinks
 ///   slightly while pressed and shows a spinner while [busy]; a capsule with
 ///   the symbol and [label] when there is one. Reduce Motion drops the press
-///   animation; Reduce Transparency makes it opaque.
+///   animation; Reduce Transparency makes it opaque. [prominent] tints the
+///   glass with the accent and draws the symbol in `onPrimary` (the primary
+///   action of a page, like `.glassProminent`): plain glass all but vanishes
+///   over a dark, empty page.
 /// * Everything else: `FloatingActionButton` (`.extended` with a [label]),
 ///   unchanged.
 class AdaptiveFloatingButton extends StatefulWidget {
@@ -24,7 +27,11 @@ class AdaptiveFloatingButton extends StatefulWidget {
     this.busy = false,
     this.tooltip,
     this.label,
+    this.prominent = false,
   });
+
+  /// Darwin only: accent-tinted glass with an `onPrimary` symbol.
+  final bool prominent;
 
   /// Text next to the icon (extended button / capsule).
   final String? label;
@@ -78,16 +85,20 @@ class _AdaptiveFloatingButtonState extends State<AdaptiveFloatingButton> {
     }
     final theme = Theme.of(context);
     final accessibility = GlassAccessibility.of(context);
+    final scheme = theme.colorScheme;
+    final prominent = widget.prominent;
+    final foreground = prominent ? scheme.onPrimary : scheme.primary;
     final radius =
         BorderRadius.circular(GlassTokens.floatingButtonSize / 2);
     final symbol = widget.busy
-        ? const CupertinoActivityIndicator(
+        ? CupertinoActivityIndicator(
             radius: GlassTokens.activityIndicatorRadius,
+            color: prominent ? foreground : null,
           )
         : IconTheme.merge(
             data: IconThemeData(
               size: GlassTokens.floatingButtonIconSize,
-              color: theme.colorScheme.primary,
+              color: foreground,
             ),
             child: widget.glassIcon,
           );
@@ -95,6 +106,10 @@ class _AdaptiveFloatingButtonState extends State<AdaptiveFloatingButton> {
       sigma: GlassTokens.barSigma,
       borderRadius: radius,
       shadow: true,
+      color: prominent ? scheme.primary : null,
+      opaqueColor: prominent ? scheme.primary : null,
+      tintOpacity:
+          prominent ? GlassTokens.floatingButtonProminentTintOpacity : null,
       child: label == null
           ? SizedBox.square(
               dimension: GlassTokens.floatingButtonSize,
@@ -116,7 +131,7 @@ class _AdaptiveFloatingButtonState extends State<AdaptiveFloatingButton> {
                       maxLines: 1,
                       style: GlassTextStyles.floatingButtonLabel(
                         theme.textTheme,
-                      ).copyWith(color: theme.colorScheme.primary),
+                      ).copyWith(color: foreground),
                     ),
                   ],
                 ),

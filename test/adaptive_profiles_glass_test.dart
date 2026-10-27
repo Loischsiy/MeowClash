@@ -356,6 +356,8 @@ void main() {
           .floatingActionButton as AdaptiveFloatingButton;
       expect((fab.icon as Icon).icon, Icons.add);
       expect((fab.glassIcon as Icon).icon, Icons.add_rounded);
+      // The page's primary action: accent glass, visible on a dark page.
+      expect(fab.prominent, isTrue);
       await unmount(tester);
     }, variant: darwin);
   });

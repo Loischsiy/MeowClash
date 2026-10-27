@@ -146,7 +146,16 @@ pixel-for-pixel. Code: `lib/widgets/adaptive/` (import `adaptive.dart`).
   under `AdaptiveGroupSelector`. The Darwin check badge replaces `_ProxyComputedMark`. The settings and
   providers sheets are glass (see Settings below). The group picker sheet (`tab.dart` `_showMoreMenu`)
   is one `GlassListSection` of `GlassListRow`s with a checkmark on the current group. The icon
-  configuration page is still the Material `MapInputPage` list inside the glass scaffold.
+  configuration page is the shared `MapInputPage` list editor (see List editors below).
+- List editors (`lib/widgets/input.dart` `ListInputPage` / `MapInputPage`: DNS, network and general
+  lists, the proxies icon map): on Darwin one `GlassReorderableSection`
+  (`glass_reorderable_section.dart`) — a `GlassListSection`-looking card drawn by `DecoratedSliver`s
+  around a lazy `SliverReorderableList` (`onReorderItem`), hairlines and first / last corner clips per
+  row, so 100+ rows stay cheap. Rows are `GlassListRow`s: tap edits through the same `AddDialog`, a
+  trailing `GlassIconButton` (trash) deletes, a long press lifts the row as an opaque card with
+  `floatingShadow` and `listRowDragScale` (no scale with Reduce Motion). Empty → `AdaptiveEmptyState`.
+  Never blurred. Material `ReorderableListView` + `CommonCard` stay verbatim, pinned by
+  `test/material_list_editors_golden_test.dart`; glass checks: `test/adaptive_list_editors_glass_test.dart`.
 - Profiles screen: cards are `AdaptiveCard(checked: false)` — selection is the tint + hairline only, no
   check badge; the name uses `GlassTextStyles.groupTitle`, the details `cardSubtitle`. The traffic bar
   is an `AdaptiveProgressBar` colored by `GlassTokens.trafficColor` (Apple green, orange above

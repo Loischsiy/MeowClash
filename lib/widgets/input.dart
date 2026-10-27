@@ -4,7 +4,6 @@ import 'package:meowclash/models/common.dart';
 import 'package:meowclash/state.dart';
 import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:meowclash/widgets/dialog.dart';
-import 'package:meowclash/widgets/null_status.dart';
 import 'package:flutter/material.dart';
 
 import 'card.dart';
@@ -253,6 +252,14 @@ class ListInputPage extends StatelessWidget {
     onChange(nextItems);
   }
 
+  /// [newIndex] already counts without the moved entry.
+  void _handleReorder(int oldIndex, int newIndex) {
+    final nextItems = List<String>.from(items);
+    final item = nextItems.removeAt(oldIndex);
+    nextItems.insert(newIndex, item);
+    onChange(nextItems);
+  }
+
   void _handleDelete(String? item) {
     final entries = List<String>.from(
       items,
@@ -285,8 +292,27 @@ class ListInputPage extends StatelessWidget {
               ),
       ),
       child: items.isEmpty
-          ? NullStatus(label: appLocalizations.noData)
-          : ReorderableListView.builder(
+          ? AdaptiveEmptyState(label: appLocalizations.noData)
+          : AdaptivePlatform.useGlass
+              ? _GlassInputList(
+                  itemCount: items.length,
+                  hasLeading: leadingBuilder != null,
+                  itemBuilder: (index) {
+                    final e = items[index];
+                    return _GlassInputRow(
+                      key: ValueKey(e),
+                      leading:
+                          leadingBuilder != null ? leadingBuilder!(e) : null,
+                      title: titleBuilder(e),
+                      subtitle:
+                          subtitleBuilder != null ? subtitleBuilder!(e) : null,
+                      onEdit: () => _handleAddOrEdit(e),
+                      onDelete: () => _handleDelete(e),
+                    );
+                  },
+                  onReorder: _handleReorder,
+                )
+              : ReorderableListView.builder(
               padding: const EdgeInsets.only(
                 bottom: 16 + 64,
               ),
@@ -404,6 +430,14 @@ class MapInputPage extends StatelessWidget {
     onChange(Map.fromEntries(nextItems));
   }
 
+  /// [newIndex] already counts without the moved entry.
+  void _handleReorder(int oldIndex, int newIndex) {
+    final nextItems = List<MapEntry<String, String>>.from(items);
+    final item = nextItems.removeAt(oldIndex);
+    nextItems.insert(newIndex, item);
+    onChange(Map.fromEntries(nextItems));
+  }
+
   void _handleDelete(MapEntry<String, String> item) {
     final entries = List<MapEntry<String, String>>.from(
       items,
@@ -436,8 +470,27 @@ class MapInputPage extends StatelessWidget {
               ),
       ),
       child: items.isEmpty
-          ? NullStatus(label: appLocalizations.noData)
-          : ReorderableListView.builder(
+          ? AdaptiveEmptyState(label: appLocalizations.noData)
+          : AdaptivePlatform.useGlass
+              ? _GlassInputList(
+                  itemCount: items.length,
+                  hasLeading: leadingBuilder != null,
+                  itemBuilder: (index) {
+                    final e = items[index];
+                    return _GlassInputRow(
+                      key: ValueKey(e.key),
+                      leading:
+                          leadingBuilder != null ? leadingBuilder!(e) : null,
+                      title: titleBuilder(e),
+                      subtitle:
+                          subtitleBuilder != null ? subtitleBuilder!(e) : null,
+                      onEdit: () => _handleAddOrEdit(e),
+                      onDelete: () => _handleDelete(e),
+                    );
+                  },
+                  onReorder: _handleReorder,
+                )
+              : ReorderableListView.builder(
               padding: const EdgeInsets.only(
                 bottom: 16 + 64,
               ),
@@ -607,6 +660,68 @@ class _AddDialogState extends State<AddDialog> {
         ),
       ),
     );
+}
+
+/// Darwin body of [ListInputPage] / [MapInputPage]: the entries as one
+/// grouped section, put in order by a long press, scrolling clear of the
+/// floating "+".
+class _GlassInputList extends StatelessWidget {
+  const _GlassInputList({
+    required this.itemCount,
+    required this.itemBuilder,
+    required this.onReorder,
+    required this.hasLeading,
+  });
+
+  final int itemCount;
+  final Widget Function(int index) itemBuilder;
+  final ReorderCallback onReorder;
+  final bool hasLeading;
+
+  @override
+  Widget build(BuildContext context) => GlassReorderableSection(
+        itemCount: itemCount,
+        hasLeading: hasLeading,
+        bottomInset:
+            GlassTokens.floatingButtonSize + kFloatingActionButtonMargin * 2,
+        itemBuilder: (_, index) => itemBuilder(index),
+        onReorderItem: onReorder,
+      );
+}
+
+/// One Darwin entry: tap to edit, the trash symbol removes it. The leading
+/// widget (the proxies icon map shows the icon) is scaled to the row symbol.
+class _GlassInputRow extends StatelessWidget {
+  const _GlassInputRow({
+    super.key,
+    required this.title,
+    required this.onEdit,
+    required this.onDelete,
+    this.leading,
+    this.subtitle,
+  });
+
+  final Widget title;
+  final Widget? subtitle;
+  final Widget? leading;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    final leading = this.leading;
+    return GlassListRow(
+      leading: leading == null ? null : FittedBox(child: leading),
+      title: title,
+      subtitle: subtitle,
+      trailing: GlassIconButton(
+        icon: const Icon(Icons.delete_outline_rounded),
+        tooltip: appLocalizations.delete,
+        onPressed: onDelete,
+      ),
+      onTap: onEdit,
+    );
+  }
 }
 
 class _InputItem extends StatelessWidget {

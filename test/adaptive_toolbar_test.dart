@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -743,6 +744,7 @@ void main() {
       VoidCallback? onWindowDrag,
       VoidCallback? onTap,
       bool scrollEdge = false,
+      bool largeTitle = false,
     }) =>
         MaterialApp(
           theme: GlassTheme.apply(ThemeData(useMaterial3: true)),
@@ -752,7 +754,9 @@ void main() {
               child: AdaptiveAppBar(
                 onWindowDrag: onWindowDrag,
                 scrollEdge: scrollEdge,
+                largeTitle: largeTitle,
                 child: GlassToolbar(
+                  largeTitle: largeTitle,
                   title: const Text('Title'),
                   actions: [
                     IconButton(
@@ -800,6 +804,37 @@ void main() {
 
       await tester.pumpWidget(bar());
       expect(gradient(), findsNothing);
+    }, variant: _darwin);
+
+    testWidgets('iOS large title: solid backdrop down to the bar bottom',
+        (tester) async {
+      LinearGradient fadeGradient() =>
+          (tester.widget<DecoratedBox>(gradient()).decoration as BoxDecoration)
+              .gradient! as LinearGradient;
+
+      await tester.pumpWidget(bar(scrollEdge: true, largeTitle: true));
+      final barRect = tester.getRect(find.byType(AdaptiveAppBar));
+      final fadeRect = tester.getRect(gradient());
+      expect(fadeRect.bottom, barRect.bottom + GlassTokens.toolbarFadeExtent);
+      final large = fadeGradient();
+      if (defaultTargetPlatform == TargetPlatform.iOS) {
+        // Content scrolled under the large title row never shows through.
+        expect(
+          large.stops!.first * fadeRect.height,
+          moreOrLessEquals(barRect.height),
+        );
+        expect(
+          large.colors.first.a,
+          GlassTokens.toolbarLargeTitleBackdropOpacity,
+        );
+      } else {
+        // macOS has no large titles: the usual scroll edge.
+        expect(large.stops!.first, GlassTokens.toolbarFadeSolidStop);
+      }
+
+      await tester.pumpWidget(bar(scrollEdge: true));
+      expect(fadeGradient().stops!.first, GlassTokens.toolbarFadeSolidStop);
+      expect(fadeGradient().colors.first.a, lessThan(1));
     }, variant: _darwin);
 
     testWidgets('capsule inside a blurring surface does not blur again',

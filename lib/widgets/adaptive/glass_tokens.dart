@@ -277,6 +277,11 @@ abstract final class GlassTokens {
   static const double toolbarFadeSolidStop = 0.6;
   static const double _toolbarFadeOpacityLight = 0.92;
   static const double _toolbarFadeOpacityDark = 0.88;
+  // iOS large title bar: the backdrop stays solid down to the bar's bottom
+  // edge (the large title row sits in the faded part otherwise, and content
+  // scrolled under it shows through the title), then the same
+  // [toolbarFadeExtent] fade.
+  static const double toolbarLargeTitleBackdropOpacity = 1;
   // Capsules float a little above the bar: a soft drop and, in light mode,
   // a crisp contour (the white rim alone vanishes on a light window).
   static const List<BoxShadow> _toolbarItemShadowLight = [

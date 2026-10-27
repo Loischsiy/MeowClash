@@ -122,8 +122,13 @@ class AdaptiveAppBar extends StatelessWidget {
         child: bar,
       );
     } else if (scrollEdge) {
+      // iOS large title: nothing may show through the title row, so the
+      // backdrop is solid down to the bar's bottom edge and only fades below.
+      final large = largeTitle && largeTitles;
       final fade = window.withValues(
-        alpha: GlassTokens.toolbarFadeOpacity(brightness),
+        alpha: large
+            ? GlassTokens.toolbarLargeTitleBackdropOpacity
+            : GlassTokens.toolbarFadeOpacity(brightness),
       );
       bar = Stack(
         clipBehavior: Clip.none,
@@ -134,15 +139,23 @@ class AdaptiveAppBar extends StatelessWidget {
             right: 0,
             bottom: -GlassTokens.toolbarFadeExtent,
             child: IgnorePointer(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    stops: const [GlassTokens.toolbarFadeSolidStop, 1],
-                    colors: [fade, fade.withValues(alpha: 0)],
-                  ),
-                ),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final height = constraints.maxHeight;
+                  final solidStop = large && height > 0
+                      ? (height - GlassTokens.toolbarFadeExtent) / height
+                      : GlassTokens.toolbarFadeSolidStop;
+                  return DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        stops: [solidStop, 1],
+                        colors: [fade, fade.withValues(alpha: 0)],
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
           ),

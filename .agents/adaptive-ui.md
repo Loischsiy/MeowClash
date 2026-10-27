@@ -117,8 +117,16 @@ pixel-for-pixel. Code: `lib/widgets/adaptive/` (import `adaptive.dart`).
   with Reduce Transparency; Profiles, scripts and the list / map editors of `input.dart` use it),
   `AdaptiveEmptyState`,
   `AdaptiveActivityIndicator`, `AdaptiveProgressBar` (static capsule, no animation; the Material
-  branch is the old `LinearProgressIndicator`), `GlassIconButton` (Darwin-only symbol button,
+  branch is the old `LinearProgressIndicator`; `SubscriptionInfoView` uses it on glass),
+  `AdaptiveLoadingBar` (the `loadingRun` bar under the toolbar in `CommonScaffold`: on Darwin a
+  `loadingBarHeight` accent capsule sweeping a clear track, one `CustomPainter` in a `RepaintBoundary`,
+  `loadingBar*` tokens; Reduce Motion stops the ticker and shows a still full-width hairline; Material is
+  `const LinearProgressIndicator()` verbatim), `GlassIconButton` (Darwin-only symbol button,
   `busy` spinner).
+- Spinners and bars: a bare `CircularProgressIndicator` / `LinearProgressIndicator` is allowed only in
+  a Material branch or on a screen Darwin cannot reach (Android-only access control, Android TV
+  receive dialog). Material goldens: `test/material_loading_golden_test.dart`; glass checks:
+  `test/adaptive_loading_glass_test.dart`.
 - Blur budget of a scrolling screen is constant: only a pinned header / floating bar / floating
   button may be a `GlassSurface`. A pinned list header is a `SliverPersistentHeader` that swaps to its
   glass variant only when `shrinkOffset > 0`, so at rest the list has zero blur.

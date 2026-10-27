@@ -17,11 +17,27 @@ class LineChart extends StatefulWidget {
     required this.points,
     required this.color,
     this.duration = Duration.zero,
+    this.strokeWidth = 2.0,
+    this.fillTopOpacity,
+    this.fillBottomOpacity,
+    this.maxY,
   });
   final List<Point> points;
   final Color color;
   final Duration duration;
   final bool gradient;
+
+  /// Line width; Material keeps the historical 2.0.
+  final double strokeWidth;
+
+  /// Fill gradient alpha at the top / bottom. Null keeps the Material
+  /// 38 % → 10 % ramp.
+  final double? fillTopOpacity;
+  final double? fillBottomOpacity;
+
+  /// Lower bound for the top of the y scale, so several series drawn on top
+  /// of each other share one scale. Null scales to the series' own maximum.
+  final double? maxY;
 
   @override
   State<LineChart> createState() => _LineChartState();
@@ -70,6 +86,10 @@ class _LineChartState extends State<LineChart>
               progress: _controller.value,
               gradient: widget.gradient,
               color: widget.color,
+              strokeWidth: widget.strokeWidth,
+              fillTopOpacity: widget.fillTopOpacity,
+              fillBottomOpacity: widget.fillBottomOpacity,
+              maxY: widget.maxY,
             ),
             child: SizedBox(
               height: container.maxHeight,
@@ -87,12 +107,20 @@ class LineChartPainter extends CustomPainter {
     required this.progress,
     required this.color,
     required this.gradient,
+    this.strokeWidth = 2.0,
+    this.fillTopOpacity,
+    this.fillBottomOpacity,
+    this.maxY,
   });
   final List<Point> prevPoints;
   final List<Point> points;
   final double progress;
   final Color color;
   final bool gradient;
+  final double strokeWidth;
+  final double? fillTopOpacity;
+  final double? fillBottomOpacity;
+  final double? maxY;
 
   List<Point> getRenderPoints(List<Point> points) {
     if (points.isEmpty) return [];
@@ -107,6 +135,8 @@ class LineChartPainter extends CustomPainter {
       if (point.y > maxY) maxY = point.y;
       if (point.y < minY) minY = point.y;
     }
+    final scaleMaxY = this.maxY;
+    if (scaleMaxY != null && scaleMaxY > maxY) maxY = scaleMaxY;
 
     return points.map((e) {
       var x = (e.x - minX) / (maxX - minX);
@@ -172,7 +202,6 @@ class LineChartPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    const strokeWidth = 2.0;
     final chartSize = Size(size.width, size.height * 0.7);
     final path = getAnimatedPath(chartSize);
 
@@ -186,8 +215,14 @@ class LineChartPainter extends CustomPainter {
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
         colors: [
-          color.opacity38,
-          color.opacity10,
+          if (fillTopOpacity case final top?)
+            color.withValues(alpha: top)
+          else
+            color.opacity38,
+          if (fillBottomOpacity case final bottom?)
+            color.withValues(alpha: bottom)
+          else
+            color.opacity10,
         ],
       );
 
@@ -215,5 +250,9 @@ class LineChartPainter extends CustomPainter {
         oldDelegate.prevPoints != prevPoints ||
         oldDelegate.points != points ||
         oldDelegate.color != color ||
-        oldDelegate.gradient != gradient;
+        oldDelegate.gradient != gradient ||
+        oldDelegate.strokeWidth != strokeWidth ||
+        oldDelegate.fillTopOpacity != fillTopOpacity ||
+        oldDelegate.fillBottomOpacity != fillBottomOpacity ||
+        oldDelegate.maxY != maxY;
 }

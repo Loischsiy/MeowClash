@@ -585,5 +585,7 @@
   "repair": "修复",
   "copyHost": "复制主机",
   "filterByProcess": "按进程筛选",
-  "closeConnection": "关闭连接"
+  "closeConnection": "关闭连接",
+  "toolbarEdit": "编辑",
+  "toolbarDone": "完成"
 }

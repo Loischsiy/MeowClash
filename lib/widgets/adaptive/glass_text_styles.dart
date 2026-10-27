@@ -81,6 +81,23 @@ abstract final class GlassTextStyles {
         weight: FontWeight.w700,
       );
 
+  /// Text action in a toolbar capsule ("Edit", "Done"); the prominent one
+  /// is semibold, as the iOS "Done".
+  static TextStyle toolbarAction(
+    TextTheme textTheme, {
+    bool prominent = false,
+  }) =>
+      _style(
+        textTheme.bodyLarge,
+        size: _mac
+            ? GlassTokens.toolbarActionSizeMac
+            : GlassTokens.toolbarActionSizeIos,
+        line: _mac
+            ? GlassTokens.toolbarActionLineMac
+            : GlassTokens.toolbarActionLineIos,
+        weight: prominent ? FontWeight.w600 : FontWeight.w400,
+      );
+
   /// Text of the toolbar search field.
   static TextStyle toolbarSearch(TextTheme textTheme) => _style(
         textTheme.bodyLarge,
@@ -265,6 +282,81 @@ abstract final class GlassTextStyles {
   static TextStyle streamMetric(TextTheme textTheme) =>
       listRowSubtitle(textTheme)
           .copyWith(fontFeatures: const [FontFeature.tabularFigures()]);
+
+  /// Title of a dashboard widget tile: small, secondary, next to the symbol.
+  static TextStyle widgetTitle(TextTheme textTheme) => _style(
+        textTheme.labelMedium,
+        size: _mac
+            ? GlassTokens.widgetTitleSizeMac
+            : GlassTokens.widgetTitleSizeIos,
+        line: _mac
+            ? GlassTokens.widgetTitleLineMac
+            : GlassTokens.widgetTitleLineIos,
+        weight: FontWeight.w600,
+      );
+
+  /// The large figure of a dashboard widget (speed, traffic, memory, IP),
+  /// tabular so live values do not jitter.
+  static TextStyle widgetValue(TextTheme textTheme) => _style(
+        textTheme.titleLarge,
+        size: _mac
+            ? GlassTokens.widgetValueSizeMac
+            : GlassTokens.widgetValueSizeIos,
+        line: _mac
+            ? GlassTokens.widgetValueLineMac
+            : GlassTokens.widgetValueLineIos,
+        weight: FontWeight.w600,
+      ).copyWith(fontFeatures: const [FontFeature.tabularFigures()]);
+
+  /// Secondary line under a widget value (units, legend, dates), tabular.
+  static TextStyle widgetCaption(TextTheme textTheme) => _style(
+        textTheme.bodySmall,
+        size: _mac
+            ? GlassTokens.widgetCaptionSizeMac
+            : GlassTokens.widgetCaptionSizeIos,
+        line: _mac
+            ? GlassTokens.widgetCaptionLineMac
+            : GlassTokens.widgetCaptionLineIos,
+        weight: FontWeight.w400,
+      ).copyWith(fontFeatures: const [FontFeature.tabularFigures()]);
+
+  /// "Start" / "Stop" on the dashboard button.
+  static TextStyle startButtonTitle(TextTheme textTheme) => _style(
+        textTheme.titleMedium,
+        size: _mac
+            ? GlassTokens.startButtonTitleSizeMac
+            : GlassTokens.startButtonTitleSizeIos,
+        line: _mac
+            ? GlassTokens.startButtonTitleLineMac
+            : GlassTokens.startButtonTitleLineIos,
+        weight: FontWeight.w600,
+      );
+
+  /// Status line of the Start button (run time, progress dots, TUN error),
+  /// tabular so the run time does not jitter.
+  static TextStyle startButtonStatus(TextTheme textTheme) => _style(
+        textTheme.bodyMedium,
+        size: _mac
+            ? GlassTokens.startButtonStatusSizeMac
+            : GlassTokens.startButtonStatusSizeIos,
+        line: _mac
+            ? GlassTokens.startButtonStatusLineMac
+            : GlassTokens.startButtonStatusLineIos,
+        weight: FontWeight.w400,
+      ).copyWith(fontFeatures: const [FontFeature.tabularFigures()]);
+
+  /// Segment label of the segmented control.
+  static TextStyle segment(TextTheme textTheme, {required bool selected}) =>
+      _style(
+        textTheme.labelLarge,
+        size: _mac
+            ? GlassTokens.segmentedTextSizeMac
+            : GlassTokens.segmentedTextSizeIos,
+        line: _mac
+            ? GlassTokens.segmentedTextLineMac
+            : GlassTokens.segmentedTextLineIos,
+        weight: selected ? FontWeight.w600 : FontWeight.w500,
+      );
 
   /// The system monospaced face (SF Mono, as in Console.app). It has no
   /// public family name: `.AppleSystemUIFontMonospaced` is what

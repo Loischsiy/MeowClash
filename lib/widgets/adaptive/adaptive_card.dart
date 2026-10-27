@@ -23,6 +23,7 @@ class AdaptiveCard extends StatelessWidget {
     this.checkAlignment = AlignmentDirectional.topEnd,
     this.onPressed,
     this.onLongPress,
+    this.radius,
   }) : checked = checked ?? isSelected;
 
   final Widget child;
@@ -36,6 +37,10 @@ class AdaptiveCard extends StatelessWidget {
 
   final VoidCallback? onPressed;
   final VoidCallback? onLongPress;
+
+  /// Corner radius of the glass card (Darwin only); defaults to
+  /// [GlassTokens.cardRadius]. Dashboard tiles use their own, larger one.
+  final double? radius;
 
   @override
   Widget build(BuildContext context) {
@@ -53,6 +58,7 @@ class AdaptiveCard extends StatelessWidget {
       checkAlignment: checkAlignment,
       onPressed: onPressed,
       onLongPress: onLongPress,
+      radius: radius ?? GlassTokens.cardRadius,
       child: child,
     );
   }
@@ -60,6 +66,7 @@ class AdaptiveCard extends StatelessWidget {
 
 class _GlassCard extends StatefulWidget {
   const _GlassCard({
+    required this.radius,
     required this.child,
     required this.isSelected,
     required this.checked,
@@ -74,6 +81,7 @@ class _GlassCard extends StatefulWidget {
   final AlignmentDirectional checkAlignment;
   final VoidCallback? onPressed;
   final VoidCallback? onLongPress;
+  final double radius;
 
   @override
   State<_GlassCard> createState() => _GlassCardState();
@@ -100,7 +108,8 @@ class _GlassCardState extends State<_GlassCard> {
     final opaque = accessibility.opaque;
     final accent = scheme.primary;
 
-    final base = dark ? scheme.surfaceContainerHigh : scheme.surfaceContainerLowest;
+    final base =
+        dark ? scheme.surfaceContainerHigh : scheme.surfaceContainerLowest;
     var fill = opaque
         ? base
         : base.withValues(alpha: GlassTokens.cardFillOpacity(brightness));
@@ -195,7 +204,7 @@ class _GlassCardState extends State<_GlassCard> {
             decoration: ShapeDecoration(
               color: fill,
               shape: RoundedSuperellipseBorder(
-                borderRadius: BorderRadius.circular(GlassTokens.cardRadius),
+                borderRadius: BorderRadius.circular(widget.radius),
                 side: side,
               ),
             ),

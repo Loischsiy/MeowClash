@@ -3,6 +3,7 @@ import 'package:meowclash/models/models.dart';
 import 'package:meowclash/providers/providers.dart';
 import 'package:meowclash/state.dart';
 import 'package:meowclash/views/profiles/add_profile.dart';
+import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:meowclash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -57,6 +58,9 @@ class MetainfoWidget extends ConsumerWidget {
     final theme = Theme.of(context);
 
     if (allProfiles.isEmpty) {
+      if (AdaptivePlatform.useGlass) {
+        return _buildGlassEmpty(context, onAdd: _addProfile);
+      }
       return CommonCard(
         onPressed: () async {
           final result = await globalState.showCommonDialog<URLFormResult>(
@@ -128,6 +132,22 @@ class MetainfoWidget extends ConsumerWidget {
           }
         }
       }
+    }
+
+    if (AdaptivePlatform.useGlass) {
+      return _buildGlass(
+        context,
+        profile: currentProfile,
+        info: subscriptionInfo,
+        supportUrl: supportUrl,
+        timeLeft: showTimeLeft
+            ? (
+                value: timeLeftValue,
+                unit: timeLeftUnit,
+                remaining: remainingText,
+              )
+            : null,
+      );
     }
 
     return CommonCard(
@@ -264,6 +284,206 @@ class MetainfoWidget extends ConsumerWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Future<void> _addProfile() async {
+    final result = await globalState.showCommonDialog<URLFormResult>(
+      child: const URLFormDialog(),
+    );
+    if (result != null) {
+      await globalState.appController.addProfileFormURL(
+        result.url,
+        decryptionPassword: result.password,
+        decryptionIterations: result.iterations,
+      );
+    }
+  }
+
+  /// Darwin: no profiles yet — an empty state with the add action.
+  Widget _buildGlassEmpty(BuildContext context, {required VoidCallback onAdd}) {
+    final theme = Theme.of(context);
+    final secondary = theme.colorScheme.onSurfaceVariant;
+    return AdaptiveWidgetTile(
+      onPressed: onAdd,
+      child: Padding(
+        padding: EdgeInsets.all(AdaptiveWidgetTile.glassPadding()),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              appLocalizations.nullProfileDesc,
+              textAlign: TextAlign.center,
+              style: GlassTextStyles.widgetCaption(theme.textTheme)
+                  .copyWith(color: secondary),
+            ),
+            const SizedBox(height: GlassTokens.emptyStateGap),
+            GlassButton(
+              label: appLocalizations.addProfile,
+              icon: Icons.add,
+              kind: GlassButtonKind.filled,
+              onPressed: onAdd,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Darwin: the subscription as a macOS / iOS widget — profile name as the
+  /// figure, traffic quota bar in the system traffic colors, expiry caption
+  /// and, close to expiry, the time left in system orange.
+  Widget _buildGlass(
+    BuildContext context, {
+    required Profile profile,
+    required SubscriptionInfo info,
+    required String? supportUrl,
+    required ({String value, String unit, String remaining})? timeLeft,
+  }) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final brightness = theme.brightness;
+    final secondary = theme.colorScheme.onSurfaceVariant;
+    final caption =
+        GlassTextStyles.widgetCaption(textTheme).copyWith(color: secondary);
+    final mac = AdaptivePlatform.isMacOSGlass;
+    final padding = AdaptiveWidgetTile.glassPadding();
+    final buttonSize = mac
+        ? GlassTokens.widgetHeaderButtonSizeMac
+        : GlassTokens.widgetHeaderButtonSizeIos;
+    final buttonIconSize = mac
+        ? GlassTokens.widgetHeaderButtonIconSizeMac
+        : GlassTokens.widgetHeaderButtonIconSizeIos;
+    final isUnlimitedTraffic = info.total == 0;
+    final isPerpetual = info.expire == 0;
+
+    Widget traffic;
+    if (isUnlimitedTraffic) {
+      traffic = Text(appLocalizations.trafficUnlimited, style: caption);
+    } else {
+      final total = TrafficValue(value: info.total);
+      final usedValue = info.upload + info.download;
+      final used = TrafficValue(value: usedValue);
+      final progress = (usedValue / info.total).clamp(0.0, 1.0);
+      final color = GlassTokens.trafficColor(progress, brightness);
+      traffic = Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            '${appLocalizations.traffic} ${used.showValue} ${used.showUnit}'
+            ' / ${total.showValue} ${total.showUnit}',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: caption,
+          ),
+          const SizedBox(height: GlassTokens.widgetRowGap),
+          AdaptiveProgressBar(
+            value: progress,
+            color: color,
+            glassColor: color,
+          ),
+        ],
+      );
+    }
+
+    final expiry = Text(
+      isPerpetual
+          ? appLocalizations.subscriptionEternal
+          : '${appLocalizations.expiresOn} ${DateFormat('dd.MM.yyyy').format(DateTime.fromMillisecondsSinceEpoch(info.expire * 1000))}',
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: caption,
+    );
+
+    return AdaptiveWidgetTile(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          GlassWidgetTileHeader(
+            info: Info(
+              label: appLocalizations.profile,
+              iconData: Icons.description_outlined,
+            ),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (supportUrl != null && supportUrl.isNotEmpty) ...[
+                  GlassIconButton(
+                    size: buttonSize,
+                    iconSize: buttonIconSize,
+                    icon: Icon(
+                      supportUrl.toLowerCase().contains('t.me')
+                          ? Icons.telegram
+                          : Icons.launch,
+                    ),
+                    onPressed: () => globalState.openUrl(supportUrl),
+                  ),
+                  const SizedBox(width: GlassTokens.widgetHeaderButtonGap),
+                ],
+                GlassIconButton(
+                  tooltip: appLocalizations.update,
+                  size: buttonSize,
+                  iconSize: buttonIconSize,
+                  icon: const Icon(Icons.sync),
+                  onPressed: () {
+                    globalState.appController.updateProfile(profile);
+                  },
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.fromLTRB(
+              padding,
+              GlassTokens.widgetRowGap,
+              padding,
+              padding,
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        profile.label ?? appLocalizations.profile,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GlassTextStyles.widgetValue(textTheme)
+                            .copyWith(color: theme.colorScheme.onSurface),
+                      ),
+                      const SizedBox(height: GlassTokens.widgetRowGap),
+                      traffic,
+                      const SizedBox(height: GlassTokens.widgetRowGap),
+                      expiry,
+                    ],
+                  ),
+                ),
+                if (timeLeft != null) ...[
+                  SizedBox(width: padding),
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(timeLeft.remaining, style: caption),
+                      Text(
+                        timeLeft.value,
+                        style: GlassTextStyles.widgetValue(textTheme).copyWith(
+                          color: GlassTokens.systemOrange(brightness),
+                        ),
+                      ),
+                      Text(timeLeft.unit, style: caption),
+                    ],
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

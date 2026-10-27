@@ -90,6 +90,14 @@ abstract final class GlassTokens {
   static const double sidebarIconSize = 20;
   static const double sidebarCompactIconSize = 22;
   static const double sidebarLogoSize = 28;
+  // Extended sidebar header: the logo is centred on the row icon column and
+  // the title starts where the row labels start. A row puts its icon at
+  // `sidebarPadding` and its label `sidebarPadding` after the icon; the logo
+  // is wider than an icon, so both offsets shrink by half the difference.
+  static const double sidebarHeaderLogoInset =
+      sidebarPadding - (sidebarLogoSize - sidebarIconSize) / 2;
+  static const double sidebarHeaderTitleGap =
+      sidebarPadding - (sidebarLogoSize - sidebarIconSize) / 2;
   static const double titleBarHeight = 28;
   static const double trafficLightsInset = 78;
 
@@ -211,14 +219,20 @@ abstract final class GlassTokens {
   static const double toolbarTitleLineMac = 20;
   static const double toolbarTitleSizeIos = 17;
   static const double toolbarTitleLineIos = 22;
-  // iOS root pages (no back button): the buttons keep the 44 pt row and the
-  // title gets a row of its own below it, large and at the leading edge, as
-  // the iOS 26 large title (34 bold) of Mail / Settings. Its line sits
-  // [toolbarLargeTitleBottomIos] above the row's bottom edge.
+  // iOS root pages (no back button): one row with the title large at the
+  // leading edge, as the iOS 26 large title (34 bold) of Mail / Settings, and
+  // the button capsules at the trailing edge, centered on the title's line.
+  // The line sits [toolbarLargeTitleBottomIos] above the row's bottom edge.
   static const double toolbarLargeTitleSizeIos = 34;
   static const double toolbarLargeTitleLineIos = 41;
   static const double toolbarLargeTitleHeightIos = 52;
   static const double toolbarLargeTitleBottomIos = 8;
+  // Bottom padding that centers the capsules on the title's line instead of
+  // the row: (height - this) / 2 = height - bottom - line / 2.
+  static const double toolbarLargeTitleActionsBottomIos =
+      2 * toolbarLargeTitleBottomIos +
+          toolbarLargeTitleLineIos -
+          toolbarLargeTitleHeightIos;
   // Least space above the iOS bar where there is no status bar (iPhone in
   // landscape), so the capsules never touch the screen edge.
   static const double toolbarMinTopInsetIos = 8;
@@ -253,6 +267,15 @@ abstract final class GlassTokens {
   static const double toolbarSearchIconSizeIos = 17;
   static const double toolbarSearchPadding = 10;
   static const double toolbarSearchIconGap = 6;
+  // Text action in a toolbar capsule ("Edit" / "Done"): body text on macOS
+  // (13/16), the iOS bar button size (17/22); horizontal padding inside the
+  // capsule.
+  static const double toolbarActionSizeMac = 13;
+  static const double toolbarActionLineMac = 16;
+  static const double toolbarActionSizeIos = 17;
+  static const double toolbarActionLineIos = 22;
+  static const double toolbarActionPaddingMac = 10;
+  static const double toolbarActionPaddingIos = 12;
   // Scroll edge: the window color behind the bar, solid down to
   // [toolbarFadeSolidStop] of the painted height, then fading out to nothing
   // [toolbarFadeExtent] below the bar's bottom edge. No blur, no hairline.
@@ -260,6 +283,11 @@ abstract final class GlassTokens {
   static const double toolbarFadeSolidStop = 0.6;
   static const double _toolbarFadeOpacityLight = 0.92;
   static const double _toolbarFadeOpacityDark = 0.88;
+  // iOS large title bar: the backdrop stays solid down to the bar's bottom
+  // edge (the large title row sits in the faded part otherwise, and content
+  // scrolled under it shows through the title), then the same
+  // [toolbarFadeExtent] fade.
+  static const double toolbarLargeTitleBackdropOpacity = 1;
   // Capsules float a little above the bar: a soft drop and, in light mode,
   // a crisp contour (the white rim alone vanishes on a light window).
   static const List<BoxShadow> _toolbarItemShadowLight = [
@@ -285,6 +313,10 @@ abstract final class GlassTokens {
   static const double floatingButtonSize = 56;
   static const double floatingButtonIconSize = 24;
   static const double floatingButtonPressedScale = 0.92;
+  // Prominent variant (the primary action of a page, `.glassProminent`):
+  // the glass is tinted with the accent, dense enough to carry a white
+  // symbol over any backdrop.
+  static const double floatingButtonProminentTintOpacity = 0.88;
   // With a label the button becomes a capsule of the same height.
   static const double floatingButtonLabelPadding = 20;
   static const double floatingButtonLabelGap = 8;
@@ -348,6 +380,12 @@ abstract final class GlassTokens {
   static const double dialogContentMaxHeight = 500;
   static const double dialogPadding = 20;
   static const double dialogTitleGap = 8;
+  // A small round button beside the title (a secondary action such as the
+  // settings of the dialog), kept out of the push-button row. iOS reserves
+  // the same width on the leading side so the title stays centered.
+  static const double dialogTitleAccessorySize = 28;
+  static const double dialogTitleAccessoryIconSize = 17;
+  static const double dialogTitleAccessoryGap = 8;
   // Between the controls of a form inside a dialog (editors of override
   // rules and proxy chains).
   static const double dialogFieldGap = 12;
@@ -745,6 +783,169 @@ abstract final class GlassTokens {
     duration: sideSheetEnterDuration,
   );
   static const Curve sideSheetExitCurve = Curves.easeOutCubic;
+  // Resizable iPhone bottom sheet (`SheetProps.expandable`), after
+  // `UISheetPresentationController` detents: it opens at medium (the stock
+  // modal sheet's 9/16, so the first look is unchanged) and drags to large
+  // (the whole safe area). Releasing it settles on the nearest detent; a
+  // downward fling or a release below [sheetDismissDetent] closes it.
+  static const double sheetMediumDetent = 9 / 16;
+  static const double sheetLargeDetent = 1;
+  static const double sheetMinDetent = 0.25;
+  static const double sheetDismissDetent = 0.4;
+  // Fling speed (logical px/s) that picks the detent in its direction.
+  static const double sheetFlingVelocity = 700;
+  static const Duration sheetDetentDuration = Duration(milliseconds: 450);
+  static const Curve sheetDetentCurve = GlassSpringCurve(
+    response: sideSheetSpringResponse,
+    dampingFraction: sideSheetSpringDamping,
+    duration: sheetDetentDuration,
+  );
+
+  // Dashboard widget tiles, after the macOS 26 / iOS 26 widgets: a larger
+  // corner than the proxy cards, the symbol in the accent next to a small
+  // secondary title, and large tabular figures. They live in a scrolling
+  // grid, so they never blur (fill and edge are the content card's).
+  static const double widgetTileRadiusMac = 16;
+  static const double widgetTileRadiusIos = 20;
+  static const double widgetTilePaddingMac = 12;
+  static const double widgetTilePaddingIos = 14;
+  static const double widgetTileSymbolSizeMac = 13;
+  static const double widgetTileSymbolSizeIos = 15;
+  static const double widgetTileSymbolGap = 5;
+  static const double widgetTitleSizeMac = 11;
+  static const double widgetTitleLineMac = 14;
+  static const double widgetTitleSizeIos = 13;
+  static const double widgetTitleLineIos = 16;
+  static const double widgetValueSizeMac = 20;
+  static const double widgetValueLineMac = 24;
+  static const double widgetValueSizeIos = 24;
+  static const double widgetValueLineIos = 29;
+  static const double widgetCaptionSizeMac = 11;
+  static const double widgetCaptionLineMac = 14;
+  static const double widgetCaptionSizeIos = 12;
+  static const double widgetCaptionLineIos = 16;
+  // Gap between stacked lines inside a tile (value over caption, legend).
+  static const double widgetLineGap = 2;
+  static const double widgetRowGap = 8;
+  // Spinner of a tile still loading its value.
+  static const double widgetSpinnerRadius = 8;
+
+  /// Spinner inside a widget row (media-unlock status slot).
+  static const double widgetInlineSpinnerRadius = 5;
+  // Small borderless button at the trailing edge of a tile header (ⓘ).
+  static const double widgetHeaderButtonSizeMac = 22;
+  static const double widgetHeaderButtonSizeIos = 28;
+  static const double widgetHeaderButtonIconSizeMac = 14;
+  static const double widgetHeaderButtonIconSizeIos = 16;
+
+  /// Between two header buttons of a widget tile.
+  static const double widgetHeaderButtonGap = 4;
+  // Cross-fade when a tile swaps its content (loading → value → error).
+  static const Duration widgetContentFadeDuration = Duration(milliseconds: 200);
+
+  // Label/value rows of a dashboard dialog (IP details), like an Info pane:
+  // a secondary symbol, a small secondary label over the selectable value.
+  static const double infoRowSymbolSizeMac = 15;
+  static const double infoRowSymbolSizeIos = 17;
+  static const double infoRowSymbolGap = 10;
+  static const double infoRowVerticalPadding = 6;
+  static const double infoRowLabelGap = 2;
+
+  /// Between the rows block and a note / status line under it.
+  static const double infoNoteGap = 8;
+
+  // Start/Stop button (the cat). The shape and the cat stay; the fill is a
+  // system color: green when connected, a neutral gray fill (secondarySystem
+  // Fill) when idle and an accent tint while connecting. A press dims the fill
+  // instead of scaling the button.
+  /// Minimum height: the button grows with larger text instead of clipping.
+  static const double startButtonHeight = 96;
+  static const double startButtonMargin = 16;
+  static const double startButtonRadiusMac = 16;
+  static const double startButtonRadiusIos = 22;
+  static const double startButtonPaddingH = 16;
+  static const double startButtonPaddingV = 8;
+  static const double startButtonCatSize = 80;
+  static const double startButtonCatGap = 12;
+  static const double startButtonTitleGap = 4;
+  static const double startButtonActionGap = 4;
+  // Title: title2 on macOS (17/22), title3 on iOS (20/25), semibold.
+  static const double startButtonTitleSizeMac = 17;
+  static const double startButtonTitleLineMac = 22;
+  static const double startButtonTitleSizeIos = 20;
+  static const double startButtonTitleLineIos = 25;
+  // Status line: body on macOS (13/16), subheadline on iOS (15/20).
+  static const double startButtonStatusSizeMac = 13;
+  static const double startButtonStatusLineMac = 16;
+  static const double startButtonStatusSizeIos = 15;
+  static const double startButtonStatusLineIos = 20;
+
+  /// Opacity of the status line under the title.
+  static const double startButtonStatusOpacity = 0.85;
+  static const Color _startButtonIdleBase = Color(0xFF787880);
+  static const double _startButtonIdleOpacityLight = 0.16;
+  static const double _startButtonIdleOpacityDark = 0.32;
+  static const double _startButtonConnectingOpacityLight = 0.16;
+  static const double _startButtonConnectingOpacityDark = 0.28;
+
+  /// Opacity of the whole button while pressed.
+  static const double startButtonPressedOpacity = 0.8;
+
+  /// The cat's eyes on the green fill.
+  static const Color startButtonCatAccentConnected = Color(0xFFFFE082);
+  static const Color startButtonForegroundConnected = Color(0xFFFFFFFF);
+
+  /// Letter spacing of the "···" progress dots while connecting.
+  static const double startButtonDotsSpacing = 4;
+  static const Duration startButtonFillDuration = Duration(milliseconds: 350);
+
+  // Dashboard editing: round badges at the top leading corner of a tile, as on
+  // the iOS home screen and macOS widgets — a neutral "−" to remove, a green
+  // "+" to add. They sit [editBadgeOffset] outside the tile corner.
+  static const double editBadgeSizeMac = 20;
+  static const double editBadgeSizeIos = 24;
+  static const double editBadgeIconSizeMac = 14;
+  static const double editBadgeIconSizeIos = 18;
+  static const double editBadgeOffset = -8;
+  static const Color _editBadgeRemoveFillLight = Color(0xFFE5E5EA);
+  static const Color _editBadgeRemoveFillDark = Color(0xFF3A3A3C);
+  static const Color editBadgeAddGlyph = Color(0xFFFFFFFF);
+
+  // Segmented control (dashboard mode picker), as in System Settings: a
+  // recessed capsule track and a neutral raised thumb — never the accent.
+  static const double segmentedHeightMac = 24;
+  static const double segmentedHeightIos = 32;
+  static const double segmentedLargeHeightMac = 30;
+  static const double segmentedLargeHeightIos = 36;
+  static const double segmentedInset = 2;
+  static const double segmentedTextSizeMac = 13;
+  static const double segmentedTextLineMac = 16;
+  static const double segmentedTextSizeIos = 13;
+  static const double segmentedTextLineIos = 18;
+  // Track: a gray fill (tertiarySystemFill), as alpha of [_segmentedTrackBase].
+  static const Color _segmentedTrackBase = Color(0xFF767680);
+  static const double _segmentedTrackOpacityLight = 0.12;
+  static const double _segmentedTrackOpacityDark = 0.24;
+  static const Color _segmentedThumbLight = Color(0xFFFFFFFF);
+  static const Color _segmentedThumbDark = Color(0xFF636366);
+  static const List<BoxShadow> _segmentedThumbShadowLight = [
+    BoxShadow(color: Color(0x1F000000), blurRadius: 8, offset: Offset(0, 3)),
+    BoxShadow(color: Color(0x0A000000), blurRadius: 1, offset: Offset(0, 3)),
+  ];
+  static const List<BoxShadow> _segmentedThumbShadowDark = [
+    BoxShadow(color: Color(0x33000000), blurRadius: 8, offset: Offset(0, 3)),
+  ];
+  static const Duration segmentedDuration = Duration(milliseconds: 220);
+  static const Curve segmentedCurve = Curves.easeOutCubic;
+
+  // Dashboard charts, colored as Activity Monitor's network graph:
+  // received (down) blue, sent (up) orange. Thin line, faint fill.
+  static const double chartLineWidth = 1.5;
+  static const double chartFillTopOpacity = 0.22;
+  static const double chartFillBottomOpacity = 0;
+  static const double chartLegendDotSize = 8;
+  static const double chartLegendGap = 6;
+  static const double chartDonutStrokeFraction = 0.16;
 
   static bool _isDark(Brightness brightness) => brightness == Brightness.dark;
 
@@ -900,6 +1101,69 @@ abstract final class GlassTokens {
 
   static List<BoxShadow> toolbarItemShadow(Brightness brightness) =>
       _isDark(brightness) ? _toolbarItemShadowDark : _toolbarItemShadowLight;
+
+  static double widgetTileRadius({required bool mac}) =>
+      mac ? widgetTileRadiusMac : widgetTileRadiusIos;
+
+  static double editBadgeSize({required bool mac}) =>
+      mac ? editBadgeSizeMac : editBadgeSizeIos;
+
+  static double editBadgeIconSize({required bool mac}) =>
+      mac ? editBadgeIconSizeMac : editBadgeIconSizeIos;
+
+  /// Fill of the "−" badge (systemGray5); the glyph is the label color.
+  static Color editBadgeRemoveFill(Brightness brightness) => _isDark(brightness)
+      ? _editBadgeRemoveFillDark
+      : _editBadgeRemoveFillLight;
+
+  static Color segmentedTrack(Brightness brightness) =>
+      _segmentedTrackBase.withValues(
+        alpha: _isDark(brightness)
+            ? _segmentedTrackOpacityDark
+            : _segmentedTrackOpacityLight,
+      );
+
+  static Color segmentedThumb(Brightness brightness) =>
+      _isDark(brightness) ? _segmentedThumbDark : _segmentedThumbLight;
+
+  static List<BoxShadow> segmentedThumbShadow(Brightness brightness) =>
+      _isDark(brightness)
+          ? _segmentedThumbShadowDark
+          : _segmentedThumbShadowLight;
+
+  /// Received traffic (↓) in dashboard charts.
+  static Color chartDownload(Brightness brightness) => systemBlue(brightness);
+
+  /// Sent traffic (↑) in dashboard charts.
+  static Color chartUpload(Brightness brightness) =>
+      _isDark(brightness) ? _systemOrangeDark : _systemOrangeLight;
+
+  /// Memory in use (core status ring and legend).
+  static Color memoryAllocated(Brightness brightness) =>
+      systemBlue(brightness);
+
+  /// Reclaimable memory (core status ring and legend).
+  static Color memoryReclaimable(Brightness brightness) =>
+      systemGreen(brightness);
+
+  static double startButtonRadius({required bool mac}) =>
+      mac ? startButtonRadiusMac : startButtonRadiusIos;
+
+  /// Fill of the idle Start button: a neutral system fill, never the accent.
+  static Color startButtonIdleFill(Brightness brightness) =>
+      _startButtonIdleBase.withValues(
+        alpha: _isDark(brightness)
+            ? _startButtonIdleOpacityDark
+            : _startButtonIdleOpacityLight,
+      );
+
+  /// Fill of the Start button while connecting / disconnecting.
+  static Color startButtonConnectingFill(Color accent, Brightness brightness) =>
+      accent.withValues(
+        alpha: _isDark(brightness)
+            ? _startButtonConnectingOpacityDark
+            : _startButtonConnectingOpacityLight,
+      );
 
   static Duration motion(Duration duration, {required bool reduceMotion}) =>
       reduceMotion ? Duration.zero : duration;

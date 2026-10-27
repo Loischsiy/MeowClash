@@ -15,6 +15,7 @@ class CommonDialog extends ConsumerWidget {
     this.padding,
     this.overrideScroll = false,
     this.backgroundColor,
+    this.titleAccessory,
   });
   final String title;
   final Widget? child;
@@ -22,6 +23,10 @@ class CommonDialog extends ConsumerWidget {
   final EdgeInsets? padding;
   final bool overrideScroll;
   final Color? backgroundColor;
+
+  /// Glass only: a control beside the title (see `GlassDialog`). Material
+  /// ignores it, so call sites keep their Material actions unchanged.
+  final Widget? titleAccessory;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -34,6 +39,7 @@ class CommonDialog extends ConsumerWidget {
         actions: actions ?? const [],
         contentPadding: padding,
         color: backgroundColor,
+        titleAccessory: titleAccessory,
         content: ConstrainedBox(
           constraints: BoxConstraints(
             maxHeight: min(

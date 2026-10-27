@@ -19,10 +19,15 @@ class SheetProps {
     this.useSafeArea = true,
     this.isScrollControlled = false,
     this.blur = true,
+    this.expandable = false,
   });
   final double? maxWidth;
   final double? maxHeight;
   final bool isScrollControlled;
+
+  /// Darwin bottom sheet only: opens at the medium detent and drags to the
+  /// whole screen ([GlassSheetDetents]). Material ignores it.
+  final bool expandable;
   final bool useSafeArea;
   final bool blur;
 }
@@ -53,17 +58,24 @@ Future<T?> showSheet<T>({
   SheetProps props = const SheetProps(),
 }) {
   final isMobile = globalState.appState.viewMode == ViewMode.mobile;
+  final detents = AdaptivePlatform.useGlass && props.expandable;
   return switch (isMobile) {
     true => showModalBottomSheet<T>(
         context: context,
-        isScrollControlled: props.isScrollControlled,
+        isScrollControlled: props.isScrollControlled || detents,
         backgroundColor: Colors.transparent,
         // Glass sheets blur only their own surface (AdaptiveSheetScaffold),
         // never the whole screen behind the barrier.
         builder: (_) => AdaptivePlatform.useGlass
-            ? SafeArea(
-                child: builder(context, SheetType.bottomSheet),
-              )
+            ? detents
+                ? GlassSheetDetents(
+                    child: SafeArea(
+                      child: builder(context, SheetType.bottomSheet),
+                    ),
+                  )
+                : SafeArea(
+                    child: builder(context, SheetType.bottomSheet),
+                  )
             : BackdropFilter(
                 filter: props.blur ? commonFilter : ImageFilter.blur(),
                 child: SafeArea(
@@ -189,6 +201,11 @@ class _AdaptiveSheetScaffoldState extends State<AdaptiveSheetScaffold> {
     );
     if (bottomSheet) {
       const handleSize = Size(32, 4);
+      // Glass: the grabber and title bar resize an expandable sheet
+      // (GlassSheetDragArea). Material keeps the two children as they were.
+      List<Widget> glassHeader(Widget grabber, Widget bar) => useGlass
+          ? [GlassSheetDragArea(grabber: grabber, child: bar)]
+          : [grabber, bar];
       final sheet = Container(
         clipBehavior: Clip.hardEdge,
         decoration: ShapeDecoration(
@@ -200,21 +217,24 @@ class _AdaptiveSheetScaffoldState extends State<AdaptiveSheetScaffold> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 16),
-              child: Container(
-                alignment: Alignment.center,
-                height: handleSize.height,
-                width: handleSize.width,
-                decoration: ShapeDecoration(
-                  shape: RoundedSuperellipseBorder(
-                    borderRadius: BorderRadius.circular(handleSize.height / 2),
+            ...glassHeader(
+              Padding(
+                padding: const EdgeInsets.only(top: 16),
+                child: Container(
+                  alignment: Alignment.center,
+                  height: handleSize.height,
+                  width: handleSize.width,
+                  decoration: ShapeDecoration(
+                    shape: RoundedSuperellipseBorder(
+                      borderRadius:
+                          BorderRadius.circular(handleSize.height / 2),
+                    ),
+                    color: context.colorScheme.onSurfaceVariant,
                   ),
-                  color: context.colorScheme.onSurfaceVariant,
                 ),
               ),
+              appBar,
             ),
-            appBar,
             Flexible(
               flex: 1,
               child: widget.body,

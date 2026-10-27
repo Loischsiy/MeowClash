@@ -977,6 +977,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "tooFrequentOperation": MessageLookupByLibrary.simpleMessage(
       "Please wait 15 seconds before refreshing again",
     ),
+    "toolbarDone": MessageLookupByLibrary.simpleMessage("Done"),
+    "toolbarEdit": MessageLookupByLibrary.simpleMessage("Edit"),
     "tools": MessageLookupByLibrary.simpleMessage("Settings"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("Tproxy Port"),
     "traffic": MessageLookupByLibrary.simpleMessage("Traffic"),

@@ -11,6 +11,7 @@ import 'package:meowclash/common/common.dart';
 import 'package:meowclash/models/models.dart';
 import 'package:meowclash/services/async_polling_loop.dart';
 import 'package:meowclash/state.dart';
+import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:meowclash/widgets/visibility_polling.dart';
 import 'package:meowclash/widgets/widgets.dart';
 
@@ -217,6 +218,16 @@ class _CoreStatusDialogState extends State<CoreStatusDialog>
     final totalTraffic = TrafficValue(value: totalMemory);
     final inUseTraffic = _formatBytes(inUse);
     final reclaimableTraffic = _formatBytes(reclaimable);
+    // Darwin: system colors (blue in use, green reclaimable) on the neutral
+    // track of the dashboard rings; Material keeps the scheme colors.
+    final glass = AdaptivePlatform.useGlass;
+    final brightness = Theme.of(context).brightness;
+    final allocatedColor = glass
+        ? GlassTokens.memoryAllocated(brightness)
+        : context.colorScheme.primary;
+    final reclaimableColor = glass
+        ? GlassTokens.memoryReclaimable(brightness)
+        : context.colorScheme.tertiary;
 
     final allocatedPercent = totalMemory > 0
         ? (inUse / totalMemory * 100).toStringAsFixed(1)
@@ -236,11 +247,13 @@ class _CoreStatusDialogState extends State<CoreStatusDialog>
           _MemoryRingChart(
             allocated: inUse.toDouble(),
             reclaimable: reclaimable.toDouble(),
-            allocatedColor: context.colorScheme.primary,
-            reclaimableColor: context.colorScheme.tertiary,
-            trackColor: context.colorScheme.surfaceContainerHighest.withValues(
-              alpha: 0.35,
-            ),
+            allocatedColor: allocatedColor,
+            reclaimableColor: reclaimableColor,
+            trackColor: glass
+                ? GlassTokens.segmentedTrack(brightness)
+                : context.colorScheme.surfaceContainerHighest.withValues(
+                    alpha: 0.35,
+                  ),
             centerChild: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -285,7 +298,7 @@ class _CoreStatusDialogState extends State<CoreStatusDialog>
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     _buildLegendItem(
-                      color: context.colorScheme.primary,
+                      color: allocatedColor,
                       label: appLocalizations.allocatedMemory,
                       value: inUseTraffic,
                       percent: '$allocatedPercent%',
@@ -293,7 +306,7 @@ class _CoreStatusDialogState extends State<CoreStatusDialog>
                     ),
                     const SizedBox(height: 8),
                     _buildLegendItem(
-                      color: context.colorScheme.tertiary,
+                      color: reclaimableColor,
                       label: appLocalizations.reclaimableMemory,
                       value: reclaimableTraffic,
                       percent: '$reclaimablePercent%',

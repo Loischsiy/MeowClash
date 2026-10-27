@@ -123,6 +123,7 @@ class _ProfilesViewState extends State<ProfilesView> with PageMixin {
           Icons.add,
         ),
         glassIcon: const Icon(Icons.add_rounded),
+        prominent: true,
       );
 
   @override

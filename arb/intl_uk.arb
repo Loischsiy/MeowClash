@@ -613,5 +613,7 @@
   "repair": "Виправити",
   "copyHost": "Скопіювати хост",
   "filterByProcess": "Фільтр за процесом",
-  "closeConnection": "Закрити з’єднання"
+  "closeConnection": "Закрити з’єднання",
+  "toolbarEdit": "Змінити",
+  "toolbarDone": "Готово"
 }

@@ -613,5 +613,7 @@
   "delayTestConcurrencyTip": "Введите число от 0 до 1000; 0 — без лимита",
   "copyHost": "Скопировать хост",
   "filterByProcess": "Фильтр по процессу",
-  "closeConnection": "Закрыть соединение"
+  "closeConnection": "Закрыть соединение",
+  "toolbarEdit": "Изменить",
+  "toolbarDone": "Готово"
 }

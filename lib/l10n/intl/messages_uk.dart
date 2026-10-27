@@ -1031,6 +1031,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "tooFrequentOperation": MessageLookupByLibrary.simpleMessage(
       "Будь ласка, зачекайте 15 секунд перед повторним оновленням",
     ),
+    "toolbarDone": MessageLookupByLibrary.simpleMessage("Готово"),
+    "toolbarEdit": MessageLookupByLibrary.simpleMessage("Змінити"),
     "tools": MessageLookupByLibrary.simpleMessage("Налаштування"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("Tproxy-порт"),
     "traffic": MessageLookupByLibrary.simpleMessage("Трафік"),

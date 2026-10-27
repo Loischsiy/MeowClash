@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -318,48 +319,60 @@ void main() {
       expect(find.byType(GlassToolbarSearchField), findsNothing);
     }, variant: _darwin);
 
-    testWidgets('iOS root page: button row, then a large title row',
+    testWidgets('iOS root page: large title and capsules share one row',
         (tester) async {
       final key = await _pumpScaffold(tester, top: _iosTop);
       _enableSearch(key, []);
       await tester.pump();
-      const row = _iosTop + GlassTokens.toolbarHeightIos;
-      expect(
-        tester.getSize(find.byType(AdaptiveAppBar)).height,
-        row + GlassTokens.toolbarLargeTitleHeightIos,
-      );
-      // The capsules keep the 44 pt row to themselves.
+      const bar = _iosTop + GlassTokens.toolbarLargeTitleHeightIos;
+      expect(tester.getSize(find.byType(AdaptiveAppBar)).height, bar);
+      // Large 34 pt title at the leading edge, right under the status bar.
+      final title = tester.getRect(find.text('Profiles'));
+      expect(_fontSize(tester, 'Profiles'), GlassTokens.toolbarLargeTitleSizeIos);
+      expect(title.left, GlassTokens.toolbarInsetIos);
+      expect(title.top, greaterThanOrEqualTo(_iosTop));
+      expect(title.bottom, bar - GlassTokens.toolbarLargeTitleBottomIos);
+      // The capsules sit on the title's line at the trailing edge.
       final capsules = find.byType(GlassToolbarGroup);
       expect(capsules, findsNWidgets(2));
-      expect(
-        tester.getRect(capsules.last).center.dy,
-        _iosTop + GlassTokens.toolbarHeightIos / 2,
-      );
+      for (var i = 0; i < 2; i++) {
+        final rect = tester.getRect(capsules.at(i));
+        expect(rect.center.dy, closeTo(title.center.dy, 0.5));
+        expect(rect.top, greaterThanOrEqualTo(_iosTop));
+        expect(rect.left, greaterThan(title.right));
+      }
       expect(
         tester.getRect(capsules.last).right,
         800 - GlassTokens.toolbarInsetIos,
       );
-      // Large 34 pt title below them, at the leading edge.
-      final title = tester.getRect(find.text('Profiles'));
-      expect(_fontSize(tester, 'Profiles'), GlassTokens.toolbarLargeTitleSizeIos);
-      expect(title.left, GlassTokens.toolbarInsetIos);
-      expect(title.top, greaterThanOrEqualTo(row));
-      expect(
-        title.bottom,
-        row +
-            GlassTokens.toolbarLargeTitleHeightIos -
-            GlassTokens.toolbarLargeTitleBottomIos,
-      );
       expect(_backdropLayers(tester), 2);
 
-      // Search keeps the bar height and the large title.
+      // Search: the back capsule and the field take the row on the same line,
+      // the bar keeps its height.
       await tester.tap(find.byIcon(Icons.search_rounded));
       await tester.pump();
-      expect(find.byType(GlassToolbarSearchField), findsOneWidget);
-      expect(find.text('Profiles'), findsOneWidget);
+      final field = find.byType(GlassToolbarSearchField);
+      expect(field, findsOneWidget);
+      expect(tester.getSize(find.byType(AdaptiveAppBar)).height, bar);
       expect(
-        tester.getSize(find.byType(AdaptiveAppBar)).height,
-        row + GlassTokens.toolbarLargeTitleHeightIos,
+        tester.getRect(field).center.dy,
+        closeTo(title.center.dy, 0.5),
+      );
+      final back = tester.getRect(
+        find.ancestor(
+          of: find.byType(BackButtonIcon),
+          matching: find.byType(GlassToolbarGroup),
+        ),
+      );
+      expect(back.left, GlassTokens.toolbarInsetIos);
+      expect(back.center.dy, closeTo(title.center.dy, 0.5));
+      expect(
+        tester.getRect(field).left,
+        back.right + GlassTokens.toolbarTitleGap,
+      );
+      expect(
+        tester.getRect(field).right,
+        800 - GlassTokens.toolbarInsetIos,
       );
       // Leave search mode so its system back block is released.
       await tester.tap(find.byType(BackButtonIcon));
@@ -392,7 +405,6 @@ void main() {
       expect(
         tester.getSize(find.byType(AdaptiveAppBar)).height,
         GlassTokens.toolbarMinTopInsetIos +
-            GlassTokens.toolbarHeightIos +
             GlassTokens.toolbarLargeTitleHeightIos,
       );
       expect(
@@ -569,9 +581,7 @@ void main() {
       // Root page: the content starts below the large title row.
       expect(
         tester.getTopLeft(find.text('Row 0')).dy,
-        _iosTop +
-            GlassTokens.toolbarHeightIos +
-            GlassTokens.toolbarLargeTitleHeightIos,
+        _iosTop + GlassTokens.toolbarLargeTitleHeightIos,
       );
       expect(_fade(), findsOneWidget);
     }, variant: _ios);
@@ -743,6 +753,7 @@ void main() {
       VoidCallback? onWindowDrag,
       VoidCallback? onTap,
       bool scrollEdge = false,
+      bool largeTitle = false,
     }) =>
         MaterialApp(
           theme: GlassTheme.apply(ThemeData(useMaterial3: true)),
@@ -752,7 +763,9 @@ void main() {
               child: AdaptiveAppBar(
                 onWindowDrag: onWindowDrag,
                 scrollEdge: scrollEdge,
+                largeTitle: largeTitle,
                 child: GlassToolbar(
+                  largeTitle: largeTitle,
                   title: const Text('Title'),
                   actions: [
                     IconButton(
@@ -800,6 +813,37 @@ void main() {
 
       await tester.pumpWidget(bar());
       expect(gradient(), findsNothing);
+    }, variant: _darwin);
+
+    testWidgets('iOS large title: solid backdrop down to the bar bottom',
+        (tester) async {
+      LinearGradient fadeGradient() =>
+          (tester.widget<DecoratedBox>(gradient()).decoration as BoxDecoration)
+              .gradient! as LinearGradient;
+
+      await tester.pumpWidget(bar(scrollEdge: true, largeTitle: true));
+      final barRect = tester.getRect(find.byType(AdaptiveAppBar));
+      final fadeRect = tester.getRect(gradient());
+      expect(fadeRect.bottom, barRect.bottom + GlassTokens.toolbarFadeExtent);
+      final large = fadeGradient();
+      if (defaultTargetPlatform == TargetPlatform.iOS) {
+        // Content scrolled under the large title row never shows through.
+        expect(
+          large.stops!.first * fadeRect.height,
+          moreOrLessEquals(barRect.height),
+        );
+        expect(
+          large.colors.first.a,
+          GlassTokens.toolbarLargeTitleBackdropOpacity,
+        );
+      } else {
+        // macOS has no large titles: the usual scroll edge.
+        expect(large.stops!.first, GlassTokens.toolbarFadeSolidStop);
+      }
+
+      await tester.pumpWidget(bar(scrollEdge: true));
+      expect(fadeGradient().stops!.first, GlassTokens.toolbarFadeSolidStop);
+      expect(fadeGradient().colors.first.a, lessThan(1));
     }, variant: _darwin);
 
     testWidgets('capsule inside a blurring surface does not blur again',

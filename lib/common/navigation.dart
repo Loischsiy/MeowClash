@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 /// when pushed from "More" on iPhone. Opt-in: other pages keep their own top
 /// padding and would hide content under the bar.
 const scrollUnderToolbarPages = {
+  PageLabel.dashboard,
   PageLabel.tools,
   PageLabel.proxies,
   PageLabel.profiles,

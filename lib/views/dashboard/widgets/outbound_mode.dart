@@ -2,6 +2,7 @@ import 'package:meowclash/common/common.dart';
 import 'package:meowclash/enum/enum.dart';
 import 'package:meowclash/providers/config.dart';
 import 'package:meowclash/state.dart';
+import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:meowclash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,6 +13,7 @@ class OutboundMode extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (AdaptivePlatform.useGlass) return _buildGlass(context);
     final height = getWidgetHeight(2);
     return SizedBox(
       height: height,
@@ -80,19 +82,65 @@ class OutboundMode extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildGlass(BuildContext context) => SizedBox(
+        height: getWidgetHeight(2),
+        child: AdaptiveWidgetTile(
+          info: Info(
+            label: appLocalizations.outboundMode,
+            iconData: Icons.call_split_sharp,
+          ),
+          child: Consumer(
+            builder: (_, ref, __) {
+              final mode = ref.watch(
+                patchClashConfigProvider.select((state) => state.mode),
+              );
+              // The tile height is fixed by the grid: with large text the
+              // three rows scale down to fit instead of overflowing.
+              return LayoutBuilder(
+                builder: (_, constraints) => FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: SizedBox(
+                    width: constraints.maxWidth,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        for (final item in Mode.values)
+                          GlassListRow(
+                            title: Text(Intl.message(item.name)),
+                            selected: item == mode,
+                            accessory: item == mode
+                                ? GlassRowAccessory.checkmark
+                                : GlassRowAccessory.none,
+                            onTap: item == mode
+                                ? null
+                                : () =>
+                                    globalState.appController.changeMode(item),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
 }
 
 class OutboundModeV2 extends StatelessWidget {
   const OutboundModeV2({super.key});
 
   Color _getTextColor(BuildContext context, Mode mode) => switch (mode) {
-      Mode.rule => context.colorScheme.onSecondaryContainer,
-      Mode.global => context.colorScheme.onPrimaryContainer,
-      Mode.direct => context.colorScheme.onTertiaryContainer,
-    };
+        Mode.rule => context.colorScheme.onSecondaryContainer,
+        Mode.global => context.colorScheme.onPrimaryContainer,
+        Mode.direct => context.colorScheme.onTertiaryContainer,
+      };
 
   @override
   Widget build(BuildContext context) {
+    if (AdaptivePlatform.useGlass) return _buildGlass(context);
     final height = getWidgetHeight(0.72);
     return SizedBox(
       height: height,
@@ -150,6 +198,36 @@ class OutboundModeV2 extends StatelessWidget {
                   globalState.appController.changeMode(value);
                 },
                 thumbColor: thumbColor,
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGlass(BuildContext context) {
+    final padding = AdaptiveWidgetTile.glassPadding();
+    return SizedBox(
+      height: getWidgetHeight(0.72),
+      child: AdaptiveWidgetTile(
+        child: Consumer(
+          builder: (_, ref, __) {
+            final mode = ref.watch(
+              patchClashConfigProvider.select((state) => state.mode),
+            );
+            return Padding(
+              padding: EdgeInsets.symmetric(horizontal: padding),
+              child: Center(
+                child: GlassSegmentedControl<Mode>(
+                  large: true,
+                  segments: {
+                    for (final item in Mode.values)
+                      item: Intl.message(item.name),
+                  },
+                  groupValue: mode,
+                  onValueChanged: globalState.appController.changeMode,
+                ),
               ),
             );
           },

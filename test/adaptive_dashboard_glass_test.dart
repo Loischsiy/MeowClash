@@ -1,0 +1,584 @@
+import 'dart:async';
+
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:meowclash/enum/enum.dart';
+import 'package:meowclash/models/ip_details.dart';
+import 'package:meowclash/providers/providers.dart';
+import 'package:meowclash/state.dart';
+import 'package:meowclash/views/dashboard/dashboard.dart';
+import 'package:meowclash/views/dashboard/widgets/core_status_dialog.dart';
+import 'package:meowclash/views/dashboard/widgets/ip_details_dialog.dart';
+import 'package:meowclash/views/dashboard/widgets/start_button.dart';
+import 'package:meowclash/views/dashboard/widgets/widgets.dart';
+import 'package:meowclash/widgets/adaptive/adaptive.dart';
+import 'package:meowclash/widgets/widgets.dart';
+
+import 'dashboard_test_support.dart';
+import 'settings_test_support.dart';
+
+/// Darwin glass "Dashboard": the widget tiles, their states and fallbacks.
+/// The Material screen is pinned by `material_dashboard_golden_test.dart`.
+void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  setUpAll(() => setUpSettingsEnvironment('meowclash_dashboard_glass'));
+
+  const mobile = Size(400, 900);
+  const wide = Size(1100, 800);
+  const darwin =
+      TargetPlatformVariant({TargetPlatform.macOS, TargetPlatform.iOS});
+
+  group('tiles', () {
+    for (final brightness in Brightness.values) {
+      final b = brightness.name;
+
+      testWidgets('all widgets, wide, started, $b', (tester) async {
+        await setUpDashboardScreen(
+          tester,
+          wide,
+          widgets: dashboardWidgetsAll,
+          started: true,
+        );
+        await pumpDashboard(tester, dashboardHost(brightness));
+        expect(tester.takeException(), isNull);
+        expect(find.byType(AdaptiveWidgetTile), findsWidgets);
+        expect(
+          find.descendant(
+            of: find.byType(AdaptiveWidgetTile),
+            matching: find.byType(BackdropFilter),
+          ),
+          findsNothing,
+        );
+        expect(find.byType(Switch), findsNothing);
+        expect(find.byType(Radio<Object?>), findsNothing);
+        expect(find.byType(LinearProgressIndicator), findsNothing);
+        expect(find.byType(CircularProgressIndicator), findsNothing);
+        expect(find.byType(AlertDialog), findsNothing);
+        await tearDownDashboard(tester);
+      }, variant: darwin);
+
+      testWidgets('widgets A and B, mobile, $b', (tester) async {
+        await setUpDashboardScreen(tester, mobile);
+        await pumpDashboard(tester, dashboardHost(brightness));
+        expect(tester.takeException(), isNull);
+        await tearDownDashboard(tester);
+
+        await setUpDashboardScreen(
+          tester,
+          mobile,
+          widgets: dashboardWidgetsB,
+          started: true,
+        );
+        await pumpDashboard(tester, dashboardHost(brightness));
+        expect(tester.takeException(), isNull);
+        await tearDownDashboard(tester);
+      }, variant: darwin);
+
+      testWidgets('no profiles, $b', (tester) async {
+        await setUpDashboardScreen(tester, mobile, profiles: const []);
+        await pumpDashboard(tester, dashboardHost(brightness));
+        expect(tester.takeException(), isNull);
+        expect(find.byType(GlassButton), findsWidgets);
+        await tearDownDashboard(tester);
+      }, variant: darwin);
+    }
+  });
+
+  group('large text and narrow windows', () {
+    for (final (scale, size) in [
+      (1.5, mobile),
+      (1.0, const Size(320, 700)),
+      (1.5, const Size(320, 700)),
+    ]) {
+      testWidgets('widgets A and B, ${scale}x text, ${size.width.toInt()} wide',
+          (tester) async {
+        tester.platformDispatcher.textScaleFactorTestValue = scale;
+        addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+        for (final widgets in [dashboardWidgetsA, dashboardWidgetsB]) {
+          await setUpDashboardScreen(tester, size,
+              widgets: widgets, started: true);
+          await pumpDashboard(tester, dashboardHost(Brightness.light));
+          expect(tester.takeException(), isNull);
+          await tearDownDashboard(tester);
+        }
+      }, variant: darwin);
+    }
+  });
+
+  group('controls', () {
+    ProviderContainer container(WidgetTester tester) =>
+        ProviderScope.containerOf(tester.element(find.byType(DashboardView)));
+
+    Mode mode(WidgetTester tester) =>
+        container(tester).read(patchClashConfigProvider).mode;
+
+    testWidgets('segments and rows change the outbound mode', (tester) async {
+      await setUpDashboardScreen(tester, wide);
+      await pumpDashboard(tester, dashboardHost(Brightness.light));
+      final segments = find.byType(GlassSegmentedControl<Mode>);
+      expect(segments, findsOneWidget);
+      expect(mode(tester), Mode.rule);
+
+      await tester.tap(
+        find.descendant(of: segments, matching: find.text('Global')).first,
+      );
+      await pumpSettingsFrames(tester);
+      expect(tester.takeException(), isNull);
+      expect(mode(tester), Mode.global);
+
+      await tester.tap(find.descendant(
+        of: find.byType(OutboundMode),
+        matching: find.text('Direct'),
+      ));
+      await pumpSettingsFrames(tester);
+      expect(mode(tester), Mode.direct);
+      expect(
+        tester.widget<GlassSegmentedControl<Mode>>(segments).groupValue,
+        Mode.direct,
+      );
+      await tearDownDashboard(tester);
+    }, variant: darwin);
+
+    testWidgets('TUN and system proxy switches write their settings',
+        (tester) async {
+      await setUpDashboardScreen(tester, mobile, widgets: dashboardWidgetsB);
+      await pumpDashboard(tester, dashboardHost(Brightness.light));
+      Finder toggle(Type tile) => find.descendant(
+            of: find.byType(tile),
+            matching: find.byType(AdaptiveSwitch),
+          );
+      expect(find.byType(Switch), findsNothing);
+
+      final tun = container(tester).read(patchClashConfigProvider).tun.enable;
+      await tester.tap(toggle(TUNButton));
+      await pumpSettingsFrames(tester);
+      expect(tester.takeException(), isNull);
+      expect(
+        container(tester).read(patchClashConfigProvider).tun.enable,
+        !tun,
+      );
+
+      final proxy = container(tester).read(networkSettingProvider).systemProxy;
+      await tester.tap(toggle(SystemProxyButton));
+      await pumpSettingsFrames(tester);
+      expect(tester.takeException(), isNull);
+      expect(
+        container(tester).read(networkSettingProvider).systemProxy,
+        !proxy,
+      );
+      await tearDownDashboard(tester);
+    }, variant: darwin);
+  });
+
+  group('accessibility fallbacks', () {
+    /// The fill of every tile: the [AdaptiveCard]'s own container is the
+    /// first one under the tile.
+    List<Color> tileFills(WidgetTester tester) => [
+          for (final tile in find.byType(AdaptiveWidgetTile).evaluate())
+            (tester
+                    .widget<AnimatedContainer>(find
+                        .descendant(
+                          of: find.byElementPredicate((e) => e == tile),
+                          matching: find.byType(AnimatedContainer),
+                        )
+                        .first)
+                    .decoration! as ShapeDecoration)
+                .color!,
+        ];
+
+    Finder inGrid(Finder matching) =>
+        find.descendant(of: find.byType(SuperGrid), matching: matching);
+
+    for (final brightness in Brightness.values) {
+      final b = brightness.name;
+
+      testWidgets('Reduce Transparency: opaque tiles, translucent after, $b',
+          (tester) async {
+        final accessibility = GlassAccessibilityController();
+        addTearDown(accessibility.dispose);
+        accessibility.value =
+            const GlassAccessibility(reduceTransparency: true);
+        await setUpDashboardScreen(tester, wide,
+            widgets: dashboardWidgetsAll, started: true);
+        await pumpDashboard(
+          tester,
+          GlassAccessibilityScope(
+            controller: accessibility,
+            child: dashboardHost(brightness),
+          ),
+        );
+        expect(tileFills(tester), isNotEmpty);
+        expect(tileFills(tester).every((color) => color.a == 1), isTrue);
+        expect(inGrid(find.byType(BackdropFilter)), findsNothing);
+
+        accessibility.value = GlassAccessibility.fallback;
+        await pumpSettingsFrames(tester);
+        expect(tester.takeException(), isNull);
+        expect(tileFills(tester).every((color) => color.a < 1), isTrue);
+        await tearDownDashboard(tester);
+      }, variant: darwin);
+
+      testWidgets('blur kill switch: opaque tiles, no blur at all, $b',
+          (tester) async {
+        GlassFlags.backdropBlurEnabled = false;
+        addTearDown(() => GlassFlags.backdropBlurEnabled = true);
+        await setUpDashboardScreen(tester, wide,
+            widgets: dashboardWidgetsAll, started: true);
+        await pumpDashboard(tester, dashboardHost(brightness));
+        expect(tileFills(tester), isNotEmpty);
+        expect(tileFills(tester).every((color) => color.a == 1), isTrue);
+        expect(find.byType(BackdropFilter), findsNothing);
+        await tearDownDashboard(tester);
+      }, variant: darwin);
+    }
+  });
+
+  group('start button', () {
+    Finder inButton(Finder matching) =>
+        find.descendant(of: find.byType(StartButton), matching: matching);
+
+    Color? fill(WidgetTester tester) {
+      final container = tester
+          .widget<AnimatedContainer>(inButton(find.byType(AnimatedContainer)));
+      return (container.decoration as BoxDecoration?)?.color;
+    }
+
+    for (final brightness in Brightness.values) {
+      final b = brightness.name;
+
+      testWidgets('idle and connected fills, press dims, $b', (tester) async {
+        await setUpDashboardScreen(tester, mobile);
+        await pumpDashboard(tester, dashboardHost(brightness));
+        expect(tester.takeException(), isNull);
+        expect(fill(tester), GlassTokens.startButtonIdleFill(brightness));
+        expect(inButton(find.byType(AnimatedSwitcher)), findsNothing);
+
+        final gesture = await tester
+            .startGesture(tester.getCenter(find.byType(StartButton)));
+        // onTapDown fires after kPressTimeout; the next frame animates.
+        await tester.pump(kPressTimeout + const Duration(milliseconds: 10));
+        await tester.pump(const Duration(milliseconds: 200));
+        expect(inButton(find.byType(Transform)), findsNothing);
+        expect(
+          tester.widget<Opacity>(inButton(find.byType(Opacity))).opacity,
+          lessThan(1),
+        );
+        await gesture.cancel();
+        await tester.pump(const Duration(milliseconds: 200));
+        await tearDownDashboard(tester);
+
+        await setUpDashboardScreen(tester, mobile, started: true);
+        await pumpDashboard(tester, dashboardHost(brightness));
+        expect(tester.takeException(), isNull);
+        expect(fill(tester), GlassTokens.systemGreen(brightness));
+        await tearDownDashboard(tester);
+      }, variant: darwin);
+
+      testWidgets('TUN failure uses glass buttons, 1.5x text, $b',
+          (tester) async {
+        tester.platformDispatcher.textScaleFactorTestValue = 1.5;
+        addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+        await setUpDashboardScreen(tester, const Size(320, 700));
+        await pumpDashboard(
+          tester,
+          dashboardHost(brightness, tunFailure: 'tun: permission denied'),
+        );
+        expect(tester.takeException(), isNull);
+        expect(inButton(find.byType(GlassIconButton)), findsOneWidget);
+        expect(inButton(find.byType(GlassButton)), findsOneWidget);
+        expect(inButton(find.byType(IconButton)), findsNothing);
+        expect(inButton(find.byType(TextButton)), findsNothing);
+        await tearDownDashboard(tester);
+      }, variant: darwin);
+    }
+
+    testWidgets('Reduce Motion: the cat sits still', (tester) async {
+      tester.platformDispatcher.accessibilityFeaturesTestValue =
+          const FakeAccessibilityFeatures(disableAnimations: true);
+      addTearDown(
+        tester.platformDispatcher.clearAccessibilityFeaturesTestValue,
+      );
+      await setUpDashboardScreen(tester, mobile);
+      await pumpDashboard(tester, dashboardHost(Brightness.light));
+      expect(tester.takeException(), isNull);
+      await tester.pump(const Duration(seconds: 1));
+      expect(tester.binding.hasScheduledFrame, isFalse);
+      await tearDownDashboard(tester);
+    }, variant: darwin);
+  });
+
+  group('editing', () {
+    Finder inGrid(Finder matching) =>
+        find.descendant(of: find.byType(SuperGrid), matching: matching);
+
+    bool anyTileTilted(WidgetTester tester) => tester
+        .widgetList<Transform>(inGrid(find.byType(Transform)))
+        .any((t) => t.transform.entry(1, 0).abs() > 1e-6);
+
+    for (final brightness in Brightness.values) {
+      final b = brightness.name;
+
+      testWidgets('Edit / Done text, remove and add badges, $b',
+          (tester) async {
+        // The add sheet lists only the two missing widgets: the media unlock
+        // tile fits its status texts in the test font only in the wide grid.
+        await setUpDashboardScreen(tester, wide, widgets: [
+          for (final w in dashboardWidgetsAll)
+            if (w != DashboardWidget.intranetIp &&
+                w != DashboardWidget.memoryInfo)
+              w,
+        ]);
+        await pumpDashboard(tester, dashboardHost(brightness));
+        expect(find.text('Edit'), findsOneWidget);
+        expect(find.byIcon(Icons.edit), findsNothing);
+        expect(find.byType(GlassEditBadge), findsNothing);
+
+        await toggleDashboardEdit(tester);
+        expect(tester.takeException(), isNull);
+        expect(find.text('Done'), findsOneWidget);
+        expect(find.byIcon(Icons.save), findsNothing);
+        expect(inGrid(find.byType(GlassEditBadge)), findsWidgets);
+        expect(inGrid(find.byType(IconButton)), findsNothing);
+        expect(inGrid(find.byType(BackdropFilter)), findsNothing);
+
+        await tester.tap(find.byIcon(Icons.add_rounded));
+        await pumpSettingsFrames(tester);
+        expect(tester.takeException(), isNull);
+        expect(find.byType(GlassEditBadge), findsWidgets);
+        await tester.tapAt(const Offset(4, 4));
+        await pumpSettingsFrames(tester);
+
+        await toggleDashboardEdit(tester);
+        expect(find.text('Edit'), findsOneWidget);
+        expect(find.byType(GlassEditBadge), findsNothing);
+        await tearDownDashboard(tester);
+      }, variant: darwin);
+    }
+
+    testWidgets('Reduce Motion: no wiggle while editing', (tester) async {
+      tester.platformDispatcher.accessibilityFeaturesTestValue =
+          const FakeAccessibilityFeatures(disableAnimations: true);
+      addTearDown(
+        tester.platformDispatcher.clearAccessibilityFeaturesTestValue,
+      );
+      await setUpDashboardScreen(tester, wide);
+      await pumpDashboard(tester, dashboardHost(Brightness.light));
+      await tester.tap(find.byType(GlassToolbarTextButton));
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+      for (var i = 0; i < 10; i++) {
+        await tester.pump(const Duration(milliseconds: 37));
+        expect(anyTileTilted(tester), isFalse);
+      }
+      expect(inGrid(find.byType(GlassEditBadge)), findsWidgets);
+      await tearDownDashboard(tester);
+    }, variant: darwin);
+  });
+
+  group('scroll under the toolbar', () {
+    Finder gridScroll() => find
+        .descendant(
+          of: find.byType(DashboardView),
+          matching: find.byType(SingleChildScrollView),
+        )
+        .first;
+
+    // Tall enough to scroll on a phone; the small media unlock tile only
+    // fits its status texts in the test font on the wide grid.
+    final tall = [
+      for (final w in dashboardWidgetsAll)
+        if (w != DashboardWidget.mediaUnlockSmall) w,
+    ];
+
+    testWidgets('grid starts below the bar and scrolls under it',
+        (tester) async {
+      await setUpDashboardScreen(tester, mobile, widgets: tall);
+      await pumpDashboard(tester, dashboardHost(Brightness.light));
+      final pinnedTop = tester.getRect(gridScroll()).top;
+      final tileTop =
+          tester.getRect(find.byType(AdaptiveWidgetTile).first).top;
+      final buttonRect = tester.getRect(find.byType(StartButton));
+      expect(pinnedTop, greaterThan(0));
+      await tearDownDashboard(tester);
+
+      await setUpDashboardScreen(tester, mobile, widgets: tall);
+      await pumpDashboard(
+        tester,
+        dashboardHost(Brightness.light, scrollUnderToolbar: true),
+      );
+      expect(tester.takeException(), isNull);
+      // The scroll view reaches the window top; the first tile still starts
+      // right below the bar, and the start button keeps its place.
+      expect(tester.getRect(gridScroll()).top, 0);
+      expect(
+        tester.getRect(find.byType(AdaptiveWidgetTile).first).top,
+        moreOrLessEquals(tileTop),
+      );
+      expect(tester.getRect(find.byType(StartButton)), buttonRect);
+
+      await tester.drag(gridScroll(), const Offset(0, -150));
+      await tester.pump();
+      final scrolled =
+          tester.getRect(find.byType(AdaptiveWidgetTile).first).top;
+      expect(scrolled, lessThan(tileTop - 100));
+      expect(tester.getRect(find.byType(StartButton)), buttonRect);
+      expect(
+        find.descendant(
+          of: find.byType(DashboardView),
+          matching: find.byType(BackdropFilter),
+        ),
+        findsNothing,
+      );
+      await tearDownDashboard(tester);
+    }, variant: darwin);
+  });
+
+  group('dialogs', () {
+    Finder inDialog(Finder matching) =>
+        find.descendant(of: find.byType(GlassDialog), matching: matching);
+
+    void expectGlassDialog() {
+      expect(find.byType(GlassDialog), findsOneWidget);
+      expect(find.byType(AlertDialog), findsNothing);
+      expect(inDialog(find.byType(LinearProgressIndicator)), findsNothing);
+      expect(inDialog(find.byType(CircularProgressIndicator)), findsNothing);
+      expect(inDialog(find.byType(IconButton)), findsNothing);
+      // One glass layer at most: the panel (none with the blur kill switch).
+      expect(
+        inDialog(find.byType(BackdropFilter)).evaluate().length,
+        lessThanOrEqualTo(1),
+      );
+    }
+
+    Future<void> showIpDetails(
+      WidgetTester tester,
+      IpDetailsLoader loader,
+    ) async {
+      unawaited(globalState.showCommonDialog<void>(
+        child: IpDetailsDialog(
+          ipInfo: sampleIpInfo,
+          loadDetails: loader,
+          onRefresh: () {},
+        ),
+      ));
+      await pumpSettingsFrames(tester);
+    }
+
+    for (final brightness in Brightness.values) {
+      final b = brightness.name;
+
+      testWidgets('IP details: rows, loading, failure and retry, $b',
+          (tester) async {
+        await setUpDashboardScreen(tester, mobile, widgets: dashboardWidgetsB);
+        await pumpDashboard(tester, dashboardHost(brightness));
+
+        await openIpDetailsDialog(tester);
+        expect(tester.takeException(), isNull);
+        expectGlassDialog();
+        expect(inDialog(find.byType(GlassIconButton)), findsOneWidget);
+        expect(inDialog(find.text('example.net')), findsOneWidget);
+        expect(inDialog(find.byType(CupertinoActivityIndicator)), findsNothing);
+        await tester.tap(inDialog(find.byType(TextButton)).last);
+        await pumpSettingsFrames(tester);
+        expect(find.byType(GlassDialog), findsNothing);
+
+        final pending = Completer<IpDetails?>();
+        await showIpDetails(
+          tester,
+          ({required ip, required languageCode, cancelToken}) =>
+              pending.future,
+        );
+        expectGlassDialog();
+        expect(inDialog(find.byType(CupertinoActivityIndicator)), findsOneWidget);
+        await tester.tap(inDialog(find.byType(TextButton)).last);
+        await pumpSettingsFrames(tester);
+
+        var calls = 0;
+        await showIpDetails(
+          tester,
+          ({required ip, required languageCode, cancelToken}) async {
+            calls++;
+            return null;
+          },
+        );
+        expectGlassDialog();
+        expect(inDialog(find.byType(GlassButton)), findsOneWidget);
+        await tester.tap(inDialog(find.byType(GlassButton)));
+        await pumpSettingsFrames(tester);
+        expect(calls, 2);
+        await tester.tap(inDialog(find.byType(TextButton)).last);
+        await pumpSettingsFrames(tester);
+        await tearDownDashboard(tester);
+      }, variant: darwin);
+
+      testWidgets('IP details fit 1.5x text on a narrow window, $b',
+          (tester) async {
+        tester.platformDispatcher.textScaleFactorTestValue = 1.5;
+        addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+        await setUpDashboardScreen(tester, const Size(320, 600),
+            widgets: dashboardWidgetsB);
+        await pumpDashboard(tester, dashboardHost(brightness));
+        await openIpDetailsDialog(tester);
+        expect(tester.takeException(), isNull);
+        expectGlassDialog();
+        await tester.tap(inDialog(find.byType(TextButton)).last);
+        await pumpSettingsFrames(tester);
+        await tearDownDashboard(tester);
+      }, variant: darwin);
+
+      testWidgets('TUN failure dialog is glass, $b', (tester) async {
+        await setUpDashboardScreen(tester, wide);
+        await pumpDashboard(
+          tester,
+          dashboardHost(brightness, tunFailure: 'route: operation not permitted'),
+        );
+        await tester.tap(find.descendant(
+          of: find.byType(StartButton),
+          matching: find.byType(GlassIconButton),
+        ));
+        await pumpSettingsFrames(tester);
+        expect(tester.takeException(), isNull);
+        expectGlassDialog();
+        expect(
+          inDialog(find.text('route: operation not permitted')),
+          findsOneWidget,
+        );
+        await tester.tap(inDialog(find.byType(TextButton)));
+        await pumpSettingsFrames(tester);
+        expect(find.byType(GlassDialog), findsNothing);
+        await tearDownDashboard(tester);
+      }, variant: darwin);
+
+      testWidgets('core status ring uses the system colors, $b',
+          (tester) async {
+        await setUpDashboardScreen(tester, mobile);
+        await pumpDashboard(tester, dashboardHost(brightness));
+        unawaited(globalState.showCommonDialog<void>(
+          child: CoreStatusDialog(
+            loadStatus: () async => null,
+            readShellMemory: () => (rss: 0, maxRss: 0),
+            coreInAppProcess: true,
+            onReleaseMemory: () {},
+          ),
+        ));
+        await pumpSettingsFrames(tester);
+        expect(tester.takeException(), isNull);
+        expectGlassDialog();
+        Finder dot(Color color) => inDialog(find.byWidgetPredicate((w) =>
+            w is Container &&
+            w.decoration is BoxDecoration &&
+            (w.decoration! as BoxDecoration).shape == BoxShape.circle &&
+            (w.decoration! as BoxDecoration).color == color));
+        expect(dot(GlassTokens.memoryAllocated(brightness)), findsOneWidget);
+        expect(dot(GlassTokens.memoryReclaimable(brightness)), findsOneWidget);
+        await tester.tap(inDialog(find.byType(TextButton)).last);
+        await pumpSettingsFrames(tester);
+        await tearDownDashboard(tester);
+      }, variant: darwin);
+    }
+  });
+}

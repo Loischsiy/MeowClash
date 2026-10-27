@@ -25,11 +25,21 @@ pixel-for-pixel. Code: `lib/widgets/adaptive/` (import `adaptive.dart`).
   inside a blurred surface), never an `Opacity` above a blur (animate scale / color instead).
 - `GlassSurface` is the single primitive. `GlassBackdrop.blur` = one `BackdropFilter` (iOS bars, sheets,
   menus); `GlassBackdrop.native` = faint tint only, the AppKit glass behind the transparent Flutter view
-  shows through (macOS sidebar and title bar, zero `BackdropFilter`).
+  shows through (macOS sidebar and title bar, zero `BackdropFilter`). The blur uses
+  `BlendMode.src`: with the default `srcOver` the blurred copy is drawn *over* the original, so over
+  the transparent parts of the macOS window (native sidebar / title bar) the sharp text underneath
+  still showed through a modal panel. Over opaque content the pixels are the same.
 - Sheets: on Darwin `showSheet` / `showExtend` skip the old full-screen `BackdropFilter` and
   `AdaptiveSheetScaffold` blurs only its own surface. A side sheet is a floating panel: inset
   `sideSheetInset` from the window edges, every corner rounded (`sideSheetRadiusMac/Ios`), the window
   insets inside reduced by the gap so its toolbar still clears the macOS title bar strip.
+- Detents: `SheetProps.expandable` (glass phones only, Material ignores it) wraps the bottom sheet in
+  `GlassSheetDetents` (`lib/widgets/adaptive/glass_sheet_detents.dart`): it opens at the medium detent
+  (`sheetMediumDetent` = 9/16, the old height), drags to full screen (`sheetLargeDetent`) and below
+  `sheetDismissDetent` closes; a fling past `sheetFlingVelocity` picks the next detent, the settle runs
+  `sheetDetentDuration` / `sheetDetentCurve`. The header (`GlassSheetDragArea`) drags too and a tap on
+  the grabber toggles medium ↔ large; the content scrolls through the sheet's `PrimaryScrollController`,
+  so it expands first and scrolls after. Used by the dashboard "Add widgets" sheet.
 - `SheetType.page` (phones, `showExtend`) is an opaque full-screen route with nothing behind it to
   blur: `AdaptiveSheetScaffold` renders it without glass, on the theme's opaque page background.
   Glass there would only tint an empty backdrop flat grey.
@@ -57,12 +67,17 @@ pixel-for-pixel. Code: `lib/widgets/adaptive/` (import `adaptive.dart`).
   `GlassToolbarSearchField` replaces the title and the actions hide. Budget: 1–3 blurs per bar.
 - Sizes (`GlassTokens.toolbar*`): macOS 52 pt bar, compact 15 pt title at the leading edge; iOS 44 pt
   bar under the status bar, centered 17 pt title. macOS keeps window drag on the bar (`onWindowDrag`).
-- iOS root pages (no back / close button, `CommonScaffold._isRootPage`) get the iOS 26 large title: the
-  44 pt row keeps only the capsules and a second 52 pt row holds a 34 pt bold title at the leading edge
-  (`toolbarLargeTitle*`). It stays while searching and scrolling, so the bar never changes height; pushed
+- iOS root pages (no back / close button, `CommonScaffold._isRootPage`) get the iOS 26 large title: one
+  52 pt row with a 34 pt bold title at the leading edge and the capsules at the trailing edge, centered on
+  the title's line (`toolbarLargeTitle*`, `toolbarLargeTitleActionsBottomIos`) — a separate 44 pt button
+  row above it left the capsules stuck in the corner, above the title. While searching the back capsule
+  and the field take that row; it stays while scrolling, so the bar never changes height; pushed
   pages keep the centered 17 pt title, macOS keeps one row. Without a status bar (top inset 0) the bar
   still keeps `toolbarMinTopInsetIos` above the capsules. Bar height always comes from
   `AdaptiveAppBar.preferredHeight`; pages read it only through `AdaptiveAppBar.topInset` (MediaQuery).
+  Under a large title the scroll-edge backdrop is solid (`toolbarLargeTitleBackdropOpacity`) down to the
+  bar's bottom edge and fades only below it — with the usual `toolbarFadeSolidStop` the title row sat in
+  the faded part and scrolled content showed through the title.
 - A capsule inside an already blurring surface (e.g. `CommonScaffold` in a glass sheet) switches to
   `GlassBackdrop.native` via `GlassSurface.isOverBlur` — never blur over blur. Its fill is then
   `GlassTokens.toolbarItemTintOverGlass` (light 0.18 = the native wash, dark 0.56) so in dark it reads as
@@ -97,7 +112,10 @@ pixel-for-pixel. Code: `lib/widgets/adaptive/` (import `adaptive.dart`).
   focus only), `AdaptiveDelayBadge` (pill, `CupertinoActivityIndicator`, bolt),
   `AdaptiveGroupHeader` (collapsible group row; blurred only while `pinned`),
   `AdaptiveGroupSelector` (floating glass group bar over a `TabController`),
-  `AdaptiveFloatingButton` (glass circle, `busy` spinner), `AdaptiveEmptyState`,
+  `AdaptiveFloatingButton` (glass circle, `busy` spinner; `prominent` = the primary "+" of a page —
+  glass tinted with the accent at `floatingButtonProminentTintOpacity`, `onPrimary` symbol, solid accent
+  with Reduce Transparency; Profiles, scripts and the list / map editors of `input.dart` use it),
+  `AdaptiveEmptyState`,
   `AdaptiveActivityIndicator`, `AdaptiveProgressBar` (static capsule, no animation; the Material
   branch is the old `LinearProgressIndicator`), `GlassIconButton` (Darwin-only symbol button,
   `busy` spinner).
@@ -145,8 +163,8 @@ pixel-for-pixel. Code: `lib/widgets/adaptive/` (import `adaptive.dart`).
   glass checks live in `test/adaptive_profile_editors_glass_test.dart`.
 - Settings (app-wide `ListItem`, `lib/widgets/list.dart`): `ListItem`, `ListHeader`, `generateSection(V2)`
   and `generateListView` render `GlassListRow` / `GlassListSection` only inside a `GlassListScope`
-  (`GlassListView` provides it); outside it they stay Material verbatim, so the dashboard mode radios are
-  untouched (connections and logs have their own flat rows, see below). `_groupGlassSections` turns a flat header + items list into
+  (`GlassListView` provides it); outside it they stay Material verbatim (the dashboard and connections /
+  logs have their own glass rows, see below). `_groupGlassSections` turns a flat header + items list into
   sections. Row kinds: `options` → `GlassPopUpButton` with the value at the trailing edge (macOS
   `NSMenu`, iOS glass menu); `input` → value + chevron; `open` / `next` → chevron (phone: `GlassPageRoute` push,
   desktop: `showExtend` side sheet on the spring); `switch` → `AdaptiveSwitch`; `radio` / `checkbox` →
@@ -189,6 +207,32 @@ pixel-for-pixel. Code: `lib/widgets/adaptive/` (import `adaptive.dart`).
   Material: `test/connections_logs_performance_test.dart` (printed, not asserted); shared host
   `test/connections_logs_test_support.dart`. In tests the list is the `Scrollable` with
   `axisDirection == AxisDirection.up` — every `SelectableText` has its own `Scrollable`.
+- Dashboard (`lib/views/dashboard/`): tiles after the macOS 26 / iOS 26 widgets. Every
+  `CommonCard(info:)` is an `AdaptiveWidgetTile` (`adaptive_widget_tile.dart`: Material = `CommonCard`
+  verbatim; Darwin = `AdaptiveCard` with `widgetTileRadius`, a header of the symbol in the accent + a
+  small secondary title, `GlassWidgetTileBody` / `GlassWidgetValue` for the large tabular figure that
+  scales down instead of overflowing). The grid never blurs — not at rest, not in edit mode; Reduce
+  Transparency and the blur kill switch make every tile fill opaque. Outbound mode: V2 =
+  `GlassSegmentedControl` (neutral thumb, instant with Reduce Motion), V1 = three `GlassListRow`s with a
+  checkmark (scaled down to the fixed tile height). TUN / system proxy / VPN toggles are
+  `AdaptiveSwitch`es on `_GlassQuickOptionTile`; spinners `AdaptiveActivityIndicator`, bars
+  `AdaptiveProgressBar`. Charts: ↓ systemBlue, ↑ systemOrange (`chart*` tokens), thinner stroke;
+  `DonutChart` takes `strokeFraction` / `trackColor` (null = the Material ring). Start button: the cat
+  and the shape stay, systemGreen when connected and a neutral fill when idle, press dims instead of
+  scaling, the ambient animation stops with Reduce Motion; the TUN failure line uses `GlassIconButton` /
+  `GlassButton`. Editing: toolbar text "Edit" / "Done" (`GlassToolbarTextButton`, `toolbarEdit` /
+  `toolbarDone` strings), the wiggle stays but not with Reduce Motion, `GlassEditBadge` (gray − to remove,
+  green + in the add sheet), drag feedback = tile × `listRowDragScale` + `floatingShadow` (`SuperGrid`
+  has the Darwin branch next to the Material one). IP details and the TUN failure open `GlassDialog`s
+  (spinner while loading, `GlassButton` to retry); the core status ring uses `memoryAllocated` /
+  `memoryReclaimable`. `PageLabel.dashboard` is in `scrollUnderToolbarPages`: the grid pads by
+  `16 + AdaptiveAppBar.topInset`, the start button stays pinned. Material:
+  `test/material_dashboard_golden_test.dart`; glass: `test/adaptive_dashboard_glass_test.dart` (tiles,
+  start button, editing, scroll under the bar, dialogs, 1.5× text / 320 pt, controls, fallbacks); frame
+  times of live traffic glass vs Material: `test/dashboard_performance_test.dart` (printed, not
+  asserted); shared host `test/dashboard_test_support.dart`. The start button animates forever: never
+  `pumpAndSettle`, use `pumpDashboard` / `tearDownDashboard`. In the test font `MediaUnlockSmall` fits
+  only the wide grid.
 - Dialogs (`lib/widgets/adaptive/adaptive_dialog.dart`): on Darwin `showCommonDialog` goes through
   `showGlassDialog` / `GlassDialogRoute` and `CommonDialog` / `CommonModal` render `GlassDialog` /
   `GlassModalPanel` — one `GlassSurface` each, no blur behind. `dialogBarrierColor`: macOS does not dim
@@ -198,7 +242,10 @@ pixel-for-pixel. Code: `lib/widgets/adaptive/` (import `adaptive.dart`).
   is animated by the dialog itself via `GlassDialogRoute.presenceOf` → `GlassSurface.presence` (sigma,
   fill, rim and shadow scale with it) + scale 1.05→1 (no scale with Reduce Motion or on close); never an
   `Opacity` / `FadeTransition` above the blur. A raw `AlertDialog` pushed through the route falls back
-  to a plain fade (it has no blur). `GlassDialogActions` drops `SizedBox` / `Spacer` between actions:
+  to a plain fade (it has no blur). A secondary control of the dialog (e.g. the media unlock settings
+  gear) goes into `CommonDialog.titleAccessory` / `GlassDialog.titleAccessory` — a `GlassIconButton`
+  (`dialogTitleAccessory*`) at the trailing end of the title row, never among the push buttons; Material
+  ignores it and keeps its actions. `GlassDialogActions` drops `SizedBox` / `Spacer` between actions:
   macOS — 28 pt capsules at the trailing edge, the last one filled with the accent; iOS — full-width
   44 pt buttons over a hairline, two side by side, three or more stacked. Content inherits
   `GlassTheme.form` (fields get `GlassFieldBorder`: filled, no outline, accent ring on focus), so call
@@ -246,6 +293,9 @@ pixel-for-pixel. Code: `lib/widgets/adaptive/` (import `adaptive.dart`).
   sidebar material and `NSMenu`s follow the *system* theme: dark system + light app = gray sidebar.
   iOS never calls it; an older runner without the method is ignored. Swift changes need an app rebuild.
 - New Swift code goes into existing files (a new file needs a `project.pbxproj` entry).
+- Sidebar header (`_SidebarHeader` in `adaptive_sidebar.dart`): the logo is centered on the rows' icon
+  column and "MeowClash" starts where the row labels start (`sidebarHeaderLogoInset`,
+  `sidebarHeaderTitleGap`, derived from `sidebarPadding` and the logo / icon sizes).
 
 ## iOS specifics
 

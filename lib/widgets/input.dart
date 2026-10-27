@@ -269,12 +269,20 @@ class ListInputPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => FloatLayout(
       floatingWidget: FloatWrapper(
-        child: FloatingActionButton(
-          onPressed: () async {
-            _handleAddOrEdit();
-          },
-          child: const Icon(Icons.add),
-        ),
+        // Darwin: the accent glass "+" of the other pages; Material verbatim.
+        child: AdaptivePlatform.useGlass
+            ? AdaptiveFloatingButton(
+                onPressed: _handleAddOrEdit,
+                icon: const Icon(Icons.add),
+                glassIcon: const Icon(Icons.add_rounded),
+                prominent: true,
+              )
+            : FloatingActionButton(
+                onPressed: () async {
+                  _handleAddOrEdit();
+                },
+                child: const Icon(Icons.add),
+              ),
       ),
       child: items.isEmpty
           ? NullStatus(label: appLocalizations.noData)
@@ -412,12 +420,20 @@ class MapInputPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => FloatLayout(
       floatingWidget: FloatWrapper(
-        child: FloatingActionButton(
-          onPressed: () async {
-            _handleAddOrEdit();
-          },
-          child: const Icon(Icons.add),
-        ),
+        // Darwin: the accent glass "+" of the other pages; Material verbatim.
+        child: AdaptivePlatform.useGlass
+            ? AdaptiveFloatingButton(
+                onPressed: _handleAddOrEdit,
+                icon: const Icon(Icons.add),
+                glassIcon: const Icon(Icons.add_rounded),
+                prominent: true,
+              )
+            : FloatingActionButton(
+                onPressed: () async {
+                  _handleAddOrEdit();
+                },
+                child: const Icon(Icons.add),
+              ),
       ),
       child: items.isEmpty
           ? NullStatus(label: appLocalizations.noData)

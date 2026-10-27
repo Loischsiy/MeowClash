@@ -6,7 +6,73 @@ import 'package:meowclash/common/common.dart';
 import 'package:meowclash/models/models.dart';
 import 'package:meowclash/providers/providers.dart';
 import 'package:meowclash/views/media_unlock/media_unlock_page.dart';
+import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:meowclash/widgets/widgets.dart';
+
+/// Darwin: status color of a media-unlock row in the system palette, as on
+/// the media-unlock page.
+Color glassMediaStatusColor(BuildContext context, MediaUnlockStatus status) {
+  final brightness = Theme.of(context).brightness;
+  return switch (status) {
+    MediaUnlockStatus.unlocked => GlassTokens.systemGreen(brightness),
+    MediaUnlockStatus.limited ||
+    MediaUnlockStatus.flagged =>
+      GlassTokens.systemOrange(brightness),
+    MediaUnlockStatus.blocked ||
+    MediaUnlockStatus.failed =>
+      GlassTokens.systemRed(brightness),
+    MediaUnlockStatus.testing => Theme.of(context).colorScheme.primary,
+    MediaUnlockStatus.unknown => Theme.of(context).colorScheme.onSurfaceVariant,
+  };
+}
+
+/// Darwin: the media-unlock tile shared by the large and small widgets —
+/// header with a refresh button (spinner while testing), rows under it, tap
+/// opens the media-unlock page.
+Widget buildGlassMediaUnlockTile(
+  BuildContext context, {
+  required bool isWidgetLoading,
+  required VoidCallback onRefresh,
+  required List<Widget> rows,
+}) {
+  final mac = AdaptivePlatform.isMacOSGlass;
+  final padding = AdaptiveWidgetTile.glassPadding();
+  return AdaptiveWidgetTile(
+    info: Info(
+      label: appLocalizations.mediaUnlock,
+      iconData: Icons.link_rounded,
+    ),
+    trailing: GlassIconButton(
+      size: mac
+          ? GlassTokens.widgetHeaderButtonSizeMac
+          : GlassTokens.widgetHeaderButtonSizeIos,
+      iconSize: mac
+          ? GlassTokens.widgetHeaderButtonIconSizeMac
+          : GlassTokens.widgetHeaderButtonIconSizeIos,
+      busy: isWidgetLoading,
+      icon: const Icon(Icons.sync),
+      onPressed: isWidgetLoading ? null : onRefresh,
+    ),
+    onPressed: () {
+      showExtend(
+        context,
+        builder: (_, type) => MediaUnlockPage(type: type),
+      );
+    },
+    child: Padding(
+      padding: EdgeInsets.fromLTRB(
+        padding,
+        GlassTokens.widgetRowGap,
+        padding,
+        padding,
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: rows,
+      ),
+    ),
+  );
+}
 
 class MediaUnlock extends ConsumerStatefulWidget {
   const MediaUnlock({super.key});
@@ -83,6 +149,9 @@ class _MediaUnlockState extends ConsumerState<MediaUnlock> {
     int? latency,
     BuildContext context,
   ) {
+    if (AdaptivePlatform.useGlass) {
+      return _buildGlassLatencyBar(status, latency, context);
+    }
     if (status == MediaUnlockStatus.testing) {
       return RepaintBoundary(
         child: ClipRRect(
@@ -140,6 +209,28 @@ class _MediaUnlockState extends ConsumerState<MediaUnlock> {
     );
   }
 
+  /// Darwin: a plain track while testing or unavailable (the dot and the
+  /// status text tell which), else the latency fill in the status color.
+  Widget _buildGlassLatencyBar(
+    MediaUnlockStatus status,
+    int? latency,
+    BuildContext context,
+  ) {
+    var widthFactor = 0.0;
+    if (status != MediaUnlockStatus.testing &&
+        !status.isUnavailable &&
+        latency != null &&
+        latency > 0) {
+      widthFactor = (0.10 + (latency / 1000) * 0.90).clamp(0.10, 1.0);
+    }
+    final color = glassMediaStatusColor(context, status);
+    return AdaptiveProgressBar(
+      value: widthFactor,
+      color: color,
+      glassColor: color,
+    );
+  }
+
   Widget _buildPlatformRow(
     MediaPlatform platform,
     MediaUnlockResult? result,
@@ -157,7 +248,9 @@ class _MediaUnlockState extends ConsumerState<MediaUnlock> {
             (isLoading
                 ? MediaUnlockStatus.testing
                 : MediaUnlockStatus.unknown));
-    final color = status.statusColor(context.colorScheme);
+    final color = AdaptivePlatform.useGlass
+        ? glassMediaStatusColor(context, status)
+        : status.statusColor(context.colorScheme);
     final latency = result?.latency;
     final String statusDisplay;
     if (status == MediaUnlockStatus.unknown) {
@@ -270,7 +363,9 @@ class _MediaUnlockState extends ConsumerState<MediaUnlock> {
                 fontSize: 11.5.ap,
                 fontFeatures: const [FontFeature.tabularFigures()],
                 color: isError
-                    ? context.colorScheme.error
+                    ? (AdaptivePlatform.useGlass
+                        ? color
+                        : context.colorScheme.error)
                     : context.colorScheme.onSurface,
               ),
               maxLines: 1,
@@ -314,7 +409,27 @@ class _MediaUnlockState extends ConsumerState<MediaUnlock> {
 
           final isWidgetLoading =
               displayedPlatforms.any(state.testingPlatforms.contains);
-          final card = CommonCard(
+          final card = AdaptivePlatform.useGlass
+              ? buildGlassMediaUnlockTile(
+                  context,
+                  isWidgetLoading: isWidgetLoading,
+                  onRefresh: () => mediaUnlockState.checkPlatforms(
+                    displayedPlatforms,
+                    force: true,
+                  ),
+                  rows: [
+                    for (final p in displayedPlatforms)
+                      _buildPlatformRow(
+                        p,
+                        state.results[p],
+                        state.isLoading,
+                        context,
+                        isItemTesting: state.testingPlatforms.contains(p),
+                        colorfulIcons: colorfulIcons,
+                      ),
+                  ],
+                )
+              : CommonCard(
             onPressed: () {
               showExtend(
                 context,

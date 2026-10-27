@@ -747,6 +747,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "tooFrequentOperation": MessageLookupByLibrary.simpleMessage(
       "再度更新する前に15秒お待ちください",
     ),
+    "toolbarDone": MessageLookupByLibrary.simpleMessage("完了"),
+    "toolbarEdit": MessageLookupByLibrary.simpleMessage("編集"),
     "tools": MessageLookupByLibrary.simpleMessage("設定"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("Tproxyポート"),
     "trafficUsage": MessageLookupByLibrary.simpleMessage("トラフィック使用量"),

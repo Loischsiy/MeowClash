@@ -585,5 +585,7 @@
   "repair": "修復",
   "copyHost": "ホストをコピー",
   "filterByProcess": "プロセスで絞り込む",
-  "closeConnection": "接続を閉じる"
+  "closeConnection": "接続を閉じる",
+  "toolbarEdit": "編集",
+  "toolbarDone": "完了"
 }

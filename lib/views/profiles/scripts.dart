@@ -291,6 +291,7 @@ class _ScriptsViewState extends ConsumerState<ScriptsView> {
               onPressed: _handleToEditor,
               icon: const Icon(Icons.add),
               glassIcon: const Icon(Icons.add_rounded),
+              prominent: true,
             )
           : FloatingActionButton(
               onPressed: _handleToEditor,

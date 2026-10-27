@@ -27,7 +27,13 @@ import 'package:meowclash/views/tools.dart';
 import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:meowclash/widgets/color_scheme_box.dart' show ColorSchemeBox;
 import 'package:meowclash/widgets/widgets.dart'
-    show CommonChip, SettingInfoCard, SettingTextCard, generateListView,
+    show
+        CommonChip,
+        ListInputPage,
+        MapInputPage,
+        SettingInfoCard,
+        SettingTextCard,
+        generateListView,
         generateSection;
 
 import 'settings_test_support.dart';
@@ -541,12 +547,52 @@ void main() {
           .where((row) => row.accessory == GlassRowAccessory.checkmark);
       expect(checked, isNotEmpty);
 
-      await tester.tap(find.byIcon(Icons.settings_outlined));
+      // The gear sits beside the dialog title (G.1), not among the actions.
+      expect(find.byIcon(Icons.settings_outlined), findsNothing);
+      await tester.tap(find.byIcon(Icons.settings_rounded));
       await pumpSettingsFrames(tester);
       expect(tester.takeException(), isNull);
       expect(find.byType(AdaptiveSwitch), findsNWidgets(5));
       expect(find.byType(Switch), findsNothing);
     }, variant: darwin);
+  });
+
+  group('List editors add button', () {
+    Widget listPage(BuildContext context) => ListInputPage(
+          title: 'Hosts',
+          items: const ['a', 'b'],
+          titleBuilder: Text.new,
+          onChange: (_) {},
+        );
+
+    Widget mapPage(BuildContext context) => MapInputPage(
+          title: 'Hosts',
+          map: const {'a': '1'},
+          titleBuilder: (e) => Text(e.key),
+          onChange: (_) {},
+        );
+
+    for (final (name, builder) in [('list', listPage), ('map', mapPage)]) {
+      testWidgets('Darwin $name: prominent accent glass, no Material FAB',
+          (tester) async {
+        await pumpPage(tester, builder);
+        final button = tester.widget<AdaptiveFloatingButton>(
+          find.byType(AdaptiveFloatingButton),
+        );
+        expect(button.prominent, isTrue);
+        expect(find.byType(FloatingActionButton), findsNothing);
+      }, variant: darwin);
+
+      testWidgets('Material $name: the stock FloatingActionButton',
+          (tester) async {
+        AdaptivePlatform.debugUseGlassOverride = false;
+        await setUpSettingsScreen(tester, size);
+        await tester.pumpWidget(settingsHost(Brightness.light, builder));
+        await pumpSettingsFrames(tester);
+        expect(find.byType(FloatingActionButton), findsOneWidget);
+        expect(find.byType(AdaptiveFloatingButton), findsNothing);
+      });
+    }
   });
 
   group('AdaptiveSlider', () {

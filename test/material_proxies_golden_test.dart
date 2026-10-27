@@ -11,6 +11,7 @@ import 'package:meowclash/providers/providers.dart';
 import 'package:meowclash/state.dart';
 import 'package:meowclash/views/proxies/list.dart';
 import 'package:meowclash/views/proxies/tab.dart';
+import 'package:meowclash/widgets/setting.dart';
 
 import 'performance_test_support.dart';
 
@@ -182,6 +183,43 @@ void main() {
       await setUp(tester, size: mobile, type: ProxiesType.tab);
       await pumpScreen(tester, host(brightness, const ProxiesTabView()));
       await expectScreen(tester, 'tab_mobile_$b');
+      await tester.pumpWidget(const SizedBox.shrink());
+    }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
+    testWidgets('group sheet, mobile, $b', (tester) async {
+      // The Material more button shows only once the tabs overflow.
+      final manyGroups = [
+        ...groups,
+        for (var i = 1; i <= 6; i++)
+          Group(
+            name: 'Region ${i.toString().padLeft(2, '0')}',
+            type: GroupType.Selector,
+            hidden: false,
+            testUrl: url,
+            all: nodes('R$i', 2),
+          ),
+      ];
+      await setUp(
+        tester,
+        size: mobile,
+        type: ProxiesType.tab,
+        groupsOverride: manyGroups,
+      );
+      await pumpScreen(tester, host(brightness, const ProxiesTabView()));
+      // The more button: expand_more in the mobile view, chevron_right else.
+      await tester.tap(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is Icon &&
+              (widget.icon == Icons.expand_more ||
+                  widget.icon == Icons.chevron_right),
+        ),
+      );
+      for (var i = 0; i < 10; i++) {
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+      expect(find.byType(SettingTextCard), findsNWidgets(manyGroups.length));
+      await expectScreen(tester, 'group_sheet_$b');
       await tester.pumpWidget(const SizedBox.shrink());
     }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 

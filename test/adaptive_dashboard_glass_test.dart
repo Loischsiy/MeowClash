@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:meowclash/enum/enum.dart';
 import 'package:meowclash/models/ip_details.dart';
 import 'package:meowclash/state.dart';
+import 'package:meowclash/views/dashboard/dashboard.dart';
 import 'package:meowclash/views/dashboard/widgets/core_status_dialog.dart';
 import 'package:meowclash/views/dashboard/widgets/ip_details_dialog.dart';
 import 'package:meowclash/views/dashboard/widgets/start_button.dart';
@@ -220,6 +221,64 @@ void main() {
         expect(anyTileTilted(tester), isFalse);
       }
       expect(inGrid(find.byType(GlassEditBadge)), findsWidgets);
+      await tearDownDashboard(tester);
+    }, variant: darwin);
+  });
+
+  group('scroll under the toolbar', () {
+    Finder gridScroll() => find
+        .descendant(
+          of: find.byType(DashboardView),
+          matching: find.byType(SingleChildScrollView),
+        )
+        .first;
+
+    // Tall enough to scroll on a phone; the small media unlock tile only
+    // fits its status texts in the test font on the wide grid.
+    final tall = [
+      for (final w in dashboardWidgetsAll)
+        if (w != DashboardWidget.mediaUnlockSmall) w,
+    ];
+
+    testWidgets('grid starts below the bar and scrolls under it',
+        (tester) async {
+      await setUpDashboardScreen(tester, mobile, widgets: tall);
+      await pumpDashboard(tester, dashboardHost(Brightness.light));
+      final pinnedTop = tester.getRect(gridScroll()).top;
+      final tileTop =
+          tester.getRect(find.byType(AdaptiveWidgetTile).first).top;
+      final buttonRect = tester.getRect(find.byType(StartButton));
+      expect(pinnedTop, greaterThan(0));
+      await tearDownDashboard(tester);
+
+      await setUpDashboardScreen(tester, mobile, widgets: tall);
+      await pumpDashboard(
+        tester,
+        dashboardHost(Brightness.light, scrollUnderToolbar: true),
+      );
+      expect(tester.takeException(), isNull);
+      // The scroll view reaches the window top; the first tile still starts
+      // right below the bar, and the start button keeps its place.
+      expect(tester.getRect(gridScroll()).top, 0);
+      expect(
+        tester.getRect(find.byType(AdaptiveWidgetTile).first).top,
+        moreOrLessEquals(tileTop),
+      );
+      expect(tester.getRect(find.byType(StartButton)), buttonRect);
+
+      await tester.drag(gridScroll(), const Offset(0, -150));
+      await tester.pump();
+      final scrolled =
+          tester.getRect(find.byType(AdaptiveWidgetTile).first).top;
+      expect(scrolled, lessThan(tileTop - 100));
+      expect(tester.getRect(find.byType(StartButton)), buttonRect);
+      expect(
+        find.descendant(
+          of: find.byType(DashboardView),
+          matching: find.byType(BackdropFilter),
+        ),
+        findsNothing,
+      );
       await tearDownDashboard(tester);
     }, variant: darwin);
   });

@@ -161,11 +161,14 @@ Future<void> setUpDashboardScreen(
 
 /// The dashboard inside a real [CommonScaffold] (toolbar actions come from
 /// `PageMixin`). [tunFailure] is the TUN start error shown by the start
-/// button status line.
+/// button status line. [scrollUnderToolbar] is what home.dart passes for the
+/// dashboard (`scrollUnderToolbarPages`); off by default so the Material
+/// goldens keep their host.
 Widget dashboardHost(
   Brightness brightness, {
   String? tunFailure,
   Widget? page,
+  bool scrollUnderToolbar = false,
 }) {
   _lastTunFailure = tunFailure;
   return ProviderScope(
@@ -199,6 +202,7 @@ Widget dashboardHost(
             globalState.theme = CommonTheme.of(context, 1);
             return CommonScaffold(
               title: 'Dashboard',
+              scrollUnderToolbar: scrollUnderToolbar,
               body: page ?? const DashboardView(),
             );
           }),

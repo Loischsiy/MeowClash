@@ -211,8 +211,12 @@ class _DashboardViewState extends ConsumerState<DashboardView> with PageMixin {
         Expanded(
           child: Align(
             alignment: Alignment.topCenter,
+            // Scrolls under the Darwin glass toolbar (`scrollUnderToolbar`
+            // in home.dart); topInset is 0 on Material. The start button
+            // below stays pinned.
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(16).copyWith(
+                top: 16 + AdaptiveAppBar.topInset(context),
                 bottom: 16,
               ),
               child: _buildIsEdit((isEdit) => isEdit

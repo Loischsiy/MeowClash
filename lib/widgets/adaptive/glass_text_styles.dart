@@ -388,6 +388,18 @@ abstract final class GlassTextStyles {
         weight: FontWeight.w600,
       );
 
+  /// Text of a toast banner (`GlassToast`); its action uses [toastAction].
+  static TextStyle toast(TextTheme textTheme) => _style(
+        textTheme.bodyMedium,
+        size: _mac ? GlassTokens.toastTextSizeMac : GlassTokens.toastTextSizeIos,
+        line: _mac ? GlassTokens.toastTextLineMac : GlassTokens.toastTextLineIos,
+        weight: FontWeight.w400,
+      );
+
+  /// Action of a toast banner ("Logs"): same size, semibold.
+  static TextStyle toastAction(TextTheme textTheme) =>
+      toast(textTheme).copyWith(fontWeight: FontWeight.w600);
+
   /// Selected proxy under the group name.
   static TextStyle groupSubtitle(TextTheme textTheme) => _style(
         textTheme.labelMedium,

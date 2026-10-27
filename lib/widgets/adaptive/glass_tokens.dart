@@ -568,6 +568,38 @@ abstract final class GlassTokens {
   static const double easterEggLinkSize = 14;
   static const double easterEggGap = 16;
   static const Color easterEggLinkColor = Color(0xFF2196F3);
+  // Toast (the glass branch of the app notifier, `GlassToast`): a floating
+  // glass banner. macOS: top trailing corner under the unified toolbar, like
+  // a Notification Center banner. iOS: top center under the status bar,
+  // like the system HUD banners (AirPods, Silent mode). Chrome, so blurred.
+  static const double toastRadiusMac = 14;
+  static const double toastRadiusIos = 24;
+  static const double toastPaddingHorizontal = 16;
+  static const double toastPaddingVertical = 12;
+  static const double toastMaxWidthMac = 360;
+  static const double toastMaxWidthIos = 440;
+  static const double toastMargin = 12;
+  static const double toastTopGap = 8;
+  static const double toastActionGap = 12;
+  static const double toastTextSizeMac = 13;
+  static const double toastTextLineMac = 17;
+  static const double toastTextSizeIos = 15;
+  static const double toastTextLineIos = 20;
+  static const int toastMaxLines = 4;
+  // Drops in from above on `.spring(response: 0.4, dampingFraction: 0.85)`
+  // and fades away on a plain ease. Zeroed by Reduce Motion (it then simply
+  // appears and disappears, with no slide).
+  static const double toastEnterOffset = 16;
+  static const Duration toastEnterDuration = Duration(milliseconds: 420);
+  static const Duration toastExitDuration = Duration(milliseconds: 200);
+  static const Curve toastEnterCurve = GlassSpringCurve(
+    response: 0.4,
+    dampingFraction: 0.85,
+    duration: toastEnterDuration,
+  );
+  static const Curve toastExitCurve = Curves.easeOutCubic;
+  // How long a toast with an action stays (the TUN recovery report).
+  static const Duration toastActionDuration = Duration(seconds: 8);
   // Theme page: appearance previews (Auto / Light / Dark) as in macOS
   // Appearance, accent swatches as the macOS accent color row, the text
   // size slider as in iOS Text Size. Content, so never blurred.

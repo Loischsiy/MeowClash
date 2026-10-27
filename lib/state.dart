@@ -393,11 +393,21 @@ class GlobalState {
     }
   }
 
-  void showNotifier(String text) {
+  void showNotifier(
+    String text, {
+    String? actionLabel,
+    VoidCallback? onAction,
+    Duration? duration,
+  }) {
     if (text.isEmpty) {
       return;
     }
-    navigatorKey.currentContext?.showNotifier(text);
+    navigatorKey.currentContext?.showNotifier(
+      text,
+      actionLabel: actionLabel,
+      onAction: onAction,
+      duration: duration,
+    );
   }
 
   Future<void> openUrl(String url) async {

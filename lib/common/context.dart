@@ -5,7 +5,20 @@ import 'package:flutter/material.dart';
 extension BuildContextExtension on BuildContext {
   CommonScaffoldState? get commonScaffoldState => findAncestorStateOfType<CommonScaffoldState>();
 
-  Future<void>? showNotifier(String text) => findAncestorStateOfType<MessageManagerState>()?.message(text);
+  /// [actionLabel]/[onAction] and [duration]: see `MessageManagerState.message`
+  /// (the action is shown by the Darwin glass toast only).
+  Future<void>? showNotifier(
+    String text, {
+    String? actionLabel,
+    VoidCallback? onAction,
+    Duration? duration,
+  }) =>
+      findAncestorStateOfType<MessageManagerState>()?.message(
+        text,
+        actionLabel: actionLabel,
+        onAction: onAction,
+        duration: duration,
+      );
 
   void showSnackBar(
     String message, {

@@ -28,6 +28,7 @@ export 'glass_key_cap.dart';
 export 'glass_motion.dart';
 export 'glass_pop_up_button.dart';
 export 'glass_refraction.dart';
+export 'glass_reorderable_section.dart';
 export 'glass_segmented_control.dart';
 export 'glass_sheet_detents.dart';
 export 'glass_stream_row.dart';

@@ -181,25 +181,54 @@ Commit: `perf(ui): evict FixedMap entries in O(1)`
 
 Commit: `perf(state): ring buffer with version for FixedList`. This is the riskiest step.
 
-- [ ] Today `FixedList.list` returns `List.unmodifiable(_list)`, a full copy on every call. The Logs
+- [x] Today `FixedList.list` returns `List.unmodifiable(_list)`, a full copy on every call. The Logs
   and Requests pages listen to `select((s) => s.list)` and compare with `ListEquality`, so every message
   from the core costs a 150-item copy plus an O(n) comparison, and the throttler repeats the comparison
   (`lib/views/logs.dart`, `lib/views/connection/requests.dart`).
-- [ ] Before editing, check how `AutoDisposeNotifierMixin` and `updateShouldNotify` decide whether to
+- [x] Before editing, check how `AutoDisposeNotifierMixin` and `updateShouldNotify` decide whether to
   notify. Two current behaviors must keep working: `copyWith()` returns a new wrapper over the **same**
   backing list (this is what makes Riverpod notify), and `AppController.addLog` (`lib/controller.dart`,
   around line 554) mutates the buffer in place without notifying.
-- [ ] Implement a fixed-capacity ring buffer with a monotonic `version`, bumped by `add` and `clear`.
+  (Checked: the mixin calls Riverpod 2.6's `updateShouldNotify`, which is `!identical(prev, next)`, so a
+  new wrapper is enough; `select` compares the selected value with `==`. Because wrappers share storage,
+  `prev.version` and `next.version` of two wrappers are always equal: compare versions only through
+  `select`, which keeps the value from the previous notification. A per-buffer counter would collide
+  after a profile switch (a new buffer restarts at 0), so versions come from one global counter and
+  never repeat across buffers. In-place `AppController.addLog` callers: `lib/common/print.dart` and
+  `lib/views/developer.dart`.)
+- [x] Implement a fixed-capacity ring buffer with a monotonic `version`, bumped by `add` and `clear`.
   The chronological `list` snapshot is cached per version. Keep the public API (`maxLength`, `add`,
   `clear`, `list`, `length`, `[]`, `copyWith`) and the type name, so the freezed `AppState` does not
   need regenerating.
-- [ ] Consumers: switch to `select((s) => s.version)`, take one snapshot per throttled UI update, and
+  (Storage `_Ring<T>` in `lib/common/fixed.dart`, shared by every `copyWith` wrapper: a growable list
+  up to capacity, then overwritten in place from `head`. The snapshot is built with one copy and
+  dropped on `add`/`clear`. One change: the constructor's `list:` is copied, no longer aliased and
+  truncated in place; nothing in `lib/` passes one. The debug `maxLength > 0` assert is kept.)
+- [x] Consumers: switch to `select((s) => s.version)`, take one snapshot per throttled UI update, and
   drop `ListEquality` from the hot path. Also check `exportLogs` (`lib/controller.dart`),
   `network_speed.dart` (traffics, `FixedList(30)`), `ScrollToEndBox` and `lib/views/developer.dart`.
-- [ ] Tests in `test/fixed_list_test.dart`: overflow, order, `clear`, version bumps, `maxLength = 1`,
+  (`logs.dart` / `requests.dart`: the listener only schedules the throttler; the post-frame callback
+  reads the provider once, skips when the version equals the shown one, then takes one snapshot.
+  `exportLogs`, `network_speed.dart` and `developer.dart` need no change: they read `list` once per
+  call or build, now cached per version. `ScrollToEndBox` keeps its `ListEquality`: it runs per page
+  build on the filtered list, not per core message, and `ListEquality` returns early on `identical`.)
+  Finding, not changed here: the page applies updates in `addPostFrameCallback`, which does not
+  schedule a frame, so on an idle screen new rows wait for the next frame from something else. The
+  old code does the same. A possible separate fix is `ensureVisualUpdate()` after adding the callback.
+  Ask the maintainer.
+- [x] Tests in `test/fixed_list_test.dart`: overflow, order, `clear`, version bumps, `maxLength = 1`,
   snapshot immutability, `copyWith` and in-place mutation.
-- [ ] Measure with the step 1 benchmark and, if a build is available, scenarios b and c.
-- [ ] Document the `FixedList` and version semantics in `.agents/runtime-contracts.md`.
+  (18 tests: "behavior kept" (9, pass on the old code), version, snapshot cache, Riverpod select with
+  in-place add, buffer replacement and traffics `clear`. Plus `test/event_buffer_live_update_test.dart`:
+  open Logs/Requests pages (Material and glass) show new events and a buffer replaced by a profile
+  switch. It passes on the old code and fails with a per-buffer counter.)
+- [x] Measure with the step 1 benchmark and, if a build is available, scenarios b and c.
+  (The benchmark now mirrors the new listener: select on `version`, one snapshot after the burst.
+  Numbers in the table, raw output in `.agent/ram/06-perf.txt`. Scenarios b and c: not measured, no
+  build. The remaining ~12 ms per 10 000 events is not profiled; candidates are the Riverpod
+  notification and `AppState.copyWith` in `onUpdate` for every message.)
+- [x] Document the `FixedList` and version semantics in `.agents/runtime-contracts.md`.
+  ("Event buffers" entry.)
 
 ### 7. Lazy Material log rows: branch `perf/logs-lazy-rows`
 
@@ -252,11 +281,11 @@ Commit: `perf(providers): structural select for proxy group names`
 
 | Scenario / metric | Baseline | After | Source |
 | --- | --- | --- | --- |
-| 10 000 `addLog` with Logs open, time | 24.5–25.6 ms | | benchmark, 3 runs |
-| 10 000 `addLog`, list copies / bytes | 10 001 snapshots, 1 488 825 slots (~11.4 MiB at 8 B/slot) | | benchmark |
-| 10 000 `addRequest` with Requests open, time | 17.0–17.9 ms (copies as for logs) | | benchmark, 3 runs |
+| 10 000 `addLog` with Logs open, time | 24.5–25.6 ms | after step 6: 12.4–12.7 ms | benchmark, 3 runs |
+| 10 000 `addLog`, list copies / bytes | 10 001 snapshots, 1 488 825 slots (~11.4 MiB at 8 B/slot) | after step 6: 1 snapshot per throttled update, 150 slots (~1.2 KiB); the select reads only `version` | benchmark |
+| 10 000 `addRequest` with Requests open, time | 17.0–17.9 ms (copies as for logs) | after step 6: 9.1–10.2 ms (copies as for logs) | benchmark, 3 runs |
 | 10 000 `FixedMap.updateCacheValue`, time | misses 135.7–138.3 ms, hits 0.34 ms | after step 5: misses 4.28–4.84 ms, hits 0.66–2.67 ms (sub-ms noise, code path unchanged), `updateMaxLength` same size 0.03–0.34 ms (0.35 before) | benchmark, 3 runs (`.agent/ram/05-perf.txt`) |
-| Logs scroll, 1000 rows, 120 frames, mean | glass macOS 24.30 ms, iOS 15.63 ms, material 29.05 ms | after step 4: glass macOS 21.05–22.36 ms, iOS 13.68–14.88 ms, material 26.34–27.95 ms (host noise, no regression) | `connections_logs` perf test, 1 run / 3 runs |
+| Logs scroll, 1000 rows, 120 frames, mean | glass macOS 24.30 ms, iOS 15.63 ms, material 29.05 ms | after step 4: glass macOS 21.05–22.36 ms, iOS 13.68–14.88 ms, material 26.34–27.95 ms (host noise, no regression); after step 6: 21.35 / 14.87 / 26.92 ms (1 run) | `connections_logs` perf test, 1 run / 3 runs |
 | Undisposed `TextPainter`s, Logs page with 150 rows, open + close | 152 of 203 created | 0 (step 4) | `text_painter_dispose_test` |
 | Undisposed `TextPainter`s, Requests page with 150 rows, open + close | 301 of 375 created | 0 (step 4) | `text_painter_dispose_test` |
 | Undisposed `TextPainter`s, dashboard with idle cat, ~2 s of frames | 86 of 256 created (about one per frame) | 0 (step 4) | `text_painter_dispose_test` |
@@ -280,4 +309,5 @@ They are for before/after comparison on the same machine only.
 | 2026-10-28 | 2 | done | `fix/buffer-capacity-profile-switch` | `f33e7cb` | tests 827 passed, 1 skipped (`.agent/ram/02-tests-raw.txt`); analyze: no new diagnostics in touched files |
 | 2026-10-28 | 3 | done | `fix/logs-cache-tag` | `74db5cc` | tests 828 passed, 1 skipped, Material goldens unchanged (`.agent/ram/03-tests-raw.txt`); analyze: no new diagnostics |
 | 2026-10-28 | 4 | done | `perf/text-painter-dispose` | `6a39487` | tests 832 passed, 1 skipped, goldens unchanged (`.agent/ram/04-tests-raw.txt`); analyze: no new diagnostics |
-| 2026-10-28 | 5 | done | `perf/fixed-map-eviction` | (this commit) | tests 842 passed, 1 skipped (`.agent/ram/05-tests-raw.txt`); analyze: touched files clean (`.agent/ram/05-analyze.txt`) |
+| 2026-10-28 | 5 | done | `perf/fixed-map-eviction` | `c8a5960` | tests 842 passed, 1 skipped (`.agent/ram/05-tests-raw.txt`); analyze: touched files clean (`.agent/ram/05-analyze.txt`) |
+| 2026-10-28 | 6 | done | `perf/fixed-list-ring-buffer` | (this commit) | tests 864 passed, 1 skipped, goldens unchanged (`.agent/ram/06-tests-raw.txt`, touched files re-run after lint fixes: `06-tests-touched.txt`); analyze: no new diagnostics in touched files (`06-analyze.txt`); old-code and per-buffer-counter runs in `.agent/ram/06-*.txt` |

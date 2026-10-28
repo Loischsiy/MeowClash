@@ -10,9 +10,10 @@ import 'performance_test_support.dart';
 
 /// Host workload of the log / request buffers and of the row height cache:
 /// core events pushed through the notifiers while a listener selects the
-/// list the way an open Logs / Requests page does, and height cache lookups
-/// on a full [FixedMap]. Times, select snapshots and copied list slots are
-/// printed for the RAM work; they are not asserted (host VM, not a device).
+/// buffer version the way an open Logs / Requests page does (plus the one
+/// snapshot of its throttled update), and height cache lookups on a full
+/// [FixedMap]. Times, snapshots and copied list slots are printed for the
+/// RAM work; they are not asserted (host VM, not a device).
 
 const _events = 10000;
 const _warmUp = 1000;
@@ -32,29 +33,23 @@ class _BufferRun {
 
   @override
   String toString() => '${_ms(elapsed)} ms, '
-      'select snapshots $snapshots, copied slots $slots '
+      'snapshots $snapshots, copied slots $slots '
       '(~${_kib(slots)} KiB), page updates $updates';
 }
 
-/// Mirrors the select listener of `LogsView` (lib/views/logs.dart).
+/// Mirrors `LogsView` (lib/views/logs.dart): the select reads the version,
+/// and the throttled update after the burst takes one snapshot.
 _BufferRun _runLogs(List<Log> logs) {
   initializePerformanceState();
   globalState.appState = globalState.appState.copyWith(
     logs: FixedList<Log>(maxLength),
   );
   final container = ProviderContainer();
-  var snapshots = 0;
-  var slots = 0;
   var updates = 0;
   final sub = container.listen(
-    logsProvider.select((state) {
-      final list = state.list;
-      snapshots++;
-      slots += list.length;
-      return list;
-    }),
+    logsProvider.select((state) => state.version),
     (prev, next) {
-      if (prev != next && !logListEquality.equals(prev, next)) updates++;
+      if (prev != next) updates++;
     },
   );
   final notifier = container.read(logsProvider.notifier);
@@ -62,7 +57,10 @@ _BufferRun _runLogs(List<Log> logs) {
   for (final log in logs) {
     notifier.addLog(log);
   }
+  final snapshot = container.read(logsProvider).list;
   watch.stop();
+  const snapshots = 1;
+  final slots = snapshot.length;
   final state = container.read(logsProvider);
   expect(state.length, maxLength);
   expect(state[state.length - 1], same(logs.last));
@@ -72,26 +70,18 @@ _BufferRun _runLogs(List<Log> logs) {
   return _BufferRun(watch.elapsed, snapshots, slots, updates);
 }
 
-/// Mirrors the select listener of `RequestsView`
-/// (lib/views/connection/requests.dart).
+/// Mirrors `RequestsView` (lib/views/connection/requests.dart), as above.
 _BufferRun _runRequests(List<Connection> requests) {
   initializePerformanceState();
   globalState.appState = globalState.appState.copyWith(
     requests: FixedList<Connection>(maxLength),
   );
   final container = ProviderContainer();
-  var snapshots = 0;
-  var slots = 0;
   var updates = 0;
   final sub = container.listen(
-    requestsProvider.select((state) {
-      final list = state.list;
-      snapshots++;
-      slots += list.length;
-      return list;
-    }),
+    requestsProvider.select((state) => state.version),
     (prev, next) {
-      if (!connectionListEquality.equals(prev, next)) updates++;
+      if (prev != next) updates++;
     },
   );
   final notifier = container.read(requestsProvider.notifier);
@@ -99,7 +89,10 @@ _BufferRun _runRequests(List<Connection> requests) {
   for (final request in requests) {
     notifier.addRequest(request);
   }
+  final snapshot = container.read(requestsProvider).list;
   watch.stop();
+  const snapshots = 1;
+  final slots = snapshot.length;
   final state = container.read(requestsProvider);
   expect(state.length, maxLength);
   expect(state[state.length - 1], same(requests.last));

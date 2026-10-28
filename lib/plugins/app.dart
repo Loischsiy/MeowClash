@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:meowclash/common/app_localizations.dart';
+import 'package:meowclash/common/fixed.dart';
 import 'package:meowclash/models/models.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -66,14 +67,25 @@ class App {
         }) ??
         false;
 
+  // One provider per package: a new MemoryImage is a new image cache key, so
+  // rebuilding connection rows filled the cache with copies of one icon.
+  final _packageIcons = FixedMap<String, ImageProvider>(32);
+
   Future<ImageProvider?> getPackageIcon(String packageName) async {
+    final cached = _packageIcons.get(packageName);
+    if (cached != null) {
+      return cached;
+    }
     final base64 = await methodChannel.invokeMethod<String>("getPackageIcon", {
       "packageName": packageName,
     });
     if (base64 == null) {
       return null;
     }
-    return MemoryImage(base64Decode(base64));
+    return _packageIcons.updateCacheValue(
+      packageName,
+      () => MemoryImage(base64Decode(base64)),
+    );
   }
 
   Future<bool?> tip(String? message) async => methodChannel.invokeMethod<bool>("tip", {

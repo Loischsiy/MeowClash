@@ -57,6 +57,11 @@ failure.
   `test/fixed_list_test.dart` and `test/event_buffer_live_update_test.dart`. The Material lists build
   each row (even index) or `Divider` (odd index) in `itemBuilder`; never build the whole row list per
   update (`test/material_lazy_rows_test.dart`).
+- **Android package icons** (connection rows): `App.getPackageIcon` returns the **same** `MemoryImage`
+  per package (32-entry `FixedMap`; empty or failed loads are not cached), and the row decodes it at
+  48 dp × pixel ratio. Never build a new `MemoryImage` per build: its cache key is the bytes' identity,
+  so each build is a new full decode and one icon fills the image cache
+  (`test/package_icon_cache_test.dart`).
 - **IP details** (`lib/services/ip_details_service.dart`): extra data is fetched only while the dialog is
   open, through the proxy-aware client, for that exact IP; responses for a different IP are rejected.
   Successful lookups are cached **5 min** in a **16-entry** IP/language LRU; failures are not cached.

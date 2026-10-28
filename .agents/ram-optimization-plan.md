@@ -276,15 +276,67 @@ Commit: `perf(providers): structural select for proxy group names`
 
 ### 9. Verify only (open a PR only for a confirmed problem; record findings here)
 
-- [ ] `_yamlToDart` (`lib/state.dart`, around line 849): take a heap snapshot after a profile is
+Host probes are scratch files, not committed: `.agent/ram/09_probe_test.dart` (provider recomputes)
+and `.agent/ram/09_icon_probe_test.dart` (image cache), output in `.agent/ram/09-probe.txt` and
+`09-icon-probe.txt`. Run them with `.agent/flutter.sh test --no-pub <file>`.
+
+- [x] `_yamlToDart` (`lib/state.dart`, around line 849): take a heap snapshot after a profile is
   applied, and check whether any `YamlMap` or converted `Map` is retained (the maps are function-local).
-- [ ] `configState`: how often it really recomputes. It assembles the whole `Config` by design; do not
+  (Code read, no change. The converted tree has no `Yaml*` objects: `YamlMap.entries` yields plain
+  values and every nested map/list is converted. `data`, `proxyDefsByName`,
+  `providerProxyNamesByProvider` and `groupDefsByName` are locals of `patchRawConfig`; the resolver
+  closures are only called inside `buildRunningChainConfig`, which stores none of them. Chain clones end
+  up in the returned config, which lives until `setupConfig` JSON-encodes it. `ProviderRefreshPlan`
+  keeps only the extracted targets, not the config. Heap snapshot on a running app: not measured, no
+  build. Maintainer steps: profile with chains and a proxy provider, apply it, DevTools Memory → GC →
+  snapshot, filter `YamlMap` / `YamlList` / `YamlScalar`; expect 0 instances.)
+- [x] `configState`: how often it really recomputes. It assembles the whole `Config` by design; do not
   split it without data.
-- [ ] `currentGroupsState`: recompute count under load.
-- [ ] Image cache (32 MB / 128 entries is a ceiling): check `imageCache.currentSizeBytes` in the
+  (Probe: 0 recomputes for 10 000 logs, 10 000 requests, 1 000 traffic ticks, 1 000 delays and 100
+  unchanged group refreshes. One recompute and one `savePreferencesDebounce` per user change: 100 of
+  100 proxy selections, and on desktop every window resize / move event, 1 000 of 1 000, about
+  0.05 ms each on the host. Rare and cheap: not split, no change.)
+- [x] `currentGroupsState`: recompute count under load.
+  (Probe: 0 under the same core load. `Groups.setGroups` drops refreshes that change nothing (0 of
+  100), and group refreshes are debounced, at most one per 5 s from delay results and only in the
+  foreground. Real changes: 100 recomputes and 100 notifications for 100 selection changes, about
+  0.13 ms each with 20 groups × 50 proxies. No change.)
+- [x] Image cache (32 MB / 128 entries is a ceiling): check `imageCache.currentSizeBytes` in the
   scenarios. If it needs changing, update `test/image_memory_test.dart`, which asserts exactly
   32 MB and 128.
-- [ ] Darwin glass GPU memory on macOS (DevTools or Instruments).
+  (Device scenarios: not measured, no build. Found a confirmed problem instead of a budget issue:
+  on Android with `find-process-mode: always` (the default) every Material connection row
+  (`lib/views/connection/item.dart`) calls `app.getPackageIcon` on each build, which returns a new
+  `MemoryImage` over freshly decoded base64. `MemoryImage` keys compare bytes by identity, so every
+  row build is a new cache entry with a full-size decode. Host probe, one icon and 200 row builds:
+  192 px icon 128 entries / 18.0 MiB, 324 px icon 79 entries / 31.6 MiB, i.e. the cache sits at its
+  ceiling. One provider per package: 1 entry, 0.1 / 0.4 MiB; decoded at 48 dp × 3: 1 entry,
+  0.08 MiB. The budget stays as is; fixed in step 9a. `test/image_memory_test.dart` is untouched.)
+- [ ] Darwin glass GPU memory on macOS (DevTools or Instruments). (Waiting for the maintainer's OK
+  for the macOS profile run, together with step 1.)
+
+### 9a. Package icons in connection rows: branch `perf/package-icon-cache`
+
+Commit: `perf(ui): one image cache entry per Android package icon`
+
+- [x] `App.getPackageIcon` (`lib/plugins/app.dart`) keeps one `MemoryImage` per package in a small
+  `FixedMap`, so the image cache key is stable. A failed or empty load is not cached, so it is retried
+  on the next build as before. A cache hit skips the platform channel call.
+  (`FixedMap<String, ImageProvider>(32)`; rows that load the same package at once share the first
+  provider. The Kotlin side already keeps every icon's base64 in `iconMap`, so this adds at most 32
+  compressed PNGs on the Dart side.)
+- [x] The row decodes the icon at its display size (48 dp × device pixel ratio, width only, no
+  upscaling), like `lib/widgets/icon.dart` does for group icons.
+  (`ResizeImage.resizeIfNeeded(cacheWidth, null, icon)` in `lib/views/connection/item.dart`; the
+  `Image` is still 48 × 48 with `gaplessPlayback`. Only the Android Material row shows icons; Darwin
+  glass rows have none.)
+- [x] Test `test/package_icon_cache_test.dart`: the same provider and one channel call for repeated
+  builds, a failed load is retried, and the image cache holds one entry. Run it on the old code too.
+  (4 tests. On the old code 3 fail: new providers each build, 200 channel calls, 128 cache entries;
+  the retry test passes, the behavior is kept. `.agent/ram/09a-icon-old-code.txt`.)
+- [x] Add one line to `.agents/runtime-contracts.md`. ("Android package icons" entry.)
+- Not measured: Android RSS / Graphics in scenario b (no device). Maintainer steps: Requests page
+  open under load for 10 minutes, `adb shell dumpsys meminfo <package>` before and after the PR.
 
 ### 10. Final verification
 
@@ -314,6 +366,8 @@ Commit: `perf(providers): structural select for proxy group names`
 | Undisposed `TextPainter`s, Logs page with 150 rows, open + close | 152 of 203 created | 0 (step 4) | `text_painter_dispose_test` |
 | Undisposed `TextPainter`s, Requests page with 150 rows, open + close | 301 of 375 created | 0 (step 4) | `text_painter_dispose_test` |
 | Undisposed `TextPainter`s, dashboard with idle cat, ~2 s of frames | 86 of 256 created (about one per frame) | 0 (step 4) | `text_painter_dispose_test` |
+| One app icon, 200 connection row builds: image cache | 324 px icon: 79 entries / 31.6 MiB; 192 px: 128 entries / 18.0 MiB (cache ceiling); 200 channel calls | after step 9a: 1 entry, 81 KiB (144 px decode at 3×), 1 channel call | `09_icon_probe_test`, `package_icon_cache_test` (`.agent/ram/09-icon-probe.txt`, `09a-*.txt`) |
+| `configState` / `currentGroupsState` recomputes under core load | 0 / 0 (step 9 probe, no change needed) | | `.agent/ram/09-probe.txt` |
 | a. Cold start, RSS | not measured | | macOS |
 | b. Requests 10 min, RSS / Dart heap | not measured | | macOS |
 | c. Logs (info) 10 min, RSS / Dart heap | not measured | | macOS |
@@ -337,4 +391,6 @@ They are for before/after comparison on the same machine only.
 | 2026-10-28 | 5 | done | `perf/fixed-map-eviction` | `c8a5960` | tests 842 passed, 1 skipped (`.agent/ram/05-tests-raw.txt`); analyze: touched files clean (`.agent/ram/05-analyze.txt`) |
 | 2026-10-28 | 6 | done | `perf/fixed-list-ring-buffer` | `5fe9b44` | tests 864 passed, 1 skipped, goldens unchanged (`.agent/ram/06-tests-raw.txt`, touched files re-run after lint fixes: `06-tests-touched.txt`); analyze: no new diagnostics in touched files (`06-analyze.txt`); old-code and per-buffer-counter runs in `.agent/ram/06-*.txt` |
 | 2026-10-28 | 7 | done | `perf/logs-lazy-rows` | `a2652bf` | tests 869 passed, 1 skipped, goldens unchanged (`.agent/ram/07-tests-raw.txt`); analyze: no new diagnostics in touched files (`07-analyze.txt`); old-code runs in `07-lazy-old-code.txt` |
-| 2026-10-28 | 8 | done | `perf/proxies-select-equality` | (this commit) | tests 872 passed, 1 skipped, goldens unchanged (`.agent/ram/08-tests-raw.txt`); analyze: no new diagnostics in touched files (`08-analyze.txt`); build_runner: 2 provider hashes (`08-build-runner.txt`); old-code run in `08-select-old-code.txt` |
+| 2026-10-28 | 8 | done | `perf/proxies-select-equality` | `6f75544` | tests 872 passed, 1 skipped, goldens unchanged (`.agent/ram/08-tests-raw.txt`); analyze: no new diagnostics in touched files (`08-analyze.txt`); build_runner: 2 provider hashes (`08-build-runner.txt`); old-code run in `08-select-old-code.txt` |
+| 2026-10-28 | 9 | host part done | `perf/package-icon-cache` | (with 9a) | `_yamlToDart`, `configState`, `currentGroupsState`: no change (probes in `.agent/ram/09_*`); image cache: package icon problem found, fixed in 9a; glass GPU memory waits for the macOS OK |
+| 2026-10-28 | 9a | done | `perf/package-icon-cache` | (this commit) | tests 876 passed, 1 skipped, goldens unchanged (`.agent/ram/09a-tests-raw.txt`); analyze: touched files have only their 3 old infos (`09a-analyze.txt` vs `09a-analyze-base.txt`); old-code run in `09a-icon-old-code.txt` |

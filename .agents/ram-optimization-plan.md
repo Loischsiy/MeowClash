@@ -107,8 +107,9 @@ Commit: `test(perf): host benchmark for log/request buffers and height cache`
 - [x] Run the existing perf tests: `connections_logs`, `dashboard`, `proxy_list`, `navigation`.
   (`proxy_list` and `navigation` only assert and print no numbers.)
 - [x] Save the raw output to `.agent/ram/01-baseline.txt` and copy the key numbers into the table below.
-- [ ] With the maintainer's OK: macOS profile run, scenarios a–e. Android only if a device is attached;
-  otherwise mark it "not measured". (Waiting for the OK; no Android device on adb.)
+- [x] With the maintainer's OK: macOS profile run, scenarios a–e. Android only if a device is attached;
+  otherwise mark it "not measured". (Skipped by the maintainer on 2026-10-29: he builds the stack on
+  GitHub Actions, tests that build himself and reports bugs. Not measured; no Android device on adb.)
 
 ### 2. Buffer capacity after a profile switch: branch `fix/buffer-capacity-profile-switch`
 
@@ -312,8 +313,8 @@ and `.agent/ram/09_icon_probe_test.dart` (image cache), output in `.agent/ram/09
   192 px icon 128 entries / 18.0 MiB, 324 px icon 79 entries / 31.6 MiB, i.e. the cache sits at its
   ceiling. One provider per package: 1 entry, 0.1 / 0.4 MiB; decoded at 48 dp × 3: 1 entry,
   0.08 MiB. The budget stays as is; fixed in step 9a. `test/image_memory_test.dart` is untouched.)
-- [ ] Darwin glass GPU memory on macOS (DevTools or Instruments). (Waiting for the maintainer's OK
-  for the macOS profile run, together with step 1.)
+- [x] Darwin glass GPU memory on macOS (DevTools or Instruments). (Skipped together with the step 1
+  profile run: not measured.)
 
 ### 9a. Package icons in connection rows: branch `perf/package-icon-cache`
 
@@ -340,26 +341,78 @@ Commit: `perf(ui): one image cache entry per Android package icon`
 
 ### 10. Final verification
 
-- [ ] On the last branch of the stack, repeat every step 1 measurement and fill the "After" column.
-- [ ] Run the full checklist in `.agents/testing.md`. Go, Python and Rust only if they were touched.
-- [ ] Draft PR descriptions with before/after numbers for each branch.
-- [ ] Prepare a manual smoke test for the maintainer: start, connect, Requests and Logs under load,
+- [x] On the last branch of the stack, repeat every step 1 measurement and fill the "After" column.
+  (Host part on `c2d4915`: benchmark and the four perf tests, 3 runs each, all pass; raw output in
+  `.agent/ram/10-after.txt`. Device scenarios a–e stay with the open step 1 box.)
+- [x] Run the full checklist in `.agents/testing.md`. Go, Python and Rust only if they were touched.
+  (`pub get`; build_runner rewrote nothing (`git status` clean); analyze, repo files only: 0 errors,
+  4 warnings, 569 infos, the same as the base; tests 876 passed, 1 skipped. Raw output in
+  `.agent/ram/10-*.txt`. ARB files, `core/`, `services/` and `test/*.py` are not touched
+  (`git diff --stat 4603025..HEAD`), so intl_utils, Go, Python and Rust are skipped.)
+- [x] Draft PR descriptions with before/after numbers for each branch.
+  (`.agent/ram/pr-descriptions.md`, local only; one section per branch, in PR order.)
+- [x] Prepare a manual smoke test for the maintainer: start, connect, Requests and Logs under load,
   log export, profile switch, rules-editor scrolling, background and resume, and on macOS glass on/off
   (Reduce Transparency).
+  (`.agent/ram/smoke-test.md`, local only. Adds the Proxies page (step 8) and Android Requests icons
+  (step 9a).)
+
+### 10a. Idle-screen frame for page updates: branch `perf/fixed-list-ring-buffer`
+
+Commit, a second one on that branch: `fix(ui): schedule a frame for throttled log/request updates`.
+The maintainer OK'd the step 6 finding on 2026-10-29 with a rule: a fix that belongs to an existing
+branch goes on that branch; only a cross-cutting one gets a branch of its own. Step 6 rewrote this path.
+
+- [x] `updateLogsThrottler` (`lib/views/logs.dart`) and `updateRequestsThrottler`
+  (`lib/views/connection/requests.dart`): call `WidgetsBinding.instance.ensureVisualUpdate()` after
+  `addPostFrameCallback`. A post-frame callback does not schedule a frame, so on an idle screen new
+  rows waited for a frame from something else. `ensureVisualUpdate` does nothing while frames are
+  disabled (app hidden), so it never wakes a backgrounded app.
+  (Commit `9765c7f`. Root cause: each event schedules a frame through the `ProviderScope` rebuild, but
+  that frame runs right away, before the 300 ms throttle, so the callback added later waited for
+  another one.)
+- [x] `test/event_buffer_live_update_test.dart`: `_pumpThrottled` no longer calls `scheduleFrame()`
+  itself; it elapses the throttle with `binding.delayed` (no frame) and then pumps only the frames the
+  app schedules. Run it on the old code too: it must fail there.
+  (Old code: all 4 tests fail (`.agent/ram/10a-live-update-old-code.txt`). With the fix the focused
+  tests pass, 69 each in 3 runs (`10a-focused.txt`). Step 6 branch: tests 864 passed, 1 skipped;
+  touched files have only their 5 old infos (`10a-analyze.txt` vs `06-analyze.txt`).)
+- [x] One sentence in the "Event buffers" entry of `.agents/runtime-contracts.md`. Do not touch the
+  `Covered by` line or the one before it: step 7 edits the next line, and this keeps the rebase clean.
+  (Done. The sentence rewraps the line before `Covered by`; the `Covered by` line and the one after
+  it, which step 7 edits, stay as they were, and the rebase was clean.)
+- [x] Rebase the stack: `git checkout perf/package-icon-cache && git rebase --update-refs
+  perf/fixed-list-ring-buffer`; it also moves `perf/logs-lazy-rows` and `perf/proxies-select-equality`.
+  Old tips, for recovery: `5fe9b44` (6), `a2652bf` (7), `6f75544` (8), `c2d4915` (9a); the docs commit
+  on top is in `git reflog`.
+  (Clean, no conflicts. New commits: 7 `37c1b4c`, 8 `2140184`, 9a `06f7ba4`; the docs commit on top
+  was amended with these notes.)
+- [x] On the new tip: the full checklist again and `git range-diff` old vs new for steps 7–9a, then
+  update the PR drafts (section 6) and the smoke test in `.agent/ram/`.
+  (build_runner: no diff; analyze 0 errors / 4 warnings / 569 infos in repo files, as on the base;
+  tests 876 passed, 1 skipped; benchmark, 3 runs: `addLog` 12.07–12.42 ms, `addRequest` 7.88–9.01 ms,
+  `FixedMap` misses 4.32–4.46 ms (`.agent/ram/10a-tip-*.txt`). `git range-diff`: 8, 9a and the docs
+  commit are identical; 7 differs only in context lines. PR draft section 6 lists both commits; the
+  smoke test has an idle-screen check.)
 
 ### 11. Cleanup
 
 - [ ] On the last branch, delete this file and the "Active work" section in `AGENTS.md`.
+  (The maintainer OK'd it on 2026-10-29; do it after step 10a. Device runs were skipped, so the PR
+  drafts in `.agent/ram/pr-descriptions.md` say "not measured". Also drop this file's row from the
+  routing table in `AGENTS.md`. Commit: `docs(agents): remove finished RAM optimization plan`.)
 
 ## Measurements
 
 | Scenario / metric | Baseline | After | Source |
 | --- | --- | --- | --- |
-| 10 000 `addLog` with Logs open, time | 24.5–25.6 ms | after step 6: 12.4–12.7 ms | benchmark, 3 runs |
-| 10 000 `addLog`, list copies / bytes | 10 001 snapshots, 1 488 825 slots (~11.4 MiB at 8 B/slot) | after step 6: 1 snapshot per throttled update, 150 slots (~1.2 KiB); the select reads only `version` | benchmark |
-| 10 000 `addRequest` with Requests open, time | 17.0–17.9 ms (copies as for logs) | after step 6: 9.1–10.2 ms (copies as for logs) | benchmark, 3 runs |
-| 10 000 `FixedMap.updateCacheValue`, time | misses 135.7–138.3 ms, hits 0.34 ms | after step 5: misses 4.28–4.84 ms, hits 0.66–2.67 ms (sub-ms noise, code path unchanged), `updateMaxLength` same size 0.03–0.34 ms (0.35 before) | benchmark, 3 runs (`.agent/ram/05-perf.txt`) |
-| Logs scroll, 1000 rows, 120 frames, mean | glass macOS 24.30 ms, iOS 15.63 ms, material 29.05 ms | after step 4: glass macOS 21.05–22.36 ms, iOS 13.68–14.88 ms, material 26.34–27.95 ms (host noise, no regression); after step 6: 21.35 / 14.87 / 26.92 ms (1 run) | `connections_logs` perf test, 1 run / 3 runs |
+| 10 000 `addLog` with Logs open, time | 24.5–25.6 ms | after step 6: 12.4–12.7 ms; step 10: 12.3–13.4 ms; step 10a: 12.07–12.42 ms | benchmark, 3 runs |
+| 10 000 `addLog`, list copies / bytes | 10 001 snapshots, 1 488 825 slots (~11.4 MiB at 8 B/slot) | after step 6: 1 snapshot per throttled update, 150 slots (~1.2 KiB); the select reads only `version`; step 10: same | benchmark |
+| 10 000 `addRequest` with Requests open, time | 17.0–17.9 ms (copies as for logs) | after step 6: 9.1–10.2 ms (copies as for logs); step 10: 9.8–10.8 ms; step 10a: 7.88–9.01 ms | benchmark, 3 runs |
+| 10 000 `FixedMap.updateCacheValue`, time | misses 135.7–138.3 ms, hits 0.34 ms | after step 5: misses 4.28–4.84 ms, hits 0.66–2.67 ms (sub-ms noise, code path unchanged), `updateMaxLength` same size 0.03–0.34 ms (0.35 before); step 10: misses 4.26–4.66 ms, hits 0.65–2.82 ms, `updateMaxLength` 0.02–0.36 ms; step 10a: misses 4.32–4.46 ms, hits 0.63–3.52 ms, `updateMaxLength` 0.02–0.30 ms | benchmark, 3 runs (`.agent/ram/05-perf.txt`, `10-after.txt`, `10a-tip-perf.txt`) |
+| Logs scroll, 1000 rows, 120 frames, mean | glass macOS 24.30 ms, iOS 15.63 ms, material 29.05 ms | after step 4: glass macOS 21.05–22.36 ms, iOS 13.68–14.88 ms, material 26.34–27.95 ms (host noise, no regression); after step 6: 21.35 / 14.87 / 26.92 ms (1 run); step 10: 21.91–22.36 / 14.09–14.70 / 26.67–27.71 ms, mounted rows unchanged | `connections_logs` perf test, 1 run / 3 runs |
+| Dashboard, 60 traffic ticks, mean | glass macOS 2.22 ms, iOS 1.80 ms, material 2.33 ms | step 10: 1.97–2.12 / 1.69–1.74 / 2.13–2.16 ms (no regression; host noise) | `dashboard` perf test, 1 run / 3 runs |
+| `proxy_list` / `navigation` perf tests (assert only, no numbers) | pass | step 10: pass, 3 runs each | perf tests |
 | Material page update, 150 rows: row widgets built | 150 rows + 150 `onClick` closures + a 299-slot list per update (read from code) | after step 7: only the rows the list keeps built, 5 logs / 6 requests at 400×900 | `material_lazy_rows_test`, code |
 | Material page update, 150 rows, wall time (throttle + 3 frames) | logs 25.3–25.6 ms, requests 18.3–18.7 ms | after step 7: logs 25.6–25.7 ms, requests 18.1 ms (no change beyond noise; host debug JIT, not profiled) | `material_lazy_rows_test`, 3 runs each (`.agent/ram/07-lazy-*.txt`) |
 | 100 group selection changes, names unchanged: recomputes / notifications | `proxiesListSelectorState` 100, `proxiesSelectorState` 100, notifications 0; the unfold-all button select fired 100 times | after step 8: 0 and 0 recomputes, 0 notifications; the button watches `groupNamesState`, 0 notifications; 1 added group: 1 recompute and 1 notification each, as before | `proxies_select_equality_test` (`.agent/ram/08-select-*.txt`) |
@@ -367,13 +420,13 @@ Commit: `perf(ui): one image cache entry per Android package icon`
 | Undisposed `TextPainter`s, Requests page with 150 rows, open + close | 301 of 375 created | 0 (step 4) | `text_painter_dispose_test` |
 | Undisposed `TextPainter`s, dashboard with idle cat, ~2 s of frames | 86 of 256 created (about one per frame) | 0 (step 4) | `text_painter_dispose_test` |
 | One app icon, 200 connection row builds: image cache | 324 px icon: 79 entries / 31.6 MiB; 192 px: 128 entries / 18.0 MiB (cache ceiling); 200 channel calls | after step 9a: 1 entry, 81 KiB (144 px decode at 3×), 1 channel call | `09_icon_probe_test`, `package_icon_cache_test` (`.agent/ram/09-icon-probe.txt`, `09a-*.txt`) |
-| `configState` / `currentGroupsState` recomputes under core load | 0 / 0 (step 9 probe, no change needed) | | `.agent/ram/09-probe.txt` |
-| a. Cold start, RSS | not measured | | macOS |
-| b. Requests 10 min, RSS / Dart heap | not measured | | macOS |
-| c. Logs (info) 10 min, RSS / Dart heap | not measured | | macOS |
+| `configState` / `currentGroupsState` recomputes under core load | 0 / 0 (step 9 probe, no change needed) | no change (verify only) | `.agent/ram/09-probe.txt` |
+| a. Cold start, RSS | not measured | not measured (skipped by the maintainer) | macOS |
+| b. Requests 10 min, RSS / Dart heap | not measured | not measured (skipped by the maintainer) | macOS |
+| c. Logs (info) 10 min, RSS / Dart heap | not measured | not measured (skipped by the maintainer) | macOS |
 | d. 3 profile switches, buffer capacity / RSS | 500 per buffer (read from code, test in step 2) / RSS not measured | 150 per buffer (step 2) / RSS not measured | `event_buffer_capacity_test` / macOS |
-| e. Background and resume, RSS | not measured | | macOS |
-| Android Total PSS (b, c) | not measured (no device) | | adb |
+| e. Background and resume, RSS | not measured | not measured (skipped by the maintainer) | macOS |
+| Android Total PSS (b, c) | not measured (no device) | not measured (no device) | adb |
 
 Host numbers come from `flutter test` on the maintainer's Mac (JIT `flutter_tester`, Flutter 3.44.1).
 They are for before/after comparison on the same machine only.
@@ -390,7 +443,10 @@ They are for before/after comparison on the same machine only.
 | 2026-10-28 | 4 | done | `perf/text-painter-dispose` | `6a39487` | tests 832 passed, 1 skipped, goldens unchanged (`.agent/ram/04-tests-raw.txt`); analyze: no new diagnostics |
 | 2026-10-28 | 5 | done | `perf/fixed-map-eviction` | `c8a5960` | tests 842 passed, 1 skipped (`.agent/ram/05-tests-raw.txt`); analyze: touched files clean (`.agent/ram/05-analyze.txt`) |
 | 2026-10-28 | 6 | done | `perf/fixed-list-ring-buffer` | `5fe9b44` | tests 864 passed, 1 skipped, goldens unchanged (`.agent/ram/06-tests-raw.txt`, touched files re-run after lint fixes: `06-tests-touched.txt`); analyze: no new diagnostics in touched files (`06-analyze.txt`); old-code and per-buffer-counter runs in `.agent/ram/06-*.txt` |
-| 2026-10-28 | 7 | done | `perf/logs-lazy-rows` | `a2652bf` | tests 869 passed, 1 skipped, goldens unchanged (`.agent/ram/07-tests-raw.txt`); analyze: no new diagnostics in touched files (`07-analyze.txt`); old-code runs in `07-lazy-old-code.txt` |
-| 2026-10-28 | 8 | done | `perf/proxies-select-equality` | `6f75544` | tests 872 passed, 1 skipped, goldens unchanged (`.agent/ram/08-tests-raw.txt`); analyze: no new diagnostics in touched files (`08-analyze.txt`); build_runner: 2 provider hashes (`08-build-runner.txt`); old-code run in `08-select-old-code.txt` |
+| 2026-10-28 | 7 | done | `perf/logs-lazy-rows` | `37c1b4c` (was `a2652bf` before 10a) | tests 869 passed, 1 skipped, goldens unchanged (`.agent/ram/07-tests-raw.txt`); analyze: no new diagnostics in touched files (`07-analyze.txt`); old-code runs in `07-lazy-old-code.txt` |
+| 2026-10-28 | 8 | done | `perf/proxies-select-equality` | `2140184` (was `6f75544` before 10a) | tests 872 passed, 1 skipped, goldens unchanged (`.agent/ram/08-tests-raw.txt`); analyze: no new diagnostics in touched files (`08-analyze.txt`); build_runner: 2 provider hashes (`08-build-runner.txt`); old-code run in `08-select-old-code.txt` |
 | 2026-10-28 | 9 | host part done | `perf/package-icon-cache` | (with 9a) | `_yamlToDart`, `configState`, `currentGroupsState`: no change (probes in `.agent/ram/09_*`); image cache: package icon problem found, fixed in 9a; glass GPU memory waits for the macOS OK |
-| 2026-10-28 | 9a | done | `perf/package-icon-cache` | (this commit) | tests 876 passed, 1 skipped, goldens unchanged (`.agent/ram/09a-tests-raw.txt`); analyze: touched files have only their 3 old infos (`09a-analyze.txt` vs `09a-analyze-base.txt`); old-code run in `09a-icon-old-code.txt` |
+| 2026-10-28 | 9a | done | `perf/package-icon-cache` | `06f7ba4` (was `c2d4915` before 10a) | tests 876 passed, 1 skipped, goldens unchanged (`.agent/ram/09a-tests-raw.txt`); analyze: touched files have only their 3 old infos (`09a-analyze.txt` vs `09a-analyze-base.txt`); old-code run in `09a-icon-old-code.txt` |
+| 2026-10-28 | 10 | host part done | `perf/package-icon-cache` | (this commit) | step 1 host measurements repeated (`.agent/ram/10-after.txt`); tests 876 passed, 1 skipped (`10-tests-raw.txt`); analyze 0 errors / 4 warnings / 569 infos in repo files, as on the base (`10-analyze-raw.txt`); build_runner: no diff; PR drafts and smoke test in `.agent/ram/`; macOS scenarios a–e and glass GPU memory still wait for the OK; step 11 waits for the maintainer |
+| 2026-10-29 | 1, 9 | device runs skipped | `perf/package-icon-cache` | (this commit) | the maintainer skips the macOS and Android runs: he tests a GitHub Actions build himself and reports bugs |
+| 2026-10-29 | 10a | done | `perf/fixed-list-ring-buffer` | `9765c7f` | the maintainer OK'd the step 6 frame fix (on the step 6 branch) and step 11; old code fails the new test (`.agent/ram/10a-live-update-old-code.txt`); branch tests 864 passed, 1 skipped; stack rebased (7 `37c1b4c`, 8 `2140184`, 9a `06f7ba4`); tip: tests 876 passed, 1 skipped, analyze 0 / 4 / 569, build_runner no diff (`10a-tip-*.txt`); step 11 next |

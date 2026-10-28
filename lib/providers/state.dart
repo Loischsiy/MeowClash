@@ -297,7 +297,7 @@ ProfilesSelectorState profilesSelectorState(Ref ref) {
 
 @riverpod
 ProxiesListSelectorState proxiesListSelectorState(Ref ref) {
-  final groupNames = ref.watch(currentGroupsStateProvider.select((state) => state.value.map((e) => e.name).toList()));
+  final groupNames = ref.watch(groupNamesStateProvider).groupNames;
   final currentUnfoldSet = ref.watch(unfoldSetProvider);
   final proxiesStyle = ref.watch(proxiesStyleSettingProvider);
   final sortNum = proxiesStyle.sortType == ProxiesSortType.delay
@@ -322,11 +322,7 @@ ProxiesListSelectorState proxiesListSelectorState(Ref ref) {
 
 @riverpod
 ProxiesSelectorState proxiesSelectorState(Ref ref) {
-  final groupNames = ref.watch(
-    currentGroupsStateProvider.select(
-      (state) => state.value.map((e) => e.name).toList(),
-    ),
-  );
+  final groupNames = ref.watch(groupNamesStateProvider).groupNames;
   final currentGroupName = ref.watch(currentProfileProvider.select(
     (state) => state?.currentGroupName,
   ));
@@ -336,6 +332,9 @@ ProxiesSelectorState proxiesSelectorState(Ref ref) {
   );
 }
 
+// The only place that maps groups to names. A new list is never == the old
+// one, but GroupNamesState compares deeply, so dependents rebuild only when
+// the names change, not on every selection or delay refresh.
 @riverpod
 GroupNamesState groupNamesState(Ref ref) => GroupNamesState(
     groupNames: ref.watch(

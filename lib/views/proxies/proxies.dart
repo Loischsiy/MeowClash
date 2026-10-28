@@ -91,11 +91,7 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> with PageMixin {
           Consumer(
             builder: (_, ref, __) {
               final unfoldSet = ref.watch(unfoldSetProvider);
-              final groupNames = ref.watch(
-                currentGroupsStateProvider.select(
-                  (state) => state.value.map((e) => e.name).toList(),
-                ),
-              );
+              final groupNames = ref.watch(groupNamesStateProvider).groupNames;
               final allExpanded = groupNames.isNotEmpty &&
                   groupNames.every(unfoldSet.contains);
               return IconButton(

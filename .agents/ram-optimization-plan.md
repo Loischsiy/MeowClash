@@ -252,12 +252,27 @@ Commit: `perf(ui): build Material log rows lazily`
 
 Commit: `perf(providers): structural select for proxy group names`
 
-- [ ] In `proxiesListSelectorState` (`lib/providers/state.dart`, around line 300),
+- [x] In `proxiesListSelectorState` (`lib/providers/state.dart`, around line 300),
   `select((s) => s.value.map((e) => e.name).toList())` returns a new `List` that is never `==` to the
   previous one, so the select fires on every change. Select a value with structural equality instead.
-- [ ] Search the other providers for the same `select(...toList())` / `select(...where...)` pattern.
-- [ ] Test the rebuild count before and after.
-- [ ] Run build_runner if annotated providers changed.
+  (Done: `proxiesListSelectorState` and `proxiesSelectorState` watch `groupNamesStateProvider`
+  (freezed `GroupNamesState`, deep list equality), so `groupNamesState` is the only place that maps
+  groups to names. Riverpod 2.6.1 compares a selected value with `!=`, so the old select fired on
+  every `currentGroupsState` change (a new selection, a delay refresh). Widgets did not rebuild
+  before either, because the freezed selector states compare deeply, but both providers recomputed.)
+- [x] Search the other providers for the same `select(...toList())` / `select(...where...)` pattern.
+  (Same select in the unfold-all button `Consumer` in `lib/views/proxies/proxies.dart`: it rebuilt on
+  every groups change; now it watches `groupNamesStateProvider`. Left as is, not hot:
+  `moreToolsSelectorState` (`where().toList()` on navigation items, freezed result), `selectedMap` /
+  `unfoldSet` `?? {}` (a new set only without a profile), one-shot `ref.read(...select(...))` in
+  `access.dart`, `controller.dart` and `override_profile.dart`, `override_profile.dart` `VM3` (deep
+  equality), and selects that return a `bool` or a `Group`.)
+- [x] Test the rebuild count before and after.
+  (New `test/proxies_select_equality_test.dart`, 3 tests: 100 selection changes that keep the names,
+  one added group, and names that follow mode, hidden groups and order. On the old code the first
+  test fails on the recompute count, the other two pass (`.agent/ram/08-select-old-code.txt`).)
+- [x] Run build_runner if annotated providers changed.
+  (Done: only the two provider hashes in `lib/providers/generated/state.g.dart` changed.)
 
 ### 9. Verify only (open a PR only for a confirmed problem; record findings here)
 
@@ -295,6 +310,7 @@ Commit: `perf(providers): structural select for proxy group names`
 | Logs scroll, 1000 rows, 120 frames, mean | glass macOS 24.30 ms, iOS 15.63 ms, material 29.05 ms | after step 4: glass macOS 21.05–22.36 ms, iOS 13.68–14.88 ms, material 26.34–27.95 ms (host noise, no regression); after step 6: 21.35 / 14.87 / 26.92 ms (1 run) | `connections_logs` perf test, 1 run / 3 runs |
 | Material page update, 150 rows: row widgets built | 150 rows + 150 `onClick` closures + a 299-slot list per update (read from code) | after step 7: only the rows the list keeps built, 5 logs / 6 requests at 400×900 | `material_lazy_rows_test`, code |
 | Material page update, 150 rows, wall time (throttle + 3 frames) | logs 25.3–25.6 ms, requests 18.3–18.7 ms | after step 7: logs 25.6–25.7 ms, requests 18.1 ms (no change beyond noise; host debug JIT, not profiled) | `material_lazy_rows_test`, 3 runs each (`.agent/ram/07-lazy-*.txt`) |
+| 100 group selection changes, names unchanged: recomputes / notifications | `proxiesListSelectorState` 100, `proxiesSelectorState` 100, notifications 0; the unfold-all button select fired 100 times | after step 8: 0 and 0 recomputes, 0 notifications; the button watches `groupNamesState`, 0 notifications; 1 added group: 1 recompute and 1 notification each, as before | `proxies_select_equality_test` (`.agent/ram/08-select-*.txt`) |
 | Undisposed `TextPainter`s, Logs page with 150 rows, open + close | 152 of 203 created | 0 (step 4) | `text_painter_dispose_test` |
 | Undisposed `TextPainter`s, Requests page with 150 rows, open + close | 301 of 375 created | 0 (step 4) | `text_painter_dispose_test` |
 | Undisposed `TextPainter`s, dashboard with idle cat, ~2 s of frames | 86 of 256 created (about one per frame) | 0 (step 4) | `text_painter_dispose_test` |
@@ -320,4 +336,5 @@ They are for before/after comparison on the same machine only.
 | 2026-10-28 | 4 | done | `perf/text-painter-dispose` | `6a39487` | tests 832 passed, 1 skipped, goldens unchanged (`.agent/ram/04-tests-raw.txt`); analyze: no new diagnostics |
 | 2026-10-28 | 5 | done | `perf/fixed-map-eviction` | `c8a5960` | tests 842 passed, 1 skipped (`.agent/ram/05-tests-raw.txt`); analyze: touched files clean (`.agent/ram/05-analyze.txt`) |
 | 2026-10-28 | 6 | done | `perf/fixed-list-ring-buffer` | `5fe9b44` | tests 864 passed, 1 skipped, goldens unchanged (`.agent/ram/06-tests-raw.txt`, touched files re-run after lint fixes: `06-tests-touched.txt`); analyze: no new diagnostics in touched files (`06-analyze.txt`); old-code and per-buffer-counter runs in `.agent/ram/06-*.txt` |
-| 2026-10-28 | 7 | done | `perf/logs-lazy-rows` | (this commit) | tests 869 passed, 1 skipped, goldens unchanged (`.agent/ram/07-tests-raw.txt`); analyze: no new diagnostics in touched files (`07-analyze.txt`); old-code runs in `07-lazy-old-code.txt` |
+| 2026-10-28 | 7 | done | `perf/logs-lazy-rows` | `a2652bf` | tests 869 passed, 1 skipped, goldens unchanged (`.agent/ram/07-tests-raw.txt`); analyze: no new diagnostics in touched files (`07-analyze.txt`); old-code runs in `07-lazy-old-code.txt` |
+| 2026-10-28 | 8 | done | `perf/proxies-select-equality` | (this commit) | tests 872 passed, 1 skipped, goldens unchanged (`.agent/ram/08-tests-raw.txt`); analyze: no new diagnostics in touched files (`08-analyze.txt`); build_runner: 2 provider hashes (`08-build-runner.txt`); old-code run in `08-select-old-code.txt` |

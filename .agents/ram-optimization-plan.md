@@ -156,18 +156,26 @@ Commit: `perf(ui): dispose TextPainter after measuring text`
 
 Commit: `perf(ui): evict FixedMap entries in O(1)`
 
-- [ ] On overflow, `FixedMap._adjustMap()` (`lib/common/fixed.dart`) builds `Map.unmodifiable`, then
+- [x] On overflow, `FixedMap._adjustMap()` (`lib/common/fixed.dart`) builds `Map.unmodifiable`, then
   `entries.toList()`, then `Map.fromEntries`: three copies for every new entry over the limit. On top
   of that, `CacheItemExtentListView` (`lib/widgets/scroll.dart`) calls `updateMaxLength` on every
   `itemExtentBuilder` call. Instead, remove `_map.keys.first` while `length > maxLength` (a
   `LinkedHashMap` keeps insertion order). Make `updateMaxLength` a no-op when the size is unchanged.
   Never use the copying `map` getter inside the class.
-- [ ] Keep the public API: `updateCacheValue`, `get`, `containsKey`, `clear`, `updateMaxLength`,
+  (Done: `_adjustMap` is replaced by `_evictOldest()`. With the same size it only compares the
+  length, so `updateMaxLength` is a no-op. FIFO by insertion order is kept; a hit does not refresh
+  the entry's age, as before. `updateMap` copies the map only when it must trim it, so the caller's
+  map is never mutated, as before. Nothing in `lib/` passes its own map to the constructor or
+  `updateMap`. The debug-only `truncate` assert for `maxLength` 0 is gone; release behavior is the same.)
+- [x] Keep the public API: `updateCacheValue`, `get`, `containsKey`, `clear`, `updateMaxLength`,
   `updateMap`, `length`, `map`.
-- [ ] Tests in `test/fixed_map_test.dart`: the oldest entries are evicted first, `maxLength` can
-  shrink and grow, `clear`, `updateMap`.
-- [ ] Note: the `log.payload` key is a reference to the existing string, not a copy. Change the key
-  only if a measurement shows a gain.
+- [x] Tests in `test/fixed_map_test.dart`: the oldest entries are evicted first, `maxLength` can
+  shrink and grow, `clear`, `updateMap`. (Also: a hit does not refresh age, the overflowing key's
+  value is returned, `map` is an unmodifiable snapshot, and 5000 random operations match a copy of
+  the old algorithm. On the old code 9 of 10 pass; `maxLength 0` fails on the debug assert,
+  `.agent/ram/05-fixed-map-old-code.txt`.)
+- [x] Note: the `log.payload` key is a reference to the existing string, not a copy. Change the key
+  only if a measurement shows a gain. (Key unchanged.)
 
 ### 6. FixedList as a ring buffer with a version: branch `perf/fixed-list-ring-buffer`
 
@@ -247,7 +255,7 @@ Commit: `perf(providers): structural select for proxy group names`
 | 10 000 `addLog` with Logs open, time | 24.5–25.6 ms | | benchmark, 3 runs |
 | 10 000 `addLog`, list copies / bytes | 10 001 snapshots, 1 488 825 slots (~11.4 MiB at 8 B/slot) | | benchmark |
 | 10 000 `addRequest` with Requests open, time | 17.0–17.9 ms (copies as for logs) | | benchmark, 3 runs |
-| 10 000 `FixedMap.updateCacheValue`, time | misses 135.7–138.3 ms, hits 0.34 ms | | benchmark, 3 runs |
+| 10 000 `FixedMap.updateCacheValue`, time | misses 135.7–138.3 ms, hits 0.34 ms | after step 5: misses 4.28–4.84 ms, hits 0.66–2.67 ms (sub-ms noise, code path unchanged), `updateMaxLength` same size 0.03–0.34 ms (0.35 before) | benchmark, 3 runs (`.agent/ram/05-perf.txt`) |
 | Logs scroll, 1000 rows, 120 frames, mean | glass macOS 24.30 ms, iOS 15.63 ms, material 29.05 ms | after step 4: glass macOS 21.05–22.36 ms, iOS 13.68–14.88 ms, material 26.34–27.95 ms (host noise, no regression) | `connections_logs` perf test, 1 run / 3 runs |
 | Undisposed `TextPainter`s, Logs page with 150 rows, open + close | 152 of 203 created | 0 (step 4) | `text_painter_dispose_test` |
 | Undisposed `TextPainter`s, Requests page with 150 rows, open + close | 301 of 375 created | 0 (step 4) | `text_painter_dispose_test` |
@@ -271,4 +279,5 @@ They are for before/after comparison on the same machine only.
 | 2026-10-28 | 1 | host part done | `test/ram-bench` | `b3bb381` | benchmark added, baseline in `.agent/ram/01-baseline.txt`; macOS profile run waits for the OK; Android not measured |
 | 2026-10-28 | 2 | done | `fix/buffer-capacity-profile-switch` | `f33e7cb` | tests 827 passed, 1 skipped (`.agent/ram/02-tests-raw.txt`); analyze: no new diagnostics in touched files |
 | 2026-10-28 | 3 | done | `fix/logs-cache-tag` | `74db5cc` | tests 828 passed, 1 skipped, Material goldens unchanged (`.agent/ram/03-tests-raw.txt`); analyze: no new diagnostics |
-| 2026-10-28 | 4 | done | `perf/text-painter-dispose` | (this commit) | tests 832 passed, 1 skipped, goldens unchanged (`.agent/ram/04-tests-raw.txt`); analyze: no new diagnostics |
+| 2026-10-28 | 4 | done | `perf/text-painter-dispose` | `6a39487` | tests 832 passed, 1 skipped, goldens unchanged (`.agent/ram/04-tests-raw.txt`); analyze: no new diagnostics |
+| 2026-10-28 | 5 | done | `perf/fixed-map-eviction` | (this commit) | tests 842 passed, 1 skipped (`.agent/ram/05-tests-raw.txt`); analyze: touched files clean (`.agent/ram/05-analyze.txt`) |

@@ -10,6 +10,10 @@ end up in PR descriptions; this file only holds them until then.
 2. Check out the newest branch of the stack (see the progress log). Uncommitted changes mean a step was
    interrupted: finish it or discard it deliberately, never silently.
 3. Raw measurement output lives in `.agent/ram/` (gitignored, local to this machine only).
+   In the folder MCP sandbox the Flutter SDK cache is read-only and plain `flutter` fails. The local
+   wrapper `.agent/flutter.sh` (gitignored) runs the flutter_tools snapshot directly with
+   `FLUTTER_ALREADY_LOCKED=true` and `HOME=.agent/home`; `.agent/flutter.sh dart ...` runs the Dart
+   binary. Use it in place of `flutter` there, and pass `--no-pub` to `test` for repeated runs.
 4. Continue from the first unchecked box. After each step, tick its boxes, add a progress-log row, fill
    the measurements table, and commit these edits **in the same commit as the step's code**.
 
@@ -37,6 +41,12 @@ paths) without changing behavior, visuals or user defaults.
   dart run custom_lint
   flutter test
   ```
+
+  Notes from step 0: `flutter analyze` from the root also scans `FlClashX-0.5.0-dev/`, a local
+  reference copy excluded through `.git/info/exclude`, so it exits 1 with ~56k issues. Count only
+  repo files (`grep -v FlClashX-0.5.0-dev/`); the base has 0 errors, 4 warnings and 569 infos there.
+  `dart run custom_lint` does not run on the base: `custom_lint` and `riverpod_lint` are not in
+  `pubspec.yaml`, so skip it and say so in the PRs.
 
 ## Already done (do not redo)
 
@@ -79,24 +89,26 @@ paths) without changing behavior, visuals or user defaults.
 
 ### 0. Environment
 
-- [ ] Clean tree; record the base commit in the progress log.
-- [ ] `flutter --version` and `flutter pub get` work from the agent shell. In the folder MCP sandbox
+- [x] Clean tree; record the base commit in the progress log.
+- [x] `flutter --version` and `flutter pub get` work from the agent shell. In the folder MCP sandbox
   `flutter --version` once printed nothing; if the sandbox blocks the Flutter cache, ask the maintainer.
-- [ ] Run `flutter test` and analyze on the base. Save any failures that already existed to
-  `.agent/ram/00-base-tests.txt`.
+  (Blocked cache worked around with `.agent/flutter.sh`, see "How to resume".)
+- [x] Run `flutter test` and analyze on the base. Save any failures that already existed to
+  `.agent/ram/00-base-tests.txt`. (No failures: 822 passed, 1 platform-gated skip.)
 
 ### 1. Benchmark and baseline: branch `test/ram-bench`
 
 Commit: `test(perf): host benchmark for log/request buffers and height cache`
 
-- [ ] Write `test/fixed_buffers_performance_test.dart` on top of `test/performance_test_support.dart`.
+- [x] Write `test/fixed_buffers_performance_test.dart` on top of `test/performance_test_support.dart`.
   It measures 10 000 `addLog` and 10 000 `addRequest` with an active `select` listener (like an open
   page), the count and size of list copies, and 10 000 `FixedMap.updateCacheValue` calls on a full map.
   It prints numbers and has no hard thresholds.
-- [ ] Run the existing perf tests: `connections_logs`, `dashboard`, `proxy_list`, `navigation`.
-- [ ] Save the raw output to `.agent/ram/01-baseline.txt` and copy the key numbers into the table below.
+- [x] Run the existing perf tests: `connections_logs`, `dashboard`, `proxy_list`, `navigation`.
+  (`proxy_list` and `navigation` only assert and print no numbers.)
+- [x] Save the raw output to `.agent/ram/01-baseline.txt` and copy the key numbers into the table below.
 - [ ] With the maintainer's OK: macOS profile run, scenarios a–e. Android only if a device is attached;
-  otherwise mark it "not measured".
+  otherwise mark it "not measured". (Waiting for the OK; no Android device on adb.)
 
 ### 2. Buffer capacity after a profile switch: branch `fix/buffer-capacity-profile-switch`
 
@@ -222,19 +234,25 @@ Commit: `perf(providers): structural select for proxy group names`
 
 | Scenario / metric | Baseline | After | Source |
 | --- | --- | --- | --- |
-| 10 000 `addLog` with Logs open, time | | | benchmark |
-| 10 000 `addLog`, list copies / bytes | | | benchmark |
-| 10 000 `addRequest` with Requests open, time | | | benchmark |
-| 10 000 `FixedMap.updateCacheValue`, time | | | benchmark |
-| a. Cold start, RSS | | | macOS |
-| b. Requests 10 min, RSS / Dart heap | | | macOS |
-| c. Logs (info) 10 min, RSS / Dart heap | | | macOS |
-| d. 3 profile switches, buffer capacity / RSS | | | test / macOS |
-| e. Background and resume, RSS | | | macOS |
-| Android Total PSS (b, c) | | | adb |
+| 10 000 `addLog` with Logs open, time | 24.5–25.6 ms | | benchmark, 3 runs |
+| 10 000 `addLog`, list copies / bytes | 10 001 snapshots, 1 488 825 slots (~11.4 MiB at 8 B/slot) | | benchmark |
+| 10 000 `addRequest` with Requests open, time | 17.0–17.9 ms (copies as for logs) | | benchmark, 3 runs |
+| 10 000 `FixedMap.updateCacheValue`, time | misses 135.7–138.3 ms, hits 0.34 ms | | benchmark, 3 runs |
+| Logs scroll, 1000 rows, 120 frames, mean | glass macOS 24.30 ms, iOS 15.63 ms, material 29.05 ms | | `connections_logs` perf test, 1 run |
+| a. Cold start, RSS | not measured | | macOS |
+| b. Requests 10 min, RSS / Dart heap | not measured | | macOS |
+| c. Logs (info) 10 min, RSS / Dart heap | not measured | | macOS |
+| d. 3 profile switches, buffer capacity / RSS | 500 per buffer (read from code, test in step 2) / RSS not measured | | test / macOS |
+| e. Background and resume, RSS | not measured | | macOS |
+| Android Total PSS (b, c) | not measured (no device) | | adb |
+
+Host numbers come from `flutter test` on the maintainer's Mac (JIT `flutter_tester`, Flutter 3.44.1).
+They are for before/after comparison on the same machine only.
 
 ## Progress log
 
 | Date | Step | Status | Branch | Commit | Notes |
 | --- | --- | --- | --- | --- | --- |
-| 2026-10-28 | plan | added | `test/ram-bench` | (this commit) | base `main` at `ea15a7e`; waiting for the maintainer's OK to start |
+| 2026-10-28 | plan | added | `test/ram-bench` | `4603025` | base `main` at `ea15a7e`; waiting for the maintainer's OK to start |
+| 2026-10-28 | 0 | done | `test/ram-bench` | (no code) | base `4603025`; tests 822 passed, 1 skipped; analyze 0 errors / 4 warnings in repo files; `custom_lint` not configured |
+| 2026-10-28 | 1 | host part done | `test/ram-bench` | (this commit) | benchmark added, baseline in `.agent/ram/01-baseline.txt`; macOS profile run waits for the OK; Android not measured |

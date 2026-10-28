@@ -265,22 +265,8 @@ class _LogsViewState extends ConsumerState<LogsView> with PageMixin {
               if (AdaptivePlatform.useGlass) {
                 return _buildGlass(state, logs);
               }
-              final items = logs
-                  .map<Widget>(
-                    (log) => LogItem(
-                      key: Key(log.dateTime),
-                      log: log,
-                      onClick: (value) {
-                        context.commonScaffoldState?.addKeyword(value);
-                      },
-                    ),
-                  )
-                  .separated(
-                    const Divider(
-                      height: 0,
-                    ),
-                  )
-                  .toList();
+              // Rows are built lazily by index: even = log, odd = divider.
+              final itemCount = logs.isEmpty ? 0 : logs.length * 2 - 1;
               final content = logs.isEmpty
                   ? NullStatus(
                       label: appLocalizations.nullTip(
@@ -301,14 +287,29 @@ class _LogsViewState extends ConsumerState<LogsView> with PageMixin {
                             shrinkWrap: true,
                             physics: const NextClampingScrollPhysics(),
                             controller: _scrollController,
-                            itemBuilder: (_, index) => items[index],
+                            itemBuilder: (_, index) {
+                              if (index.isOdd) {
+                                return const Divider(
+                                  height: 0,
+                                );
+                              }
+                              final log = logs[index ~/ 2];
+                              return LogItem(
+                                key: Key(log.dateTime),
+                                log: log,
+                                onClick: (value) {
+                                  context.commonScaffoldState
+                                      ?.addKeyword(value);
+                                },
+                              );
+                            },
                             itemExtentBuilder: (index) {
                               if (index.isOdd) {
                                 return 0;
                               }
                               return _getItemHeight(logs[index ~/ 2]);
                             },
-                            itemCount: items.length,
+                            itemCount: itemCount,
                             keyBuilder: (index) {
                               if (index.isOdd) {
                                 return "divider";

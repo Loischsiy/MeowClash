@@ -54,7 +54,9 @@ failure.
   idle screen hid the last events of a burst. `list` is an unmodifiable
   snapshot cached until the
   next change; the Logs/Requests pages take one per throttled update. Covered by
-  `test/fixed_list_test.dart` and `test/event_buffer_live_update_test.dart`.
+  `test/fixed_list_test.dart` and `test/event_buffer_live_update_test.dart`. The Material lists build
+  each row (even index) or `Divider` (odd index) in `itemBuilder`; never build the whole row list per
+  update (`test/material_lazy_rows_test.dart`).
 - **IP details** (`lib/services/ip_details_service.dart`): extra data is fetched only while the dialog is
   open, through the proxy-aware client, for that exact IP; responses for a different IP are rejected.
   Successful lookups are cached **5 min** in a **16-entry** IP/language LRU; failures are not cached.

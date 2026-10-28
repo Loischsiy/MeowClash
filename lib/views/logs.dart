@@ -25,7 +25,7 @@ class _LogsViewState extends ConsumerState<LogsView> with PageMixin {
   late ScrollController _scrollController;
 
   double _currentMaxWidth = 0;
-  final _tag = CacheTag.rules;
+  final _tag = CacheTag.logs;
   bool _isLoad = false;
 
   List<Log> _logs = [];

@@ -1,4 +1,9 @@
+import 'constant.dart';
 import 'iterable.dart';
+
+/// Log and request buffer. Used at start-up and after a profile switch, so
+/// both keep the same [maxLength] capacity.
+FixedList<T> createEventBuffer<T>() => FixedList<T>(maxLength);
 
 class FixedList<T> {
 

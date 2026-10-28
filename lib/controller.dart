@@ -761,8 +761,8 @@ class AppController {
     final currentProfileId = _ref.read(currentProfileIdProvider);
 
     applyProfile();
-    _ref.read(logsProvider.notifier).value = FixedList(500);
-    _ref.read(requestsProvider.notifier).value = FixedList(500);
+    _ref.read(logsProvider.notifier).value = createEventBuffer();
+    _ref.read(requestsProvider.notifier).value = createEventBuffer();
     globalState.cacheHeightMap = {};
     globalState.cacheScrollPosition = {};
 

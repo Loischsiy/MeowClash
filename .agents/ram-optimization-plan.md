@@ -114,11 +114,14 @@ Commit: `test(perf): host benchmark for log/request buffers and height cache`
 
 Commit: `fix(state): keep log/request buffers at maxLength after profile switch`
 
-- [ ] In `handleChangeProfile()` (`lib/controller.dart`, around line 764), `logsProvider` and
+- [x] In `handleChangeProfile()` (`lib/controller.dart`, around line 764), `logsProvider` and
   `requestsProvider` are recreated as `FixedList(500)`, while `initApp` in `lib/state.dart` uses
   `FixedList(maxLength)` with `maxLength = 150` (`lib/common/constant.dart`). Use `maxLength`; ideally
-  create both buffers through one factory.
-- [ ] Test: after a profile switch, both buffers have a capacity of `maxLength`.
+  create both buffers through one factory. (Factory `createEventBuffer<T>()` in
+  `lib/common/fixed.dart`, used by `initApp` and `handleChangeProfile`. Step 6 must keep it.)
+- [x] Test: after a profile switch, both buffers have a capacity of `maxLength`.
+  (`test/event_buffer_capacity_test.dart`: three real `handleChangeProfile()` calls with the core
+  stubbed out; it fails on the old code with `Expected: <150> Actual: <500>`.)
 
 ### 3. A cache tag of its own for the Logs page: branch `fix/logs-cache-tag`
 
@@ -242,7 +245,7 @@ Commit: `perf(providers): structural select for proxy group names`
 | a. Cold start, RSS | not measured | | macOS |
 | b. Requests 10 min, RSS / Dart heap | not measured | | macOS |
 | c. Logs (info) 10 min, RSS / Dart heap | not measured | | macOS |
-| d. 3 profile switches, buffer capacity / RSS | 500 per buffer (read from code, test in step 2) / RSS not measured | | test / macOS |
+| d. 3 profile switches, buffer capacity / RSS | 500 per buffer (read from code, test in step 2) / RSS not measured | 150 per buffer (step 2) / RSS not measured | `event_buffer_capacity_test` / macOS |
 | e. Background and resume, RSS | not measured | | macOS |
 | Android Total PSS (b, c) | not measured (no device) | | adb |
 
@@ -255,4 +258,5 @@ They are for before/after comparison on the same machine only.
 | --- | --- | --- | --- | --- | --- |
 | 2026-10-28 | plan | added | `test/ram-bench` | `4603025` | base `main` at `ea15a7e`; waiting for the maintainer's OK to start |
 | 2026-10-28 | 0 | done | `test/ram-bench` | (no code) | base `4603025`; tests 822 passed, 1 skipped; analyze 0 errors / 4 warnings in repo files; `custom_lint` not configured |
-| 2026-10-28 | 1 | host part done | `test/ram-bench` | (this commit) | benchmark added, baseline in `.agent/ram/01-baseline.txt`; macOS profile run waits for the OK; Android not measured |
+| 2026-10-28 | 1 | host part done | `test/ram-bench` | `b3bb381` | benchmark added, baseline in `.agent/ram/01-baseline.txt`; macOS profile run waits for the OK; Android not measured |
+| 2026-10-28 | 2 | done | `fix/buffer-capacity-profile-switch` | (this commit) | tests 827 passed, 1 skipped (`.agent/ram/02-tests-raw.txt`); analyze: no new diagnostics in touched files |

@@ -139,14 +139,18 @@ Commit: `fix(ui): give the logs page its own height/scroll cache tag`
 
 Commit: `perf(ui): dispose TextPainter after measuring text`
 
-- [ ] `Measure.computeTextSize` (`lib/common/measure.dart`) creates a `TextPainter` for every
+- [x] `Measure.computeTextSize` (`lib/common/measure.dart`) creates a `TextPainter` for every
   measurement and never calls `dispose()`, so the native `ui.Paragraph` stays alive until a GC
   finalizer runs. It runs for every Logs and Requests row height. Store the size, dispose the painter,
-  then return the size.
-- [ ] Look for other `TextPainter(` instances in `lib/` that are never disposed, and fix them the same way.
-- [ ] Measure with the step 1 benchmark and, if a build is available, external/native memory while
-  opening Logs and Requests.
-- [ ] Add one line to `.agents/runtime-contracts.md`: text measurements dispose their `TextPainter`.
+  then return the size. (`try`/`finally` around `layout`.)
+- [x] Look for other `TextPainter(` instances in `lib/` that are never disposed, and fix them the same way.
+  (One more: `_CatPainter._drawZ` in `lib/views/dashboard/widgets/start_button.dart` made a painter
+  on every frame of the idle cat animation. Now disposed after the loop.)
+- [x] Measure with the step 1 benchmark and, if a build is available, external/native memory while
+  opening Logs and Requests. (New `test/text_painter_dispose_test.dart` counts undisposed painters,
+  raw output in `.agent/ram/04-before.txt` / `04-after.txt`; timings in `.agent/ram/04-perf.txt`, no
+  regression. Native memory on a device: not measured, no build.)
+- [x] Add one line to `.agents/runtime-contracts.md`: text measurements dispose their `TextPainter`.
 
 ### 5. FixedMap eviction without rebuilding: branch `perf/fixed-map-eviction`
 
@@ -244,7 +248,10 @@ Commit: `perf(providers): structural select for proxy group names`
 | 10 000 `addLog`, list copies / bytes | 10 001 snapshots, 1 488 825 slots (~11.4 MiB at 8 B/slot) | | benchmark |
 | 10 000 `addRequest` with Requests open, time | 17.0–17.9 ms (copies as for logs) | | benchmark, 3 runs |
 | 10 000 `FixedMap.updateCacheValue`, time | misses 135.7–138.3 ms, hits 0.34 ms | | benchmark, 3 runs |
-| Logs scroll, 1000 rows, 120 frames, mean | glass macOS 24.30 ms, iOS 15.63 ms, material 29.05 ms | | `connections_logs` perf test, 1 run |
+| Logs scroll, 1000 rows, 120 frames, mean | glass macOS 24.30 ms, iOS 15.63 ms, material 29.05 ms | after step 4: glass macOS 21.05–22.36 ms, iOS 13.68–14.88 ms, material 26.34–27.95 ms (host noise, no regression) | `connections_logs` perf test, 1 run / 3 runs |
+| Undisposed `TextPainter`s, Logs page with 150 rows, open + close | 152 of 203 created | 0 (step 4) | `text_painter_dispose_test` |
+| Undisposed `TextPainter`s, Requests page with 150 rows, open + close | 301 of 375 created | 0 (step 4) | `text_painter_dispose_test` |
+| Undisposed `TextPainter`s, dashboard with idle cat, ~2 s of frames | 86 of 256 created (about one per frame) | 0 (step 4) | `text_painter_dispose_test` |
 | a. Cold start, RSS | not measured | | macOS |
 | b. Requests 10 min, RSS / Dart heap | not measured | | macOS |
 | c. Logs (info) 10 min, RSS / Dart heap | not measured | | macOS |
@@ -263,4 +270,5 @@ They are for before/after comparison on the same machine only.
 | 2026-10-28 | 0 | done | `test/ram-bench` | (no code) | base `4603025`; tests 822 passed, 1 skipped; analyze 0 errors / 4 warnings in repo files; `custom_lint` not configured |
 | 2026-10-28 | 1 | host part done | `test/ram-bench` | `b3bb381` | benchmark added, baseline in `.agent/ram/01-baseline.txt`; macOS profile run waits for the OK; Android not measured |
 | 2026-10-28 | 2 | done | `fix/buffer-capacity-profile-switch` | `f33e7cb` | tests 827 passed, 1 skipped (`.agent/ram/02-tests-raw.txt`); analyze: no new diagnostics in touched files |
-| 2026-10-28 | 3 | done | `fix/logs-cache-tag` | (this commit) | tests 828 passed, 1 skipped, Material goldens unchanged (`.agent/ram/03-tests-raw.txt`); analyze: no new diagnostics |
+| 2026-10-28 | 3 | done | `fix/logs-cache-tag` | `74db5cc` | tests 828 passed, 1 skipped, Material goldens unchanged (`.agent/ram/03-tests-raw.txt`); analyze: no new diagnostics |
+| 2026-10-28 | 4 | done | `perf/text-painter-dispose` | (this commit) | tests 832 passed, 1 skipped, goldens unchanged (`.agent/ram/04-tests-raw.txt`); analyze: no new diagnostics |

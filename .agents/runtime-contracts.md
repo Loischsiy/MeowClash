@@ -40,6 +40,10 @@ failure.
   a **192 MiB** soft limit on desktop/Android (the iOS extension uses 32 MiB); explicit (core status dialog) and OS-pressure
   reclaims coalesce into one outstanding request. Do not call `Touch()` on providers just to forward
   delay history — it updates their last-use timestamp and defeats `lazy` health checks.
+- **Text measurement**: every `TextPainter` created outside a `RenderParagraph` (row heights in
+  `Measure.computeTextSize`, the start button's "z") is disposed right after use, so its native
+  `ui.Paragraph` is freed at once instead of waiting for a GC finalizer.
+  `test/text_painter_dispose_test.dart` counts undisposed painters through `FlutterMemoryAllocations`.
 - **IP details** (`lib/services/ip_details_service.dart`): extra data is fetched only while the dialog is
   open, through the proxy-aware client, for that exact IP; responses for a different IP are rejected.
   Successful lookups are cached **5 min** in a **16-entry** IP/language LRU; failures are not cached.

@@ -1061,28 +1061,34 @@ class _CatPainter extends CustomPainter {
       textAlign: TextAlign.left,
     );
 
-    for (var i = 0; i < 3; i++) {
-      final t = ((ambient * 2) + i * 0.33) % 1;
-      final opacity = (1 - t) * traits.zStrength;
-      if (opacity <= 0) continue;
+    try {
+      for (var i = 0; i < 3; i++) {
+        final t = ((ambient * 2) + i * 0.33) % 1;
+        final opacity = (1 - t) * traits.zStrength;
+        if (opacity <= 0) continue;
 
-      zPaint
-        ..text = TextSpan(
-          text: 'z',
-          style: TextStyle(
-            color: foregroundColor.withValues(alpha: opacity.clamp(0.0, 1.0)),
-            fontSize: (10 + 4 * t) * s,
-            fontWeight: FontWeight.w700,
-          ),
-        )
-        ..layout()
-        ..paint(
-          canvas,
-          Offset(
-            14 * s + 6 * s * t,
-            -32 * s - 20 * s * t,
-          ),
-        );
+        zPaint
+          ..text = TextSpan(
+            text: 'z',
+            style: TextStyle(
+              color:
+                  foregroundColor.withValues(alpha: opacity.clamp(0.0, 1.0)),
+              fontSize: (10 + 4 * t) * s,
+              fontWeight: FontWeight.w700,
+            ),
+          )
+          ..layout()
+          ..paint(
+            canvas,
+            Offset(
+              14 * s + 6 * s * t,
+              -32 * s - 20 * s * t,
+            ),
+          );
+      }
+    } finally {
+      // Painted every frame while idle: free the paragraph right away.
+      zPaint.dispose();
     }
   }
 

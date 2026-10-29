@@ -1,3 +1,4 @@
+import 'package:meowclash/clash/clash.dart';
 import 'package:meowclash/common/common.dart';
 import 'package:meowclash/enum/enum.dart';
 import 'package:meowclash/models/models.dart';
@@ -61,7 +62,12 @@ class ProxyCard extends StatelessWidget {
         child: child,
       );
 
-  void _openProxyGroup(BuildContext context, Group group) {
+  void _openProxyGroup(BuildContext context, WidgetRef ref, Group group) {
+    // A hidden group has no header on the proxies page, so its drill-down
+    // sheet is the only place to refresh the providers behind it.
+    final canUpdateProviders = group.hidden == true &&
+        groupUpdatableProviders(group, ref.read(providersProvider))
+            .isNotEmpty;
     showExtend(
       context,
       props: const ExtendProps(maxWidth: 480),
@@ -69,6 +75,10 @@ class ProxyCard extends StatelessWidget {
         type: type,
         body: _ProxyGroupDrillDownView(groupName: group.name),
         title: group.name,
+        actions: [
+          if (canUpdateProviders)
+            _GroupProvidersUpdateButton(groupName: group.name),
+        ],
       ),
     );
   }
@@ -205,7 +215,7 @@ class ProxyCard extends StatelessWidget {
                 _changeProxy(ref);
               },
               onLongPress: drillDownGroup != null
-                  ? () => _openProxyGroup(context, drillDownGroup)
+                  ? () => _openProxyGroup(context, ref, drillDownGroup)
                   : null,
               isSelected: selectedProxyName == proxy.name,
               checked: AdaptivePlatform.useGlass && _isChecked(ref),
@@ -270,6 +280,109 @@ class ProxyCard extends StatelessWidget {
             ),
           )
       ],
+    );
+  }
+}
+
+/// Top-right action of a hidden group's drill-down sheet: re-downloads every
+/// HTTP proxy provider feeding the group (one or several) in parallel.
+class _GroupProvidersUpdateButton extends ConsumerStatefulWidget {
+  const _GroupProvidersUpdateButton({required this.groupName});
+
+  final String groupName;
+
+  @override
+  ConsumerState<_GroupProvidersUpdateButton> createState() =>
+      _GroupProvidersUpdateButtonState();
+}
+
+class _GroupProvidersUpdateButtonState
+    extends ConsumerState<_GroupProvidersUpdateButton> {
+  bool _updating = false;
+
+  List<ExternalProvider> _targets() {
+    final group = ref.read(groupsProvider).getGroup(widget.groupName);
+    if (group == null) return const [];
+    return groupUpdatableProviders(group, ref.read(providersProvider));
+  }
+
+  Future<void> _updateProvider(
+    ExternalProvider provider,
+    List<String> errors,
+  ) async {
+    globalState.appController.setProvider(
+      provider.copyWith(isUpdating: true),
+    );
+    try {
+      final message = await clashCore.updateExternalProvider(
+        providerName: provider.name,
+      );
+      if (message.isNotEmpty) errors.add('${provider.name}: $message');
+    } catch (e) {
+      errors.add('${provider.name}: $e');
+    }
+    ExternalProvider? updated;
+    try {
+      updated = await clashCore.getExternalProvider(provider.name);
+    } catch (e) {
+      commonPrint.log('Reload provider ${provider.name} failed: $e');
+    }
+    globalState.appController.setProvider(
+      updated ?? provider.copyWith(isUpdating: false),
+    );
+  }
+
+  Future<void> _update() async {
+    final targets = _targets();
+    if (_updating || targets.isEmpty) return;
+    setState(() => _updating = true);
+    final errors = <String>[];
+    try {
+      await Future.wait([
+        for (final provider in targets) _updateProvider(provider, errors),
+      ]);
+    } finally {
+      if (mounted) setState(() => _updating = false);
+    }
+    globalState.appController.updateGroupsDebounce();
+    if (errors.isEmpty) return;
+    await globalState.showMessage(
+      title: appLocalizations.tip,
+      message: TextSpan(text: errors.join('\n')),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final group = ref.watch(
+      groupsProvider.select((state) => state.getGroup(widget.groupName)),
+    );
+    final providers = ref.watch(providersProvider);
+    final targets = group == null
+        ? const <ExternalProvider>[]
+        : groupUpdatableProviders(group, providers);
+    final busy = _updating || targets.any((provider) => provider.isUpdating);
+    final glass = AdaptivePlatform.useGlass;
+    final names = targets.map((provider) => provider.name).join(', ');
+    return IconButton(
+      tooltip: names.isEmpty
+          ? appLocalizations.sync
+          : '${appLocalizations.sync}: $names',
+      onPressed: busy || targets.isEmpty ? null : _update,
+      icon: busy
+          ? glass
+              ? const AdaptiveActivityIndicator()
+              : RepaintBoundary(
+                  child: SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      color: context.colorScheme.primary,
+                      strokeWidth: 1.5,
+                    ),
+                  ),
+                )
+          : Icon(glass ? Icons.sync_rounded : Icons.sync),
     );
   }
 }

@@ -253,7 +253,9 @@ class Proxy with _$Proxy {
       {required String name,
       required String type,
       String? now,
-      String? serverDescription}) = _Proxy;
+      String? serverDescription,
+      // Set by mihomo for nodes loaded from a proxy provider; empty otherwise.
+      @JsonKey(name: 'provider-name') String? providerName}) = _Proxy;
 
   factory Proxy.fromJson(Map<String, Object?> json) => _$ProxyFromJson(json);
 }

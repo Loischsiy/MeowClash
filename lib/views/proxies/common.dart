@@ -5,6 +5,33 @@ import 'package:meowclash/services/delay_test_runner.dart';
 import 'package:meowclash/state.dart';
 import 'package:meowclash/widgets/adaptive/adaptive.dart';
 
+/// HTTP proxy providers that feed [group] directly, in member order.
+///
+/// mihomo tags every node loaded from a proxy provider with `provider-name`;
+/// manual nodes and nested groups carry none. Only providers the core reports
+/// in [providers] with an HTTP vehicle can be re-downloaded. A rule provider
+/// may share a proxy provider's name, so only `Proxy` providers are matched.
+List<ExternalProvider> groupUpdatableProviders(
+  Group group,
+  List<ExternalProvider> providers,
+) {
+  final names = <String>{
+    for (final proxy in group.all)
+      if (proxy.providerName case final name? when name.isNotEmpty) name,
+  };
+  if (names.isEmpty) return const [];
+  final proxyProviders = <String, ExternalProvider>{
+    for (final provider in providers)
+      if (provider.type == 'Proxy') provider.name: provider,
+  };
+  return [
+    for (final name in names)
+      if (proxyProviders[name] case final provider?
+          when provider.vehicleType == 'HTTP')
+        provider,
+  ];
+}
+
 double get listHeaderHeight {
   final measure = globalState.measure;
   return 20 + measure.titleMediumHeight + 4 + measure.bodyMediumHeight;

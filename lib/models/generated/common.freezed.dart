@@ -2263,7 +2263,10 @@ mixin _$Proxy {
   String get name => throw _privateConstructorUsedError;
   String get type => throw _privateConstructorUsedError;
   String? get now => throw _privateConstructorUsedError;
-  String? get serverDescription => throw _privateConstructorUsedError;
+  String? get serverDescription =>
+      throw _privateConstructorUsedError; // Set by mihomo for nodes loaded from a proxy provider; empty otherwise.
+  @JsonKey(name: 'provider-name')
+  String? get providerName => throw _privateConstructorUsedError;
 
   /// Serializes this Proxy to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -2279,7 +2282,12 @@ abstract class $ProxyCopyWith<$Res> {
   factory $ProxyCopyWith(Proxy value, $Res Function(Proxy) then) =
       _$ProxyCopyWithImpl<$Res, Proxy>;
   @useResult
-  $Res call({String name, String type, String? now, String? serverDescription});
+  $Res call(
+      {String name,
+      String type,
+      String? now,
+      String? serverDescription,
+      @JsonKey(name: 'provider-name') String? providerName});
 }
 
 /// @nodoc
@@ -2301,6 +2309,7 @@ class _$ProxyCopyWithImpl<$Res, $Val extends Proxy>
     Object? type = null,
     Object? now = freezed,
     Object? serverDescription = freezed,
+    Object? providerName = freezed,
   }) {
     return _then(_value.copyWith(
       name: null == name
@@ -2319,6 +2328,10 @@ class _$ProxyCopyWithImpl<$Res, $Val extends Proxy>
           ? _value.serverDescription
           : serverDescription // ignore: cast_nullable_to_non_nullable
               as String?,
+      providerName: freezed == providerName
+          ? _value.providerName
+          : providerName // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 }
@@ -2330,7 +2343,12 @@ abstract class _$$ProxyImplCopyWith<$Res> implements $ProxyCopyWith<$Res> {
       __$$ProxyImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String name, String type, String? now, String? serverDescription});
+  $Res call(
+      {String name,
+      String type,
+      String? now,
+      String? serverDescription,
+      @JsonKey(name: 'provider-name') String? providerName});
 }
 
 /// @nodoc
@@ -2350,6 +2368,7 @@ class __$$ProxyImplCopyWithImpl<$Res>
     Object? type = null,
     Object? now = freezed,
     Object? serverDescription = freezed,
+    Object? providerName = freezed,
   }) {
     return _then(_$ProxyImpl(
       name: null == name
@@ -2368,6 +2387,10 @@ class __$$ProxyImplCopyWithImpl<$Res>
           ? _value.serverDescription
           : serverDescription // ignore: cast_nullable_to_non_nullable
               as String?,
+      providerName: freezed == providerName
+          ? _value.providerName
+          : providerName // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -2379,7 +2402,8 @@ class _$ProxyImpl implements _Proxy {
       {required this.name,
       required this.type,
       this.now,
-      this.serverDescription});
+      this.serverDescription,
+      @JsonKey(name: 'provider-name') this.providerName});
 
   factory _$ProxyImpl.fromJson(Map<String, dynamic> json) =>
       _$$ProxyImplFromJson(json);
@@ -2392,10 +2416,14 @@ class _$ProxyImpl implements _Proxy {
   final String? now;
   @override
   final String? serverDescription;
+// Set by mihomo for nodes loaded from a proxy provider; empty otherwise.
+  @override
+  @JsonKey(name: 'provider-name')
+  final String? providerName;
 
   @override
   String toString() {
-    return 'Proxy(name: $name, type: $type, now: $now, serverDescription: $serverDescription)';
+    return 'Proxy(name: $name, type: $type, now: $now, serverDescription: $serverDescription, providerName: $providerName)';
   }
 
   @override
@@ -2407,13 +2435,15 @@ class _$ProxyImpl implements _Proxy {
             (identical(other.type, type) || other.type == type) &&
             (identical(other.now, now) || other.now == now) &&
             (identical(other.serverDescription, serverDescription) ||
-                other.serverDescription == serverDescription));
+                other.serverDescription == serverDescription) &&
+            (identical(other.providerName, providerName) ||
+                other.providerName == providerName));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, name, type, now, serverDescription);
+  int get hashCode => Object.hash(
+      runtimeType, name, type, now, serverDescription, providerName);
 
   /// Create a copy of Proxy
   /// with the given fields replaced by the non-null parameter values.
@@ -2433,10 +2463,12 @@ class _$ProxyImpl implements _Proxy {
 
 abstract class _Proxy implements Proxy {
   const factory _Proxy(
-      {required final String name,
-      required final String type,
-      final String? now,
-      final String? serverDescription}) = _$ProxyImpl;
+          {required final String name,
+          required final String type,
+          final String? now,
+          final String? serverDescription,
+          @JsonKey(name: 'provider-name') final String? providerName}) =
+      _$ProxyImpl;
 
   factory _Proxy.fromJson(Map<String, dynamic> json) = _$ProxyImpl.fromJson;
 
@@ -2447,7 +2479,11 @@ abstract class _Proxy implements Proxy {
   @override
   String? get now;
   @override
-  String? get serverDescription;
+  String?
+      get serverDescription; // Set by mihomo for nodes loaded from a proxy provider; empty otherwise.
+  @override
+  @JsonKey(name: 'provider-name')
+  String? get providerName;
 
   /// Create a copy of Proxy
   /// with the given fields replaced by the non-null parameter values.

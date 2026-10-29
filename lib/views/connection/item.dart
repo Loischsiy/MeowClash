@@ -185,12 +185,20 @@ class ConnectionItem extends ConsumerWidget {
                         height: 48,
                         child: FutureBuilder<ImageProvider?>(
                           future: _getPackageIcon(connection),
-                          builder: (_, snapshot) {
+                          builder: (context, snapshot) {
                             if (!snapshot.hasData && snapshot.data == null) {
                               return Container();
                             } else {
+                              // Decode at the display size, as in icon.dart.
+                              final cacheWidth = (48 *
+                                      MediaQuery.devicePixelRatioOf(context))
+                                  .ceil();
                               return Image(
-                                image: snapshot.data!,
+                                image: ResizeImage.resizeIfNeeded(
+                                  cacheWidth,
+                                  null,
+                                  snapshot.data!,
+                                ),
                                 gaplessPlayback: true,
                                 width: 48,
                                 height: 48,

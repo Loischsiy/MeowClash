@@ -131,8 +131,8 @@ class GlobalState {
     appState = AppState(
       version: version,
       viewSize: Size.zero,
-      requests: FixedList(maxLength),
-      logs: FixedList(maxLength),
+      requests: createEventBuffer(),
+      logs: createEventBuffer(),
       traffics: FixedList(30),
       totalTraffic: Traffic(),
     );

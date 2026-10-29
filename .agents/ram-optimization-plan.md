@@ -127,10 +127,13 @@ Commit: `fix(state): keep log/request buffers at maxLength after profile switch`
 
 Commit: `fix(ui): give the logs page its own height/scroll cache tag`
 
-- [ ] `lib/views/logs.dart` uses `_tag = CacheTag.rules`, the same tag as the rules editor
+- [x] `lib/views/logs.dart` uses `_tag = CacheTag.rules`, the same tag as the rules editor
   (`lib/views/profiles/override_profile.dart`, around line 857), so the two pages share
   `cacheHeightMap` and `cacheScrollPosition`. Switch to the existing `CacheTag.logs`.
-- [ ] Check that nothing else uses `CacheTag.logs`, and that the Logs tests and goldens still pass.
+- [x] Check that nothing else uses `CacheTag.logs`, and that the Logs tests and goldens still pass.
+  (Nothing else used it. `test/adaptive_connections_logs_glass_test.dart` passes `CacheTag.rules`
+  to a bare `ScrollToEndBox` as an arbitrary tag; left as is. New `test/logs_cache_tag_test.dart`
+  fails on the old code: log rows evicted the rules editor's height entry.)
 
 ### 4. Dispose TextPainter after measuring: branch `perf/text-painter-dispose`
 
@@ -259,4 +262,5 @@ They are for before/after comparison on the same machine only.
 | 2026-10-28 | plan | added | `test/ram-bench` | `4603025` | base `main` at `ea15a7e`; waiting for the maintainer's OK to start |
 | 2026-10-28 | 0 | done | `test/ram-bench` | (no code) | base `4603025`; tests 822 passed, 1 skipped; analyze 0 errors / 4 warnings in repo files; `custom_lint` not configured |
 | 2026-10-28 | 1 | host part done | `test/ram-bench` | `b3bb381` | benchmark added, baseline in `.agent/ram/01-baseline.txt`; macOS profile run waits for the OK; Android not measured |
-| 2026-10-28 | 2 | done | `fix/buffer-capacity-profile-switch` | (this commit) | tests 827 passed, 1 skipped (`.agent/ram/02-tests-raw.txt`); analyze: no new diagnostics in touched files |
+| 2026-10-28 | 2 | done | `fix/buffer-capacity-profile-switch` | `f33e7cb` | tests 827 passed, 1 skipped (`.agent/ram/02-tests-raw.txt`); analyze: no new diagnostics in touched files |
+| 2026-10-28 | 3 | done | `fix/logs-cache-tag` | (this commit) | tests 828 passed, 1 skipped, Material goldens unchanged (`.agent/ram/03-tests-raw.txt`); analyze: no new diagnostics |

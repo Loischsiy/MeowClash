@@ -43,7 +43,7 @@
     </tr>
     <tr>
       <td><a href="snapshots/android.mp4"><img alt="MeowClash Androidilla" src="snapshots/android.webp" width="270" style="border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);"></a></td>
-      <td><a href="snapshots/ios.mov"><img alt="MeowClash iOS:llä" src="snapshots/ios.webp" width="340" style="border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);"></a></td>
+      <td><a href="snapshots/ios.mp4"><img alt="MeowClash iOS:llä" src="snapshots/ios.webp" width="300" style="border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);"></a></td>
     </tr>
   </table>
 </div>

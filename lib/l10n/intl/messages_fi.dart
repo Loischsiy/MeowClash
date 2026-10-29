@@ -120,6 +120,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "checkFailed": MessageLookupByLibrary.simpleMessage("Aikakatkaisu"),
     "checkUpdate": MessageLookupByLibrary.simpleMessage("Tarkista päivitykset"),
     "checking": MessageLookupByLibrary.simpleMessage("Tarkistetaan..."),
+    "close": MessageLookupByLibrary.simpleMessage("Sulje"),
     "closeConnection": MessageLookupByLibrary.simpleMessage("Sulje yhteys"),
     "columns": MessageLookupByLibrary.simpleMessage("Sarakkeet"),
     "compatible": MessageLookupByLibrary.simpleMessage("Yhteensopivuustila"),

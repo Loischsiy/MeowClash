@@ -2804,6 +2804,11 @@ class AppLocalizations {
     return Intl.message('Cancel', name: 'cancel', desc: '', args: []);
   }
 
+  /// `Close`
+  String get close {
+    return Intl.message('Close', name: 'close', desc: '', args: []);
+  }
+
   /// `The file has been modified. Do you want to save the changes?`
   String get fileIsUpdate {
     return Intl.message(

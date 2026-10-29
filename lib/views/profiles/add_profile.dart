@@ -5,7 +5,6 @@ import 'package:meowclash/state.dart';
 import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:meowclash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'receive_profile_dialog.dart';
 
 /// Result returned by [URLFormDialog].
@@ -223,11 +222,8 @@ class _URLFormDialogState extends State<URLFormDialog> {
     );
   }
 
-  Future<void> _handlePaste() async {
-    final clipboardData = await Clipboard.getData(Clipboard.kTextPlain);
-    if (clipboardData?.text != null) {
-      urlController.text = clipboardData!.text!;
-    }
+  void _handleClose() {
+    Navigator.of(context).pop();
   }
 
   @override
@@ -235,8 +231,8 @@ class _URLFormDialogState extends State<URLFormDialog> {
       title: appLocalizations.importFromURL,
       actions: [
         TextButton(
-          onPressed: _handlePaste,
-          child: Text(appLocalizations.pasteFromClipboard),
+          onPressed: _handleClose,
+          child: Text(appLocalizations.close),
         ),
         const SizedBox(width: 8),
         FilledButton(

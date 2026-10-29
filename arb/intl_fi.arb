@@ -192,6 +192,7 @@
   "noData": "Ei tietoja",
   "system": "Järjestelmä",
   "cancel": "Peruuta",
+  "close": "Sulje",
   "copySuccess": "Kopiointi onnistui",
   "import": "Tuo",
   "importFile": "Tuo tiedostosta",

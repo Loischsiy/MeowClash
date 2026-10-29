@@ -223,6 +223,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "clipboardImport": MessageLookupByLibrary.simpleMessage(
       "Імпорт із буфера обміну",
     ),
+    "close": MessageLookupByLibrary.simpleMessage("Закрити"),
     "closeConnection": MessageLookupByLibrary.simpleMessage(
       "Закрити з’єднання",
     ),

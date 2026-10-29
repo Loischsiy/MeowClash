@@ -361,6 +361,7 @@
   "copyEnvVar": "Copying environment variables",
   "memoryInfo": "Memory info",
   "cancel": "Cancel",
+  "close": "Close",
   "fileIsUpdate": "The file has been modified. Do you want to save the changes?",
   "profileHasUpdate": "The profile has been modified. Do you want to disable auto update?",
   "hasCacheChange": "Do you want to cache the changes?",

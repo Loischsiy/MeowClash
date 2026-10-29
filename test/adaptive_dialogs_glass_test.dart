@@ -539,4 +539,26 @@ void main() {
       expect(find.byType(GlassDialog), findsNothing);
     }, variant: mac);
   });
+
+  testWidgets('url form: Close replaces Paste and dismisses without a result',
+      (tester) async {
+    var closed = false;
+    URLFormResult? result;
+    await open(
+      tester,
+      () => globalState
+          .showCommonDialog<URLFormResult>(child: const URLFormDialog())
+          .then((value) {
+        result = value;
+        closed = true;
+      }),
+    );
+    expect(find.text('Paste'), findsNothing);
+    expect(find.text('Close'), findsOneWidget);
+    await tester.tap(find.text('Close'));
+    await tester.pumpAndSettle();
+    expect(find.byType(URLFormDialog), findsNothing);
+    expect(closed, isTrue);
+    expect(result, isNull);
+  }, variant: TargetPlatformVariant.all());
 }

@@ -17,9 +17,9 @@ bool get _mac => defaultTargetPlatform == TargetPlatform.macOS;
 ///
 /// A long press lifts a row out of the card with [GlassTokens.floatingShadow]
 /// and grows it to [GlassTokens.listRowDragScale] (no growth with Reduce
-/// Motion), like the profile sort sheet; dropping it calls [onReorderItem]
-/// with the old index and the index of the row once it is removed there (as
-/// `SliverReorderableList.onReorderItem`).
+/// Motion), like the profile sort sheet; dropping it in a new place calls
+/// [onReorderItem] with the old index and the index of the row once it is
+/// removed there (as `SliverReorderableList.onReorderItem` on Flutter 3.41+).
 ///
 /// Rows are usually [GlassListRow]s, each with a key unique in the list.
 /// Scrolls, so never blurred; opaque with Reduce Transparency or the blur
@@ -147,7 +147,14 @@ class GlassReorderableSection extends StatelessWidget {
                 ),
                 sliver: SliverReorderableList(
                   itemCount: itemCount,
-                  onReorderItem: onReorderItem,
+                  // Not `onReorderItem`: the Flutter 3.35.7 builds (macOS,
+                  // Android, Linux x64) do not have it. `onReorder` gives the
+                  // new index before the row is removed, so shift it here.
+                  // ignore: deprecated_member_use
+                  onReorder: (oldIndex, newIndex) {
+                    final index = newIndex > oldIndex ? newIndex - 1 : newIndex;
+                    if (index != oldIndex) onReorderItem(oldIndex, index);
+                  },
                   proxyDecorator: proxyDecorator,
                   itemBuilder: (context, index) {
                     final row = itemBuilder(context, index);

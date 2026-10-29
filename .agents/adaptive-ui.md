@@ -150,8 +150,9 @@ pixel-for-pixel. Code: `lib/widgets/adaptive/` (import `adaptive.dart`).
 - List editors (`lib/widgets/input.dart` `ListInputPage` / `MapInputPage`: DNS, network and general
   lists, the proxies icon map): on Darwin one `GlassReorderableSection`
   (`glass_reorderable_section.dart`) — a `GlassListSection`-looking card drawn by `DecoratedSliver`s
-  around a lazy `SliverReorderableList` (`onReorderItem`), hairlines and first / last corner clips per
-  row, so 100+ rows stay cheap. Rows are `GlassListRow`s: tap edits through the same `AddDialog`, a
+  around a lazy `SliverReorderableList` (deprecated `onReorder` with the index shifted to the
+  `onReorderItem` meaning: Flutter 3.35.7 has no `onReorderItem`), hairlines and first / last corner
+  clips per row, so 100+ rows stay cheap. Rows are `GlassListRow`s: tap edits through the same `AddDialog`, a
   trailing `GlassIconButton` (trash) deletes, a long press lifts the row as an opaque card with
   `floatingShadow` and `listRowDragScale` (no scale with Reduce Motion). Empty → `AdaptiveEmptyState`.
   Never blurred. Material `ReorderableListView` + `CommonCard` stay verbatim, pinned by

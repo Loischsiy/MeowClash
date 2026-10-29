@@ -221,6 +221,34 @@ void main() {
     }
   }, variant: darwin);
 
+  testWidgets('a row dragged up moves up; dropped in place, nothing changes',
+      (tester) async {
+    List<String>? changed;
+    await pump(
+      tester,
+      listEditor(['a', 'b', 'c'], changed: (next) => changed = next),
+    );
+    final rowHeight = tester.getSize(rowOf('a')).height;
+    Future<void> longPressDrag(String title, double dy) async {
+      final gesture = await tester.startGesture(tester.getCenter(rowOf(title)));
+      await tester.pump(kLongPressTimeout + const Duration(milliseconds: 50));
+      await gesture.moveBy(Offset(0, dy / 2));
+      await tester.pump();
+      await gesture.moveBy(Offset(0, dy / 2));
+      await tester.pump(const Duration(milliseconds: 500));
+      await gesture.up();
+      await tester.pumpAndSettle();
+    }
+
+    await longPressDrag('b', rowHeight * 0.2);
+    expect(changed, isNull);
+    expect(titles(tester), ['a', 'b', 'c']);
+
+    await longPressDrag('c', -rowHeight * 1.2);
+    expect(changed, ['a', 'c', 'b']);
+    expect(titles(tester), ['a', 'c', 'b']);
+  }, variant: darwin);
+
   testWidgets('a short tap does not start a drag', (tester) async {
     List<String>? changed;
     await pump(tester, listEditor(['a', 'b'], changed: (next) => changed = next));

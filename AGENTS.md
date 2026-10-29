@@ -16,7 +16,8 @@ arm64-v8a, iOS arm64). iOS is physical devices only — simulator builds are rej
 ## Tech stack
 
 - Flutter **3.35.7** and **3.44.1**, Go **1.24.0** and **1.26.0** — two versions of each coexist; check
-  the workflow you are touching (`.agents/ci-and-release.md`).
+  the workflow you are touching (`.agents/ci-and-release.md`). `lib/` must compile on **both** Flutter
+  versions, and local checks and `platform-checks.yaml` run only 3.44.1: no Flutter API newer than 3.35.7.
 - Rust (`services/helper/`), Java 17 + Android NDK for Android, Nix (nixpkgs unstable) for Linux/NixOS.
 - Riverpod + freezed + json_serializable, `flutter_intl` from `arb/`, FFI to the Go core.
 

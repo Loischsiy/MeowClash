@@ -23,14 +23,29 @@
 
 ## 📸 Предварительный просмотр
 
+<p align="center"><sub>Нажмите на превью, чтобы открыть видео в полном качестве.</sub></p>
+
 ### На компьютере (Десктоп)
 <div align="center">
-  <img alt="Интерфейс MeowClash для десктопа" src="snapshots/desktop.gif" width="85%" style="border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+  <a href="snapshots/macos.mov"><img alt="MeowClash на macOS" src="snapshots/macos.webp" width="85%" style="border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);"></a>
+  <br><sub>macOS</sub>
+  <br><br>
+  <img alt="MeowClash на Windows" src="snapshots/desktop.gif" width="85%" style="border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+  <br><sub>Windows</sub>
 </div>
 
 ### На мобильных устройствах
 <div align="center">
-  <img alt="Мобильный интерфейс MeowClash" src="snapshots/mobile.gif" width="35%" style="border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+  <table>
+    <tr>
+      <th>Android</th>
+      <th>iOS</th>
+    </tr>
+    <tr>
+      <td><a href="snapshots/android.mp4"><img alt="MeowClash на Android" src="snapshots/android.webp" width="270" style="border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);"></a></td>
+      <td><a href="snapshots/ios.mov"><img alt="MeowClash на iOS" src="snapshots/ios.webp" width="340" style="border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);"></a></td>
+    </tr>
+  </table>
 </div>
 
 ---

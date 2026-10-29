@@ -23,14 +23,29 @@
 
 ## 📸 スクリーンショット
 
+<p align="center"><sub>プレビューをクリックすると、フル画質の動画を開けます。</sub></p>
+
 ### デスクトップ
 <div align="center">
-  <img alt="MeowClash デスクトップインターフェース" src="snapshots/desktop.gif" width="85%" style="border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+  <a href="snapshots/macos.mov"><img alt="macOS 版 MeowClash" src="snapshots/macos.webp" width="85%" style="border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);"></a>
+  <br><sub>macOS</sub>
+  <br><br>
+  <img alt="Windows 版 MeowClash" src="snapshots/desktop.gif" width="85%" style="border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+  <br><sub>Windows</sub>
 </div>
 
 ### モバイル
 <div align="center">
-  <img alt="MeowClash モバイルインターフェース" src="snapshots/mobile.gif" width="35%" style="border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+  <table>
+    <tr>
+      <th>Android</th>
+      <th>iOS</th>
+    </tr>
+    <tr>
+      <td><a href="snapshots/android.mp4"><img alt="Android 版 MeowClash" src="snapshots/android.webp" width="270" style="border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);"></a></td>
+      <td><a href="snapshots/ios.mov"><img alt="iOS 版 MeowClash" src="snapshots/ios.webp" width="340" style="border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);"></a></td>
+    </tr>
+  </table>
 </div>
 
 ---

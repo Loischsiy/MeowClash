@@ -23,14 +23,29 @@
 
 ## 📸 界面预览
 
+<p align="center"><sub>点击预览即可打开原画质视频。</sub></p>
+
 ### 桌面端
 <div align="center">
-  <img alt="MeowClash 桌面端界面" src="snapshots/desktop.gif" width="85%" style="border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+  <a href="snapshots/macos.mov"><img alt="MeowClash macOS 版" src="snapshots/macos.webp" width="85%" style="border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);"></a>
+  <br><sub>macOS</sub>
+  <br><br>
+  <img alt="MeowClash Windows 版" src="snapshots/desktop.gif" width="85%" style="border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+  <br><sub>Windows</sub>
 </div>
 
 ### 移动端
 <div align="center">
-  <img alt="MeowClash 移动端界面" src="snapshots/mobile.gif" width="35%" style="border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+  <table>
+    <tr>
+      <th>Android</th>
+      <th>iOS</th>
+    </tr>
+    <tr>
+      <td><a href="snapshots/android.mp4"><img alt="MeowClash Android 版" src="snapshots/android.webp" width="270" style="border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);"></a></td>
+      <td><a href="snapshots/ios.mov"><img alt="MeowClash iOS 版" src="snapshots/ios.webp" width="340" style="border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);"></a></td>
+    </tr>
+  </table>
 </div>
 
 ---

@@ -22,6 +22,14 @@ Router: `AGENTS.md`. Why the build code looks the way it does — do not "simpli
   `README_FI.md` localizes the `alt` text (`Hae GitHubista`, `Hae GitLabista`), the others keep English
   `Get it on X`. These SVGs are referenced only from the READMEs; nothing in `lib/` or `setup.dart`
   reads them.
+- **README previews are animated WebP, not `<video>`.** GitHub strips `<video>` tags whose `src` is a
+  relative repo path, so each `📸` Preview block embeds `snapshots/{macos,android,ios}.webp` as `<img>`
+  wrapped in `<a href>` to the full video (`macos.mov`, `android.mp4`, `ios.mov`); `desktop.gif` stays
+  as the Windows preview. After replacing a video, regenerate its preview (macOS at `scale=960`,
+  phones at `scale=360`):
+  `ffmpeg -i snapshots/X.mov -vf "fps=15,scale=360:-2:flags=lanczos" /tmp/f/f%04d.png` then
+  `img2webp -loop 0 -lossy -q 70 -m 6 -d 67 /tmp/f/f*.png -o snapshots/X.webp`. The block is
+  duplicated in all six READMEs with localized `alt` text and hint line — edit all six.
 
 ## Windows packaging
 

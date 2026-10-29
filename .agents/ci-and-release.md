@@ -8,7 +8,7 @@ Router: `AGENTS.md`.
 
 | Tool    | CI version | Notes |
 |---------|------------|-------|
-| Flutter | **3.35.7** + **3.44.1** | `3.35.7` (`channel: stable`) for the legacy Android/macOS/Linux-x64 jobs in `build.yaml` and `release-all.yaml`. `3.44.1` for Windows ARM64, iOS and everything in `platform-checks.yaml`. ARM/iOS hosts use `channel: master` because no stable host archive exists — that is a pinned checkout mechanism, not "track master". |
+| Flutter | **3.35.7** + **3.44.1** | `3.35.7` (`channel: stable`) for the legacy Android/macOS/Linux-x64 jobs in `build.yaml` and `release-all.yaml`. `3.44.1` for Windows ARM64, iOS and everything in `platform-checks.yaml`. So no PR check compiles with 3.35.7: an API added later (e.g. `SliverReorderableList.onReorderItem`, 3.41) passes the checks and breaks only those builds; keep the older API (`// ignore: deprecated_member_use`). ARM/iOS hosts use `channel: master` because no stable host archive exists — that is a pinned checkout mechanism, not "track master". |
 | Go      | **1.24.0** + **1.26.0** | `1.24.0` in `build.yaml`; `1.26.0` in `platform-checks.yaml` and the iOS job of `release-all.yaml`. The mihomo version itself always comes from `core/constant/version.go`, never from the toolchain. |
 | Rust    | latest     | `services/helper/` is a Cargo project. |
 | Java    | 17         | CI uses Temurin 17 for Android builds. |

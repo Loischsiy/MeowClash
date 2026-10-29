@@ -625,7 +625,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "systemProxyDesc": MessageLookupByLibrary.simpleMessage("设置系统代理"),
     "tab": MessageLookupByLibrary.simpleMessage("标签页"),
     "tabAnimation": MessageLookupByLibrary.simpleMessage("选项卡动画"),
-    "tabAnimationDesc": MessageLookupByLibrary.simpleMessage("仅在移动视图中有效"),
+    "tabAnimationDesc": MessageLookupByLibrary.simpleMessage("切换页面时显示动画"),
     "tcpConcurrent": MessageLookupByLibrary.simpleMessage("TCP并发"),
     "tcpConcurrentDesc": MessageLookupByLibrary.simpleMessage("开启后允许TCP并发"),
     "testUrl": MessageLookupByLibrary.simpleMessage("测速链接"),

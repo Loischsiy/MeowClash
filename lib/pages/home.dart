@@ -67,7 +67,14 @@ class _HomePageView extends ConsumerWidget {
     return NavigationPageView(
       selectedIndex: items.indexWhere((item) => item.label == label),
       itemCount: items.length,
-      animate: animate && isMobile,
+      animate: animate,
+      // The sideways scroll belongs to the phone tab bar; next to a sidebar
+      // the pages change along it (glass) or fade through (Material).
+      transition: isMobile
+          ? NavigationPageTransition.slide
+          : AdaptivePlatform.useGlass
+              ? NavigationPageTransition.verticalSlide
+              : NavigationPageTransition.fadeThrough,
       itemKey: (index) => ValueKey(items[index].label),
       keepAlive: (index) => items[index].keep,
       itemBuilder: (context, index) => items[index].view,

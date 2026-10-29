@@ -10,6 +10,7 @@ All notable changes to **MeowClash** will be documented in this file.
 
 ### 🚀 Improvements
 - **Core**: Updated mihomo proxy engine to version 1.19.33 and refreshed Go dependencies.
+- **Navigation**: Sidebar layouts (Windows, Linux, macOS, tablets) now animate page switches: a Material fade through on Windows and Linux, a vertical glass slide on macOS. The Tab animation setting now applies to every layout.
 
 ### 🧹 Internal
 - Added a core regression test for Shadowsocks TCP salt prefixes and refreshed the Nix vendor hash.

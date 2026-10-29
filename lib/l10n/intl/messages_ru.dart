@@ -975,7 +975,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "tab": MessageLookupByLibrary.simpleMessage("Вкладка"),
     "tabAnimation": MessageLookupByLibrary.simpleMessage("Анимация вкладок"),
     "tabAnimationDesc": MessageLookupByLibrary.simpleMessage(
-      "Работает только в мобильном режиме",
+      "Анимировать переключение между разделами",
     ),
     "tcpConcurrent": MessageLookupByLibrary.simpleMessage("Параллельный TCP"),
     "tcpConcurrentDesc": MessageLookupByLibrary.simpleMessage(

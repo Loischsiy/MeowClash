@@ -383,7 +383,7 @@
   "saveChanges": "変更を保存しますか？",
   "generalDesc": "一般設定を変更",
   "findProcessModeDesc": "有効化するとパフォーマンスが若干低下します",
-  "tabAnimationDesc": "モバイル表示でのみ有効",
+  "tabAnimationDesc": "ページの切り替えをアニメーションで表示",
   "saveTip": "保存してもよろしいですか？",
   "colorSchemes": "カラースキーム",
   "palette": "パレット",

@@ -383,7 +383,7 @@
   "saveChanges": "是否保存更改？",
   "generalDesc": "修改通用设置",
   "findProcessModeDesc": "开启后会有一定性能损耗",
-  "tabAnimationDesc": "仅在移动视图中有效",
+  "tabAnimationDesc": "切换页面时显示动画",
   "saveTip": "确定要保存吗？",
   "colorSchemes": "配色方案",
   "palette": "调色板",

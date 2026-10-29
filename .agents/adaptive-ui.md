@@ -49,6 +49,14 @@ pixel-for-pixel. Code: `lib/widgets/adaptive/` (import `adaptive.dart`).
   `GlassSpringCurve` (`sideSheetSpring*`) and leaves on an ease via `SideSheetMotion`. Never fade a
   glass page (`Opacity` over `BackdropFilter`). Material keeps `CommonRoute` / `CommonDesktopRoute` and
   the stock 300/200 ms side sheet (`motion: null`). Pinned by `test/adaptive_settings_motion_test.dart`.
+- Destination switching (`NavigationPageView.transition`, chosen in `_HomePageView`): the phone tab bar
+  keeps the sideways `slide` through intermediate pages. Sidebar layouts (desktop, tablets) animate too:
+  glass (macOS / iPad) uses `verticalSlide` (old and new page move along the sidebar, transforms only,
+  `GlassTokens.sidebarSwitchDuration/Curve`); Material (Windows / Linux / Android tablets) uses M3
+  `fadeThrough` (`Durations.medium2`, new page grows from 92 %). Only the two switched pages move: the
+  page being left is swapped next to the target for the duration (as in `TabBarView`), so the pages in
+  between are never built. The Tab animation setting (`isAnimateToPage`) and reduce motion jump
+  instead. Pinned by `test/navigation_sidebar_transition_test.dart`.
 - Specular rim (`_GlassRimPainter`): light = 1 pt white 0.72 → 0.10 (unchanged, liked on device); dark
   = 0.5 pt (one Retina pixel) white 0.12 → 0.03 (`GlassTokens.rimWidth/rimTopOpacity/rimBottomOpacity`).
   A full 1 pt rim at 0.26 read as a gray frame around dark side sheets and dialogs.

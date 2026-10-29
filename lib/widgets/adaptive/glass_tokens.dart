@@ -816,6 +816,13 @@ abstract final class GlassTokens {
   // trailing edge, no back swipe for the mouse). Never a cross-fade: an
   // Opacity over a glass page would flatten its blur.
   static const Duration desktopPushDuration = Duration(milliseconds: 350);
+  // Switching sidebar destinations (macOS / iPad sidebar layout). The pages
+  // are peers, so instead of a push they slide along the sidebar: picking a
+  // row further down brings the new page up from below. Only the page being
+  // left and the page being opened move, however far apart they are, and
+  // never with a cross-fade (same reason as above).
+  static const Duration sidebarSwitchDuration = Duration(milliseconds: 400);
+  static const Curve sidebarSwitchCurve = Curves.easeOutCubic;
   // Side sheet (macOS / iPad): the floating glass panel slides in from the
   // trailing edge on `.spring(response: 0.45, dampingFraction: 0.9)` and
   // leaves on a plain ease. The exit curve is applied to the falling route

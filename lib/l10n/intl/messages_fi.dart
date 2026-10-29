@@ -456,6 +456,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Järjestelmän välityspalvelin",
     ),
     "tabAnimation": MessageLookupByLibrary.simpleMessage("Välilehtianimaatio"),
+    "tabAnimationDesc": MessageLookupByLibrary.simpleMessage(
+      "Animoi sivujen välillä vaihtaminen",
+    ),
     "testing": MessageLookupByLibrary.simpleMessage("Testataan"),
     "theme": MessageLookupByLibrary.simpleMessage("Teema"),
     "themeColor": MessageLookupByLibrary.simpleMessage("Teeman väri"),

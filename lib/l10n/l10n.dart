@@ -3044,10 +3044,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Effective only in mobile view`
+  /// `Animate switching between pages`
   String get tabAnimationDesc {
     return Intl.message(
-      'Effective only in mobile view',
+      'Animate switching between pages',
       name: 'tabAnimationDesc',
       desc: '',
       args: [],

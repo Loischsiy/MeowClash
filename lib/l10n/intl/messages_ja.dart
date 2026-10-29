@@ -709,7 +709,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "tab": MessageLookupByLibrary.simpleMessage("タブ"),
     "tabAnimation": MessageLookupByLibrary.simpleMessage("タブアニメーション"),
-    "tabAnimationDesc": MessageLookupByLibrary.simpleMessage("モバイル表示でのみ有効"),
+    "tabAnimationDesc": MessageLookupByLibrary.simpleMessage(
+      "ページの切り替えをアニメーションで表示",
+    ),
     "tcpConcurrent": MessageLookupByLibrary.simpleMessage("TCP並列処理"),
     "tcpConcurrentDesc": MessageLookupByLibrary.simpleMessage("TCP並列処理を許可"),
     "testUrl": MessageLookupByLibrary.simpleMessage("URLテスト"),

@@ -132,6 +132,7 @@
   "project": "Projekti",
   "core": "Ydin",
   "tabAnimation": "Välilehtianimaatio",
+  "tabAnimationDesc": "Animoi sivujen välillä vaihtaminen",
   "startVpn": "VPN käynnistyy...",
   "stopVpn": "VPN pysähtyy...",
   "compatible": "Yhteensopivuustila",

@@ -212,10 +212,9 @@ Commit: `perf(state): ring buffer with version for FixedList`. This is the riski
   `exportLogs`, `network_speed.dart` and `developer.dart` need no change: they read `list` once per
   call or build, now cached per version. `ScrollToEndBox` keeps its `ListEquality`: it runs per page
   build on the filtered list, not per core message, and `ListEquality` returns early on `identical`.)
-  Finding, not changed here: the page applies updates in `addPostFrameCallback`, which does not
-  schedule a frame, so on an idle screen new rows wait for the next frame from something else. The
-  old code does the same. A possible separate fix is `ensureVisualUpdate()` after adding the callback.
-  Ask the maintainer.
+  Finding: the page applies updates in `addPostFrameCallback`, which does not schedule a frame, so on
+  an idle screen new rows waited for the next frame from something else; the old code did the same.
+  Fixed in step 10a by a second commit on this branch: `ensureVisualUpdate()` after the callback.
 - [x] Tests in `test/fixed_list_test.dart`: overflow, order, `clear`, version bumps, `maxLength = 1`,
   snapshot immutability, `copyWith` and in-place mutation.
   (18 tests: "behavior kept" (9, pass on the old code), version, snapshot cache, Riverpod select with

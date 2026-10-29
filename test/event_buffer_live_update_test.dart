@@ -34,12 +34,21 @@ Finder _requestRow(int i) => find.textContaining('live-$i.example');
 ProviderContainer _container(WidgetTester tester, Type page) =>
     ProviderScope.containerOf(tester.element(find.byType(page)));
 
-/// Lets the page throttle fire, then draws frames. The page applies the
-/// update in a post-frame callback, which does not schedule a frame itself.
+/// Draws only the frames the app asked for, like an otherwise idle screen.
+Future<void> _pumpScheduledFrames(WidgetTester tester) async {
+  for (var i = 0; i < 20 && tester.binding.hasScheduledFrame; i++) {
+    await tester.pump(const Duration(milliseconds: 16));
+  }
+}
+
+/// The event's own frame (Riverpod) is drawn at once; the page throttle fires
+/// later on an idle screen. The page applies the update in a post-frame
+/// callback, so it must ask for that frame itself.
 Future<void> _pumpThrottled(WidgetTester tester) async {
-  await tester.pump(commonDuration + const Duration(milliseconds: 50));
-  tester.binding.scheduleFrame();
-  await pumpSettingsFrames(tester);
+  await _pumpScheduledFrames(tester);
+  await tester.binding
+      .delayed(commonDuration + const Duration(milliseconds: 50));
+  await _pumpScheduledFrames(tester);
 }
 
 void main() {

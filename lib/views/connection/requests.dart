@@ -198,6 +198,9 @@ class _RequestsViewState extends ConsumerState<RequestsView> with PageMixin {
           connections: _requests,
         );
       });
+      // A post-frame callback does not schedule a frame: an idle screen
+      // would hold the update until something else draws.
+      WidgetsBinding.instance.ensureVisualUpdate();
     }, duration: commonDuration);
   }
 

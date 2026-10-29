@@ -265,22 +265,10 @@ class _RequestsViewState extends ConsumerState<RequestsView> with PageMixin {
                 if (AdaptivePlatform.useGlass) {
                   return _buildGlass(state, connections);
                 }
-                final items = connections
-                    .map<Widget>(
-                      (connection) => ConnectionItem(
-                        key: Key(connection.id),
-                        connection: connection,
-                        onClickKeyword: (value) {
-                          context.commonScaffoldState?.addKeyword(value);
-                        },
-                      ),
-                    )
-                    .separated(
-                      const Divider(
-                        height: 0,
-                      ),
-                    )
-                    .toList();
+                // Rows are built lazily by index: even = request, odd =
+                // divider.
+                final itemCount =
+                    connections.isEmpty ? 0 : connections.length * 2 - 1;
                 final content = connections.isEmpty
                     ? NullStatus(
                         label:
@@ -307,8 +295,23 @@ class _RequestsViewState extends ConsumerState<RequestsView> with PageMixin {
                                 return _calcCacheHeight(
                                     connections[index ~/ 2]);
                               },
-                              itemBuilder: (_, index) => items[index],
-                              itemCount: items.length,
+                              itemBuilder: (_, index) {
+                                if (index.isOdd) {
+                                  return const Divider(
+                                    height: 0,
+                                  );
+                                }
+                                final connection = connections[index ~/ 2];
+                                return ConnectionItem(
+                                  key: Key(connection.id),
+                                  connection: connection,
+                                  onClickKeyword: (value) {
+                                    context.commonScaffoldState
+                                        ?.addKeyword(value);
+                                  },
+                                );
+                              },
+                              itemCount: itemCount,
                               keyBuilder: (index) {
                                 if (index.isOdd) {
                                   return "divider";

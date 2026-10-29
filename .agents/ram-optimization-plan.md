@@ -233,12 +233,20 @@ Commit: `perf(state): ring buffer with version for FixedList`. This is the riski
 
 Commit: `perf(ui): build Material log rows lazily`
 
-- [ ] The Material branch of `LogsView.build` (`lib/views/logs.dart`) builds every `LogItem` and
+- [x] The Material branch of `LogsView.build` (`lib/views/logs.dart`) builds every `LogItem` and
   divider up front on each update (`logs.map(...).separated(...).toList()`), even though
   `ListView.builder` is lazy. Build each item in `itemBuilder` by index instead: even index for a
   `LogItem`, odd index for a `Divider`. The glass branch is already lazy.
-- [ ] Check `lib/views/connection/requests.dart` for the same pattern.
-- [ ] `test/material_connections_logs_golden_test.dart` must pass without updating goldens.
+  (Done: `itemCount = 2n - 1`; the row keeps its `Key(log.dateTime)` and the `onClick` closure on the
+  page `context`; the divider is the same `const Divider(height: 0)`. Extents and height-cache keys
+  are unchanged.)
+- [x] Check `lib/views/connection/requests.dart` for the same pattern.
+  (Same pattern, same fix, `Key(connection.id)`. The other `.separated(...)` users in `lib/` are
+  short settings lists and the scaffold actions, built once per page, not per core event: left as is.)
+- [x] `test/material_connections_logs_golden_test.dart` must pass without updating goldens.
+  (Passes. New `test/material_lazy_rows_test.dart`: every index of a 150-row list gives the same row,
+  key, extent and cache key; a row chip still filters the page (logs and requests); a printed
+  benchmark of 60 page updates on a full buffer. All 5 pass on the old code too.)
 
 ### 8. Structural equality in select: branch `perf/proxies-select-equality`
 
@@ -285,6 +293,8 @@ Commit: `perf(providers): structural select for proxy group names`
 | 10 000 `addRequest` with Requests open, time | 17.0–17.9 ms (copies as for logs) | after step 6: 9.1–10.2 ms (copies as for logs) | benchmark, 3 runs |
 | 10 000 `FixedMap.updateCacheValue`, time | misses 135.7–138.3 ms, hits 0.34 ms | after step 5: misses 4.28–4.84 ms, hits 0.66–2.67 ms (sub-ms noise, code path unchanged), `updateMaxLength` same size 0.03–0.34 ms (0.35 before) | benchmark, 3 runs (`.agent/ram/05-perf.txt`) |
 | Logs scroll, 1000 rows, 120 frames, mean | glass macOS 24.30 ms, iOS 15.63 ms, material 29.05 ms | after step 4: glass macOS 21.05–22.36 ms, iOS 13.68–14.88 ms, material 26.34–27.95 ms (host noise, no regression); after step 6: 21.35 / 14.87 / 26.92 ms (1 run) | `connections_logs` perf test, 1 run / 3 runs |
+| Material page update, 150 rows: row widgets built | 150 rows + 150 `onClick` closures + a 299-slot list per update (read from code) | after step 7: only the rows the list keeps built, 5 logs / 6 requests at 400×900 | `material_lazy_rows_test`, code |
+| Material page update, 150 rows, wall time (throttle + 3 frames) | logs 25.3–25.6 ms, requests 18.3–18.7 ms | after step 7: logs 25.6–25.7 ms, requests 18.1 ms (no change beyond noise; host debug JIT, not profiled) | `material_lazy_rows_test`, 3 runs each (`.agent/ram/07-lazy-*.txt`) |
 | Undisposed `TextPainter`s, Logs page with 150 rows, open + close | 152 of 203 created | 0 (step 4) | `text_painter_dispose_test` |
 | Undisposed `TextPainter`s, Requests page with 150 rows, open + close | 301 of 375 created | 0 (step 4) | `text_painter_dispose_test` |
 | Undisposed `TextPainter`s, dashboard with idle cat, ~2 s of frames | 86 of 256 created (about one per frame) | 0 (step 4) | `text_painter_dispose_test` |
@@ -309,4 +319,5 @@ They are for before/after comparison on the same machine only.
 | 2026-10-28 | 3 | done | `fix/logs-cache-tag` | `74db5cc` | tests 828 passed, 1 skipped, Material goldens unchanged (`.agent/ram/03-tests-raw.txt`); analyze: no new diagnostics |
 | 2026-10-28 | 4 | done | `perf/text-painter-dispose` | `6a39487` | tests 832 passed, 1 skipped, goldens unchanged (`.agent/ram/04-tests-raw.txt`); analyze: no new diagnostics |
 | 2026-10-28 | 5 | done | `perf/fixed-map-eviction` | `c8a5960` | tests 842 passed, 1 skipped (`.agent/ram/05-tests-raw.txt`); analyze: touched files clean (`.agent/ram/05-analyze.txt`) |
-| 2026-10-28 | 6 | done | `perf/fixed-list-ring-buffer` | (this commit) | tests 864 passed, 1 skipped, goldens unchanged (`.agent/ram/06-tests-raw.txt`, touched files re-run after lint fixes: `06-tests-touched.txt`); analyze: no new diagnostics in touched files (`06-analyze.txt`); old-code and per-buffer-counter runs in `.agent/ram/06-*.txt` |
+| 2026-10-28 | 6 | done | `perf/fixed-list-ring-buffer` | `5fe9b44` | tests 864 passed, 1 skipped, goldens unchanged (`.agent/ram/06-tests-raw.txt`, touched files re-run after lint fixes: `06-tests-touched.txt`); analyze: no new diagnostics in touched files (`06-analyze.txt`); old-code and per-buffer-counter runs in `.agent/ram/06-*.txt` |
+| 2026-10-28 | 7 | done | `perf/logs-lazy-rows` | (this commit) | tests 869 passed, 1 skipped, goldens unchanged (`.agent/ram/07-tests-raw.txt`); analyze: no new diagnostics in touched files (`07-analyze.txt`); old-code runs in `07-lazy-old-code.txt` |

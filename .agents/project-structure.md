@@ -9,7 +9,7 @@ ios/                Xcode project: Runner (app) + PacketTunnel (NetworkExtension
                     build_core.sh, generate_icons.sh, Config/*.xcconfig
 native/quickjs/     Rebuilt flutter_js QuickJS C bridge (CMake) + MSVC math shim + smoke.cpp;
                     has its own README.md with the pinned upstream commit
-scripts/            Python release tooling (rename_release_assets.py)
+scripts/            Python tooling (rename_release_assets.py, generate_windows_icons.py)
 shaders/            Flutter fragment shaders (glass_refraction.frag, iOS tab bar) — .agents/adaptive-ui.md
 tool/               One-off Node generators (generate_ip_country_names.cjs)
 test/               All Dart, Python and NixOS-VM tests (.agents/testing.md)

@@ -12,8 +12,12 @@ All notable changes to **MeowClash** will be documented in this file.
 - **Core**: Updated mihomo proxy engine to version 1.19.33 and refreshed Go dependencies.
 - **Navigation**: Sidebar layouts (Windows, Linux, macOS, tablets) now animate page switches: a Material fade through on Windows and Linux, a vertical glass slide on macOS. The Tab animation setting now applies to every layout.
 
+### 🐛 Bug Fixes
+- **Windows Icons**: The tray, taskbar, Alt+Tab and desktop icons no longer look pixelated at 125 %, 175 % and other display scales. Every Windows `.ico` now carries a frame for each DPI step (16–256 px, downscaled with Lanczos from the master PNG), and the window sets its big and small icons for the exact DPI of its monitor, refreshing them when it moves to a monitor with a different scale.
+
 ### 🧹 Internal
 - Added a core regression test for Shadowsocks TCP salt prefixes and refreshed the Nix vendor hash.
+- Added `scripts/generate_windows_icons.py` to regenerate the Windows `.ico` files and `test/test_windows_icons.py` to keep their DPI size ladder intact.
 
 ## [v1.1.1]
 

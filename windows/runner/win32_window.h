@@ -95,6 +95,10 @@ private:
   // Update the window frame's theme to match the system theme.
   static void UpdateTheme(HWND const window);
 
+  // Sets ICON_BIG / ICON_SMALL to the app icon frames that exactly match
+  // |dpi|, so the taskbar, Alt+Tab and title bar never upscale a smaller one.
+  void UpdateWindowIcons(HWND const window, UINT const dpi);
+
   bool quit_on_close_ = false;
 
   // window handle for top level window.
@@ -102,6 +106,11 @@ private:
 
   // window handle for hosted content.
   HWND child_content_ = nullptr;
+
+  // Icons passed to WM_SETICON; the window does not own them, so they are
+  // destroyed when replaced and in Destroy().
+  HICON big_icon_ = nullptr;
+  HICON small_icon_ = nullptr;
 };
 
 #endif // RUNNER_WIN32_WINDOW_H_

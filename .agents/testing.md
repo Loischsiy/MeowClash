@@ -9,7 +9,7 @@ flutter test                                        # ~33 Dart test files
 flutter test test/build_platforms_test.dart         # focused run
 CGO_ENABLED=0 go -C core test ./...                 # Go core tests
 go -C core test -race ./mobilebridge                # iOS bridge, race detector
-python3 -m unittest discover -s test -p 'test_*.py' # release-asset naming
+python3 -m unittest discover -s test -p 'test_*.py' # release-asset naming, Windows .ico sizes
 cargo test --manifest-path services/helper/Cargo.toml # privileged helper schema/recovery logic
 nix build .#checks.x86_64-linux.nixos-vm -L         # NixOS VM test (test/nixos-module.nix)
 ```

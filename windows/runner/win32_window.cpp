@@ -59,6 +59,19 @@ namespace
     FreeLibrary(user32_module);
   }
 
+  // Loads IDI_APP_ICON at exactly |size| x |size| pixels. LoadIcon only
+  // returns the system-DPI SM_CXICON frame and lets Windows stretch it for
+  // every other size, which made the taskbar / Alt+Tab icon look pixelated on
+  // scaled displays. app_icon.ico carries a frame for every DPI step
+  // (scripts/generate_windows_icons.py), so this never has to stretch.
+  HICON LoadAppIcon(int size)
+  {
+    return static_cast<HICON>(LoadImage(GetModuleHandle(nullptr),
+                                        MAKEINTRESOURCE(IDI_APP_ICON),
+                                        IMAGE_ICON, size, size,
+                                        LR_DEFAULTCOLOR));
+  }
+
 } // namespace
 
 // Manages the Win32Window's window class registration.
@@ -165,6 +178,8 @@ bool Win32Window::Create(const std::wstring &title,
     return false;
   }
 
+  UpdateWindowIcons(window, FlutterDesktopGetDpiForMonitor(MonitorFromWindow(
+                                window, MONITOR_DEFAULTTONEAREST)));
   UpdateTheme(window);
 
   return OnCreate();
@@ -263,6 +278,7 @@ Win32Window::MessageHandler(HWND hwnd,
 
     SetWindowPos(hwnd, nullptr, newRectSize->left, newRectSize->top, newWidth,
                  newHeight, SWP_NOZORDER | SWP_NOACTIVATE);
+    UpdateWindowIcons(hwnd, LOWORD(wparam));
 
     return 0;
   }
@@ -301,6 +317,16 @@ void Win32Window::Destroy()
   {
     DestroyWindow(window_handle_);
     window_handle_ = nullptr;
+  }
+  if (big_icon_ != nullptr)
+  {
+    DestroyIcon(big_icon_);
+    big_icon_ = nullptr;
+  }
+  if (small_icon_ != nullptr)
+  {
+    DestroyIcon(small_icon_);
+    small_icon_ = nullptr;
   }
   if (g_active_window_count == 0)
   {
@@ -352,6 +378,38 @@ bool Win32Window::OnCreate()
 void Win32Window::OnDestroy()
 {
   // No-op; provided for subclasses.
+}
+
+void Win32Window::UpdateWindowIcons(HWND const window, UINT const dpi)
+{
+  // 32 and 16 px are SM_CXICON / SM_CXSMICON at 96 DPI; scale them the same
+  // way GetSystemMetricsForDpi does for the monitor the window is on.
+  const int window_dpi = static_cast<int>(dpi);
+  HICON big_icon = LoadAppIcon(MulDiv(32, window_dpi, 96));
+  HICON small_icon = LoadAppIcon(MulDiv(16, window_dpi, 96));
+
+  // WM_SETICON does not take ownership: free the previous frames only after
+  // the window has switched to the new ones.
+  if (big_icon != nullptr)
+  {
+    SendMessage(window, WM_SETICON, ICON_BIG,
+                reinterpret_cast<LPARAM>(big_icon));
+    if (big_icon_ != nullptr)
+    {
+      DestroyIcon(big_icon_);
+    }
+    big_icon_ = big_icon;
+  }
+  if (small_icon != nullptr)
+  {
+    SendMessage(window, WM_SETICON, ICON_SMALL,
+                reinterpret_cast<LPARAM>(small_icon));
+    if (small_icon_ != nullptr)
+    {
+      DestroyIcon(small_icon_);
+    }
+    small_icon_ = small_icon;
+  }
 }
 
 void Win32Window::UpdateTheme(HWND const window)

@@ -71,7 +71,7 @@ Full command matrix and build behaviors: `.agents/build.md`. Pre-commit checklis
 flutter test                                        # ~33 Dart test files
 CGO_ENABLED=0 go -C core test ./...                 # Go core
 go -C core test -race ./mobilebridge                # iOS bridge, race detector
-python3 -m unittest discover -s test -p 'test_*.py' # release-asset naming
+python3 -m unittest discover -s test -p 'test_*.py' # release-asset naming, Windows .ico sizes
 ```
 
 Every test lives in `test/`, except the Go tests, `macos/RunnerTests/RunnerTests.swift` and
@@ -122,7 +122,7 @@ the platform-neutral recovery schema — see `.agents/testing.md` for the full p
 | build_runner, ffigen, intl, CLDR data, lint config | `.agents/codegen-and-lint.md` |
 | Writing or running tests, pre-commit checklist | `.agents/testing.md` |
 | Workflows, toolchain versions, release assets | `.agents/ci-and-release.md` |
-| Windows/MSVC/Inno/QuickJS/iOS build gotchas | `.agents/platform-gotchas.md` |
+| Windows/MSVC/Inno/QuickJS/iOS build gotchas, Windows `.ico` sizes | `.agents/platform-gotchas.md` |
 | iOS Runner vs PacketTunnel behavior | `.agents/ios-runtime.md` |
 | Delay tests, provider refresh, UI suspension, navigation transitions, memory, IP details | `.agents/runtime-contracts.md` |
 | History of the removed `meowclash-*` overrides | `.agents/fork-changes.md` |

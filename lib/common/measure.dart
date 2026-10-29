@@ -33,10 +33,16 @@ class Measure {
       maxLines: text.maxLines,
       textScaler: _textScaler,
       textDirection: text.textDirection ?? TextDirection.ltr,
-    )..layout(
+    );
+    try {
+      textPainter.layout(
         maxWidth: maxWidth,
       );
-    return textPainter.size;
+      return textPainter.size;
+    } finally {
+      // Free the native paragraph now, not at a later GC finalizer.
+      textPainter.dispose();
+    }
   }
 
   double get bodyMediumHeight => _measureMap.updateCacheValue(

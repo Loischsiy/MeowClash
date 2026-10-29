@@ -29,6 +29,7 @@ class _LogsViewState extends ConsumerState<LogsView> with PageMixin {
   bool _isLoad = false;
 
   List<Log> _logs = [];
+  int _logsVersion = 0;
 
   @override
   void initState() {
@@ -37,7 +38,9 @@ class _LogsViewState extends ConsumerState<LogsView> with PageMixin {
     _scrollController = ScrollController(
       initialScrollOffset: position > 0 ? position : double.maxFinite,
     );
-    _logs = globalState.appState.logs.list;
+    final logs = globalState.appState.logs;
+    _logs = logs.list;
+    _logsVersion = logs.version;
     _logsStateNotifier.value = _logsStateNotifier.value.copyWith(
       logs: _logs,
     );
@@ -54,15 +57,12 @@ class _LogsViewState extends ConsumerState<LogsView> with PageMixin {
       },
       fireImmediately: true,
     );
+    // Only the version per core message: no list copy or comparison.
     ref.listenManual(
-      logsProvider.select((state) => state.list),
+      logsProvider.select((state) => state.version),
       (prev, next) {
         if (prev != next) {
-          final isEquality = logListEquality.equals(prev, next);
-          if (!isEquality) {
-            _logs = next;
-            updateLogsThrottler();
-          }
+          updateLogsThrottler();
         }
       },
     );
@@ -138,20 +138,24 @@ class _LogsViewState extends ConsumerState<LogsView> with PageMixin {
 
   void updateLogsThrottler() {
     throttler.call(FunctionTag.logs, () {
-      final isEquality = logListEquality.equals(
-        _logs,
-        _logsStateNotifier.value.logs,
-      );
-      if (isEquality) {
-        return;
-      }
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          _logsStateNotifier.value = _logsStateNotifier.value.copyWith(
-            logs: _logs,
-          );
+        if (!mounted) {
+          return;
         }
+        // One snapshot per throttled update.
+        final logs = ref.read(logsProvider);
+        if (logs.version == _logsVersion) {
+          return;
+        }
+        _logsVersion = logs.version;
+        _logs = logs.list;
+        _logsStateNotifier.value = _logsStateNotifier.value.copyWith(
+          logs: _logs,
+        );
       });
+      // A post-frame callback does not schedule a frame: an idle screen
+      // would hold the update until something else draws.
+      WidgetsBinding.instance.ensureVisualUpdate();
     }, duration: commonDuration);
   }
 

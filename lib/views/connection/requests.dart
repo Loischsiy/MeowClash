@@ -24,6 +24,7 @@ class _RequestsViewState extends ConsumerState<RequestsView> with PageMixin {
     const ConnectionsState(loading: true),
   );
   List<Connection> _requests = [];
+  int _requestsVersion = 0;
   final _tag = CacheTag.requests;
   late ScrollController _scrollController;
   bool _isLoad = false;
@@ -50,7 +51,9 @@ class _RequestsViewState extends ConsumerState<RequestsView> with PageMixin {
     _scrollController = ScrollController(
       initialScrollOffset: preOffset > 0 ? preOffset : double.maxFinite,
     );
-    _requests = globalState.appState.requests.list;
+    final requests = globalState.appState.requests;
+    _requests = requests.list;
+    _requestsVersion = requests.version;
     _requestsStateNotifier.value = _requestsStateNotifier.value.copyWith(
       connections: _requests,
     );
@@ -67,11 +70,11 @@ class _RequestsViewState extends ConsumerState<RequestsView> with PageMixin {
       },
       fireImmediately: true,
     );
+    // Only the version per core message: no list copy or comparison.
     ref.listenManual(
-      requestsProvider.select((state) => state.list),
+      requestsProvider.select((state) => state.version),
       (prev, next) {
-        if (!connectionListEquality.equals(prev, next)) {
-          _requests = next;
+        if (prev != next) {
           updateRequestsThrottler();
         }
       },
@@ -180,20 +183,24 @@ class _RequestsViewState extends ConsumerState<RequestsView> with PageMixin {
 
   void updateRequestsThrottler() {
     throttler.call(FunctionTag.requests, () {
-      final isEquality = connectionListEquality.equals(
-        _requests,
-        _requestsStateNotifier.value.connections,
-      );
-      if (isEquality) {
-        return;
-      }
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          _requestsStateNotifier.value = _requestsStateNotifier.value.copyWith(
-            connections: _requests,
-          );
+        if (!mounted) {
+          return;
         }
+        // One snapshot per throttled update.
+        final requests = ref.read(requestsProvider);
+        if (requests.version == _requestsVersion) {
+          return;
+        }
+        _requestsVersion = requests.version;
+        _requests = requests.list;
+        _requestsStateNotifier.value = _requestsStateNotifier.value.copyWith(
+          connections: _requests,
+        );
       });
+      // A post-frame callback does not schedule a frame: an idle screen
+      // would hold the update until something else draws.
+      WidgetsBinding.instance.ensureVisualUpdate();
     }, duration: commonDuration);
   }
 

@@ -44,6 +44,17 @@ failure.
   `Measure.computeTextSize`, the start button's "z") is disposed right after use, so its native
   `ui.Paragraph` is freed at once instead of waiting for a GC finalizer.
   `test/text_painter_dispose_test.dart` counts undisposed painters through `FlutterMemoryAllocations`.
+- **Event buffers** (`FixedList` in `lib/common/fixed.dart`: logs, requests, traffics): a ring buffer.
+  `copyWith()` is a new wrapper over the **same** storage, which is what makes Riverpod notify, and
+  `AppController.addLog` adds in place without notifying. `version` changes on every `add`/`clear` and
+  comes from one global counter, so a buffer replaced on a profile switch never repeats a version. Pages
+  watch `select((s) => s.version)`, never the list, and never compare `prev.version` with
+  `next.version` of two wrappers (always equal). The throttled page update is a post-frame callback
+  followed by `ensureVisualUpdate()`: the callback alone waits for a frame from something else, so an
+  idle screen hid the last events of a burst. `list` is an unmodifiable
+  snapshot cached until the
+  next change; the Logs/Requests pages take one per throttled update. Covered by
+  `test/fixed_list_test.dart` and `test/event_buffer_live_update_test.dart`.
 - **IP details** (`lib/services/ip_details_service.dart`): extra data is fetched only while the dialog is
   open, through the proxy-aware client, for that exact IP; responses for a different IP are rejected.
   Successful lookups are cached **5 min** in a **16-entry** IP/language LRU; failures are not cached.

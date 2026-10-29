@@ -46,7 +46,7 @@ class FixedMap<K, V> {
       key,
       callback,
     );
-    _adjustMap();
+    _evictOldest();
     return realValue;
   }
 
@@ -56,19 +56,19 @@ class FixedMap<K, V> {
 
   void updateMaxLength(int size) {
     maxLength = size;
-    _adjustMap();
+    _evictOldest();
   }
 
   void updateMap(Map<K, V> map) {
-    _map = map;
-    _adjustMap();
+    // Copy only when trimming, so the caller's map is never mutated here.
+    _map = map.length > maxLength ? Map.of(map) : map;
+    _evictOldest();
   }
 
-  void _adjustMap() {
-    if (_map.length > maxLength) {
-      _map = Map.fromEntries(
-        map.entries.toList()..truncate(maxLength),
-      );
+  // Insertion-ordered map: the first key is the oldest entry.
+  void _evictOldest() {
+    while (_map.length > maxLength) {
+      _map.remove(_map.keys.first);
     }
   }
 

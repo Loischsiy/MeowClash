@@ -251,7 +251,7 @@ final profilesSelectorStateProvider =
 typedef ProfilesSelectorStateRef
     = AutoDisposeProviderRef<ProfilesSelectorState>;
 String _$proxiesListSelectorStateHash() =>
-    r'2c586f3fc03785c50a2f8d17e7fe13221b653f47';
+    r'a7f79fe7a7feb00404989a92144bda1ff719a215';
 
 /// See also [proxiesListSelectorState].
 @ProviderFor(proxiesListSelectorState)
@@ -271,7 +271,7 @@ final proxiesListSelectorStateProvider =
 typedef ProxiesListSelectorStateRef
     = AutoDisposeProviderRef<ProxiesListSelectorState>;
 String _$proxiesSelectorStateHash() =>
-    r'7bd67f71ec73cf976c4a2329a82235a5272f7720';
+    r'6781b76780682e366a9c2a92fd8fdfbbd3284977';
 
 /// See also [proxiesSelectorState].
 @ProviderFor(proxiesSelectorState)

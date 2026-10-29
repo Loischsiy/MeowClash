@@ -3,6 +3,12 @@
 Router file: rules that always apply, plus pointers to `.agents/<topic>.md`. Read the guide that matches
 your task instead of everything. Keep this file under ~150 lines.
 
+## Active work
+
+- **RAM optimization is in progress.** Read `.agents/ram-optimization-plan.md` before touching `lib/`;
+  to continue the work, follow its "How to resume" section. Delete this section together with the plan
+  when the plan's last step is done.
+
 ## Project overview
 
 Multi-platform Flutter proxy client (Android, Windows, macOS, Linux, iOS/iPadOS 15+), fork of FlClashX,
@@ -125,3 +131,4 @@ the platform-neutral recovery schema — see `.agents/testing.md` for the full p
 | iOS Runner vs PacketTunnel behavior | `.agents/ios-runtime.md` |
 | Delay tests, provider refresh, UI suspension, navigation transitions, memory, IP details | `.agents/runtime-contracts.md` |
 | History of the removed `meowclash-*` overrides | `.agents/fork-changes.md` |
+| Active RAM optimization work (plan, progress, how to resume) | `.agents/ram-optimization-plan.md` |

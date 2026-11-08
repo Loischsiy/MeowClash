@@ -1,0 +1,52 @@
+[
+  {
+    "kind": "proxies",
+    "url": "https://example.com/sub",
+    "path": "proxies/3dd403f32a12bab6123243ae838133fb"
+  },
+  {
+    "kind": "proxies",
+    "url": "https://example.com/sub?token=abc\u0026x=1",
+    "path": "proxies/2b975f9078814c24cc578f32e820ce6d"
+  },
+  {
+    "kind": "proxies",
+    "url": "http://127.0.0.1:8080/provider.yaml",
+    "path": "proxies/724545906a79a79e3241f4e320bc0d09"
+  },
+  {
+    "kind": "proxies",
+    "url": "https://пример.рф/подписка",
+    "path": "proxies/74bbacd9450df39f2e0ff6baedfdd98b"
+  },
+  {
+    "kind": "proxies",
+    "url": "https://example.com/a b?q=1#frag",
+    "path": "proxies/e2a26e5d7543379b939e96bf54040c76"
+  },
+  {
+    "kind": "rules",
+    "url": "https://example.com/sub",
+    "path": "rules/3dd403f32a12bab6123243ae838133fb"
+  },
+  {
+    "kind": "rules",
+    "url": "https://example.com/sub?token=abc\u0026x=1",
+    "path": "rules/2b975f9078814c24cc578f32e820ce6d"
+  },
+  {
+    "kind": "rules",
+    "url": "http://127.0.0.1:8080/provider.yaml",
+    "path": "rules/724545906a79a79e3241f4e320bc0d09"
+  },
+  {
+    "kind": "rules",
+    "url": "https://пример.рф/подписка",
+    "path": "rules/74bbacd9450df39f2e0ff6baedfdd98b"
+  },
+  {
+    "kind": "rules",
+    "url": "https://example.com/a b?q=1#frag",
+    "path": "rules/e2a26e5d7543379b939e96bf54040c76"
+  }
+]

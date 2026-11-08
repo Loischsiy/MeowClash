@@ -97,6 +97,7 @@ const (
 	updateGeoDataMethod            Method = "updateGeoData"
 	updateExternalProviderMethod   Method = "updateExternalProvider"
 	sideLoadExternalProviderMethod Method = "sideLoadExternalProvider"
+	getProviderCachePathMethod     Method = "getProviderCachePath"
 	startLogMethod                 Method = "startLog"
 	stopLogMethod                  Method = "stopLog"
 	startListenerMethod            Method = "startListener"

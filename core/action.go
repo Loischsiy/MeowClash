@@ -206,6 +206,21 @@ func handleAction(action *Action, result ActionResult) {
 		result.success("")
 		sendMessage(Message{Type: LoadedMessage, Data: params["providerName"]})
 		return
+	case getProviderCachePathMethod:
+		// Failures are an empty path (never an error string that could be
+		// mistaken for a path by the Dart side).
+		var params = map[string]string{}
+		if !dataIsStr || json.Unmarshal([]byte(dataStr), &params) != nil {
+			result.success("")
+			return
+		}
+		path, err := getProviderCachePath(params["kind"], params["url"])
+		if err != nil {
+			result.success("")
+			return
+		}
+		result.success(path)
+		return
 	case startLogMethod:
 		handleStartLog()
 		result.success(true)

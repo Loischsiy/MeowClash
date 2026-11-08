@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
@@ -14,8 +15,13 @@ typedef ProviderPayloadFetcher = Future<Uint8List> Function(
   CancelToken cancellation,
 );
 
-/// Owned by the Android service engine, never by an Application widget.
-/// Both automatic and manual encrypted refreshes use this single owner.
+Future<Uint8List> _readCacheFile(String path) => File(path).readAsBytes();
+
+/// Owns every background and manual provider refresh of one isolate (the
+/// Android service engine, or the desktop main isolate). The core only rereads
+/// cache files, so a refresh works with the core stopped: it downloads,
+/// decrypts and writes the cache, and additionally side-loads the bytes into a
+/// running core. Automatic and manual refreshes share this single owner.
 class ProviderRefreshService {
   ProviderRefreshService({
     required this.invokeCore,
@@ -24,8 +30,10 @@ class ProviderRefreshService {
     required this.modifiedAt,
     required this.persist,
     required this.log,
+    Future<Uint8List> Function(String path)? read,
     DateTime Function()? now,
-  }) : _now = now ?? DateTime.now {
+  })  : read = read ?? _readCacheFile,
+        _now = now ?? DateTime.now {
     _loop = AsyncPollingLoop(
       interval: const Duration(minutes: 1),
       onTick: (_) => _tick(),
@@ -40,6 +48,7 @@ class ProviderRefreshService {
   final Future<DateTime> Function(String path) modifiedAt;
   final Future<void> Function(String path, Uint8List bytes) persist;
   final void Function(String message) log;
+  final Future<Uint8List> Function(String path) read;
   final DateTime Function() _now;
   late final AsyncPollingLoop _loop;
   ProviderRefreshPlan? _plan;
@@ -51,6 +60,10 @@ class ProviderRefreshService {
   final _inFlight = <String, Future<String>>{};
   final _cancellations = <CancelToken>{};
   final _updatedAt = <String, DateTime>{};
+
+  /// Targets whose cache was rewritten while the core was stopped. A core that
+  /// keeps its loaded config across a stop/start must reread them on start.
+  final _pendingReload = <String, ProviderRefreshTarget>{};
 
   Future<T> _exclusive<T>(Future<T> Function() operation) {
     final preceding = _mutations;
@@ -86,6 +99,7 @@ class ProviderRefreshService {
     _disposed = true;
     _plan = null;
     _updatedAt.clear();
+    _pendingReload.clear();
     _loop.dispose();
   }
 
@@ -98,6 +112,7 @@ class ProviderRefreshService {
     suspend();
     _plan = null;
     _updatedAt.clear();
+    _pendingReload.clear();
     final generation = _generation;
     final configuration = ++_configuration;
     return _exclusive(() async {
@@ -109,8 +124,8 @@ class ProviderRefreshService {
       // refreshes. Providers may share a path but have different deadlines;
       // another provider's later cache write must never postpone this one.
       final loadedAt = <String, DateTime>{};
-      if (plan?.managed == true) {
-        for (final target in plan!.targets) {
+      if (plan != null && plan.managed) {
+        for (final target in plan.targets) {
           try {
             loadedAt[target.key] = (await modifiedAt(target.path)).toUtc();
           } catch (error) {
@@ -124,8 +139,8 @@ class ProviderRefreshService {
       if (!_disposed && configuration == _configuration) {
         _plan = plan;
         _updatedAt.addAll(loadedAt);
-        // Stop keeps the applied plan for the next start. A newer setup,
-        // shutdown or disposal invalidates it altogether.
+        // A newer setup, shutdown or disposal invalidates the plan; a plain
+        // stop does not, because refreshes also run while the core is stopped.
         if (generation == _generation) resume();
       }
       return result;
@@ -143,7 +158,7 @@ class ProviderRefreshService {
           ? ProviderRefreshPlan.fromJson(Map<String, dynamic>.from(metadata))
           : null;
       final config = Map<String, dynamic>.from(params['config'] as Map);
-      params['config'] = plan?.prepareCoreConfig(config) ?? config;
+      params['config'] = config;
       action['data'] = json.encode(params);
       return configure(
         plan,
@@ -151,13 +166,17 @@ class ProviderRefreshService {
         succeeded: _setupSucceeded,
       );
     }
-    if (method == 'stopListener' || method == 'shutdown') {
+    if (method == 'stopListener') {
+      // Providers keep refreshing with the core stopped; the commit step
+      // checks isRunning() again, so an in-flight refresh just writes the cache.
+      return _exclusive(() => invokeCore(message));
+    }
+    if (method == 'shutdown') {
       suspend();
-      if (method == 'shutdown') {
-        _configuration++;
-        _plan = null;
-        _updatedAt.clear();
-      }
+      _configuration++;
+      _plan = null;
+      _updatedAt.clear();
+      _pendingReload.clear();
       return _exclusive(() => invokeCore(message));
     }
     if (method == 'startListener') {
@@ -168,27 +187,21 @@ class ProviderRefreshService {
           result['code'] == 0 &&
           result['data'] == true) {
         resume();
+        final plan = _plan;
+        if (plan != null) unawaited(_reloadPending(plan, generation));
       }
       return response;
     }
     if (method == 'updateExternalProvider') {
-      await _mutations;
-      final plan = _plan;
-      if (plan?.managed == true) {
-        final matches = plan!.targets
-            .where((target) => target.name == action['data'])
-            .toList();
-        if (matches.isNotEmpty) {
-          final result = matches.length == 1
-              ? await refresh(matches.single)
-              : 'Provider name is ambiguous between proxy and rule providers';
-          return json.encode({
-            'id': action['id'],
-            'method': method,
-            'code': 0,
-            'data': result
-          });
-        }
+      final name = action['data'];
+      final result = name is String ? await refreshByName(name) : null;
+      if (result != null) {
+        return json.encode({
+          'id': action['id'],
+          'method': method,
+          'code': 0,
+          'data': result
+        });
       }
       return _exclusive(() => invokeCore(message));
     }
@@ -196,6 +209,29 @@ class ProviderRefreshService {
       return _exclusive(() => invokeCore(message));
     }
     return invokeCore(message);
+  }
+
+  /// Manual refresh by provider name; null when no managed target has it (the
+  /// caller then falls back to the core). Waits for a pending setup first.
+  Future<String?> refreshByName(String name) async {
+    await _mutations;
+    final plan = _plan;
+    if (plan == null || !plan.managed) return null;
+    final matches = plan.targets.where((target) => target.name == name).toList();
+    if (matches.isEmpty) return null;
+    if (matches.length > 1) {
+      return 'Provider name is ambiguous between proxy and rule providers';
+    }
+    return refresh(matches.single);
+  }
+
+  /// For owners that start the core without routing through [handleAction]
+  /// (desktop): resumes ticking and reloads caches written while it was stopped.
+  Future<void> coreStarted() async {
+    final plan = _plan;
+    if (plan == null || _disposed) return;
+    resume();
+    await _reloadPending(plan, _generation);
   }
 
   static bool _setupSucceeded(String response) {
@@ -208,10 +244,10 @@ class ProviderRefreshService {
 
   Future<void> _tick() async {
     final plan = _plan;
-    if (plan == null || !plan.managed || !isRunning()) return;
+    if (plan == null || !plan.managed) return;
     final generation = _generation;
     for (final target in plan.targets) {
-      if (!_current(plan, generation) || !isRunning()) return;
+      if (!_current(plan, generation)) return;
       if (target.interval <= Duration.zero) continue;
       try {
         final lastUpdate = _updatedAt[target.key] ??
@@ -225,9 +261,53 @@ class ProviderRefreshService {
     }
   }
 
+  /// Sends [bytes] to the running core. Empty string means the core accepted
+  /// them. `expectedPath` makes the core reject a late payload of an old profile.
+  Future<String> _sideLoad(ProviderRefreshTarget target, Uint8List bytes) async {
+    final response = await invokeCore(json.encode({
+      'id': 'provider-refresh#${++_requestId}',
+      'method': 'sideLoadExternalProvider',
+      'data': json.encode({
+        'providerName': target.name,
+        'providerType': target.type,
+        'expectedPath': target.path,
+        'dataBase64': base64.encode(bytes),
+      }),
+    }));
+    final result = json.decode(response) as Map;
+    return result['code'] != 0 || result['data'] != ''
+        ? 'Provider data was rejected by the core'
+        : '';
+  }
+
+  /// After a start: caches written while the core was stopped are side-loaded
+  /// into it, so the loaded providers never lag behind the files on disk.
+  Future<void> _reloadPending(ProviderRefreshPlan plan, int generation) async {
+    for (final target in _pendingReload.values.toList()) {
+      if (!_current(plan, generation)) return;
+      try {
+        await _exclusive(() async {
+          if (!_current(plan, generation) || !isRunning()) return;
+          if (!_pendingReload.containsKey(target.key)) return;
+          final error = await _sideLoad(target, await read(target.path));
+          if (error.isEmpty) {
+            _pendingReload.remove(target.key);
+          } else {
+            log('Provider ${target.type}/${target.name}: $error');
+          }
+        });
+      } catch (error) {
+        log('Provider ${target.type}/${target.name} reload failed (${error.runtimeType})');
+      }
+    }
+  }
+
   /// Network work is single-flight per typed provider. Native application and
   /// cache commit are serialized with setup/start/stop, with a generation check
   /// immediately before committing. A stopped/old profile cannot publish late.
+  /// With the core running the bytes are side-loaded first and the cache is
+  /// written only if the core accepts them; with the core stopped the cache is
+  /// written directly and reloaded on the next start.
   Future<String> refresh(ProviderRefreshTarget target) {
     final existing = _inFlight[target.key];
     if (existing != null) return existing;
@@ -253,26 +333,19 @@ class ProviderRefreshService {
             if (!_current(plan, generation) || cancellation.isCancelled) {
               return 'Provider update cancelled';
             }
-            final response = await invokeCore(json.encode({
-              'id': 'provider-refresh#${++_requestId}',
-              'method': 'sideLoadExternalProvider',
-              'data': json.encode({
-                'providerName': target.name,
-                'providerType': target.type,
-                'expectedPath': target.path,
-                'dataBase64': base64.encode(bytes),
-              }),
-            }));
-            final result = json.decode(response) as Map;
-            if (result['code'] != 0 || result['data'] != '') {
-              return 'Provider data was rejected by the core';
-            }
-            // The native call may finish after a stop/profile-change request.
-            // It is serialized before the next setup, but cannot be cancelled.
-            if (!_current(plan, generation) || cancellation.isCancelled) {
-              return 'Provider update cancelled';
+            final coreRunning = isRunning();
+            if (coreRunning) {
+              final error = await _sideLoad(target, bytes);
+              if (error.isNotEmpty) return error;
+              // The native call may finish after a stop/profile-change request.
+              // It is serialized before the next setup, but cannot be cancelled.
+              if (!_current(plan, generation) || cancellation.isCancelled) {
+                return 'Provider update cancelled';
+              }
+              _pendingReload.remove(target.key);
             }
             await persist(target.path, bytes);
+            if (!coreRunning) _pendingReload[target.key] = target;
             if (_current(plan, generation)) {
               _updatedAt[target.key] = _now().toUtc();
               log('Provider ${target.type}/${target.name} updated automatically or manually');

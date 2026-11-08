@@ -69,6 +69,10 @@ class Harness {
         return fetcher?.call(p, target, cancellation) ??
             Future.value(Uint8List.fromList([77, 82, 83, 0, 255, 128]));
       },
+      read: (path) async {
+        reads.add(path);
+        return Uint8List.fromList([5, 6, 7]);
+      },
       modifiedAt: (path) async => writes[path] ?? epoch,
       persist: (path, bytes) async {
         persisted.add(path);
@@ -87,6 +91,7 @@ class Harness {
   final downloads = <String>[];
   final cancellations = <CancelToken>[];
   final persisted = <String>[];
+  final reads = <String>[];
   final writes = <String, DateTime>{};
   final actions = <Map<String, dynamic>>[];
   final logs = <String>[];
@@ -195,27 +200,10 @@ void main() {
     });
   });
 
-  test('a late start reply cannot restart polling after a stop request', () {
+  test('stop keeps the plan: refreshes continue and only write the cache', () {
     fakeAsync((clock) {
       final h = Harness(clock);
       h.configure(plan(both: false));
-      h.service.suspend();
-      final startReply = Completer<String>();
-      h.coreResponder = (action) async {
-        if (action['method'] == 'startListener') return startReply.future;
-        return json.encode({
-          'id': action['id'],
-          'method': action['method'],
-          'code': 0,
-          'data': true,
-        });
-      };
-      unawaited(h.service.handleAction(json.encode({
-        'id': 'start',
-        'method': 'startListener',
-        'data': null,
-      })));
-      clock.flushMicrotasks();
       unawaited(h.service.handleAction(json.encode({
         'id': 'stop',
         'method': 'stopListener',
@@ -223,16 +211,10 @@ void main() {
       })));
       h.running = false;
       clock.flushMicrotasks();
-      startReply.complete(json.encode({
-        'id': 'start',
-        'method': 'startListener',
-        'code': 0,
-        'data': true,
-      }));
-      clock.flushMicrotasks();
-      expect(clock.nonPeriodicTimerCount, 0);
-      clock.elapse(const Duration(hours: 2));
-      expect(h.downloads, isEmpty);
+      clock.elapse(const Duration(minutes: 20));
+      expect(h.downloads, hasLength(1));
+      expect(h.persisted, ['/A/proxies']);
+      expect(h.applied, isEmpty);
       h.service.dispose();
     });
   });
@@ -361,26 +343,10 @@ void main() {
     });
   });
 
-  test('disabled interval and stopped VPN do not cause background downloads',
-      () {
+  test('disabled interval causes no background downloads', () {
     fakeAsync((clock) {
       final h = Harness(clock);
       h.configure(plan(interval: 0));
-      clock.elapse(const Duration(hours: 2));
-      expect(h.downloads, isEmpty);
-      h.running = false;
-      h.configure(plan());
-      clock.elapse(const Duration(hours: 2));
-      expect(h.downloads, isEmpty);
-      h.service.dispose();
-    });
-  });
-
-  test('unencrypted providers retain native scheduling without Dart duplicates',
-      () {
-    fakeAsync((clock) {
-      final h = Harness(clock);
-      h.configure(plan(password: null));
       clock.elapse(const Duration(hours: 2));
       expect(h.downloads, isEmpty);
       expect(clock.nonPeriodicTimerCount, 0);
@@ -388,9 +354,147 @@ void main() {
     });
   });
 
-  test(
-      'setup IPC strips credentials and preserves the original interval snapshot',
+  test('core off: tick downloads and writes the cache without a side-load', () {
+    fakeAsync((clock) {
+      final h = Harness(clock)..running = false;
+      h.configure(plan());
+      clock.elapse(const Duration(minutes: 20));
+      expect(h.downloads, ['Proxy\u0000shared', 'Rule\u0000shared']);
+      expect(h.persisted, ['/A/proxies', '/A/rules']);
+      expect(h.applied, isEmpty);
+      h.service.dispose();
+    });
+  });
+
+  test('core on: tick side-loads with the path guard before writing', () {
+    fakeAsync((clock) {
+      final h = Harness(clock);
+      h.configure(plan(both: false));
+      clock.elapse(const Duration(minutes: 20));
+      final payload = json.decode(h.applied.single['data'] as String) as Map;
+      expect(payload['expectedPath'], '/A/proxies');
+      expect(payload['providerType'], 'Proxy');
+      expect(h.persisted, ['/A/proxies']);
+      h.service.dispose();
+    });
+  });
+
+  test('a cache written while the core was off is side-loaded on start', () {
+    fakeAsync((clock) {
+      final h = Harness(clock)..running = false;
+      h.configure(plan(both: false));
+      clock.elapse(const Duration(minutes: 20));
+      expect(h.persisted, ['/A/proxies']);
+      h.running = true;
+      unawaited(h.service.handleAction(json.encode({
+        'id': 'start',
+        'method': 'startListener',
+        'data': null,
+      })));
+      clock.flushMicrotasks();
+      expect(h.reads, ['/A/proxies']);
+      final payload = json.decode(h.applied.single['data'] as String) as Map;
+      expect(base64.decode(payload['dataBase64'] as String), [5, 6, 7]);
+      // Reloaded once only.
+      h.reads.clear();
+      unawaited(h.service.coreStarted());
+      clock.flushMicrotasks();
+      expect(h.reads, isEmpty);
+      h.service.dispose();
+    });
+  });
+
+  test('a fresh setup discards pending reloads (the core reads the disk)', () {
+    fakeAsync((clock) {
+      final h = Harness(clock)..running = false;
+      h.configure(plan(both: false));
+      clock.elapse(const Duration(minutes: 20));
+      h.configure(plan(both: false));
+      h.running = true;
+      unawaited(h.service.coreStarted());
+      clock.flushMicrotasks();
+      expect(h.applied, isEmpty);
+      h.service.dispose();
+    });
+  });
+
+  test('manual refresh by name works with the core off and reports unknown',
       () {
+    fakeAsync((clock) {
+      final h = Harness(clock)..running = false;
+      h.configure(plan(both: false));
+      String? result;
+      unawaited(h.service.refreshByName('shared').then((v) => result = v));
+      clock.flushMicrotasks();
+      expect(result, '');
+      expect(h.persisted, ['/A/proxies']);
+      String? unknown = 'unset';
+      unawaited(h.service.refreshByName('nope').then((v) => unknown = v));
+      clock.flushMicrotasks();
+      expect(unknown, isNull);
+      h.service.dispose();
+    });
+  });
+
+  test('refreshByName flags a name shared by proxy and rule providers', () {
+    fakeAsync((clock) {
+      final h = Harness(clock);
+      h.configure(plan());
+      String? result;
+      unawaited(h.service.refreshByName('shared').then((v) => result = v));
+      clock.flushMicrotasks();
+      expect(result, contains('ambiguous'));
+      expect(h.downloads, isEmpty);
+      h.service.dispose();
+    });
+  });
+
+  test('providers without a password are managed too (plaintext passthrough)',
+      () {
+    fakeAsync((clock) {
+      final h = Harness(clock);
+      h.configure(plan(password: null));
+      clock.elapse(const Duration(minutes: 20));
+      expect(h.downloads, ['Proxy\u0000shared', 'Rule\u0000shared']);
+      h.service.dispose();
+    });
+  });
+
+  test('external providers get their path from the core, not from the config',
+      () async {
+    final config = <String, dynamic>{
+      'proxy-providers': {
+        'a': {'type': 'http', 'url': 'https://example.invalid/a', 'interval': 60},
+        'inline': {'type': 'inline'},
+      },
+      'rule-providers': {
+        'r': {'type': 'http', 'url': 'https://example.invalid/r'},
+      },
+    };
+    final asked = <String>[];
+    final paths = await ProviderRefreshPlan.resolveCachePaths(config,
+        (kind, url) async {
+      asked.add('$kind $url');
+      return '/home/$kind/h-${url.split('/').last}';
+    });
+    expect(asked, ['proxies https://example.invalid/a', 'rules https://example.invalid/r']);
+    final p = ProviderRefreshPlan.fromConfig(
+        profileId: 'A', userAgent: 'ua', config: config, cachePaths: paths);
+    expect(p.managed, isTrue);
+    expect(p.hasAutomaticUpdates, isTrue);
+    expect(p.targets.map((t) => '${t.type}:${t.path}'),
+        ['Proxy:/home/proxies/h-a', 'Rule:/home/rules/h-r']);
+    // A core that cannot answer leaves the provider unmanaged, never guessed.
+    final none = await ProviderRefreshPlan.resolveCachePaths(
+        config, (_, __) async => '');
+    expect(
+        ProviderRefreshPlan.fromConfig(
+                profileId: 'A', userAgent: 'ua', config: config, cachePaths: none)
+            .managed,
+        isFalse);
+  });
+
+  test('setup IPC strips credentials and leaves provider intervals alone', () {
     fakeAsync((clock) {
       final h = Harness(clock);
       final config = <String, dynamic>{
@@ -425,12 +529,11 @@ void main() {
       expect(
           json.encode(forwarded), isNot(contains(providerRefreshMetadataKey)));
       final applied = json.decode(forwarded['data'] as String) as Map;
-      expect(applied['config']['proxy-providers']['nodes']['interval'], 0);
+      expect(applied['config']['proxy-providers']['nodes']['interval'], 1200);
       expect(
           applied['config']['proxy-providers']['nodes']['health-check']
               ['interval'],
           300);
-      expect((config['proxy-providers'] as Map)['nodes']['interval'], 1200);
       clock.elapse(const Duration(minutes: 20));
       expect(h.persisted, ['/A/nodes']);
       h.service.dispose();

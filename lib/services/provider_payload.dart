@@ -67,10 +67,19 @@ class ProviderPayloadDownloader {
       cancellation: cancellation,
     );
     if (cancellation.isCancelled) throw StateError('Provider update cancelled');
+    // Profile credentials win; the response headers are the fallback.
+    var password = plan.password;
+    var iterations = plan.iterations;
+    if (password == null || password.isEmpty) {
+      password = fetched.headers['meowclash-password'];
+      iterations = int.tryParse(
+              fetched.headers['meowclash-password-iterations'] ?? '') ??
+          iterations;
+    }
     final result = await decryptProviderPayload(
       fetched.bytes,
-      password: plan.password,
-      iterations: plan.iterations,
+      password: password,
+      iterations: iterations,
     );
     if (cancellation.isCancelled) throw StateError('Provider update cancelled');
     return result;

@@ -10,9 +10,7 @@ import 'package:meowclash/clash/ios.dart';
 import 'package:meowclash/plugins/ios.dart';
 import 'package:meowclash/clash/proxy_groups.dart';
 import 'package:meowclash/common/common.dart';
-import 'package:meowclash/l10n/l10n.dart';
 import 'package:meowclash/models/models.dart';
-import 'package:meowclash/services/subscription_crypto.dart';
 import 'package:meowclash/state.dart';
 import 'package:path/path.dart';
 
@@ -218,127 +216,21 @@ class ClashCore {
         providerName: providerName, data: data);
   }
 
-  static Future<Uint8List> maybeDecryptProvider(
-    Uint8List data, {
-    required String? password,
-    required int iterations,
-  }) async {
-    final String text;
-    try {
-      text = utf8.decode(data, allowMalformed: false);
-    } on FormatException {
-      return data;
-    }
-    if (!SubscriptionCrypto.looksLikeEncryptedPayload(text)) {
-      return data;
-    }
-    if (password == null || password.isEmpty) {
-      throw SubscriptionPasswordRequiredException(
-        AppLocalizations.current.profileEncryptedPasswordRequired,
-      );
-    }
-    return SubscriptionCrypto.decryptBase64(
-      text,
-      password: password,
-      iterations: iterations,
-    );
-  }
-
-  static Future<void> downloadAndDecryptProvider({
-    required Profile profile,
-    required String providerName,
-    required String url,
-    required String type,
-    required String providerPath,
-  }) async {
-    final response = await request.getFileResponseForUrl(url);
-    final responseData = response.data;
-    if (responseData == null) {
-      throw Exception("Failed to download provider data");
-    }
-    ensureCoreInputHeaderFits(
-      response.headers.value(HttpHeaders.contentLengthHeader),
-      name: 'Provider $providerName',
-    );
-
-    final password = profile.providerHeaders['meowclash-password'];
-    final iterations = int.tryParse(
-            profile.providerHeaders['meowclash-password-iterations'] ?? '') ??
-        kDefaultPbkdf2Iterations;
-
-    final decryptedData = await maybeDecryptProvider(
-      responseData,
-      password: password,
-      iterations: iterations,
-    );
-    ensureCoreInputBytes(decryptedData, name: 'Provider $providerName');
-
-    final file = File(providerPath);
-    await file.parent.create(recursive: true);
-    final temporary =
-        File('$providerPath.tmp.${DateTime.now().microsecondsSinceEpoch}');
-    try {
-      await temporary.writeAsBytes(decryptedData, flush: true);
-      await temporary.rename(providerPath);
-    } finally {
-      if (temporary.existsSync()) await temporary.delete();
-    }
-  }
-
+  /// Manual refresh. Android delegates to the service engine; every other
+  /// platform uses the app's [ProviderRefreshService], so a manual refresh and
+  /// the scheduler share one single-flight download that works with the core
+  /// stopped. Without a managed target the core simply rereads its cache file.
   Future<String> updateExternalProvider({
     required String providerName,
   }) async {
-    // The service owns Android refreshes, including manual ones, so closing
-    // the UI cannot abort decryption and a timer cannot race a manual download.
-    if (Platform.isAndroid) {
-      return clashInterface.updateExternalProvider(providerName);
-    }
-    final currentProfile = globalState.config.currentProfile;
-    if (currentProfile != null) {
-      final profileId = currentProfile.id;
+    if (!Platform.isAndroid) {
       try {
-        final configMap = await globalState.getProfileConfig(profileId);
-        String? url;
-        String? type;
-
-        if (configMap['proxy-providers'] != null) {
-          final provider = configMap['proxy-providers'][providerName];
-          if (provider is Map && provider['url'] != null) {
-            url = provider['url'].toString();
-            type = 'proxies';
-          }
-        }
-        if (url == null && configMap['rule-providers'] != null) {
-          final provider = configMap['rule-providers'][providerName];
-          if (provider is Map && provider['url'] != null) {
-            url = provider['url'].toString();
-            type = 'rules';
-          }
-        }
-
-        if (url != null && type != null) {
-          final providerPath =
-              await appPath.getProvidersFilePath(profileId, type, url);
-          await downloadAndDecryptProvider(
-            profile: currentProfile,
-            providerName: providerName,
-            url: url,
-            type: type,
-            providerPath: providerPath,
-          );
-
-          final text = await File(providerPath).readAsString();
-          return sideLoadExternalProvider(
-            providerName: providerName,
-            data: text,
-          );
-        }
+        final result =
+            await globalState.providerRefresh.refreshByName(providerName);
+        if (result != null) return result;
       } on CoreInputTooLargeException catch (e) {
         commonPrint.log("updateExternalProvider blocked: $e");
         return e.toString();
-      } catch (e) {
-        commonPrint.log("Custom updateExternalProvider failed: $e");
-        // Fallback to default Clash update if anything fails
       }
     }
     return clashInterface.updateExternalProvider(providerName);

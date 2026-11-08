@@ -36,13 +36,19 @@ class ClashLib extends ClashHandlerInterface with AndroidClashInterface {
   Future<bool> preload() => _canSendCompleter.future;
 
   @override
-  Future<String> setupConfig(SetupParams setupParams) {
+  Future<String> setupConfig(SetupParams setupParams) async {
     final profile = globalState.config.currentProfile;
+    // The service isolate cannot compute provider cache paths; the core does.
+    final cachePaths = await ProviderRefreshPlan.resolveCachePaths(
+      setupParams.config,
+      (kind, url) => getProviderCachePath(kind: kind, url: url),
+    );
     final plan = ProviderRefreshPlan.forProfile(
       profileId: profile?.id ?? '',
       userAgent: globalState.ua,
       config: setupParams.config,
       credentials: profile?.providerHeaders ?? const {},
+      cachePaths: cachePaths,
     );
     return invoke<String>(
       method: ActionMethod.setupConfig,

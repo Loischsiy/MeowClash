@@ -12,10 +12,18 @@ failure.
   deadline that includes queue wait. Profile/core changes discard queued work and ignore late responses,
   settling any started loading indicator. Delay updates coalesce for **50 ms** and copy only changed URL
   buckets — never mutate existing immutable snapshots, and do not notify on unchanged scalars.
-- **Provider refresh** (`lib/services/provider_refresh_service.dart`): owned by the **Android service
-  engine**, not the Activity or the `Application` widget. Setup IPC and quick-settings cold starts hand
-  it a snapshot of the effective provider configuration, including profile-script changes and
-  decryption credentials.
+- **Provider refresh** (`lib/services/provider_refresh_service.dart`): one owner per isolate, shared by
+  automatic ticks and manual refresh. On Android it is the **service engine** (not the Activity or the
+  `Application` widget); on desktop and iOS it is `globalState.providerRefresh` in the main isolate
+  (`globalState.setupCoreConfig` configures it). It gets a snapshot of the effective provider
+  configuration (profile-script changes, decryption credentials) and cache paths resolved by the core
+  (`ProviderRefreshPlan.resolveCachePaths`). Any http provider with a url is managed; the password is
+  optional (plaintext passes through, or comes from the response headers). The core never downloads
+  external providers, it only rereads the cache file. Ticks run with the core stopped: the cache is
+  written directly and the key is remembered in `_pendingReload`, then side-loaded on start
+  (`coreStarted()` / `startListener`). With the core running, bytes are side-loaded first and the cache
+  is written only if the core accepts them. `stopListener` does not suspend the loop; `shutdown` and a
+  new setup do. Do not reintroduce zeroing of provider `interval` in the core config.
 - **UI suspension** (`lib/services/ui_lifecycle.dart`, `lib/widgets/suspendable_ui.dart`):
   run-time/traffic polling must stop on Android background transitions and a stale resume callback must
   not restart it; periodic group refresh pauses in the background. Check `mounted`/results **after**

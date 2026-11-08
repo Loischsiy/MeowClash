@@ -223,21 +223,6 @@ class AppPath {
     );
   }
 
-  Future<String> getProvidersFilePath(
-    String id,
-    String type,
-    String url,
-  ) async {
-    final directory = await profilesPath;
-    return join(
-      directory,
-      "providers",
-      id,
-      type,
-      url.toMd5(),
-    );
-  }
-
   Future<String> get tempPath async {
     final directory = await tempDir.future;
     return directory.path;

@@ -719,7 +719,7 @@ class AppController {
       final params = await globalState.getSetupParams(
         pathConfig: realPatchConfig,
       );
-      message = await clashCore.setupConfig(params);
+      message = await globalState.setupCoreConfig(params);
     } catch (_) {
       if (Platform.isWindows && realTunEnable) await request.finishTun();
       rethrow;
@@ -793,79 +793,6 @@ class AppController {
       } catch (e) {
         commonPrint.log(e.toString());
       }
-    }
-  }
-
-  Future<void> autoUpdateProviders() async {
-    if (Platform.isAndroid)
-      return; // Owned by the service, not this UI isolate.
-    final isCoreInit = await clashCore.isInit;
-    if (!isCoreInit) return;
-
-    final currentProfile = globalState.config.currentProfile;
-    if (currentProfile == null) return;
-    final profileId = currentProfile.id;
-
-    try {
-      final providers = await clashCore.getExternalProviders();
-      if (providers.isEmpty) return;
-
-      final configMap = await globalState.getProfileConfig(profileId);
-      final proxyProviders = configMap['proxy-providers'] is Map
-          ? configMap['proxy-providers'] as Map
-          : null;
-      final ruleProviders = configMap['rule-providers'] is Map
-          ? configMap['rule-providers'] as Map
-          : null;
-
-      final List<Future<bool>> updateFutures = [];
-
-      for (final provider in providers) {
-        if (provider.vehicleType != 'HTTP') continue;
-
-        Map? providerConfig;
-        if (provider.type == 'Proxy' && proxyProviders != null) {
-          providerConfig = proxyProviders[provider.name] as Map?;
-        } else if (provider.type == 'Rule' && ruleProviders != null) {
-          providerConfig = ruleProviders[provider.name] as Map?;
-        }
-
-        if (providerConfig == null) continue;
-
-        final intervalVal = providerConfig['interval'];
-        if (intervalVal == null) continue;
-
-        final interval = int.tryParse(intervalVal.toString());
-        if (interval == null || interval <= 0) continue;
-
-        final timeSinceLastUpdate =
-            DateTime.now().toUtc().difference(provider.updateAt.toUtc());
-        if (timeSinceLastUpdate >= Duration(seconds: interval)) {
-          commonPrint.log(
-              "Auto-updating provider: ${provider.name} (interval: $interval s, last update: ${provider.updateAt})");
-          updateFutures.add(() async {
-            try {
-              await clashCore.updateExternalProvider(
-                  providerName: provider.name);
-              return true;
-            } catch (e) {
-              commonPrint
-                  .log("Auto-updating provider ${provider.name} failed: $e");
-              return false;
-            }
-          }());
-        }
-      }
-
-      if (updateFutures.isNotEmpty) {
-        final results = await Future.wait(updateFutures);
-        if (results.any((updated) => updated)) {
-          await updateProviders();
-          updateGroupsDebounce();
-        }
-      }
-    } catch (e) {
-      commonPrint.log("autoUpdateProviders error: $e");
     }
   }
 
@@ -1020,6 +947,7 @@ class AppController {
       await savePreferences();
       await system.setMacOSDns(true);
       await proxy?.stopProxy();
+      globalState.disposeProviderRefresh();
       await clashCore.shutdown();
       await clashCore.destroy();
     } catch (e) {
@@ -1326,9 +1254,6 @@ class AppController {
 
       commonPrint.log("AppController: Starting auto-update profiles...");
       unawaited(autoUpdateProfiles());
-
-      commonPrint.log("AppController: Starting auto-update providers...");
-      unawaited(autoUpdateProviders());
 
       commonPrint.log("AppController: Starting auto-check update...");
       unawaited(autoCheckUpdate());

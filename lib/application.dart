@@ -45,7 +45,6 @@ class ApplicationState extends ConsumerState<Application> {
     onError: (error, stack) => commonPrint.log('Group refresh failed: $error'),
   );
   Timer? _autoUpdateProfilesTaskTimer;
-  Timer? _autoUpdateProvidersTaskTimer;
 
   final _pageTransitionsTheme = PageTransitionsTheme(
     builders: <TargetPlatform, PageTransitionsBuilder>{
@@ -75,8 +74,6 @@ class ApplicationState extends ConsumerState<Application> {
     uiLifecycle.addListener(_syncGroupPolling);
     _syncGroupPolling();
     _autoUpdateProfilesTask();
-    // Android has one provider refresh owner: the background service engine.
-    if (!Platform.isAndroid) _autoUpdateProvidersTask();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       final currentContext = globalState.navigatorKey.currentContext;
       if (currentContext != null) {
@@ -101,14 +98,6 @@ class ApplicationState extends ConsumerState<Application> {
       if (!mounted) return;
       await globalState.appController.autoUpdateProfiles();
       if (mounted) _autoUpdateProfilesTask();
-    });
-  }
-
-  void _autoUpdateProvidersTask() {
-    _autoUpdateProvidersTaskTimer = Timer(const Duration(minutes: 1), () async {
-      if (!mounted) return;
-      await globalState.appController.autoUpdateProviders();
-      if (mounted) _autoUpdateProvidersTask();
     });
   }
 
@@ -278,7 +267,6 @@ class ApplicationState extends ConsumerState<Application> {
     _groupPolling.dispose();
     uiLifecycle.removeListener(_syncGroupPolling);
     _autoUpdateProfilesTaskTimer?.cancel();
-    _autoUpdateProvidersTaskTimer?.cancel();
     globalState.appController.delayTests.cancel();
     await globalState.appController.savePreferences();
     await globalState.appController.handleExit();

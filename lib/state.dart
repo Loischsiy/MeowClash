@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io' show Platform, File;
 
 import 'package:animations/animations.dart';
@@ -17,6 +18,8 @@ import 'package:meowclash/services/profile_script_evaluator.dart';
 import 'package:meowclash/services/provider_cache_updater.dart';
 import 'package:meowclash/services/provider_payload.dart';
 import 'package:meowclash/services/provider_preloader.dart';
+import 'package:meowclash/services/provider_refresh_plan.dart';
+import 'package:meowclash/services/provider_refresh_service.dart';
 import 'package:meowclash/services/subscription_crypto.dart';
 import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:meowclash/widgets/dialog.dart';
@@ -201,6 +204,66 @@ class GlobalState {
   Future<String> resolveProviderCachePath(String kind, String url) =>
       clashCore.getProviderCachePath(kind: kind, url: url);
 
+  ProviderRefreshService? _providerRefresh;
+
+  /// Provider scheduler and manual-refresh owner of the main isolate on every
+  /// platform except Android, where the service engine owns it.
+  ProviderRefreshService get providerRefresh =>
+      _providerRefresh ??= ProviderRefreshService(
+        invokeCore: _invokeCoreAction,
+        isRunning: () => isStart,
+        fetch: providerDownloader.fetch,
+        modifiedAt: providerCacheModifiedAt,
+        persist: writeProviderCache,
+        log: commonPrint.log,
+      );
+
+  void disposeProviderRefresh() {
+    _providerRefresh?.dispose();
+    _providerRefresh = null;
+  }
+
+  /// Adapts the service's action-JSON protocol to the in-process core
+  /// interface. A timeout is an error, never an accepted (empty) reply.
+  Future<String> _invokeCoreAction(String message) async {
+    final action = Map<String, dynamic>.from(json.decode(message) as Map);
+    final method = ActionMethod.values.byName(action['method'] as String);
+    final data = await clashCore.clashInterface.invoke<String>(
+      method: method,
+      data: action['data'],
+      timeout: const Duration(minutes: 1),
+      onTimeout: () => 'Core call timed out',
+    );
+    return json.encode({
+      'id': action['id'],
+      'method': action['method'],
+      'code': 0,
+      'data': data,
+    });
+  }
+
+  /// Applies [params] to the core. Outside Android this also hands the
+  /// provider scheduler the applied snapshot (Android's setup IPC does so).
+  Future<String> setupCoreConfig(SetupParams params) async {
+    if (Platform.isAndroid) return clashCore.setupConfig(params);
+    final profile = config.currentProfile;
+    final plan = ProviderRefreshPlan.forProfile(
+      profileId: profile?.id ?? '',
+      userAgent: ua,
+      config: params.config,
+      credentials: profile?.providerHeaders ?? const {},
+      cachePaths: await ProviderRefreshPlan.resolveCachePaths(
+        params.config,
+        resolveProviderCachePath,
+      ),
+    );
+    return providerRefresh.configure<String>(
+      plan,
+      () => clashCore.setupConfig(params),
+      succeeded: (message) => message.isEmpty,
+    );
+  }
+
   ProviderPreloader providerPreloader(ProviderPathResolver? resolve) =>
       ProviderPreloader(
         resolvePath: resolve ?? resolveProviderCachePath,
@@ -268,6 +331,7 @@ class GlobalState {
     }
     startTime ??= DateTime.now();
     await clashCore.startListener();
+    if (!Platform.isAndroid) unawaited(providerRefresh.coreStarted());
     if (Platform.isWindows &&
         appState.realTunEnable &&
         config.patchClashConfig.tun.enable) {

@@ -231,8 +231,31 @@ Future<void> _service(List<String> flags) async {
               return;
             }
             commonPrint.log("TileService: Getting setup params");
+            final initParams = InitParams(homeDir: homeDirPath, version: version);
+            // The service isolate has no ClashCore. The core needs its home
+            // directory before it can name provider cache files, so initialise
+            // it first (idempotent; quickStart repeats it) and ask it directly.
+            Future<Map> invokeCore(ActionMethod method, Object data) async =>
+                json.decode(await clashLibHandler.invokeAction(json.encode(
+                  core_models.Action(
+                    id: "${method.name}#${utils.id}",
+                    method: method,
+                    data: data,
+                  ),
+                ))) as Map;
+            await invokeCore(ActionMethod.initClash, json.encode(initParams));
+            Future<String> resolveProviderPath(String kind, String url) async {
+              final result = await invokeCore(
+                ActionMethod.getProviderCachePath,
+                json.encode({'kind': kind, 'url': url}),
+              );
+              final path = result['data'];
+              return path is String ? path : '';
+            }
+
             final params = await globalState.getSetupParams(
               pathConfig: clashConfig,
+              resolveProviderPath: resolveProviderPath,
             );
             commonPrint.log("TileService: Setup params ready");
 
@@ -243,13 +266,16 @@ Future<void> _service(List<String> flags) async {
               config: params.config,
               credentials: globalState.config.currentProfile?.providerHeaders ??
                   const {},
+              cachePaths: await ProviderRefreshPlan.resolveCachePaths(
+                params.config,
+                resolveProviderPath,
+              ),
             );
             final res = await providerUpdates.configure(
               refreshPlan,
               () => clashLibHandler.quickStart(
-                InitParams(homeDir: homeDirPath, version: version),
-                params.copyWith(
-                    config: refreshPlan.prepareCoreConfig(params.config)),
+                initParams,
+                params,
                 globalState.getCoreState(),
               ),
               succeeded: (result) => result.isEmpty,

@@ -468,9 +468,16 @@ void main() {
       );
       expect(find.byType(AdaptiveActivityIndicator), findsNothing);
 
+      // External providers report File and keep their Sync capsule.
       await pumpPage(
         tester,
-        (_) => item(http.copyWith(vehicleType: 'File', isUpdating: true)),
+        (_) => item(http.copyWith(vehicleType: 'File')),
+      );
+      expect(find.byType(GlassButton), findsNWidgets(2));
+
+      await pumpPage(
+        tester,
+        (_) => item(http.copyWith(vehicleType: 'Compatible', isUpdating: true)),
       );
       expect(find.byType(GlassButton), findsOneWidget);
       expect(find.byType(AdaptiveActivityIndicator), findsOneWidget);

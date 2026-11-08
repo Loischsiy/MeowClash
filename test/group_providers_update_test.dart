@@ -45,18 +45,34 @@ void main() {
       expect(result.map((provider) => provider.name), ['sub-b', 'sub-a']);
     });
 
-    test('skips file providers, unknown providers and rule providers', () {
+    test('includes File providers: the app downloads them for the core', () {
+      final group = Group(
+        type: GroupType.Selector,
+        name: 'hidden-select',
+        all: [_node('f-1', 'local')],
+      );
+      final result = groupUpdatableProviders(group, [
+        _provider('local', vehicleType: 'File'),
+      ]);
+      expect(result.single.name, 'local');
+    });
+
+    test('providerCanSync accepts HTTP and File only', () {
+      expect(providerCanSync(_provider('a')), isTrue);
+      expect(providerCanSync(_provider('a', vehicleType: 'File')), isTrue);
+      expect(providerCanSync(_provider('a', vehicleType: 'Compatible')), isFalse);
+    });
+
+    test('skips unknown providers and rule providers', () {
       final group = Group(
         type: GroupType.Selector,
         name: 'hidden-select',
         all: [
-          _node('f-1', 'local'),
           _node('u-1', 'missing'),
           _node('s-1', 'shared'),
         ],
       );
       final result = groupUpdatableProviders(group, [
-        _provider('local', vehicleType: 'File'),
         _provider('shared', type: 'Rule'),
       ]);
       expect(result, isEmpty);

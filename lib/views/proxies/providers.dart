@@ -6,6 +6,7 @@ import 'package:meowclash/common/common.dart';
 import 'package:meowclash/models/core.dart';
 import 'package:meowclash/providers/app.dart';
 import 'package:meowclash/state.dart';
+import 'package:meowclash/views/proxies/common.dart' show providerCanSync;
 import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:meowclash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
@@ -110,7 +111,7 @@ class ProviderItem extends StatelessWidget {
 
   Future<void> _handleUpdateProvider() async {
     final appController = globalState.appController;
-    if (provider.vehicleType != "HTTP") return;
+    if (!providerCanSync(provider)) return;
     await globalState.safeRun(
       () async {
         appController.setProvider(
@@ -172,7 +173,7 @@ class ProviderItem extends StatelessWidget {
   /// Darwin: a plain row; the actions are capsule buttons under the subtitle
   /// and Sync shows its own spinner while updating.
   Widget _buildGlass() {
-    final canSync = provider.vehicleType == "HTTP";
+    final canSync = providerCanSync(provider);
     return ListItem(
       title: Text(provider.name),
       subtitle: Column(
@@ -253,7 +254,7 @@ class ProviderItem extends StatelessWidget {
                   label: appLocalizations.upload,
                   onPressed: _handleSideLoadProvider,
                 ),
-                if (provider.vehicleType == "HTTP")
+                if (providerCanSync(provider))
                   CommonChip(
                     avatar: const Icon(Icons.sync),
                     label: appLocalizations.sync,

@@ -5,11 +5,17 @@ import 'package:meowclash/services/delay_test_runner.dart';
 import 'package:meowclash/state.dart';
 import 'package:meowclash/widgets/adaptive/adaptive.dart';
 
-/// HTTP proxy providers that feed [group] directly, in member order.
+/// Whether the Sync action applies. Providers the app downloads for the core
+/// report the `File` vehicle (the core only rereads their cache), so `File`
+/// counts too; a purely local file just gets re-read.
+bool providerCanSync(ExternalProvider provider) =>
+    provider.vehicleType == 'HTTP' || provider.vehicleType == 'File';
+
+/// Syncable proxy providers that feed [group] directly, in member order.
 ///
 /// mihomo tags every node loaded from a proxy provider with `provider-name`;
 /// manual nodes and nested groups carry none. Only providers the core reports
-/// in [providers] with an HTTP vehicle can be re-downloaded. A rule provider
+/// in [providers] with a syncable vehicle can be refreshed. A rule provider
 /// may share a proxy provider's name, so only `Proxy` providers are matched.
 List<ExternalProvider> groupUpdatableProviders(
   Group group,
@@ -27,7 +33,7 @@ List<ExternalProvider> groupUpdatableProviders(
   return [
     for (final name in names)
       if (proxyProviders[name] case final provider?
-          when provider.vehicleType == 'HTTP')
+          when providerCanSync(provider))
         provider,
   ];
 }

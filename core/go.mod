@@ -152,6 +152,6 @@ require (
 // `client-fingerprint: firefox` / `safari` resolve to the new specs.
 replace github.com/metacubex/utls => github.com/metacubex/utls v0.0.0-20260715025833-a77524af3a17
 
-replace github.com/metacubex/mihomo => github.com/Loischsiy/mihomo v1.19.33-meowclash.3
+replace github.com/metacubex/mihomo => github.com/Loischsiy/mihomo v1.19.33-meowclash.5
 
 replace github.com/metacubex/sing-shadowsocks2 => github.com/Loischsiy/sing-shadowsocks2 v0.2.8-meowclash.1

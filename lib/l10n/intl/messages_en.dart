@@ -48,13 +48,28 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m10(label) => "${label} must be between 1024 and 49151";
 
-  static String m11(count) => "${count} items have been selected";
+  static String m11(name) =>
+      "Provider \"${name}\" could not be downloaded and there is no saved copy. Check the connection and try again.";
 
-  static String m12(days) => "Your subscription expires in ${days} day(s)";
+  static String m12(name) =>
+      "Provider \"${name}\" is encrypted, but this profile has no decryption password. Set it in the profile settings.";
 
-  static String m13(label) => "${label} must be a url";
+  static String m13(name) =>
+      "The core did not report where to store provider \"${name}\". Restart the app and try again.";
 
-  static String m14(count) =>
+  static String m14(name) =>
+      "Provider \"${name}\" could not be updated, using the saved copy.";
+
+  static String m15(name) =>
+      "Provider \"${name}\" could not be decrypted: wrong password or iteration count.";
+
+  static String m16(count) => "${count} items have been selected";
+
+  static String m17(days) => "Your subscription expires in ${days} day(s)";
+
+  static String m18(label) => "${label} must be a url";
+
+  static String m19(count) =>
       "${Intl.plural(count, one: '1 year ago', other: '${count} years ago')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -735,6 +750,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "profiles": MessageLookupByLibrary.simpleMessage("Profiles"),
     "profilesSort": MessageLookupByLibrary.simpleMessage("Profiles sort"),
     "project": MessageLookupByLibrary.simpleMessage("Project"),
+    "providerPreloadDownloadFailed": m11,
+    "providerPreloadPasswordRequired": m12,
+    "providerPreloadPathUnavailable": m13,
+    "providerPreloadUsingCache": m14,
+    "providerPreloadWrongPassword": m15,
     "providers": MessageLookupByLibrary.simpleMessage("Providers"),
     "proxies": MessageLookupByLibrary.simpleMessage("Proxies"),
     "proxiesCount": MessageLookupByLibrary.simpleMessage("Proxies"),
@@ -862,7 +882,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "selectAll": MessageLookupByLibrary.simpleMessage("Select all"),
     "selectProfile": MessageLookupByLibrary.simpleMessage("Select Profile"),
     "selected": MessageLookupByLibrary.simpleMessage("Selected"),
-    "selectedCountTitle": m11,
+    "selectedCountTitle": m16,
     "sendToTv": MessageLookupByLibrary.simpleMessage("Send to TV"),
     "sendToTvTitle": MessageLookupByLibrary.simpleMessage("Send to TV"),
     "sentSuccessfullyMessage": MessageLookupByLibrary.simpleMessage(
@@ -909,7 +929,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionExpired": MessageLookupByLibrary.simpleMessage(
       "Your subscription has expired",
     ),
-    "subscriptionExpiresInDays": m12,
+    "subscriptionExpiresInDays": m17,
     "subscriptionExpiresSoon": MessageLookupByLibrary.simpleMessage(
       "Subscription expires soon",
     ),
@@ -1025,7 +1045,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlDesc": MessageLookupByLibrary.simpleMessage(
       "Obtain profile through URL",
     ),
-    "urlTip": m13,
+    "urlTip": m18,
     "useHosts": MessageLookupByLibrary.simpleMessage("Use hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("Use system hosts"),
     "value": MessageLookupByLibrary.simpleMessage("Value"),
@@ -1048,7 +1068,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("Whitelist mode"),
     "years": MessageLookupByLibrary.simpleMessage("Years"),
-    "yearsAgo": m14,
+    "yearsAgo": m19,
     "zh_CN": MessageLookupByLibrary.simpleMessage("Simplified Chinese"),
   };
 }

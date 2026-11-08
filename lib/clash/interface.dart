@@ -52,6 +52,13 @@ mixin ClashInterface {
 
   Future<String> updateExternalProvider(String providerName);
 
+  /// Cache file the core reads for a `meowclash-external` provider. Always
+  /// asked from the core (mihomo GetPathByHash), never computed in Dart.
+  Future<String> getProviderCachePath({
+    required String kind,
+    required String url,
+  });
+
   FutureOr<String> getTraffic();
 
   FutureOr<String> getTotalTraffic();
@@ -273,6 +280,16 @@ abstract class ClashHandlerInterface with ClashInterface {
         "providerName": providerName,
         "data": data,
       }),
+    );
+
+  @override
+  Future<String> getProviderCachePath({
+    required String kind,
+    required String url,
+  }) => invoke<String>(
+      method: ActionMethod.getProviderCachePath,
+      data: json.encode({"kind": kind, "url": url}),
+      timeout: const Duration(seconds: 10),
     );
 
   @override

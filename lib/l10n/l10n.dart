@@ -1,6 +1,7 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+
 import 'intl/messages_all.dart';
 
 // **************************************************************************
@@ -4632,6 +4633,56 @@ class AppLocalizations {
   /// `Done`
   String get toolbarDone {
     return Intl.message('Done', name: 'toolbarDone', desc: '', args: []);
+  }
+
+  /// `Provider "{name}" is encrypted, but this profile has no decryption password. Set it in the profile settings.`
+  String providerPreloadPasswordRequired(String name) {
+    return Intl.message(
+      'Provider "$name" is encrypted, but this profile has no decryption password. Set it in the profile settings.',
+      name: 'providerPreloadPasswordRequired',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Provider "{name}" could not be decrypted: wrong password or iteration count.`
+  String providerPreloadWrongPassword(String name) {
+    return Intl.message(
+      'Provider "$name" could not be decrypted: wrong password or iteration count.',
+      name: 'providerPreloadWrongPassword',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Provider "{name}" could not be downloaded and there is no saved copy. Check the connection and try again.`
+  String providerPreloadDownloadFailed(String name) {
+    return Intl.message(
+      'Provider "$name" could not be downloaded and there is no saved copy. Check the connection and try again.',
+      name: 'providerPreloadDownloadFailed',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `The core did not report where to store provider "{name}". Restart the app and try again.`
+  String providerPreloadPathUnavailable(String name) {
+    return Intl.message(
+      'The core did not report where to store provider "$name". Restart the app and try again.',
+      name: 'providerPreloadPathUnavailable',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Provider "{name}" could not be updated, using the saved copy.`
+  String providerPreloadUsingCache(String name) {
+    return Intl.message(
+      'Provider "$name" could not be updated, using the saved copy.',
+      name: 'providerPreloadUsingCache',
+      desc: '',
+      args: [name],
+    );
   }
 }
 

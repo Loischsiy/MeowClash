@@ -42,13 +42,13 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m10(label) => "${label} 必须在 1024 到 49151 之间";
 
-  static String m11(count) => "已选择 ${count} 项";
+  static String m16(count) => "已选择 ${count} 项";
 
-  static String m12(days) => "您的订阅将在${days}天后到期";
+  static String m17(days) => "您的订阅将在${days}天后到期";
 
-  static String m13(label) => "${label}必须为URL";
+  static String m18(label) => "${label}必须为URL";
 
-  static String m14(count) => "${count} 年前";
+  static String m19(count) => "${count} 年前";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -584,7 +584,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "seconds": MessageLookupByLibrary.simpleMessage("秒"),
     "selectAll": MessageLookupByLibrary.simpleMessage("全选"),
     "selected": MessageLookupByLibrary.simpleMessage("已选择"),
-    "selectedCountTitle": m11,
+    "selectedCountTitle": m16,
     "settings": MessageLookupByLibrary.simpleMessage("设置"),
     "sharedProcessMemoryHint": MessageLookupByLibrary.simpleMessage(
       "内核运行在应用进程内，因此外壳 RSS 包含内核。",
@@ -611,7 +611,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subRule": MessageLookupByLibrary.simpleMessage("子规则"),
     "submit": MessageLookupByLibrary.simpleMessage("提交"),
     "subscriptionExpired": MessageLookupByLibrary.simpleMessage("您的订阅已过期"),
-    "subscriptionExpiresInDays": m12,
+    "subscriptionExpiresInDays": m17,
     "subscriptionExpiresSoon": MessageLookupByLibrary.simpleMessage("订阅即将到期"),
     "subscriptionExpiresToday": MessageLookupByLibrary.simpleMessage(
       "您的订阅今天到期",
@@ -692,7 +692,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "upload": MessageLookupByLibrary.simpleMessage("上传"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlDesc": MessageLookupByLibrary.simpleMessage("通过URL获取配置文件"),
-    "urlTip": m13,
+    "urlTip": m18,
     "useHosts": MessageLookupByLibrary.simpleMessage("使用Hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("使用系统Hosts"),
     "value": MessageLookupByLibrary.simpleMessage("值"),
@@ -709,7 +709,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage("WebDAV配置"),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("白名单模式"),
     "years": MessageLookupByLibrary.simpleMessage("年"),
-    "yearsAgo": m14,
+    "yearsAgo": m19,
     "zh_CN": MessageLookupByLibrary.simpleMessage("中文简体"),
   };
 }

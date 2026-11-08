@@ -616,5 +616,45 @@
   "filterByProcess": "Фильтр по процессу",
   "closeConnection": "Закрыть соединение",
   "toolbarEdit": "Изменить",
-  "toolbarDone": "Готово"
+  "toolbarDone": "Готово",
+  "providerPreloadPasswordRequired": "Провайдер «{name}» зашифрован, но для этого профиля не задан пароль расшифровки. Укажите его в настройках профиля.",
+  "@providerPreloadPasswordRequired": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "providerPreloadWrongPassword": "Не удалось расшифровать провайдер «{name}»: неверный пароль или число итераций.",
+  "@providerPreloadWrongPassword": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "providerPreloadDownloadFailed": "Не удалось скачать провайдер «{name}», сохранённой копии нет. Проверьте соединение и повторите.",
+  "@providerPreloadDownloadFailed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "providerPreloadPathUnavailable": "Ядро не сообщило, куда сохранить провайдер «{name}». Перезапустите приложение и повторите.",
+  "@providerPreloadPathUnavailable": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "providerPreloadUsingCache": "Не удалось обновить провайдер «{name}», используется сохранённая копия.",
+  "@providerPreloadUsingCache": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  }
 }

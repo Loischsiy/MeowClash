@@ -48,13 +48,13 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m10(label) => "${label} має бути числом від 1024 до 49151";
 
-  static String m11(count) => "Вибрано ${count} елементів";
+  static String m16(count) => "Вибрано ${count} елементів";
 
-  static String m12(days) => "Ваша підписка закінчується через ${days} дн.";
+  static String m17(days) => "Ваша підписка закінчується через ${days} дн.";
 
-  static String m13(label) => "${label} має бути URL";
+  static String m18(label) => "${label} має бути URL";
 
-  static String m14(count) =>
+  static String m19(count) =>
       "${Intl.plural(count, one: '${count} рік тому', few: '${count} роки тому', many: '${count} років тому', other: '${count} років тому')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -916,7 +916,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "selectAll": MessageLookupByLibrary.simpleMessage("Вибрати все"),
     "selectProfile": MessageLookupByLibrary.simpleMessage("Вибрати профіль"),
     "selected": MessageLookupByLibrary.simpleMessage("Вибрано"),
-    "selectedCountTitle": m11,
+    "selectedCountTitle": m16,
     "sendToTv": MessageLookupByLibrary.simpleMessage("Надіслати на ТВ"),
     "sendToTvTitle": MessageLookupByLibrary.simpleMessage("Надіслати на ТВ"),
     "sentSuccessfullyMessage": MessageLookupByLibrary.simpleMessage(
@@ -963,7 +963,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionExpired": MessageLookupByLibrary.simpleMessage(
       "Ваша підписка закінчилася",
     ),
-    "subscriptionExpiresInDays": m12,
+    "subscriptionExpiresInDays": m17,
     "subscriptionExpiresSoon": MessageLookupByLibrary.simpleMessage(
       "Підписка скоро закінчується",
     ),
@@ -1085,7 +1085,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlDesc": MessageLookupByLibrary.simpleMessage(
       "Завантажити профіль за URL",
     ),
-    "urlTip": m13,
+    "urlTip": m18,
     "useHosts": MessageLookupByLibrary.simpleMessage("Використовувати hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Використовувати системні hosts",
@@ -1112,7 +1112,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Режим білого списку",
     ),
     "years": MessageLookupByLibrary.simpleMessage("Років"),
-    "yearsAgo": m14,
+    "yearsAgo": m19,
     "zh_CN": MessageLookupByLibrary.simpleMessage("Спрощена китайська"),
   };
 }

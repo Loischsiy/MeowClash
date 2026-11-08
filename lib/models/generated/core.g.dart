@@ -350,6 +350,7 @@ const _$ActionMethodEnumMap = {
   ActionMethod.updateGeoData: 'updateGeoData',
   ActionMethod.updateExternalProvider: 'updateExternalProvider',
   ActionMethod.sideLoadExternalProvider: 'sideLoadExternalProvider',
+  ActionMethod.getProviderCachePath: 'getProviderCachePath',
   ActionMethod.startLog: 'startLog',
   ActionMethod.stopLog: 'stopLog',
   ActionMethod.startListener: 'startListener',

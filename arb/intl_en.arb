@@ -615,5 +615,45 @@
   "filterByProcess": "Filter by Process",
   "closeConnection": "Close Connection",
   "toolbarEdit": "Edit",
-  "toolbarDone": "Done"
+  "toolbarDone": "Done",
+  "providerPreloadPasswordRequired": "Provider \"{name}\" is encrypted, but this profile has no decryption password. Set it in the profile settings.",
+  "@providerPreloadPasswordRequired": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "providerPreloadWrongPassword": "Provider \"{name}\" could not be decrypted: wrong password or iteration count.",
+  "@providerPreloadWrongPassword": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "providerPreloadDownloadFailed": "Provider \"{name}\" could not be downloaded and there is no saved copy. Check the connection and try again.",
+  "@providerPreloadDownloadFailed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "providerPreloadPathUnavailable": "The core did not report where to store provider \"{name}\". Restart the app and try again.",
+  "@providerPreloadPathUnavailable": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "providerPreloadUsingCache": "Provider \"{name}\" could not be updated, using the saved copy.",
+  "@providerPreloadUsingCache": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  }
 }

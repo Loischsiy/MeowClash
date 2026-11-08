@@ -273,6 +273,7 @@ enum ActionMethod {
   updateGeoData,
   updateExternalProvider,
   sideLoadExternalProvider,
+  getProviderCachePath,
   startLog,
   stopLog,
   startListener,

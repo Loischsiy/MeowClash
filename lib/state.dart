@@ -14,6 +14,10 @@ import 'package:meowclash/plugins/service.dart';
 import 'package:meowclash/plugins/ios.dart';
 import 'package:meowclash/services/async_polling_loop.dart';
 import 'package:meowclash/services/profile_script_evaluator.dart';
+import 'package:meowclash/services/provider_cache_updater.dart';
+import 'package:meowclash/services/provider_payload.dart';
+import 'package:meowclash/services/provider_preloader.dart';
+import 'package:meowclash/services/subscription_crypto.dart';
 import 'package:meowclash/widgets/adaptive/adaptive.dart';
 import 'package:meowclash/widgets/dialog.dart';
 import 'package:meowclash/widgets/scaffold.dart';
@@ -28,6 +32,18 @@ import 'core_version.dart';
 import 'models/models.dart';
 
 typedef UpdateTasks = List<FutureOr Function()>;
+
+/// Asks the core for a provider cache path (`proxies`/`rules`, url).
+typedef ProviderPathResolver = Future<String> Function(String kind, String url);
+
+/// A provider could not be prepared; [message] is already localized.
+class ProviderSetupException implements Exception {
+  const ProviderSetupException(this.message);
+  final String message;
+
+  @override
+  String toString() => message;
+}
 
 dynamic _yamlToDart(dynamic value) {
   if (value is YamlMap) {
@@ -166,6 +182,43 @@ class GlobalState {
       utils.getLocaleForString(config.appSetting.locale) ??
           WidgetsBinding.instance.platformDispatcher.locale,
     );
+  }
+
+  final providerDownloader = ProviderPayloadDownloader();
+
+  /// One cache updater per isolate: preload, the scheduler and manual refreshes
+  /// share it, so the same cache file is never downloaded twice at once.
+  late final ProviderCacheUpdater providerCache = ProviderCacheUpdater(
+    download: (request, cancellation) => providerDownloader.download(
+      url: request.url,
+      headers: request.headers,
+      userAgent: request.userAgent,
+      cancellation: cancellation,
+    ),
+  );
+
+  /// Cache path of a provider, always asked from the core.
+  Future<String> resolveProviderCachePath(String kind, String url) =>
+      clashCore.getProviderCachePath(kind: kind, url: url);
+
+  ProviderPreloader providerPreloader(ProviderPathResolver? resolve) =>
+      ProviderPreloader(
+        resolvePath: resolve ?? resolveProviderCachePath,
+        updater: providerCache,
+      );
+
+  String providerFailureText(ProviderFetchException error) {
+    final name = error.providerName;
+    return switch (error.reason) {
+      ProviderFailureReason.passwordRequired =>
+        appLocalizations.providerPreloadPasswordRequired(name),
+      ProviderFailureReason.wrongPassword =>
+        appLocalizations.providerPreloadWrongPassword(name),
+      ProviderFailureReason.download =>
+        appLocalizations.providerPreloadDownloadFailed(name),
+      ProviderFailureReason.pathUnavailable =>
+        appLocalizations.providerPreloadPathUnavailable(name),
+    };
   }
 
   String get ua =>
@@ -445,9 +498,11 @@ class GlobalState {
 
   Future<SetupParams> getSetupParams({
     required ClashConfig pathConfig,
+    ProviderPathResolver? resolveProviderPath,
   }) async {
     final clashConfig = await patchRawConfig(
       patchConfig: pathConfig,
+      resolveProviderPath: resolveProviderPath,
     );
     final params = SetupParams(
       config: clashConfig,
@@ -514,6 +569,7 @@ class GlobalState {
 
   Future<Map<String, dynamic>> patchRawConfig({
     required ClashConfig patchConfig,
+    ProviderPathResolver? resolveProviderPath,
   }) async {
     final profile = config.currentProfile;
     if (profile == null) {
@@ -681,72 +737,24 @@ class GlobalState {
     if (rawConfig["profile"] == null) {
       rawConfig["profile"] = {};
     }
-    if (rawConfig["proxy-providers"] != null) {
-      final proxyProviders = rawConfig["proxy-providers"] as Map;
-      for (final key in proxyProviders.keys) {
-        final proxyProvider = proxyProviders[key];
-        if (proxyProvider["type"] != "http") {
-          continue;
-        }
-        if (proxyProvider["url"] != null) {
-          final path = await appPath.getProvidersFilePath(
-            profile.id,
-            "proxies",
-            proxyProvider["url"],
-          );
-          proxyProvider["path"] = path;
-          final file = File(path);
-          if (!await file.exists() || await file.length() == 0) {
-            try {
-              await ClashCore.downloadAndDecryptProvider(
-                profile: profile,
-                providerName: key.toString(),
-                url: proxyProvider["url"].toString(),
-                type: "proxies",
-                providerPath: path,
-              );
-            } on CoreInputTooLargeException {
-              rethrow;
-            } catch (e) {
-              commonPrint.log("Pre-download proxy provider $key failed: $e");
-            }
-          }
-        }
-      }
-    }
-
-    if (rawConfig["rule-providers"] != null) {
-      final ruleProviders = rawConfig["rule-providers"] as Map;
-      for (final key in ruleProviders.keys) {
-        final ruleProvider = ruleProviders[key];
-        if (ruleProvider["type"] != "http") {
-          continue;
-        }
-        if (ruleProvider["url"] != null) {
-          final path = await appPath.getProvidersFilePath(
-            profile.id,
-            "rules",
-            ruleProvider["url"],
-          );
-          ruleProvider["path"] = path;
-          final file = File(path);
-          if (!await file.exists() || await file.length() == 0) {
-            try {
-              await ClashCore.downloadAndDecryptProvider(
-                profile: profile,
-                providerName: key.toString(),
-                url: ruleProvider["url"].toString(),
-                type: "rules",
-                providerPath: path,
-              );
-            } on CoreInputTooLargeException {
-              rethrow;
-            } catch (e) {
-              commonPrint.log("Pre-download rule provider $key failed: $e");
-            }
-          }
-        }
-      }
+    // Every http provider becomes `meowclash-external`: the core only reads the
+    // cache file, the app downloads and decrypts it before the core starts.
+    final preloaded = await providerPreloader(resolveProviderPath).prepare(
+      rawConfig,
+      userAgent: ua,
+      password: profile.providerHeaders['meowclash-password'],
+      iterations: int.tryParse(
+              profile.providerHeaders['meowclash-password-iterations'] ??
+                  '') ??
+          kDefaultPbkdf2Iterations,
+    ).onError<ProviderFetchException>(
+      (error, _) => throw ProviderSetupException(providerFailureText(error)),
+    );
+    for (final warning in preloaded.warnings) {
+      commonPrint.log('Provider preload: ${warning.message}');
+      showNotifier(appLocalizations.providerPreloadUsingCache(
+        warning.providerName,
+      ));
     }
 
     rawConfig["profile"]["store-selected"] = false;

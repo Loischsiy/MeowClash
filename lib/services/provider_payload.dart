@@ -36,6 +36,14 @@ Future<Uint8List> decryptProviderPayload(
   return result;
 }
 
+/// Raw provider bytes plus the (lower-cased) response headers, which may carry
+/// the `meowclash-password` credentials when the profile has none stored.
+class ProviderDownload {
+  const ProviderDownload(this.bytes, this.headers);
+  final Uint8List bytes;
+  final Map<String, String> headers;
+}
+
 class ProviderPayloadDownloader {
   ProviderPayloadDownloader({Dio? dio})
       : _dio = dio ??
@@ -52,16 +60,15 @@ class ProviderPayloadDownloader {
     ProviderRefreshTarget target,
     CancelToken cancellation,
   ) async {
-    final bytes = await _download(plan, target, cancellation).timeout(
-      const Duration(minutes: 1),
-      onTimeout: () {
-        cancellation.cancel('Provider download timed out');
-        throw TimeoutException('Provider download timed out');
-      },
+    final fetched = await download(
+      url: target.url,
+      headers: target.headers,
+      userAgent: plan.userAgent,
+      cancellation: cancellation,
     );
     if (cancellation.isCancelled) throw StateError('Provider update cancelled');
     final result = await decryptProviderPayload(
-      bytes,
+      fetched.bytes,
       password: plan.password,
       iterations: plan.iterations,
     );
@@ -69,17 +76,34 @@ class ProviderPayloadDownloader {
     return result;
   }
 
-  Future<Uint8List> _download(
-    ProviderRefreshPlan plan,
-    ProviderRefreshTarget target,
+  /// One network request, bounded by a one-minute deadline. Every provider
+  /// download of the app goes through here (preload, scheduler, manual).
+  Future<ProviderDownload> download({
+    required String url,
+    required Map<String, dynamic> headers,
+    required String userAgent,
+    required CancelToken cancellation,
+  }) =>
+      _download(url, headers, userAgent, cancellation).timeout(
+        const Duration(minutes: 1),
+        onTimeout: () {
+          cancellation.cancel('Provider download timed out');
+          throw TimeoutException('Provider download timed out');
+        },
+      );
+
+  Future<ProviderDownload> _download(
+    String url,
+    Map<String, dynamic> targetHeaders,
+    String userAgent,
     CancelToken cancellation,
   ) async {
-    final headers = Map<String, dynamic>.from(target.headers);
+    final headers = Map<String, dynamic>.from(targetHeaders);
     if (!headers.keys.any((key) => key.toLowerCase() == 'user-agent')) {
-      headers['User-Agent'] = plan.userAgent;
+      headers['User-Agent'] = userAgent;
     }
     final response = await _dio.get<ResponseBody>(
-      target.url,
+      url,
       cancelToken: cancellation,
       options: Options(
         responseType: ResponseType.stream,
@@ -102,7 +126,10 @@ class ProviderPayloadDownloader {
         ensureCoreInputSize(buffer.length + chunk.length, name: 'Provider');
         buffer.add(chunk);
       }
-      return buffer.takeBytes();
+      return ProviderDownload(buffer.takeBytes(), {
+        for (final entry in response.headers.map.entries)
+          if (entry.value.isNotEmpty) entry.key.toLowerCase(): entry.value.first,
+      });
     } catch (_) {
       cancellation.cancel('Provider download rejected');
       rethrow;

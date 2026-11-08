@@ -42,13 +42,13 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m10(label) => "${label} は 1024 から 49151 の間でなければなりません";
 
-  static String m11(count) => "${count} 項目が選択されています";
+  static String m16(count) => "${count} 項目が選択されています";
 
-  static String m12(days) => "サブスクリプションは${days}日後に期限切れになります";
+  static String m17(days) => "サブスクリプションは${days}日後に期限切れになります";
 
-  static String m13(label) => "${label}はURLである必要があります";
+  static String m18(label) => "${label}はURLである必要があります";
 
-  static String m14(count) => "${count} 年前";
+  static String m19(count) => "${count} 年前";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -662,7 +662,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "seconds": MessageLookupByLibrary.simpleMessage("秒"),
     "selectAll": MessageLookupByLibrary.simpleMessage("すべて選択"),
     "selected": MessageLookupByLibrary.simpleMessage("選択済み"),
-    "selectedCountTitle": m11,
+    "selectedCountTitle": m16,
     "settings": MessageLookupByLibrary.simpleMessage("設定"),
     "sharedProcessMemoryHint": MessageLookupByLibrary.simpleMessage(
       "コアはアプリのプロセス内で動作するため、シェルのRSSにはコアが含まれます。",
@@ -691,7 +691,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionExpired": MessageLookupByLibrary.simpleMessage(
       "サブスクリプションが期限切れになりました",
     ),
-    "subscriptionExpiresInDays": m12,
+    "subscriptionExpiresInDays": m17,
     "subscriptionExpiresSoon": MessageLookupByLibrary.simpleMessage(
       "サブスクリプションがまもなく期限切れ",
     ),
@@ -784,7 +784,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "upload": MessageLookupByLibrary.simpleMessage("アップロード"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlDesc": MessageLookupByLibrary.simpleMessage("URL経由でプロファイルを取得"),
-    "urlTip": m13,
+    "urlTip": m18,
     "useHosts": MessageLookupByLibrary.simpleMessage("ホストを使用"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("システムホストを使用"),
     "value": MessageLookupByLibrary.simpleMessage("値"),
@@ -801,7 +801,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage("WebDAV設定"),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("ホワイトリストモード"),
     "years": MessageLookupByLibrary.simpleMessage("年"),
-    "yearsAgo": m14,
+    "yearsAgo": m19,
     "zh_CN": MessageLookupByLibrary.simpleMessage("簡体字中国語"),
   };
 }

@@ -198,6 +198,14 @@ class ClashCore {
   Future<String> updateGeoData(UpdateGeoDataParams params) =>
       clashInterface.updateGeoData(params);
 
+  /// The file the core reads for this provider, straight from mihomo.
+  /// An empty string means the core could not answer (not initialized).
+  Future<String> getProviderCachePath({
+    required String kind,
+    required String url,
+  }) =>
+      clashInterface.getProviderCachePath(kind: kind, url: url);
+
   Future<String> sideLoadExternalProvider({
     required String providerName,
     required String data,

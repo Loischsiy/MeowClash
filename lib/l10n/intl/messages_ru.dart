@@ -47,13 +47,28 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m10(label) => "${label} должен быть числом от 1024 до 49151";
 
-  static String m11(count) => "Выбрано ${count} элементов";
+  static String m11(name) =>
+      "Не удалось скачать провайдер «${name}», сохранённой копии нет. Проверьте соединение и повторите.";
 
-  static String m12(days) => "Ваша подписка истекает через ${days} дн.";
+  static String m12(name) =>
+      "Провайдер «${name}» зашифрован, но для этого профиля не задан пароль расшифровки. Укажите его в настройках профиля.";
 
-  static String m13(label) => "${label} должен быть URL";
+  static String m13(name) =>
+      "Ядро не сообщило, куда сохранить провайдер «${name}». Перезапустите приложение и повторите.";
 
-  static String m14(count) =>
+  static String m14(name) =>
+      "Не удалось обновить провайдер «${name}», используется сохранённая копия.";
+
+  static String m15(name) =>
+      "Не удалось расшифровать провайдер «${name}»: неверный пароль или число итераций.";
+
+  static String m16(count) => "Выбрано ${count} элементов";
+
+  static String m17(days) => "Ваша подписка истекает через ${days} дн.";
+
+  static String m18(label) => "${label} должен быть URL";
+
+  static String m19(count) =>
       "${Intl.plural(count, one: '${count} год назад', few: '${count} года назад', many: '${count} лет назад', other: '${count} лет назад')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -772,6 +787,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "profiles": MessageLookupByLibrary.simpleMessage("Профили"),
     "profilesSort": MessageLookupByLibrary.simpleMessage("Сортировка профилей"),
     "project": MessageLookupByLibrary.simpleMessage("Проект"),
+    "providerPreloadDownloadFailed": m11,
+    "providerPreloadPasswordRequired": m12,
+    "providerPreloadPathUnavailable": m13,
+    "providerPreloadUsingCache": m14,
+    "providerPreloadWrongPassword": m15,
     "providers": MessageLookupByLibrary.simpleMessage("Провайдеры"),
     "proxies": MessageLookupByLibrary.simpleMessage("Прокси"),
     "proxiesCount": MessageLookupByLibrary.simpleMessage("Прокси"),
@@ -905,7 +925,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "selectAll": MessageLookupByLibrary.simpleMessage("Выбрать все"),
     "selectProfile": MessageLookupByLibrary.simpleMessage("Выбрать профиль"),
     "selected": MessageLookupByLibrary.simpleMessage("Выбрано"),
-    "selectedCountTitle": m11,
+    "selectedCountTitle": m16,
     "sendToTv": MessageLookupByLibrary.simpleMessage("Отправить на ТВ"),
     "sendToTvTitle": MessageLookupByLibrary.simpleMessage("Отправить на ТВ"),
     "sentSuccessfullyMessage": MessageLookupByLibrary.simpleMessage(
@@ -952,7 +972,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionExpired": MessageLookupByLibrary.simpleMessage(
       "Ваша подписка истекла",
     ),
-    "subscriptionExpiresInDays": m12,
+    "subscriptionExpiresInDays": m17,
     "subscriptionExpiresSoon": MessageLookupByLibrary.simpleMessage(
       "Подписка скоро истекает",
     ),
@@ -1070,7 +1090,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "upload": MessageLookupByLibrary.simpleMessage("Отправка"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlDesc": MessageLookupByLibrary.simpleMessage("Загрузить профиль по URL"),
-    "urlTip": m13,
+    "urlTip": m18,
     "useHosts": MessageLookupByLibrary.simpleMessage("Использовать hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Использовать системные hosts",
@@ -1097,7 +1117,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Режим белого списка",
     ),
     "years": MessageLookupByLibrary.simpleMessage("Лет"),
-    "yearsAgo": m14,
+    "yearsAgo": m19,
     "zh_CN": MessageLookupByLibrary.simpleMessage("Упрощенный китайский"),
   };
 }

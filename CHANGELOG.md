@@ -2,6 +2,33 @@
 
 All notable changes to **MeowClash** will be documented in this file.
 
+## [v1.2.0]
+
+### ✨ New Features
+- **Liquid Glass UI (macOS & iOS)**: Added an adaptive glass design system for Apple platforms: glass theme tokens, a single `GlassSurface` primitive with a blur kill switch, a refraction shader, accessibility handling (Reduce Transparency/Motion, Increase Contrast, system accent), and a native glass window backdrop on macOS 26+. Material platforms are unchanged.
+- **Glass Screens**: Rebuilt on glass for Darwin: toolbar with glass capsules and search field (content scrolls under it, iOS large titles), Proxies, Profiles, profile and override editors, Dashboard (tiles, widgets, editing, dialogs, start button), Connections and Requests, Logs, Settings, dialogs, toasts, TUN recovery report, group picker sheet, grouped list editors and loading indicators. Also added native context menus on macOS and glass menus on iOS.
+- **System Font**: macOS and iOS now use the system San Francisco font with the Apple type scale.
+- **Windows TUN Recovery**: Added TUN recovery and Windows service integration, plus a `netstate` module in the service helper.
+- **External Providers**: Added the `meowclash-external` mode for HTTP proxy and rule providers. Provider caches are preloaded before core setup, can be refreshed with the core stopped on every platform, and Sync stays available for File-vehicle providers. The core exposes `getProviderCachePath`.
+- **Proxy Model**: Added the `providerName` field to the `Proxy` model.
+
+### 🚀 Improvements
+- **Core**: Updated the mihomo fork to `v1.19.34-meowclash.1`, merged with upstream Meta (Snell v6, `httpupgrade` links in the converter, updated dependencies).
+- **Memory & Performance**: Logs and requests use a ring-buffer `FixedList` with O(1) `FixedMap` eviction, Material log rows build lazily, Android package icons use one image cache entry each, proxy group names use structural select equality, and `TextPainter` is disposed after measuring text.
+- **macOS**: The app runs as a regular window and the minimum macOS version is now 12.0.
+- **Import from URL**: The dialog shows Close instead of Paste.
+- **iOS**: Added Flutter Swift Package Manager integration and a debug-only arm64 simulator build for UI preview.
+
+### 🐛 Bug Fixes
+- **Logs**: Buffers keep `maxLength` after a profile switch, the logs page has its own height/scroll cache tag, and throttled log/request updates now schedule a frame.
+- **iOS & macOS UI**: Fixed the UIScene lifecycle, iOS large title backdrop and toolbar buttons, macOS sidebar theme sync and header alignment, dialog settings gear placement, Apple-style close buttons, glass blur backdrop, and sheet drag from medium to full screen.
+- **Flutter 3.35.7**: The glass list reorder is built on the 3.35.7 API so `lib/` compiles on both supported Flutter versions.
+- **Icons**: Material symbols replace unbundled `CupertinoIcons`, and group headers absorb emoji-tall subtitles.
+
+### 🧹 Internal
+- Added Material golden baselines and glass checks for the new screens, a host benchmark for log/request buffers, and refreshed the Nix vendor hash.
+- Updated `AGENTS.md` and `.agents/` guides (adaptive UI, Liquid Glass notes) and added platform demo videos with animated WebP previews to the README.
+
 ## [v1.1.2]
 
 ### ✨ New Features

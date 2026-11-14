@@ -50,6 +50,7 @@ app.*.map.json
 .agent
 .gemini
 .pi
+.vibe
 
 Example*
 

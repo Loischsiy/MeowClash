@@ -15,6 +15,10 @@ A bump touches **four** places. Skipping any of the last three still builds loca
 
 1. `core/go.mod` — point `github.com/metacubex/mihomo` at the new tag.
 2. `core/constant/version.go` — update `var Version` to the exact same string.
+   When mihomo comes from the fork through `replace github.com/metacubex/mihomo => ... <tag>`, use the
+   **replace tag** (e.g. `v1.19.34-meowclash.1`), not the `require` version. `TestCoreVersionMatchesGoMod`
+   (`core/core_version_test.go`) fails if they differ; then rerun `setup.dart` (or regenerate
+   `lib/core_version.dart` the same way) so the About screen shows the new version.
 3. `cd core && go mod tidy` — regenerates `core/go.sum` and the indirect requires.
    Afterwards confirm the `replace github.com/metacubex/utls => ...` pseudo-version survived: the
    Firefox/Safari fingerprints live on an upstream *branch*, not a tag, so its pseudo-version sorts

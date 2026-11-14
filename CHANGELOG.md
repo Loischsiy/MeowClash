@@ -5,6 +5,7 @@ All notable changes to **MeowClash** will be documented in this file.
 ## [Unreleased]
 
 ### 🐛 Bug Fixes
+- **Core Version**: About and the User-Agent showed the old core version `v1.19.33`; the bump to `v1.19.34-meowclash.1` only changed `go.mod`. `core/constant/version.go` is updated and a Go test now checks it against `go.mod`.
 - **Android Reopen**: Reopening the app after closing it from recents reattaches to the running service instead of recreating it. The same config is no longer reapplied to a running core, so URL-test groups keep their delays and selection, providers are not reloaded, and Go/Flutter memory no longer grows with each reopen. The forced subscription download now runs only on a real app launch.
 - **Android Network**: Closing the UI no longer unregisters the network callback used by the running VPN service, so DNS follows network changes while the app is closed.
 - **Android Sleep**: The proxy no longer stops working 10–20 minutes after locking the phone. Network and DNS changes now always reach the core (they were dropped when the UI engine attached last), and after a network change, leaving Doze or unlocking after a long sleep the core refreshes DNS and re-runs health checks instead of staying on nodes marked dead while asleep.

@@ -1165,6 +1165,93 @@ class MediaUnlockChecker {
     }
   }
 
+  static const _gfnServerInfoUrl =
+      'https://prod.cloudmatchbeta.nvidiagrid.net/v2/serverInfo';
+
+  /// GeForce NOW zone names that [normalizeRegion] does not know.
+  static const _gfnCountryOverrides = {
+    'UNITED KINGDOM': 'GB',
+    'BULGARIA': 'BG',
+  };
+
+  /// Country of a GeForce NOW zone name, such as "United Kingdom 1",
+  /// "Netherlands North" or "Northern California (USA)".
+  static String? _gfnZoneCountry(String zone) {
+    var name = zone.trim();
+    final paren = RegExp(r'\(([^)]+)\)').firstMatch(name);
+    if (paren != null) name = paren.group(1)!;
+    name = name
+        .replaceAll(
+          RegExp(
+            r'\s+(\d+|north|south|east|west|central)$',
+            caseSensitive: false,
+          ),
+          '',
+        )
+        .trim()
+        .toUpperCase();
+    if (name.isEmpty) return null;
+    final override = _gfnCountryOverrides[name];
+    if (override != null) return override;
+    final code = normalizeRegion(name);
+    return RegExp(r'^[A-Z]{2}$').hasMatch(code) ? code : null;
+  }
+
+  /// GeForce NOW assigns each client a home zone. Its public `serverInfo`
+  /// endpoint names that zone in the `local-region` metadata key; the zone's
+  /// country is shown as the region.
+  Future<MediaUnlockResult> checkGeForceNow() async {
+    final sw = Stopwatch()..start();
+    final dio = _createDio(followRedirects: true);
+    try {
+      final res = await dio.get<String>(
+        _gfnServerInfoUrl,
+        options: Options(
+          receiveTimeout: const Duration(seconds: 4),
+          sendTimeout: const Duration(seconds: 4),
+        ),
+      );
+      final latency = sw.elapsedMilliseconds;
+      final code = res.statusCode ?? 0;
+      final json = _parseJson(res.data);
+      String? zone;
+      final metaData = json?['metaData'];
+      if (metaData is List) {
+        for (final item in metaData) {
+          if (item is Map && item['key'] == 'local-region') {
+            final value = item['value'];
+            if (value is String && value.isNotEmpty) zone = value;
+            break;
+          }
+        }
+      }
+      final MediaUnlockStatus status;
+      if (code == 200 && json != null) {
+        status = MediaUnlockStatus.unlocked;
+      } else if (code == 403 || code == 451) {
+        status = MediaUnlockStatus.blocked;
+      } else {
+        status = MediaUnlockStatus.failed;
+      }
+      return MediaUnlockResult(
+        platform: MediaPlatform.geforcenow,
+        status: status,
+        region: zone != null ? _gfnZoneCountry(zone) : null,
+        latency: status == MediaUnlockStatus.unlocked
+            ? await _measureLatency(dio, _gfnServerInfoUrl, latency)
+            : latency,
+      );
+    } catch (_) {
+      return MediaUnlockResult(
+        platform: MediaPlatform.geforcenow,
+        status: MediaUnlockStatus.failed,
+        latency: sw.elapsedMilliseconds,
+      );
+    } finally {
+      dio.close(force: true);
+    }
+  }
+
   static final _metaRdVerify = RegExp(r"""['"](/__rd_verify[^'"]+)['"]""");
   static final _metaAccessGate = RegExp(
     r'isAllowed\\*"\s*:\s*(true|false)\s*,\s*\\*"blockReason\\*"\s*:\s*'
@@ -1829,6 +1916,7 @@ class MediaUnlockChecker {
       MediaPlatform.humblebundle =>
         _checkCloudflareTrace(MediaPlatform.humblebundle, 'humblebundle.com'),
       MediaPlatform.roblox => checkRoblox(),
+      MediaPlatform.geforcenow => checkGeForceNow(),
       MediaPlatform.coinbase =>
         _checkCloudflareTrace(MediaPlatform.coinbase, 'www.coinbase.com'),
       MediaPlatform.okx =>

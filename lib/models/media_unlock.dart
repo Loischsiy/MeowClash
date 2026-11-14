@@ -77,6 +77,7 @@ enum MediaPlatform {
   ubisoft,
   humblebundle,
   roblox,
+  geforcenow,
   coinbase,
   okx,
   kraken,
@@ -154,7 +155,8 @@ extension MediaPlatformExt on MediaPlatform {
         MediaPlatform.epic ||
         MediaPlatform.ubisoft ||
         MediaPlatform.humblebundle ||
-        MediaPlatform.roblox =>
+        MediaPlatform.roblox ||
+        MediaPlatform.geforcenow =>
           MediaCategory.gaming,
         MediaPlatform.coinbase ||
         MediaPlatform.okx ||
@@ -214,6 +216,7 @@ extension MediaPlatformExt on MediaPlatform {
         MediaPlatform.ubisoft => 'Ubisoft',
         MediaPlatform.humblebundle => 'Humble Bundle',
         MediaPlatform.roblox => 'Roblox',
+        MediaPlatform.geforcenow => 'GeForce NOW',
         MediaPlatform.coinbase => 'Coinbase',
         MediaPlatform.okx => 'OKX',
         MediaPlatform.kraken => 'Kraken',

@@ -46,6 +46,10 @@ data object ServicePlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
             result.success(true)
         }
 
+        "isAlive" -> {
+            result.success(GlobalState.hasServiceEngine())
+        }
+
         else -> {
             result.notImplemented()
         }

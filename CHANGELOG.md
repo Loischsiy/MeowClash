@@ -2,6 +2,15 @@
 
 All notable changes to **MeowClash** will be documented in this file.
 
+## [Unreleased]
+
+### 🐛 Bug Fixes
+- **Android Reopen**: Reopening the app after closing it from recents reattaches to the running service instead of recreating it. The same config is no longer reapplied to a running core, so URL-test groups keep their delays and selection, providers are not reloaded, and Go/Flutter memory no longer grows with each reopen. The forced subscription download now runs only on a real app launch.
+- **Android Network**: Closing the UI no longer unregisters the network callback used by the running VPN service, so DNS follows network changes while the app is closed.
+
+### 🚀 Improvements
+- **Battery (Android)**: With the UI closed, the core stops serializing connections and delays for nobody, and the foreground notification stops refreshing every second while the screen is off.
+
 ## [v1.2.0]
 
 ### ✨ New Features

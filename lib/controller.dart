@@ -1144,6 +1144,10 @@ class AppController {
     await handleExit();
   }
 
+  /// The Android UI was reopened over a core that kept running in the service
+  /// process (e.g. after the task was swiped from recents).
+  bool _reopenedOverRunningCore = false;
+
   Future<void> _initCore() async {
     commonPrint.log("AppController: _initCore starting...");
     final isInit = await clashCore.isInit;
@@ -1237,6 +1241,7 @@ class AppController {
       }
 
       commonPrint.log("AppController: Initializing core...");
+      _reopenedOverRunningCore = Platform.isAndroid && await clashCore.isInit;
       await _initCore();
 
       commonPrint.log("AppController: Initializing status...");
@@ -1248,9 +1253,14 @@ class AppController {
       );
 
       commonPrint.log("AppController: Scheduling subscription update...");
-      // Delay subscription update to ensure network is ready after app initialization
-      Future.delayed(
-          const Duration(seconds: 1), _updateCurrentProfileSubscription);
+      // Delay subscription update to ensure network is ready after app initialization.
+      // Reopening the UI is not an app launch: the core kept running, and a
+      // forced download would reapply the profile and reset URL-test groups.
+      // autoUpdateProfiles below still honours the update interval.
+      if (!_reopenedOverRunningCore) {
+        Future.delayed(
+            const Duration(seconds: 1), _updateCurrentProfileSubscription);
+      }
 
       commonPrint.log("AppController: Starting auto-update profiles...");
       unawaited(autoUpdateProfiles());

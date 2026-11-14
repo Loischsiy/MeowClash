@@ -282,3 +282,9 @@ func iosSyncIPv6() {
 		state.CurrentState.VpnProps.Ipv6 = currentConfig.General.IPv6
 	}
 }
+
+// hasMessageListener: this platform has no detachable message port, so the
+// forwarders always run.
+func hasMessageListener() bool {
+	return true
+}

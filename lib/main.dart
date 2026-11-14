@@ -128,10 +128,12 @@ Future<void> _service(List<String> flags) async {
       persist: writeProviderCache,
       log: commonPrint.log,
     );
+    final mainIpc = _MainIpc(clashLibHandler, providerUpdates);
 
     commonPrint.log("[DART] Adding tile listener...");
     tile?.addListener(
       _TileListenerWithService(
+        onUiDetached: mainIpc.detach,
         onChangeMode: (mode) async {
           commonPrint.log("[DART] TileService onChangeMode: $mode");
           try {
@@ -292,7 +294,7 @@ Future<void> _service(List<String> flags) async {
               } catch (e) {
                 debugPrint("Tile vpn.stop() error (ignored): $e");
               }
-              Isolate.current.kill(priority: Isolate.immediate);
+              _exitServiceIsolate();
               return;
             }
 
@@ -326,7 +328,7 @@ Future<void> _service(List<String> flags) async {
             } catch (stopError) {
               debugPrint("Tile vpn.stop() error (ignored): $stopError");
             }
-            Isolate.current.kill(priority: Isolate.immediate);
+            _exitServiceIsolate();
             return;
           }
         },
@@ -344,7 +346,7 @@ Future<void> _service(List<String> flags) async {
           } catch (e) {
             debugPrint("Tile vpn.stop() error (ignored): $e");
           }
-          Isolate.current.kill(priority: Isolate.immediate);
+          _exitServiceIsolate();
         },
       ),
     );
@@ -391,10 +393,20 @@ Future<void> _service(List<String> flags) async {
     }
 
     commonPrint.log("[DART] quickStart=$quickStart");
+    // The service engine outlives the Activity. A reopened UI attaches through
+    // this port instead of recreating the engine and the core configuration.
+    final attachPort = ReceivePort();
+    IsolateNameServer.removePortNameMapping(serviceIsolate);
+    IsolateNameServer.registerPortWithName(attachPort.sendPort, serviceIsolate);
+    attachPort.listen((message) {
+      if (message == serviceAttachRequest) {
+        unawaited(mainIpc.attach(waitForMain: false));
+      }
+    });
     if (!quickStart) {
       // App is in memory - set up IPC for communication with main isolate
-      commonPrint.log("[DART] Not quickStart, calling _handleMainIpc");
-      _handleMainIpc(clashLibHandler, providerUpdates);
+      commonPrint.log("[DART] Not quickStart, attaching to the main isolate");
+      unawaited(mainIpc.attach(waitForMain: true));
     } else {
       // App was not in memory - VPN will be started via pending action triggered by signalServiceReady()
       // The onStart callback in tile listener will handle the actual VPN startup
@@ -408,48 +420,79 @@ Future<void> _service(List<String> flags) async {
   });
 }
 
-void _handleMainIpc(
-  ClashLibHandler clashLibHandler,
-  ProviderRefreshService providerUpdates,
-) async {
-  commonPrint.log("[DART] _handleMainIpc: Looking up mainIsolate port...");
+/// Removes the attach mapping before the service isolate exits, so a reopened
+/// UI does not wait for a port that nobody listens to.
+void _exitServiceIsolate() {
+  IsolateNameServer.removePortNameMapping(serviceIsolate);
+  Isolate.current.kill(priority: Isolate.immediate);
+}
 
-  SendPort? sendPort;
-  for (int i = 0; i < 10; i++) {
-    sendPort = IsolateNameServer.lookupPortByName(mainIsolate);
-    if (sendPort != null) break;
-    commonPrint
-        .log("[DART] _handleMainIpc: mainIsolate port not found, retry $i...");
-    await Future.delayed(Duration(milliseconds: 200 * (i + 1)));
+/// IPC between the service isolate and the current UI isolate. The UI can be
+/// destroyed and recreated many times while the service keeps the core.
+class _MainIpc {
+  _MainIpc(this.clashLibHandler, this.providerUpdates);
+
+  final ClashLibHandler clashLibHandler;
+  final ProviderRefreshService providerUpdates;
+  ReceivePort? _requests;
+  ReceivePort? _messages;
+  int _generation = 0;
+
+  Future<void> attach({required bool waitForMain}) async {
+    final generation = ++_generation;
+    commonPrint.log("[DART] _MainIpc: Looking up mainIsolate port...");
+    SendPort? sendPort;
+    final attempts = waitForMain ? 10 : 1;
+    for (int i = 0; i < attempts; i++) {
+      sendPort = IsolateNameServer.lookupPortByName(mainIsolate);
+      if (sendPort != null || i == attempts - 1) break;
+      commonPrint.log("[DART] _MainIpc: mainIsolate port not found, retry $i...");
+      await Future.delayed(Duration(milliseconds: 200 * (i + 1)));
+    }
+    if (generation != _generation) return;
+    if (sendPort == null) {
+      commonPrint.log(
+          "[DART] _MainIpc: mainIsolate port NOT FOUND, aborting IPC setup");
+      return;
+    }
+    _close();
+    final target = sendPort;
+
+    void safeSend(dynamic message) {
+      try {
+        target.send(message);
+      } catch (_) {}
+    }
+
+    final requests = ReceivePort()
+      ..listen((message) async {
+        final res = await providerUpdates.handleAction(message as String);
+        safeSend(res);
+      });
+    final messages = ReceivePort()..listen(safeSend);
+    _requests = requests;
+    _messages = messages;
+    clashLibHandler.attachMessagePort(messages.sendPort.nativePort);
+    commonPrint.log("[DART] _MainIpc: Sending service port to mainIsolate");
+    safeSend(requests.sendPort);
+    commonPrint.log("[DART] _MainIpc: IPC setup completed");
   }
 
-  if (sendPort == null) {
-    commonPrint.log(
-        "[DART] _handleMainIpc: mainIsolate port NOT FOUND after retries, aborting IPC setup");
-    return;
-  }
-  commonPrint.log(
-      "[DART] _handleMainIpc: mainIsolate port found, setting up listeners");
-
-  void safeSend(dynamic message) {
-    try {
-      sendPort?.send(message);
-    } catch (_) {}
+  /// The UI engine is gone: stop the core from serializing logs, requests and
+  /// delays for a port that nobody reads.
+  void detach() {
+    _generation++;
+    _close();
+    commonPrint.log("[DART] _MainIpc: UI detached");
   }
 
-  final serviceReceiverPort = ReceivePort();
-  serviceReceiverPort.listen((message) async {
-    final res = await providerUpdates.handleAction(message as String);
-    safeSend(res);
-  });
-  commonPrint.log("[DART] _handleMainIpc: Sending service port to mainIsolate");
-  safeSend(serviceReceiverPort.sendPort);
-  final messageReceiverPort = ReceivePort();
-  clashLibHandler.attachMessagePort(
-    messageReceiverPort.sendPort.nativePort,
-  );
-  messageReceiverPort.listen(safeSend);
-  commonPrint.log("[DART] _handleMainIpc: IPC setup completed");
+  void _close() {
+    if (_messages != null) clashLibHandler.attachMessagePort(-1);
+    _requests?.close();
+    _messages?.close();
+    _requests = null;
+    _messages = null;
+  }
 }
 
 @immutable
@@ -458,13 +501,19 @@ class _TileListenerWithService with TileListener {
     required Function() onStart,
     required Function() onStop,
     required Function(String mode) onChangeMode,
+    required Function() onUiDetached,
   })  : _onStart = onStart,
         _onStop = onStop,
-        _onChangeMode = onChangeMode;
+        _onChangeMode = onChangeMode,
+        _onUiDetached = onUiDetached;
 
   final Function() _onStart;
   final Function() _onStop;
   final Function(String mode) _onChangeMode;
+  final Function() _onUiDetached;
+
+  @override
+  void onUiDetached() => _onUiDetached();
 
   @override
   void onStart() {

@@ -25,7 +25,8 @@ class ClashLib extends ClashHandlerInterface with AndroidClashInterface {
   }
 
   ClashLib._internal() {
-    _initService();
+    receiverPort.listen(_handleServiceMessage);
+    unawaited(_initService(reuseRunningService: true));
   }
   static ClashLib? _instance;
   Completer<bool> _canSendCompleter = Completer();
@@ -60,35 +61,66 @@ class ClashLib extends ClashHandlerInterface with AndroidClashInterface {
     );
   }
 
-  Future<void> _initService() async {
-    commonPrint.log("[DART] ClashLib._initService: Starting service initialization...");
-    await service?.destroy();
-    _registerMainPort(receiverPort.sendPort);
-    receiverPort.listen((message) {
-      if (message is SendPort) {
-        commonPrint.log("[DART] ClashLib: Received service SendPort");
-        if (_canSendCompleter.isCompleted) {
-          commonPrint.log("[DART] ClashLib: _canSendCompleter already completed, resetting");
-          sendPort = null;
-          _canSendCompleter = Completer();
-        }
-        sendPort = message;
-        _canSendCompleter.complete(true);
-        commonPrint.log("[DART] ClashLib: _canSendCompleter COMPLETED");
-      } else if (message is Map) {
-        // Ignore IPC responses (Map type) - they don't need processing
-        return;
-      } else {
-        handleResult(
-          ActionResult.fromJson(json.decode(
-            message,
-          )),
-        );
+  /// True when this UI isolate attached to a service engine that was already
+  /// running (the UI was reopened after being swiped from recents) instead of
+  /// starting a new one.
+  bool attachedToRunningService = false;
+
+  void _handleServiceMessage(dynamic message) {
+    if (message is SendPort) {
+      commonPrint.log("[DART] ClashLib: Received service SendPort");
+      if (_canSendCompleter.isCompleted) {
+        commonPrint.log("[DART] ClashLib: _canSendCompleter already completed, resetting");
+        sendPort = null;
+        _canSendCompleter = Completer();
       }
-    });
+      sendPort = message;
+      _canSendCompleter.complete(true);
+      commonPrint.log("[DART] ClashLib: _canSendCompleter COMPLETED");
+    } else if (message is Map) {
+      // Ignore IPC responses (Map type) - they don't need processing
+      return;
+    } else {
+      handleResult(
+        ActionResult.fromJson(json.decode(
+          message,
+        )),
+      );
+    }
+  }
+
+  Future<void> _initService({required bool reuseRunningService}) async {
+    commonPrint.log("[DART] ClashLib._initService: Starting service initialization...");
+    _registerMainPort(receiverPort.sendPort);
+    if (reuseRunningService && await _attachToRunningService()) {
+      attachedToRunningService = true;
+      commonPrint.log("[DART] ClashLib: attached to the running service engine");
+      return;
+    }
+    // Destroying the service engine drops its provider scheduler, and the core
+    // configuration then has to be pushed again; only do it when there is no
+    // live service to attach to, or for an explicit core restart.
+    await service?.destroy();
     commonPrint.log("[DART] ClashLib: Calling service.init()...");
     await service?.init();
     commonPrint.log("[DART] ClashLib: service.init() returned");
+  }
+
+  /// The service engine outlives the Activity while the VPN runs. Ask it to
+  /// connect to this UI isolate instead of recreating it, which would also
+  /// reapply the profile and reset every URL-test group in the core.
+  Future<bool> _attachToRunningService() async {
+    try {
+      if (await service?.isAlive() != true) return false;
+      final servicePort = IsolateNameServer.lookupPortByName(serviceIsolate);
+      if (servicePort == null) return false;
+      servicePort.send(serviceAttachRequest);
+      await _canSendCompleter.future.timeout(const Duration(seconds: 2));
+      return true;
+    } catch (error) {
+      commonPrint.log("[DART] ClashLib: service attach failed: $error");
+      return false;
+    }
   }
 
   void _registerMainPort(SendPort sendPort) {
@@ -106,7 +138,7 @@ class ClashLib extends ClashHandlerInterface with AndroidClashInterface {
 
   @override
   void reStart() {
-    _initService();
+    unawaited(_initService(reuseRunningService: false));
   }
 
   @override

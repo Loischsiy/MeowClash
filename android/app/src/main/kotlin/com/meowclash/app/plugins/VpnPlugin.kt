@@ -6,6 +6,8 @@ import android.app.PendingIntent
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
+import android.content.BroadcastReceiver
 import android.content.ServiceConnection
 import android.net.ConnectivityManager
 import android.net.Network
@@ -14,7 +16,9 @@ import android.net.NetworkRequest
 import android.net.Uri
 import android.os.Build
 import android.os.IBinder
+import android.os.PowerManager
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
 import com.meowclash.app.MeowClashApplication
 import com.meowclash.app.GlobalState
@@ -63,6 +67,8 @@ data object VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
     private lateinit var scope: CoroutineScope
     private var lastStartForegroundParams: StartForegroundParams? = null
     private var timerJob: Job? = null
+    private var attachedEngines = 0
+    private var screenReceiver: BroadcastReceiver? = null
     private val uidPageNameMap = mutableMapOf<Int, String>()
 
     private val connectivity by lazy {
@@ -88,8 +94,13 @@ data object VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         scope = CoroutineScope(Dispatchers.Default)
-        scope.launch {
-            registerNetworkCallback()
+        // VpnPlugin is shared by the UI and service engines. Register the
+        // network callback once and keep it while any engine is attached.
+        attachedEngines++
+        if (attachedEngines == 1) {
+            scope.launch {
+                registerNetworkCallback()
+            }
         }
         flutterMethodChannel = MethodChannel(flutterPluginBinding.binaryMessenger, "vpn")
         flutterMethodChannel.setMethodCallHandler(this)
@@ -109,7 +120,12 @@ data object VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
     }
 
     override fun onDetachedFromEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
-        unRegisterNetworkCallback()
+        // Closing the UI must not stop network/DNS updates for the service
+        // engine that keeps the core running.
+        attachedEngines = (attachedEngines - 1).coerceAtLeast(0)
+        if (attachedEngines == 0) {
+            unRegisterNetworkCallback()
+        }
         // Clear the handler for the engine that is ACTUALLY detaching — not for
         // whatever `flutterMethodChannel` happens to point at. VpnPlugin is a
         // singleton attached to BOTH the main UI engine and the background
@@ -209,11 +225,11 @@ data object VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
 
     private fun registerNetworkCallback() {
         networks.clear()
-        connectivity?.registerNetworkCallback(request, callback)
+        runCatching { connectivity?.registerNetworkCallback(request, callback) }
     }
 
     private fun unRegisterNetworkCallback() {
-        connectivity?.unregisterNetworkCallback(callback)
+        runCatching { connectivity?.unregisterNetworkCallback(callback) }
         networks.clear()
         onUpdateNetwork()
     }
@@ -247,18 +263,70 @@ data object VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
     }
 
     private fun startForegroundJob() {
-        stopForegroundJob()
+        registerScreenReceiver()
+        startNotificationLoop()
+    }
+
+    // The notification shows live traffic, so it is refreshed every second:
+    // a call into the service isolate plus a notification update. Nobody can
+    // see it with the screen off, so the loop pauses until the screen is on.
+    private fun startNotificationLoop() {
+        stopNotificationLoop()
+        val power = MeowClashApplication.getAppContext().getSystemService<PowerManager>()
         timerJob = CoroutineScope(Dispatchers.Main).launch {
             while (isActive) {
+                // The first pass always runs: it promotes the service to the
+                // foreground even when the VPN starts with the screen off.
                 startForeground()
+                if (power?.isInteractive == false) break
                 delay(1000)
             }
         }
     }
 
-    private fun stopForegroundJob() {
+    private fun stopNotificationLoop() {
         timerJob?.cancel()
         timerJob = null
+    }
+
+    private fun registerScreenReceiver() {
+        if (screenReceiver != null) return
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                when (intent.action) {
+                    Intent.ACTION_SCREEN_OFF -> stopNotificationLoop()
+                    Intent.ACTION_SCREEN_ON -> {
+                        if (GlobalState.runState.value == RunState.START) {
+                            startNotificationLoop()
+                        }
+                    }
+                }
+            }
+        }
+        val filter = IntentFilter().apply {
+            addAction(Intent.ACTION_SCREEN_OFF)
+            addAction(Intent.ACTION_SCREEN_ON)
+        }
+        runCatching {
+            ContextCompat.registerReceiver(
+                MeowClashApplication.getAppContext(),
+                receiver,
+                filter,
+                ContextCompat.RECEIVER_NOT_EXPORTED,
+            )
+            screenReceiver = receiver
+        }
+    }
+
+    private fun unregisterScreenReceiver() {
+        val receiver = screenReceiver ?: return
+        screenReceiver = null
+        runCatching { MeowClashApplication.getAppContext().unregisterReceiver(receiver) }
+    }
+
+    private fun stopForegroundJob() {
+        unregisterScreenReceiver()
+        stopNotificationLoop()
     }
 
 

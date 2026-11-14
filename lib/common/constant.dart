@@ -95,6 +95,10 @@ const mainIsolate = "MeowClashMainIsolate";
 
 const serviceIsolate = "MeowClashServiceIsolate";
 
+/// Sent by a reopened UI isolate to the running service isolate's
+/// [serviceIsolate] port to request a new IPC connection.
+const serviceAttachRequest = "attach";
+
 const defaultPrimaryColors = [
   0xFF795548,
   defaultPrimaryColor,

@@ -148,7 +148,14 @@ class MainActivity : FlutterActivity() {
     }
 
     override fun onDestroy() {
-        GlobalState.flutterEngine = null
+        // Only the Activity that owns the current UI engine may clear it: a
+        // recreated Activity can register its new engine before the old one is
+        // destroyed.
+        val engine = flutterEngine
+        if (engine == null || GlobalState.flutterEngine === engine) {
+            GlobalState.flutterEngine = null
+            GlobalState.notifyUiDetached()
+        }
         // Don't reset runState here - VPN might still be running via serviceEngine
         // The runState is managed by VpnPlugin.handleStart/handleStop
         super.onDestroy()

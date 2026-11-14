@@ -24,6 +24,9 @@ class Service {
 
   Future<bool?> destroy() async => methodChannel.invokeMethod<bool>("destroy");
 
+  /// Whether the background service engine exists (it survives the Activity).
+  Future<bool?> isAlive() async => methodChannel.invokeMethod<bool>("isAlive");
+
   Future<bool?> startVpn() async {
     final options = await clashLib?.getAndroidVpnOptions() ?? "";
     return methodChannel.invokeMethod<bool>("startVpn", {

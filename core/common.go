@@ -279,6 +279,7 @@ func readFile(path string) ([]byte, error) {
 func updateConfig(params *UpdateParams) {
 	runLock.Lock()
 	defer runLock.Unlock()
+	invalidateAppliedSetup()
 	general := currentConfig.General
 	if params.MixedPort != nil {
 		general.MixedPort = *params.MixedPort
@@ -343,6 +344,17 @@ func setupConfig(params *SetupParams) error {
 	defer runLock.Unlock()
 	var err error
 
+	fingerprint := setupFingerprint(params)
+	if canSkipSetup(fingerprint) {
+		log.Infoln("[Setup] config unchanged on a running core, keeping live proxies and delay history")
+		sendMessage(Message{
+			Type: LoadedMessage,
+			Data: "all",
+		})
+		return nil
+	}
+	invalidateAppliedSetup()
+
 	extractProxyDescriptionsFromRaw(params.Config)
 	resetHealthCheckForwarderState()
 	manualDelayProxies = proxyLookupCache{}
@@ -391,6 +403,9 @@ func setupConfig(params *SetupParams) error {
 		Data: "all",
 	})
 
+	if err == nil {
+		rememberAppliedSetup(fingerprint)
+	}
 	return err
 }
 

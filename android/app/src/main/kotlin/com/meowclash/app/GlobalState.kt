@@ -181,6 +181,19 @@ object GlobalState {
         }
     }
 
+    fun hasServiceEngine(): Boolean = serviceEngine != null
+
+    /**
+     * The UI engine was destroyed (e.g. the task was swiped from recents) while
+     * the service engine keeps the core. Tell the service isolate to detach the
+     * core message port, so the core stops forwarding logs, connections and
+     * delays that nobody reads.
+     */
+    fun notifyUiDetached() {
+        val tilePlugin = serviceEngine?.plugins?.get(TilePlugin::class.java) as TilePlugin?
+        tilePlugin?.handleUiDetached()
+    }
+
     fun destroyServiceEngine() {
         runLock.withLock {
             VpnPlugin.onServiceEngineDestroyed()

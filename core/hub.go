@@ -9,6 +9,7 @@ import (
 	"runtime/debug"
 	"sort"
 	"strconv"
+	"sync/atomic"
 	"time"
 
 	"github.com/metacubex/mihomo/adapter"
@@ -33,6 +34,9 @@ var (
 	logSubscriber     observable.Subscription[log.Event]
 	healthCheckStopCh chan struct{}
 	healthCheckSeen   = map[string]string{}
+	// healthCheckResync asks the forwarder goroutine, the only owner of
+	// healthCheckSeen while it runs, to forget what it already sent.
+	healthCheckResync atomic.Bool
 	requestStopCh     chan struct{}
 	requestSeen       = map[string]bool{}
 )
@@ -108,12 +112,13 @@ func handleForceGc() {
 }
 
 func handleShutdown() bool {
+	invalidateAppliedSetup()
 	stopHealthCheckForwarder()
 	stopRequestForwarder()
 	stopListeners()
 	executor.Shutdown()
 	requestSeen = nil
-	healthCheckSeen = nil
+	healthCheckResync.Store(true)
 	externalProviders = nil
 	debug.FreeOSMemory()
 	isInit = false
@@ -148,10 +153,18 @@ func stopHealthCheckForwarder() {
 }
 
 func resetHealthCheckForwarderState() {
-	healthCheckSeen = map[string]string{}
+	healthCheckResync.Store(true)
 }
 
 func forwardHealthCheckDelays() {
+	// Nobody listens while the Android UI is closed: skip the walk over every
+	// proxy instead of formatting delays nobody receives.
+	if !hasMessageListener() {
+		return
+	}
+	if healthCheckResync.Swap(false) || healthCheckSeen == nil {
+		healthCheckSeen = map[string]string{}
+	}
 	runLock.Lock()
 	if currentConfig == nil {
 		runLock.Unlock()
@@ -219,6 +232,12 @@ func stopRequestForwarder() {
 }
 
 func forwardNewRequests() {
+	// Without a listener every new connection would still be serialized and
+	// pushed into the service isolate once a second, for nothing. Leaving
+	// requestSeen untouched lets a reattached UI receive the live connections.
+	if !hasMessageListener() {
+		return
+	}
 	alive := make(map[string]bool, len(requestSeen))
 	statistic.DefaultManager.Range(func(c statistic.Tracker) bool {
 		id := c.ID()
@@ -469,6 +488,9 @@ func handleUpdateGeoData(geoType string, geoName string, fn func(value string)) 
 			fn(err.Error())
 			return
 		}
+		// The UI reapplies the profile to load the new files; that setup must
+		// not be skipped as unchanged.
+		invalidateAppliedSetup()
 		fn("")
 	}()
 }
@@ -554,6 +576,7 @@ func handleGetMemory(fn func(value string)) {
 }
 
 func handleSetState(params string) {
+	invalidateAppliedSetup()
 	_ = json.Unmarshal([]byte(params), state.CurrentState)
 }
 

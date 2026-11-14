@@ -14,6 +14,9 @@ abstract mixin class TileListener {
   void onDetached(){
 
   }
+
+  /// Sent to the service engine when the UI engine is destroyed.
+  void onUiDetached() {}
 }
 
 class Tile {
@@ -45,6 +48,9 @@ class Tile {
           break;
         case "detached":
           listener.onDetached();
+          break;
+        case "uiDetached":
+          listener.onUiDetached();
           break;
       }
     }

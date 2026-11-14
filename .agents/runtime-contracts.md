@@ -24,6 +24,17 @@ failure.
   (`coreStarted()` / `startListener`). With the core running, bytes are side-loaded first and the cache
   is written only if the core accepts them. `stopListener` does not suspend the loop; `shutdown` and a
   new setup do. Do not reintroduce zeroing of provider `interval` in the core config.
+- **Android UI reopen** (`lib/clash/lib.dart`, `_MainIpc` in `lib/main.dart`, Go
+  `core/setup_fingerprint.go`): the service engine outlives the Activity. A new UI isolate first asks
+  the live service to attach (`service.isAlive` + the `serviceIsolate` port, 2 s timeout) and only
+  destroys/recreates the engine if that fails or on `reStart()`. `MainActivity.onDestroy` sends
+  `uiDetached` to the service, which detaches the core message port (`-1`); the Go delay/request
+  forwarders then skip their work, and attaching a port makes the delay forwarder resend every latest
+  delay. `setupConfig` with the same config + test URL on a **running** core is skipped (live proxies,
+  URL-test history and selection survive); `updateConfig`, `setState`, geodata updates and shutdown
+  invalidate the fingerprint. A reopen over a running core also skips the forced startup subscription
+  download (`autoUpdateProfiles` still honours intervals). `VpnPlugin` is shared by both engines: the
+  network callback is ref-counted, and the 1 s notification loop pauses while the screen is off.
 - **UI suspension** (`lib/services/ui_lifecycle.dart`, `lib/widgets/suspendable_ui.dart`):
   run-time/traffic polling must stop on Android background transitions and a stale resume callback must
   not restart it; periodic group refresh pauses in the background. Check `mounted`/results **after**

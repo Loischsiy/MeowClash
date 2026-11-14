@@ -79,3 +79,9 @@ func startServer(arg string) {
 func nextHandle(action *Action, result ActionResult) bool {
 	return false
 }
+
+// hasMessageListener: this platform has no detachable message port, so the
+// forwarders always run.
+func hasMessageListener() bool {
+	return true
+}

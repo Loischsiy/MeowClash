@@ -28,6 +28,14 @@ func initNativeApiBridge(api unsafe.Pointer) {
 //export attachMessagePort
 func attachMessagePort(mPort C.longlong) {
 	messagePort.Store(int64(mPort))
+	// A newly attached UI starts with no delays: resend the latest of each.
+	healthCheckResync.Store(true)
+}
+
+// hasMessageListener reports whether a Dart isolate receives core messages.
+// The Android service isolate detaches (-1) when the UI engine is destroyed.
+func hasMessageListener() bool {
+	return messagePort.Load() != -1
 }
 
 //export getTraffic

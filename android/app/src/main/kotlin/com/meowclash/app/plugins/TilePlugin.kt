@@ -98,6 +98,11 @@ class TilePlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
         channel.invokeMethod("changeMode", mode)
     }
 
+    fun handleUiDetached() {
+        Log.d(TAG, "handleUiDetached: invoking 'uiDetached' on channel")
+        runCatching { channel.invokeMethod("uiDetached", null) }
+    }
+
     private fun handleDetached() {
         Log.d(TAG, "handleDetached: invoking 'detached' on channel")
         channel.invokeMethod("detached", null)

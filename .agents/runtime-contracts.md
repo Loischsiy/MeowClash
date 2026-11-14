@@ -35,6 +35,14 @@ failure.
   invalidate the fingerprint. A reopen over a running core also skips the forced startup subscription
   download (`autoUpdateProfiles` still honours intervals). `VpnPlugin` is shared by both engines: the
   network callback is ref-counted, and the 1 s notification loop pauses while the screen is off.
+- **Network changes and sleep** (`VpnPlugin.onUpdateNetwork`, Go `core/network_change.go`):
+  `dnsChanged` always goes to the **service** engine channel (`foregroundChannel`); the UI engine has
+  no listener and silently dropped it. It is sent on network available/lost (forced), on link property
+  changes (only if the DNS list changed), on Doze/light-idle exit (with the screen off at most once
+  per 15 min) and on screen-on after ≥ 2 min off.
+  Go `updateDns` flushes the DNS cache, resets pooled DNS connections and, 3 s after the last call,
+  re-runs health checks of every proxy provider and group provider (running core only), because
+  checks made during sleep mark every node dead.
 - **UI suspension** (`lib/services/ui_lifecycle.dart`, `lib/widgets/suspendable_ui.dart`):
   run-time/traffic polling must stop on Android background transitions and a stale resume callback must
   not restart it; periodic group refresh pauses in the background. Check `mounted`/results **after**

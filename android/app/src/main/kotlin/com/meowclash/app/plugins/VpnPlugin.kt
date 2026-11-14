@@ -10,6 +10,7 @@ import android.content.IntentFilter
 import android.content.BroadcastReceiver
 import android.content.ServiceConnection
 import android.net.ConnectivityManager
+import android.net.LinkProperties
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
@@ -17,6 +18,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
+import android.os.SystemClock
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
@@ -68,7 +70,14 @@ data object VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
     private var lastStartForegroundParams: StartForegroundParams? = null
     private var timerJob: Job? = null
     private var attachedEngines = 0
+    private const val WAKE_RECHECK_AFTER_MS = 2 * 60 * 1000L
+    private const val IDLE_RECHECK_INTERVAL_MS = 15 * 60 * 1000L
+    // PowerManager.ACTION_DEVICE_LIGHT_IDLE_MODE_CHANGED (public since API 33).
+    private const val ACTION_DEVICE_LIGHT_IDLE_MODE_CHANGED =
+        "android.os.action.LIGHT_DEVICE_IDLE_MODE_CHANGED"
     private var screenReceiver: BroadcastReceiver? = null
+    private var screenOffAt = 0L
+    private var lastIdleRecheckAt = 0L
     private val uidPageNameMap = mutableMapOf<Int, String>()
 
     private val connectivity by lazy {
@@ -194,26 +203,50 @@ data object VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
 
     val networks = mutableSetOf<Network>()
 
-    fun onUpdateNetwork() {
-        val dns = networks.flatMap { network ->
-            connectivity?.resolveDns(network) ?: emptyList()
+    @Volatile
+    private var lastDns: String? = null
+
+    /**
+     * Pushes the system DNS servers of the underlying networks to the core. The
+     * core also drops pooled DNS connections and re-runs health checks, so it
+     * recovers after the phone slept or switched networks.
+     *
+     * @param force send even when the DNS list did not change: a network was
+     * added or lost, or the device left Doze.
+     */
+    fun onUpdateNetwork(force: Boolean = true) {
+        val dns = synchronized(networks) { networks.toList() }.flatMap { network ->
+            runCatching { connectivity?.resolveDns(network) }.getOrNull() ?: emptyList()
         }.toSet().joinToString(",")
+        if (!force && dns == lastDns) return
+        lastDns = dns
         scope.launch {
             withContext(Dispatchers.Main) {
-                flutterMethodChannel.invokeMethod("dnsChanged", dns)
+                // Only the service engine applies DNS to the core. When the UI
+                // engine attached last, `flutterMethodChannel` points at it and
+                // the update was silently dropped, so the core kept the DNS of
+                // a network that no longer existed until the VPN was restarted.
+                val channel = foregroundChannel ?: flutterMethodChannel
+                channel.invokeMethod("dnsChanged", dns)
             }
         }
     }
 
     private val callback = object : ConnectivityManager.NetworkCallback() {
         override fun onAvailable(network: Network) {
-            networks.add(network)
+            synchronized(networks) { networks.add(network) }
             onUpdateNetwork()
         }
 
         override fun onLost(network: Network) {
-            networks.remove(network)
+            synchronized(networks) { networks.remove(network) }
             onUpdateNetwork()
+        }
+
+        // DNS servers can change without the network being lost (DHCP renew,
+        // roaming between access points of one Wi-Fi).
+        override fun onLinkPropertiesChanged(network: Network, linkProperties: LinkProperties) {
+            onUpdateNetwork(force = false)
         }
     }
 
@@ -224,13 +257,13 @@ data object VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
     }.build()
 
     private fun registerNetworkCallback() {
-        networks.clear()
+        synchronized(networks) { networks.clear() }
         runCatching { connectivity?.registerNetworkCallback(request, callback) }
     }
 
     private fun unRegisterNetworkCallback() {
         runCatching { connectivity?.unregisterNetworkCallback(callback) }
-        networks.clear()
+        synchronized(networks) { networks.clear() }
         onUpdateNetwork()
     }
 
@@ -294,10 +327,37 @@ data object VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
         val receiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 when (intent.action) {
-                    Intent.ACTION_SCREEN_OFF -> stopNotificationLoop()
+                    Intent.ACTION_SCREEN_OFF -> {
+                        screenOffAt = SystemClock.elapsedRealtime()
+                        stopNotificationLoop()
+                    }
                     Intent.ACTION_SCREEN_ON -> {
                         if (GlobalState.runState.value == RunState.START) {
                             startNotificationLoop()
+                            // After a long sleep, health checks ran without a
+                            // usable network; refresh before the user notices.
+                            val offFor = SystemClock.elapsedRealtime() - screenOffAt
+                            if (screenOffAt != 0L && offFor >= WAKE_RECHECK_AFTER_MS) {
+                                onUpdateNetwork()
+                            }
+                        }
+                    }
+                    PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED,
+                    ACTION_DEVICE_LIGHT_IDLE_MODE_CHANGED -> {
+                        val power = context.getSystemService<PowerManager>()
+                        val idle = power?.isDeviceIdleMode == true ||
+                            (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                                power?.isDeviceLightIdleMode == true)
+                        // Leaving Doze: network access is back for the core.
+                        // Maintenance windows repeat every few minutes while
+                        // the phone sleeps, so recheck at most once per window
+                        // interval unless the screen is on.
+                        val now = SystemClock.elapsedRealtime()
+                        val throttled = power?.isInteractive != true &&
+                            now - lastIdleRecheckAt < IDLE_RECHECK_INTERVAL_MS
+                        if (!idle && !throttled && GlobalState.runState.value == RunState.START) {
+                            lastIdleRecheckAt = now
+                            onUpdateNetwork()
                         }
                     }
                 }
@@ -306,6 +366,8 @@ data object VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
         val filter = IntentFilter().apply {
             addAction(Intent.ACTION_SCREEN_OFF)
             addAction(Intent.ACTION_SCREEN_ON)
+            addAction(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED)
+            addAction(ACTION_DEVICE_LIGHT_IDLE_MODE_CHANGED)
         }
         runCatching {
             ContextCompat.registerReceiver(

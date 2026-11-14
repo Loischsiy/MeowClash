@@ -14,6 +14,7 @@ import (
 	"fmt"
 	"github.com/metacubex/mihomo/component/dialer"
 	"github.com/metacubex/mihomo/component/process"
+	"github.com/metacubex/mihomo/component/resolver"
 	"github.com/metacubex/mihomo/constant"
 	"github.com/metacubex/mihomo/dns"
 	"github.com/metacubex/mihomo/listener/sing_tun"
@@ -185,6 +186,9 @@ func handleUpdateDns(value string) {
 		log.Infoln("[DNS] updateDns %s", value)
 		dns.UpdateSystemDNS(strings.Split(value, ","))
 		dns.FlushCacheWithDefaultResolver()
+		// Pooled DNS connections belong to the previous network.
+		resolver.ResetConnection()
+		scheduleNetworkRecheck()
 	}()
 }
 

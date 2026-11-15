@@ -1252,6 +1252,55 @@ class MediaUnlockChecker {
     }
   }
 
+  /// xbox.com answers the bare origin with a geo redirect to a locale path
+  /// such as `/en-GB/`, chosen from the exit IP and not from
+  /// `Accept-Language`; the country is the part after the dash.
+  Future<MediaUnlockResult> checkXbox() async {
+    final sw = Stopwatch()..start();
+    final dio = _createDio();
+    const siteUrl = 'https://www.xbox.com/';
+    try {
+      final res = await dio.head<void>(
+        siteUrl,
+        options: Options(
+          receiveTimeout: const Duration(seconds: 4),
+          sendTimeout: const Duration(seconds: 4),
+        ),
+      );
+      final latency = sw.elapsedMilliseconds;
+      final code = res.statusCode ?? 0;
+      final location = res.headers.value('location') ?? '';
+      final region = RegExp(r'^(?:https?://[^/]+)?/[a-z]{2,3}-([A-Za-z]{2})/')
+          .firstMatch(location)
+          ?.group(1)
+          ?.toUpperCase();
+      final MediaUnlockStatus status;
+      if (code == 200 || (code >= 300 && code < 400 && region != null)) {
+        status = MediaUnlockStatus.unlocked;
+      } else if (code == 403 || code == 451) {
+        status = MediaUnlockStatus.blocked;
+      } else {
+        status = MediaUnlockStatus.failed;
+      }
+      return MediaUnlockResult(
+        platform: MediaPlatform.xbox,
+        status: status,
+        region: region,
+        latency: status == MediaUnlockStatus.unlocked
+            ? await _measureLatency(dio, siteUrl, latency)
+            : latency,
+      );
+    } catch (_) {
+      return MediaUnlockResult(
+        platform: MediaPlatform.xbox,
+        status: MediaUnlockStatus.failed,
+        latency: sw.elapsedMilliseconds,
+      );
+    } finally {
+      dio.close(force: true);
+    }
+  }
+
   static final _metaRdVerify = RegExp(r"""['"](/__rd_verify[^'"]+)['"]""");
   static final _metaAccessGate = RegExp(
     r'isAllowed\\*"\s*:\s*(true|false)\s*,\s*\\*"blockReason\\*"\s*:\s*'
@@ -1917,6 +1966,7 @@ class MediaUnlockChecker {
         _checkCloudflareTrace(MediaPlatform.humblebundle, 'humblebundle.com'),
       MediaPlatform.roblox => checkRoblox(),
       MediaPlatform.geforcenow => checkGeForceNow(),
+      MediaPlatform.xbox => checkXbox(),
       MediaPlatform.coinbase =>
         _checkCloudflareTrace(MediaPlatform.coinbase, 'www.coinbase.com'),
       MediaPlatform.okx =>

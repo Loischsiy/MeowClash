@@ -161,6 +161,7 @@ const _$MediaPlatformEnumMap = {
   MediaPlatform.humblebundle: 'humblebundle',
   MediaPlatform.roblox: 'roblox',
   MediaPlatform.geforcenow: 'geforcenow',
+  MediaPlatform.xbox: 'xbox',
   MediaPlatform.coinbase: 'coinbase',
   MediaPlatform.okx: 'okx',
   MediaPlatform.kraken: 'kraken',

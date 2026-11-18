@@ -22,13 +22,20 @@ import (
 // returned so that downstream validateConfig surfaces the original
 // YAML error to the user.
 func normalizeSubscription(bytes []byte) []byte {
-	if _, err := config.UnmarshalRawConfig(bytes); err == nil {
+	if raw, err := config.UnmarshalRawConfig(bytes); err == nil &&
+		(len(raw.Proxy) > 0 || len(raw.ProxyProvider) > 0) {
 		return bytes
 	}
 
-	proxies, err := convert.ConvertsV2Ray(bytes)
-	if err != nil || len(proxies) == 0 {
-		return bytes
+	var proxies []map[string]any
+	if outlineProxies, ok := parseOutlineDynamicConfig(bytes); ok && len(outlineProxies) > 0 {
+		proxies = outlineProxies
+	} else {
+		converted, err := convert.ConvertsV2Ray(bytes)
+		if err != nil || len(converted) == 0 {
+			return bytes
+		}
+		proxies = converted
 	}
 
 	names := make([]string, 0, len(proxies))

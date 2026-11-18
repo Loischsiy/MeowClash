@@ -75,3 +75,51 @@ func TestNormalizeSubscription_Garbage_ReturnsOriginal(t *testing.T) {
 		t.Fatalf("expected original bytes back for unrecognised input")
 	}
 }
+
+func TestNormalizeSubscription_OutlineDynamicYAML_TCPUDP(t *testing.T) {
+	input := []byte(`transport:
+  $type: tcpudp
+  tcp:
+    <<: &shared
+    $type: shadowsocks
+    endpoint: 147.182.248.224:20478
+    secret: cqXYJ2BtMyNHneQHjpIXyg
+    cipher: chacha20-ietf-poly1305
+    prefix: "\u0013\u0003\u0003\u003F"
+  udp:
+    <<: *shared
+    prefix: "\u006b\u007b\u0001\u0020"
+`)
+	out := normalizeSubscription(input)
+	s := string(out)
+	if !strings.Contains(s, "type: ss") {
+		t.Fatalf("expected ss proxy in YAML, got:\n%s", s)
+	}
+	if !strings.Contains(s, "server: 147.182.248.224") || !strings.Contains(s, "port: 20478") {
+		t.Fatalf("expected server and port in YAML, got:\n%s", s)
+	}
+	if !strings.Contains(s, "prefix:") || !strings.Contains(s, "udp-prefix:") {
+		t.Fatalf("expected both prefix and udp-prefix in YAML, got:\n%s", s)
+	}
+	if !strings.Contains(s, "udp: true") {
+		t.Fatalf("expected udp: true in YAML, got:\n%s", s)
+	}
+}
+
+func TestNormalizeSubscription_OutlineDynamicJSON_Flat(t *testing.T) {
+	input := []byte(`{
+  "server": "198.51.100.10",
+  "server_port": 8388,
+  "password": "secret-password",
+  "method": "aes-256-gcm",
+  "prefix": "POST "
+}`)
+	out := normalizeSubscription(input)
+	s := string(out)
+	if !strings.Contains(s, "server: 198.51.100.10") || !strings.Contains(s, "cipher: aes-256-gcm") {
+		t.Fatalf("expected parsed flat Outline JSON proxy, got:\n%s", s)
+	}
+	if !strings.Contains(s, "prefix: 'POST '") && !strings.Contains(s, `prefix: "POST "`) && !strings.Contains(s, "prefix: POST ") {
+		t.Fatalf("expected prefix in YAML, got:\n%s", s)
+	}
+}

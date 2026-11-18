@@ -363,7 +363,7 @@ extension ProfileExtension on Profile {
     }
 
     final response = await request.getFileResponseForUrl(
-      url,
+      url.normalizedSubscriptionUrl,
       headers: headers.isNotEmpty ? headers : null,
     );
 

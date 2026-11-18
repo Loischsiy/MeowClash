@@ -6,7 +6,14 @@ import 'package:crypto/crypto.dart';
 import 'print.dart';
 
 extension StringExtension on String {
-  bool get isUrl => RegExp(r'^(http|https|ftp)://').hasMatch(this);
+  bool get isUrl =>
+      RegExp(r'^(http|https|ftp|ssconf)://', caseSensitive: false)
+          .hasMatch(this);
+
+  String get normalizedSubscriptionUrl =>
+      startsWith(RegExp(r'^ssconf://', caseSensitive: false))
+          ? 'https://${substring(9)}'
+          : this;
 
   dynamic get splitByMultipleSeparators {
     final parts =

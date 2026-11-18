@@ -108,7 +108,7 @@ Varmista ennen sovelluksen käyttöä, että vaaditut järjestelmäkirjastot on 
 sudo apt-get install libayatana-appindicator3-dev libkeybinder-3.0-dev
 
 # Arch Linux
-sudo pacman -S libayatana-appindicator libkeybinder3
+sudo pacman -S libayatana-appindicator libayatana-indicator libkeybinder3
 
 # Fedora
 sudo dnf install libayatana-appindicator-gtk3-devel keybinder3-devel

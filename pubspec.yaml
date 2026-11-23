@@ -105,6 +105,7 @@ flutter:
     - assets/data/geoip.dat
     - assets/data/geosite.dat
     - assets/data/asn.mmdb
+    - assets/data/cacert.pem
     - assets/fonts/
     - assets/images/
     - assets/images/avatars/

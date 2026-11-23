@@ -59,6 +59,7 @@ Future<void> main() async {
     if (Platform.isAndroid) {
       vpn; // Accessing the getter initializes the singleton
     }
+    await initWindowsTrustedRoots();
     HttpOverrides.global = MeowClashHttpOverrides();
     commonPrint.log("[DART] Running application...");
     runApp(const ProviderScope(

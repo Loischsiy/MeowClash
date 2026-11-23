@@ -39,6 +39,7 @@ export 'system.dart';
 export 'text.dart';
 export 'tls_error.dart';
 export 'tray.dart';
+export 'trusted_roots.dart';
 export 'utils.dart';
 export 'window.dart';
 export 'windows.dart';

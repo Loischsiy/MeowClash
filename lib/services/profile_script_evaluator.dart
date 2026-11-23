@@ -7,6 +7,7 @@ import 'dart:isolate';
 import 'package:flutter/services.dart';
 import 'package:flutter_js/extensions/xhr.dart';
 import 'package:flutter_js/flutter_js.dart';
+import 'package:meowclash/common/trusted_roots.dart';
 
 /// Preserve the app's routing decision inside the worker: isolates do not
 /// inherit HttpOverrides.global. Localhost bypass remains identical to the app.
@@ -40,11 +41,19 @@ Future<Map<String, dynamic>> evaluateProfileScript(
   // it and may evaluate the polyfill after an early engine disposal.
   final fetchPolyfill =
       await rootBundle.loadString('packages/flutter_js/assets/js/fetch.js');
-  return Isolate.run(() => HttpOverrides.runWithHttpOverrides(
-        () => _evaluate(script, config, () => getJavascriptRuntime(xhr: false),
-            fetchPolyfill: fetchPolyfill),
-        ProfileScriptHttpOverrides(httpProxy, proxyBypassHost),
-      ));
+  final trustedRootsPem = bundledTrustedRootsBytes;
+  return Isolate.run(() {
+    if (trustedRootsPem != null) {
+      try {
+        applyTrustedRootsPem(trustedRootsPem);
+      } catch (_) {}
+    }
+    return HttpOverrides.runWithHttpOverrides(
+      () => _evaluate(script, config, () => getJavascriptRuntime(xhr: false),
+          fetchPolyfill: fetchPolyfill),
+      ProfileScriptHttpOverrides(httpProxy, proxyBypassHost),
+    );
+  });
 }
 
 Future<Map<String, dynamic>> _evaluate(

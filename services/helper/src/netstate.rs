@@ -137,7 +137,7 @@ $adapters = @(
       $adapter = Get-NetAdapter -InterfaceIndex $ip.InterfaceIndex -ErrorAction SilentlyContinue
       if ($null -eq $adapter) { return }
       $dns = @(Get-DnsClientServerAddress -InterfaceIndex $ip.InterfaceIndex -AddressFamily IPv4 -ErrorAction SilentlyContinue | ForEach-Object { $_.ServerAddresses })
-      $registryPath = 'HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces\{' + $adapter.InterfaceGuid.ToString() + '}'
+      $registryPath = 'HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces\{' + $adapter.InterfaceGuid.ToString().Trim('{}') + '}'
       $registry = Get-ItemProperty -LiteralPath $registryPath -ErrorAction SilentlyContinue
       [pscustomobject]@{
         name = $adapter.Name
@@ -146,6 +146,7 @@ $adapters = @(
         dns_servers = $dns
       }
     }
+)
 [pscustomobject]@{
   schema_version = 1
   created_at = [DateTime]::UtcNow.ToString('yyyy-MM-ddTHH:mm:ssZ')
@@ -224,7 +225,7 @@ $adapters = @(
         const SCRIPT: &str = r#"
 $ErrorActionPreference = 'Stop'
 $guid = '{' + $env:MEOWCLASH_ADAPTER_GUID.Trim('{}') + '}'
-$adapter = Get-NetAdapter | Where-Object { $_.InterfaceGuid.ToString() -ieq $guid.Trim('{}') } | Select-Object -First 1
+$adapter = Get-NetAdapter | Where-Object { $_.InterfaceGuid.ToString().Trim('{}') -ieq $guid.Trim('{}') } | Select-Object -First 1
 if ($null -eq $adapter) { throw "Adapter $guid is not present" }
 $servers = @(ConvertFrom-Json -InputObject $env:MEOWCLASH_DNS_SERVERS)
 $registryPath = 'HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces\' + $guid

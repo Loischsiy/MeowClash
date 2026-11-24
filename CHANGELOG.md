@@ -2,16 +2,30 @@
 
 All notable changes to **MeowClash** will be documented in this file.
 
-## [Unreleased]
+## [v1.2.1]
 
-### 🐛 Bug Fixes
-- **Core Version**: About and the User-Agent showed the old core version `v1.19.33`; the bump to `v1.19.34-meowclash.1` only changed `go.mod`. `core/constant/version.go` is updated and a Go test now checks it against `go.mod`.
-- **Android Reopen**: Reopening the app after closing it from recents reattaches to the running service instead of recreating it. The same config is no longer reapplied to a running core, so URL-test groups keep their delays and selection, providers are not reloaded, and Go/Flutter memory no longer grows with each reopen. The forced subscription download now runs only on a real app launch.
-- **Android Network**: Closing the UI no longer unregisters the network callback used by the running VPN service, so DNS follows network changes while the app is closed.
-- **Android Sleep**: The proxy no longer stops working 10–20 minutes after locking the phone. Network and DNS changes now always reach the core (they were dropped when the UI engine attached last), and after a network change, leaving Doze or unlocking after a long sleep the core refreshes DNS and re-runs health checks instead of staying on nodes marked dead while asleep.
+### ✨ New Features
+- **Outline Dynamic Configurations**: Added support for parsing Outline dynamic Shadowsocks configurations (`ssconf://`) in both YAML and JSON formats. Supports dynamic server keys, dynamic server list parsing, and TCP+UDP transport mode with shared backend configuration.
+- **Media Unlock Checks**:
+  - **GeForce NOW**: Added GeForce NOW to the Gaming media unlock category, reporting service availability and exit zone country.
+  - **Xbox**: Added Xbox availability check to the Gaming media unlock category with geo-redirect country detection.
 
 ### 🚀 Improvements
-- **Battery (Android)**: With the UI closed, the core stops serializing connections and delays for nobody, and the foreground notification stops refreshing every second while the screen is off.
+- **Battery & Background Resource Usage (Android)**: Detached the core message port while the UI is closed so connection serialization and delay forwarders idle, and paused the 1-second foreground notification refresh loop while the screen is off.
+- **TUN Health Checks**: Increased TUN health check HTTP request timeout from 1 s to 5 s and overall health deadline from 10 s to 15 s, added detailed error logging on health check failures, and refined Windows default route detection in the service helper (`netstate`) to filter out loopback, link-local, multicast, and host (/32) routes.
+
+### 🐛 Bug Fixes
+- **Windows TLS / Mozilla CA Roots**: Bundled Mozilla CA roots (`cacert.pem`) in application assets and loaded them into Dart's default `SecurityContext` during startup and inside profile script evaluator worker isolates. Resolves TLS handshake failures on Windows where Dart's BoringSSL integration does not trigger Windows' lazy root certificate download (dart-lang/sdk#52266).
+- **Windows Service Helper**: Corrected PowerShell GUID parsing in the `netstate` module by trimming curly braces before querying network adapter GUIDs and constructing registry paths.
+- **Android Reopen & Configuration Fingerprinting**: Reopening the app after closing it from recents reattaches to the running service instead of recreating it. The same configuration is no longer reapplied to an already running core (using configuration fingerprinting), preserving URL-test group delays and selection, avoiding unnecessary provider reloads, and preventing memory growth. Forced subscription downloads now run only on a cold app launch.
+- **Android Sleep & Network Handoff**: The proxy no longer stops working 10–20 minutes after locking the device. Network and DNS changes now reliably reach the core via the service engine (preventing updates from being dropped when the UI engine attached last), DNS updates are triggered on link property changes, Doze/light-idle exit, and screen unlock after prolonged sleep, and the core now resets pooled DNS connections and re-runs health checks after a debounce period so nodes marked dead during sleep recover.
+- **Android Network Callback**: Closing the UI no longer unregisters the network callback used by the running VPN service (using reference counting), keeping DNS synchronized with network changes while the UI is closed.
+- **Core Version Reporting**: Fixed core version mismatch where About, the User-Agent, and Dart constants displayed outdated core version information. Updated `core/constant/version.go` and `lib/core_version.dart` to match `go.mod`, and added a Go test (`TestCoreVersionMatchesGoMod`) to prevent version drift in CI.
+
+### 🧹 Internal
+- **Core Engine**: Updated embedded mihomo proxy core to `v1.19.34-meowclash.2` and sing-shadowsocks2 to `v0.2.8-meowclash.2`.
+- **Nix & Build Tooling**: Updated Flutter to 3.44.1 (`flutter344`) in `flake.nix`, updated Nixpkgs core `vendorHash`, and added `.vibe` to `.gitignore`.
+- **Documentation**: Fixed Arch Linux dependency package list by adding `libayatana-indicator` across all six README files.
 
 ## [v1.2.0]
 

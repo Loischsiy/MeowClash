@@ -282,9 +282,10 @@ class Request {
             data: {'device': device},
             options: Options(responseType: ResponseType.plain),
           )
-          .timeout(const Duration(seconds: 1));
+          .timeout(const Duration(seconds: 5));
       return response.statusCode == HttpStatus.ok && response.data == 'true';
-    } catch (_) {
+    } catch (error) {
+      commonPrint.log('TUN health check failed: $error');
       return false;
     }
   }

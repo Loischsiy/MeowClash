@@ -474,7 +474,14 @@ $ErrorActionPreference = 'Stop'
 $adapter = Get-NetAdapter | Where-Object { $_.Name -ceq $env:MEOWCLASH_TUN_DEVICE } | Select-Object -First 1
 $route = $false
 if ($null -ne $adapter) {
-  $route = $null -ne (Get-NetRoute -InterfaceIndex $adapter.ifIndex -DestinationPrefix '0.0.0.0/0' -ErrorAction SilentlyContinue | Select-Object -First 1)
+  $route = $null -ne (
+    Get-NetRoute -InterfaceIndex $adapter.ifIndex -AddressFamily IPv4 -ErrorAction SilentlyContinue |
+      Where-Object {
+        $_.DestinationPrefix -notmatch '^(127\.|169\.254\.|224\.|255\.)' -and
+        $_.DestinationPrefix -notlike '*/32'
+      } |
+      Select-Object -First 1
+  )
 }
 [pscustomobject]@{ adapter = ($null -ne $adapter); default_route = $route } | ConvertTo-Json -Compress
 "#;

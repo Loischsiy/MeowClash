@@ -338,12 +338,12 @@ class GlobalState {
       final device = config.patchClashConfig.tun.device;
       var healthy = false;
       final healthDeadline = Stopwatch()..start();
-      while (healthDeadline.elapsed < const Duration(seconds: 10)) {
+      while (healthDeadline.elapsed < const Duration(seconds: 15)) {
         if (await request.checkTunHealth(device)) {
           healthy = true;
           break;
         }
-        if (healthDeadline.elapsed < const Duration(seconds: 10)) {
+        if (healthDeadline.elapsed < const Duration(seconds: 15)) {
           await Future<void>.delayed(const Duration(milliseconds: 500));
         }
       }

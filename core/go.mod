@@ -154,4 +154,4 @@ replace github.com/metacubex/utls => github.com/metacubex/utls v0.0.0-2026071502
 
 replace github.com/metacubex/mihomo => github.com/Loischsiy/mihomo v1.19.34-meowclash.1
 
-replace github.com/metacubex/sing-shadowsocks2 => github.com/Loischsiy/sing-shadowsocks2 v0.2.8-meowclash.1
+replace github.com/metacubex/sing-shadowsocks2 => github.com/Loischsiy/sing-shadowsocks2 v0.2.8-meowclash.2
